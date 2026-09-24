@@ -1,0 +1,29 @@
+{
+  "contract": "shine-defence/baseline-v1",
+  "version": "1.0.0",
+  "purpose": "Minimum automated security controls required before a Shine application can claim baseline Shine Defence protection.",
+  "badge": {
+    "label": "Protected by Shine Defence",
+    "rule": "The release revision must pass every required control in its local baseline-v1 certification profile."
+  },
+  "requirements": [
+    {"id":"SD-001","name":"Application/package publishing boundary is explicit","required":true},
+    {"id":"SD-002","name":"Supported runtime is declared","required":true},
+    {"id":"SD-003","name":"Unexpected HTTP methods are rejected","required":true},
+    {"id":"SD-004","name":"Baseline browser security headers are emitted","required":true},
+    {"id":"SD-005","name":"Static file paths are constrained to the application root","required":true},
+    {"id":"SD-006","name":"Remote data fetches use deadlines and response-size limits","required":true},
+    {"id":"SD-007","name":"Untrusted local file imports have format-specific parser protections and size limits","required":true},
+    {"id":"SD-008","name":"External new-tab links isolate the opener","required":true},
+    {"id":"SD-009","name":"Application source is checked for obvious committed secret material","required":true}
+  ],
+  "futureProfiles": [
+    "content-security-policy",
+    "shared-rate-limiting",
+    "malware-quarantine",
+    "authenticated-session-hardening",
+    "ai-prompt-and-tool-boundaries",
+    "family-safety-and-age-appropriate-controls",
+    "shared-threat-intelligence"
+  ]
+}
