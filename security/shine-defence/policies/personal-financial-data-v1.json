@@ -1,0 +1,26 @@
+{
+  "policy": "shine-defence/personal-financial-data-v1",
+  "version": "1.0.0",
+  "purpose": "Security and integrity boundaries for Shine applications that store, calculate with or present personal financial data.",
+  "requirements": [
+    "Financial records and derived views are available only inside an authenticated, authorised user or household boundary.",
+    "Authentication credentials and session secrets are stored separately from financial records and are never returned in ordinary application responses.",
+    "Session cookies are HttpOnly, Secure in production, deliberately SameSite scoped and protected from cross-site state-changing requests.",
+    "Login and other credential-bearing request bodies are byte-bounded before parsing, input validated, abuse throttled and use generic authentication failure responses.",
+    "Financial imports and backups are size-bounded, schema-validated and fail closed on malformed or unsupported data before changing stored records.",
+    "Money amounts, dates, account identities and transaction semantics are validated before persistence or calculation; invalid numeric values do not silently become zero.",
+    "Derived balances, forecasts and scenarios distinguish recorded facts from assumptions, estimates and modelled values.",
+    "Concurrency-sensitive corrections or restores detect stale state rather than silently overwriting newer financial records.",
+    "Exports, logs, telemetry and error messages minimise financial detail and exclude passwords, session credentials and unnecessary private record content.",
+    "External provider or bank-derived data preserves source and freshness context; stale or failed retrieval is not represented as current.",
+    "AI or assistant features receive only the financial context needed for the task and cannot bypass authentication, ownership or advice-boundary controls.",
+    "Irreversible deletion, bulk replacement or authority-changing operations require deterministic validation and an explicit user action appropriate to the product flow.",
+    "When authentication, storage integrity or a critical dependency cannot establish a trustworthy result, protected financial operations fail closed."
+  ],
+  "nonClaims": [
+    "This policy does not make financial records complete or current.",
+    "This policy does not provide financial product advice or determine suitability.",
+    "This policy does not guarantee a bank or external provider is correct or available.",
+    "This policy does not certify an application merely because it performs financial calculations."
+  ]
+}
