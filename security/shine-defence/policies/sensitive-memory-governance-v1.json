@@ -1,0 +1,26 @@
+{
+  "policy":"shine-defence/sensitive-memory-governance-v1",
+  "version":"1.0.0",
+  "purpose":"Ownership, privacy, provenance and disclosure controls for applications that retrieve or store sensitive personal memory.",
+  "requirements":[
+    "Memory retrieval begins from a verified authenticated identity; client-supplied user identifiers are not treated as authority.",
+    "Every retrieved memory remains scoped to its canonical owner identity and authorised application domain.",
+    "Source access is explicitly permitted before retrieval; arbitrary table or source names cannot bypass the domain boundary.",
+    "Cross-user memory disclosure fails closed unless a reviewed sharing relationship and explicit owner permission permit a bounded view.",
+    "Highly sensitive and private records are classified before disclosure and may be blocked, redacted or summarised according to policy.",
+    "Credentials, tokens, direct identifiers and internal prompts are removed from application-facing memory records.",
+    "Private recovery, journal, Step-work, health, legal and financial memory receives stricter handling than ordinary profile context.",
+    "Retrieved records preserve source and provenance metadata so model-generated text does not silently become authoritative memory.",
+    "Memory writes and promotions preserve ownership, source and lifecycle state and cannot be authorised solely by model output.",
+    "Retrieval limits and result normalisation are bounded, and unavailable retrieval remains explicit rather than fabricated.",
+    "Database row-level security or equivalent server-side ownership enforcement protects persisted personal memory.",
+    "Security and privacy tests cover authenticated ownership, cross-user denial and sensitive-field filtering.",
+    "When identity, ownership, source permission or privacy classification cannot be established, memory access fails closed."
+  ],
+  "nonClaims":[
+    "This policy does not guarantee that stored memories are factually correct.",
+    "This policy does not authorise sharing merely because two people have a relationship.",
+    "This policy does not make model-generated summaries equivalent to original records.",
+    "This policy does not permit recovery or health memory to bypass application-specific safety boundaries."
+  ]
+}
