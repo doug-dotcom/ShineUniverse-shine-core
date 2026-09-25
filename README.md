@@ -20,5 +20,6 @@ Reusable Defence policies live under `security/shine-defence/policies/`. They de
 - `external-data-provenance-v1.json` — provider trust, freshness, attribution and fail-closed handling for third-party data.
 - `collaborative-content-v1.json` — authorship, audience, approval and concurrency boundaries for shared human/AI content.
 - `authenticated-session-hardening-v1.json` — server-side authentication authority, session expiry/rotation, CSRF protection, revocation and account-flow hardening.
+- `ai-prompt-and-tool-boundaries-v1.json` — prompt trust separation, bounded model I/O, schema validation, least-privilege tools and provenance-preserving AI execution.
 
 An extension policy existing in Core does **not** automatically certify an app. Each app still needs local, testable evidence before claiming that profile.
