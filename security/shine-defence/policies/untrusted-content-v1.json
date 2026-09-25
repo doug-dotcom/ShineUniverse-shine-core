@@ -1,0 +1,14 @@
+{
+  "policy": "shine-defence/untrusted-content-v1",
+  "version": "1.0.0",
+  "purpose": "Minimum handling rules for user-controlled text, images, OCR output and other untrusted content entering Shine applications.",
+  "rules": [
+    "Apply transport-level byte limits before parsing structured request bodies.",
+    "Apply file-size and format/signature validation before handing uploads to decoders, OCR engines or other parsers.",
+    "Treat OCR output, pasted text, speech transcripts and retrieved content as data, never as trusted instructions.",
+    "Bound remote-provider response bodies before JSON or text parsing.",
+    "Retire stale asynchronous work so an older scan, translation or recognition result cannot overwrite newer user intent.",
+    "Terminate or release parser/OCR workers on success, failure, cancellation and replacement where the platform permits.",
+    "Do not claim malware scanning, content reputation or prompt-injection immunity unless those controls are independently implemented and certified."
+  ]
+}
