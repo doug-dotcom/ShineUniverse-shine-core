@@ -1,0 +1,24 @@
+{
+  "policy": "shine-defence/external-data-provenance-v1",
+  "version": "1.0.0",
+  "purpose": "Trust-boundary requirements for third-party data used by Shine applications.",
+  "requirements": [
+    "External provider destinations are explicit HTTPS origins/endpoints controlled by code, not untrusted user input.",
+    "Redirects are rejected unless a reviewed provider contract explicitly allows and revalidates them.",
+    "Provider requests have bounded deadlines and response bodies are byte-limited before JSON parsing.",
+    "Expected response media types and schema-critical fields are validated before data becomes application state.",
+    "Coordinates, timestamps, units and other domain-critical context are checked against the request and expected contract.",
+    "Provider identity plus retrieval/issue or review timestamps are preserved with the resulting data.",
+    "Missing, stale, failed or unverified data stays explicit and is never silently converted to zero, safe, available or current.",
+    "Cached provider data has a defined freshness policy and stale fallback is visibly labelled.",
+    "Curated legal, rules, access or safety-sensitive records keep an attributable source and review date.",
+    "A reviewed source or forecast is not represented as live legal clearance, current closure status, boating safety approval or a prediction of user success.",
+    "Only the minimum provider inputs required for the feature are sent; unrelated personal records are not included."
+  ],
+  "nonClaims": [
+    "This policy does not prove that an external provider is always correct or available.",
+    "This policy does not make historical or reviewed rules current law.",
+    "This policy does not turn forecast data into a safety clearance or activity recommendation.",
+    "This policy does not certify every external hyperlink as reputable."
+  ]
+}
