@@ -1,0 +1,12 @@
+{
+  "policy": "shine-defence/external-link-v1",
+  "version": "1.0.0",
+  "purpose": "Minimum browser handoff rules for external links surfaced by Shine applications.",
+  "rules": [
+    "Only http and https URLs may be rendered as external navigation.",
+    "URLs with embedded username or password credentials are rejected.",
+    "Loopback, localhost, link-local and private-network IP destinations are rejected for public provider links.",
+    "New-tab external links isolate window.opener with noopener and should suppress referrer data.",
+    "A passing link policy does not certify the destination as reputable or scam-free; threat reputation is a separate future control."
+  ]
+}
