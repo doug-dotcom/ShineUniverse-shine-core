@@ -1,0 +1,26 @@
+{
+  "policy":"shine-defence/exercise-companion-safety-v1",
+  "version":"1.0.0",
+  "purpose":"Safety, provenance and human-control boundaries for exercise logging, programme assistance and workout companion features.",
+  "requirements":[
+    "Workout, programme and measurement records are scoped to the authenticated owner and selected participant.",
+    "Health and measurement imports are bounded, schema validated, unit constrained and reject non-finite or implausible values.",
+    "Recorded workouts, targets and measurements are distinguished from inferred progress, readiness, technique or clinical status.",
+    "AI coaching receives only the selected workout/programme context and treats saved records and reference material as untrusted data rather than instructions.",
+    "AI responses cannot directly mutate programmes, workout logs or health records; proposed changes require deterministic application validation and explicit user review.",
+    "Slow AI operations bind their result to the exact reviewed record revision so concurrent changes invalidate stale advice or drafts.",
+    "Exercise alternatives based on movement or equipment similarity are not represented as evidence of clinical suitability.",
+    "Pain, injury, rehabilitation, medication or conflicting practitioner instructions trigger a bounded response that does not diagnose, clear return-to-activity or replace professional care.",
+    "Recorded practitioner restrictions retain provenance and cannot be silently loosened or removed by model output.",
+    "Load progression, maximum-effort attempts and personalised rehabilitation are not autonomously prescribed from incomplete workout history.",
+    "Minor participants receive age-appropriate safeguards against restrictive dieting, appearance judgement, performance-enhancing-drug advice and aggressive progression.",
+    "Model/provider storage is disabled when supported for private exercise interactions, with bounded request/output sizes and explicit provider failures.",
+    "When participant identity, record revision, health context or safety constraints cannot be established, affected coaching or programme mutations fail closed."
+  ],
+  "nonClaims":[
+    "This policy does not make the application a doctor, physiotherapist or personal trainer.",
+    "This policy does not establish that an exercise is medically safe for a particular person.",
+    "This policy does not infer good technique, recovery or progress from logged data alone.",
+    "This policy does not replace emergency or professional medical assessment."
+  ]
+}
