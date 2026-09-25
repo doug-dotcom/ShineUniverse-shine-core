@@ -1,0 +1,26 @@
+{
+  "policy": "shine-defence/ai-prompt-and-tool-boundaries-v1",
+  "version": "1.0.0",
+  "purpose": "Security boundaries for AI prompts, retrieved context, model outputs and tool execution across Shine applications.",
+  "requirements": [
+    "Trusted application instructions remain separate from untrusted user, retrieved, uploaded and external content.",
+    "Prompt construction marks user, memory, retrieval, document and provider content as data rather than authority.",
+    "Only the minimum personal or confidential context required for the task is sent to a model or tool.",
+    "Provider storage is disabled when the provider and feature support a no-storage mode for private Shine interactions.",
+    "Model requests and responses use deadlines and bounded sizes before parsing or persistence.",
+    "Structured model outputs are schema-validated and fail closed when malformed, incomplete or outside the expected contract.",
+    "Model-generated URLs, file paths, identifiers and tool arguments are validated by application policy before use.",
+    "Tools and side-effecting actions use explicit allowlists and least privilege; model text cannot bypass authentication, authorisation or ownership checks.",
+    "High-impact or irreversible actions require deterministic application checks and any human confirmation required by the product flow.",
+    "Retrieved memories, documents, provider results and prior AI output preserve provenance so generated text does not silently become authoritative stored fact.",
+    "Secrets and service credentials are not intentionally placed in model prompts, model-visible logs or user-visible model output.",
+    "AI failures and uncertain outputs remain explicit; applications do not silently fabricate successful tool execution or verified facts.",
+    "Security-relevant AI and tool events can be audited without logging raw secrets or unnecessary private prompt content."
+  ],
+  "nonClaims": [
+    "This policy does not guarantee model output is factually correct.",
+    "This policy does not eliminate prompt injection or model error.",
+    "This policy does not make an AI model an authorisation system.",
+    "This policy does not certify autonomous high-impact actions without separately proven safeguards."
+  ]
+}
