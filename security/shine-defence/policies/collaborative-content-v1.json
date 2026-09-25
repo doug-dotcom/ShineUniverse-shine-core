@@ -1,0 +1,25 @@
+{
+  "policy": "shine-defence/collaborative-content-v1",
+  "version": "1.0.0",
+  "purpose": "Security and provenance boundaries for shared human/AI-authored content in collaborative Shine applications.",
+  "requirements": [
+    "Every shared record has an explicit author/source class and visibility/audience boundary.",
+    "Untrusted text is escaped or encoded at HTML/export boundaries; stored text is never treated as executable markup by default.",
+    "AI-authored or AI-suggested content remains labelled as AI and cannot become approved fact solely because a model produced it.",
+    "Approval, truth/classification and audience changes require an authorised human role and are recorded separately from content generation.",
+    "Reads, search results, exports and related-record traversal apply the same membership and audience filtering before returning data.",
+    "Private provenance, DM-only notes and hidden records do not become searchable side channels for players.",
+    "Invitations are bound to explicit accounts, expire, can be cancelled, and membership revocation takes effect on later reads.",
+    "Mutation requests are origin/host constrained and request bodies are bounded before parsing.",
+    "Session credentials are unpredictable, expiry-bounded, HttpOnly and protected against cross-site browser submission; production transport must additionally use Secure cookies.",
+    "Backup/restore input is byte-bounded, schema-validated and restored into a safe review state rather than blindly preserving authority, sharing or approval.",
+    "Conflicting revisions fail rather than silently overwriting another collaborator's newer edit.",
+    "Unknown, malformed or over-limit collaborative content fails closed."
+  ],
+  "nonClaims": [
+    "This policy does not make user-generated content factually correct.",
+    "This policy does not replace human game-master judgement.",
+    "This policy does not certify a loopback-only preview for public internet deployment.",
+    "This policy does not make AI-generated narrative authoritative."
+  ]
+}
