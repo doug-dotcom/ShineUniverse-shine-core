@@ -1,0 +1,26 @@
+{
+  "policy": "shine-defence/authenticated-session-hardening-v1",
+  "version": "1.0.0",
+  "purpose": "Security boundaries for authenticated user sessions and account-sensitive actions across Shine applications.",
+  "requirements": [
+    "Authentication and authorisation decisions are enforced server-side; client state, hidden controls or route visibility are never treated as authority.",
+    "Session identifiers and one-time authentication tokens are cryptographically unpredictable, purpose-bound and never accepted from URL query strings.",
+    "Cookie-backed sessions use HttpOnly cookies and production transport requires Secure cookies; SameSite and Path scope are set deliberately for the application flow.",
+    "Session state has explicit idle and absolute expiry, and expiry is enforced by the server rather than inferred only by the client.",
+    "Sessions are rotated after authentication and meaningful privilege changes so pre-authentication session identifiers do not survive elevation.",
+    "Logout, credential reset, account disablement and membership revocation invalidate relevant server-side session or refresh state promptly.",
+    "Cookie-authenticated state-changing requests are protected against cross-site submission with origin/host checks and an explicit CSRF strategy appropriate to the architecture.",
+    "Login, recovery, verification, invitation and other credential-bearing endpoints use bounded request bodies, input validation, abuse throttling and generic failure responses that avoid account enumeration.",
+    "Password reset, email verification, invitation and similar one-time tokens are short-lived, single-purpose and invalid after successful use or replacement.",
+    "Redirect and return-to destinations are constrained to reviewed local paths or explicit allowlists so authentication flows cannot become open redirects.",
+    "Privileged service credentials remain separate from end-user session credentials and are not exposed to browser code or logs.",
+    "Authentication, revocation and sensitive account-change events create security-relevant audit evidence without storing raw passwords, session identifiers, bearer tokens or reset secrets.",
+    "When the authentication or authorisation dependency cannot establish a trustworthy decision, protected operations fail closed."
+  ],
+  "nonClaims": [
+    "This policy does not prove a person's real-world identity.",
+    "This policy does not guarantee that an account can never be compromised.",
+    "This policy does not substitute for application-specific authorisation rules, data-scoping checks or least-privilege design.",
+    "This policy does not claim multi-factor authentication unless the application separately implements and verifies it."
+  ]
+}
