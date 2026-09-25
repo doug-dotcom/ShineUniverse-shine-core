@@ -1,0 +1,26 @@
+{
+  "policy":"shine-defence/financial-research-provenance-v1",
+  "version":"1.0.0",
+  "purpose":"Evidence, freshness and model-boundary controls for market, fund and issuer research systems.",
+  "requirements":[
+    "Every material market, fund or issuer fact preserves a source identity and the observation, publication or document date available for that fact.",
+    "Retrieval time is not substituted for observation or publication time.",
+    "Missing, stale, rejected or unavailable evidence remains explicit and is not silently repaired, zero-filled or represented as current.",
+    "Numerical values are accepted only with validated identity, unit and finite-value checks appropriate to the series.",
+    "Calculations preserve their input identities, dates, units and formula and are distinguished from publisher-reported facts.",
+    "Comparisons that require matched periods or observation dates fail closed when the required inputs are not comparable.",
+    "Historical evidence is labelled as historical and does not silently become a current market or issuer claim.",
+    "Fund and security identity is resolved explicitly; ambiguous records do not inherit facts from similarly named products or issuers.",
+    "Model prompts treat retrieved research as evidence/data, preserve supplied provenance and limitations, and do not treat prior model output as source authority.",
+    "Provider/model storage is disabled when supported for private research interactions, and model failures are not presented as completed research.",
+    "Research output distinguishes source facts, application calculations and analytical interpretation.",
+    "Authentication, authorisation and private research records remain server-side and privileged database credentials are not exposed to clients or model output.",
+    "When source provenance, identity, freshness or required evidence cannot be established, the affected conclusion is narrowed or withheld rather than invented."
+  ],
+  "nonClaims":[
+    "This policy does not guarantee investment performance or market forecasts.",
+    "This policy does not make historical observations current.",
+    "This policy does not convert research into personal financial advice.",
+    "This policy does not certify a publisher or external data provider as error-free."
+  ]
+}
