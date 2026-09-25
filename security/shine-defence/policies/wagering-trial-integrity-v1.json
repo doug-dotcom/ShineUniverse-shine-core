@@ -1,0 +1,26 @@
+{
+  "policy":"shine-defence/wagering-trial-integrity-v1",
+  "version":"1.0.0",
+  "purpose":"Integrity and access controls for racing analysis, simulated wagering trials and result evaluation without enabling hidden or unauthorised betting actions.",
+  "requirements":[
+    "Private racing analysis and trial records require authenticated and authorised access.",
+    "State-changing browser requests enforce origin and CSRF protections.",
+    "Credential endpoints are throttled, bounded and use generic authentication failures.",
+    "Trial selections, strategies and evaluation records preserve stable identifiers and timestamps so later results can be traced to the decision that existed beforehand.",
+    "Historical strategy versions are immutable or versioned so backtests cannot silently use future logic.",
+    "Race results and price observations preserve source, event identity and observation timing; missing or stale evidence is not silently represented as current.",
+    "Trial evaluation distinguishes simulated or bonus-bet records from real-money wagering and does not silently convert one into the other.",
+    "Ledger and reconciliation logic is deterministic, auditable and does not fabricate settlement when result evidence is incomplete.",
+    "Imported results and externally sourced race data are schema validated and bounded before persistence.",
+    "Model or heuristic scores remain analysis signals rather than authority to execute a wager.",
+    "No secret, password or privileged session credential is exposed in client code, logs or analysis output.",
+    "Explicit sign-out revokes or invalidates the relevant session where the authentication architecture supports revocation.",
+    "When identity, result provenance or ledger integrity cannot be established, protected mutations and settlement fail closed."
+  ],
+  "nonClaims":[
+    "This policy does not predict winners or guarantee profitability.",
+    "This policy does not certify a strategy as suitable for gambling with real money.",
+    "This policy does not authorise autonomous bet placement.",
+    "This policy does not remove the financial risks of gambling."
+  ]
+}
