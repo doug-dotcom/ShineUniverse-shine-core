@@ -57,7 +57,7 @@ An app is never granted access to a user's entire Vault merely because it belong
 - **Layer 10** — app connection registry and onboarding state.
 - **Layer 11** — second appendage: Shine Dive with opaque-session federation.
 - **Layer 12** — reusable appendage onboarding kit and shared backend client.
-- **Layer 13** — third appendage: Shine Ski with opt-in pseudonymous identity.
+- **Layer 13** — third appendage: Shine Ski with opt-in pseudonymous identity.\n- **Layer 14** — explicit two-proof identity claim linking for pseudonymous appendages; Vault consent remains separate.
 
 ## Durable state
 
