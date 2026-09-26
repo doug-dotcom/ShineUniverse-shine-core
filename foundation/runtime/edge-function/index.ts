@@ -28,7 +28,9 @@ const sql:any=(strings:any,...values:any[])=>rawSql.begin(async(tx:any)=>{
 const adapters=createSupabaseRuntimeAdapters({
   sql,
   fetchImpl:fetch,
-  defenceGate:createFoundationRuntimeDefenceGateV1()
+  defenceGate:createFoundationRuntimeDefenceGateV1(),
+  localAuthUrl:supabaseUrl,
+  fetchFn:fetch
 });
 
 const gateway=createFoundationGateway({adapters});
