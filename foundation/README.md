@@ -81,4 +81,14 @@ The runtime uses pinned dependencies and a serverless transaction-pooler databas
 
 ## Current hosting status
 
-The runtime is deployment-ready and CI-tested, but there is currently no dedicated **Shine Foundation** Supabase project. Foundation has deliberately not been installed inside Dive, Money, RC or another appendage project.
+**Shine Foundation is live in its own dedicated Supabase project.**
+
+- Project ref: `sjpxqeyewahraxvidvcc`
+- Region: `ap-southeast-2`
+- Live function: `foundation-gateway` v1
+- Platform JWT verification: enabled
+- Hosted Supabase security advisor: 0 lints
+
+The Edge Function uses Supabase's built-in database connection but scopes every Foundation query with `SET LOCAL ROLE foundation_gateway`, where `foundation_gateway` is NOLOGIN and does not bypass RLS.
+
+See `layers/layer-007-hosted-foundation.md` and `runtime/hosted-deployment-v1.json` for the live deployment record.
