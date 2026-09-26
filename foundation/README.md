@@ -58,6 +58,7 @@ An app is never granted access to a user's entire Vault merely because it belong
 - **Layer 11** — second appendage: Shine Dive with opaque-session federation.
 - **Layer 12** — reusable appendage onboarding kit and shared backend client.
 - **Layer 13** — third appendage: Shine Ski with opt-in pseudonymous identity.
+- **Layer 14** — explicit two-proof identity claim and merge.
 
 ## Durable state
 
@@ -159,3 +160,14 @@ Its local-first personal data model is preserved. **Connect to Shine** creates o
 Current connection registry state: **Shine Ski = identity-ready** (1 active credential, 1 approved pseudonymous-session provider, 0 active grants, 0 observed decisions).
 
 See `layers/layer-013-ski-third-appendage.md`.
+
+
+## Identity claim
+
+Foundation Layer 14 adds the explicit claim boundary for unbound pseudonymous app sessions.
+
+`POST /v1/identity/claim` requires three independent proofs: the Shine app backend, the source pseudonymous session and a separately authenticated existing canonical identity.
+
+The request body contains no Shine ID or provider subject. Claim targets are approved per app through `foundation.app_claim_identity_providers`.
+
+A successful claim creates only the identity binding and append-only claim evidence. It does **not** create a Vault grant.
