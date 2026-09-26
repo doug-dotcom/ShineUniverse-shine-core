@@ -21,7 +21,7 @@
       "const": "shine-foundation/app-connection-status-v1"
     },
     "schemaVersion": {
-      "const": "1.0.0"
+      "const": "1.1.0"
     },
     "appId": {
       "type": "string",
