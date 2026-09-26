@@ -59,15 +59,11 @@ jobs:
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/runtime-v1.sql
       - name: Apply identity federation
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/identity-federation-v1.sql
-      - name: Apply trusted auth bridge
-        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/auth-bridge-v1.sql
       - name: Apply hosted-advisor hardening
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/live-advisor-hardening-v1.sql
       - name: Run persistence acceptance tests
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/persistence-v1.test.sql
       - name: Run runtime acceptance tests
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/runtime-v1.test.sql
-      - name: Run auth bridge acceptance tests
-        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/auth-bridge-v1.test.sql
       - name: Run identity federation acceptance tests
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/identity-federation-v1.test.sql
