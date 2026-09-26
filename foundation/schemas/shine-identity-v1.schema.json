@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:shine:foundation:schema:shine-identity-v1",
+  "title": "Shine Identity v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "identity",
+    "schemaVersion",
+    "shineId",
+    "accountState",
+    "createdAt",
+    "security"
+  ],
+  "properties": {
+    "identity": {
+      "const": "shine-foundation/shine-identity-v1"
+    },
+    "schemaVersion": {
+      "const": "1.0.0"
+    },
+    "shineId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "accountState": {
+      "enum": [
+        "active",
+        "suspended",
+        "deletion-pending",
+        "deleted"
+      ]
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "authBindings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "provider",
+          "subject"
+        ],
+        "properties": {
+          "provider": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "subject": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "verifiedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    "profileRef": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 500
+    },
+    "security": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "authorisationAuthority",
+        "userEditableMetadataAuthoritative"
+      ],
+      "properties": {
+        "authorisationAuthority": {
+          "const": "server-verified"
+        },
+        "userEditableMetadataAuthoritative": {
+          "const": false
+        }
+      }
+    }
+  }
+}
