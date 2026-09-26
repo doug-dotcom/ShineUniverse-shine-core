@@ -93,7 +93,7 @@ The runtime uses pinned dependencies and a serverless transaction-pooler databas
 
 - Project ref: `sjpxqeyewahraxvidvcc`
 - Region: `ap-southeast-2`
-- Live function: `foundation-gateway` v7
+- Live function: `foundation-gateway` v10
 - Platform JWT precheck: disabled in favour of custom dual auth (app credential + app-approved identity-provider user-token verification)
 - Hosted Supabase security advisor: 0 lints
 
@@ -171,3 +171,6 @@ Foundation Layer 14 adds the explicit claim boundary for unbound pseudonymous ap
 The request body contains no Shine ID or provider subject. Claim targets are approved per app through `foundation.app_claim_identity_providers`.
 
 A successful claim creates only the identity binding and append-only claim evidence. It does **not** create a Vault grant.
+
+
+Current identity-claim state for Shine Ski: **1 approved claim provider, 0 successful claims, 0 active grants**. Ski remains `identity-ready` until a real user explicitly proves both the Ski session and an existing canonical Shine identity.
