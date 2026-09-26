@@ -268,6 +268,7 @@ test('complete identity claim delegates to atomic database function',async()=>{
     sourceProviderId:'supabase:ski-session',
     sourceSubject:'source-hash',
     targetProviderId:'supabase:test',
+    targetSubject:'auth-user',
     targetShineId:shineId,
     occurredAt:'2026-09-26T12:30:00Z'
   });
