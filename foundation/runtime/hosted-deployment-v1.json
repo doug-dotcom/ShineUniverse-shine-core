@@ -1,6 +1,6 @@
 {
   "deployment": "shine-foundation/hosted-deployment-v1",
-  "version": "1.6.0",
+  "version": "1.7.0",
   "deployedAt": "2026-09-26",
   "supabase": {
     "projectName": "Shine Foundation",
@@ -61,7 +61,12 @@
       "shine.travel",
       "shine.dive"
     ],
-    "cleanDatabaseRebuildAfterLayer12": "PASS"
+    "cleanDatabaseRebuildAfterLayer12": "PASS",
+    "skiFoundationBuildTests": "887/887 PASS",
+    "skiDefenceCertification": "PASS",
+    "skiRailwayDeployment": "SUCCESS",
+    "skiContainerStarted": true,
+    "skiSessionTableSecurityAdvisorLints": 0
   },
   "secrets": {
     "included": false,
@@ -80,7 +85,13 @@
     "diveActiveCredentials": 1,
     "diveActiveIdentityProviders": 1,
     "diveActiveGrants": 1,
-    "diveObservedAllows": 0
+    "diveObservedAllows": 0,
+    "skiState": "identity-ready",
+    "skiActiveCredentials": 1,
+    "skiActiveIdentityProviders": 1,
+    "skiActiveGrants": 0,
+    "skiObservedAllows": 0,
+    "skiObservedDenies": 0
   },
   "secondAppendage": {
     "appId": "shine.dive",
@@ -107,7 +118,8 @@
     "sharedBackendClient": "foundation/onboarding/foundation-app-client-v1.mjs",
     "goldenExamples": [
       "shine.travel",
-      "shine.dive"
+      "shine.dive",
+      "shine.ski"
     ],
     "supportedUserCredentialModes": [
       "bearer-jwt",
@@ -117,5 +129,31 @@
     "containsPersonalIds": false,
     "createsLiveAccess": false,
     "verifiedCommit": "9d8bf75430a3d9b1e67eabd8001ef873359ebda5"
+  },
+  "thirdAppendage": {
+    "appId": "shine.ski",
+    "runtime": "Railway",
+    "identityProvider": "supabase:ski-session",
+    "identityKind": "supabase-opaque-vault",
+    "gatewayRequestVersion": "2.0.0",
+    "pilotScope": "vault.foundation.pilot.read",
+    "pilotPurpose": "ski.foundation-pilot",
+    "pilotResourceCategory": "foundation.pilot",
+    "connectionState": "identity-ready",
+    "activeCredentials": 1,
+    "activeIdentityProviders": 1,
+    "activeGrants": 0,
+    "observedAllows": 0,
+    "observedDenies": 0,
+    "explicitOptIn": true,
+    "explicitClaimRequired": true,
+    "canonicalBindings": 0,
+    "personalDataUploaded": false,
+    "sessionAnchorsAtAcceptance": 0,
+    "visibleConnectionStatus": true,
+    "disconnectSupported": true,
+    "productionDeployment": "da63cda823fc231970d3b1520764e5b402e751af",
+    "productionDeploymentId": "8b63a0bc-47ff-4a5a-b011-17edc45812d1",
+    "productionDeploymentStatus": "SUCCESS"
   }
 }
