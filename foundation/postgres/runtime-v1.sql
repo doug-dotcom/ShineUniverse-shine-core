@@ -80,12 +80,14 @@ begin
     create role foundation_runtime nologin;
   end if;
   if not exists (select 1 from pg_roles where rolname='foundation_gateway') then
-    create role foundation_gateway login;
+    create role foundation_gateway nologin;
   end if;
 end
 $$;
 
+alter role foundation_gateway nologin;
 grant foundation_runtime to foundation_gateway;
+grant foundation_gateway to postgres;
 grant usage on schema foundation to foundation_runtime;
 
 grant select on foundation.app_registry to foundation_runtime;
