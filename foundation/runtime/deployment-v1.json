@@ -1,20 +1,25 @@
 {
   "deployment": "shine-foundation/runtime-deployment-v1",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "target": "supabase-edge-functions",
   "functionName": "foundation-gateway",
   "verifyJwt": true,
   "entrypoint": "foundation/runtime/edge-function/index.ts",
   "database": {
-    "connectionEnv": "FOUNDATION_DATABASE_URL",
+    "connectionEnv": "SUPABASE_DB_URL",
+    "source": "Supabase built-in Edge Function secret",
     "requiredRole": "foundation_gateway",
-    "recommendedMode": "shared-pooler-transaction",
+    "requiredRoleLogin": false,
+    "executionMode": "SET LOCAL ROLE foundation_gateway per query transaction",
     "preparedStatements": false,
     "maxConnectionsPerIsolate": 1
   },
   "auth": {
     "projectEnv": "SUPABASE_URL",
-    "keyPreference": ["SUPABASE_PUBLISHABLE_KEY", "SUPABASE_ANON_KEY"],
+    "keyPreference": [
+      "SUPABASE_PUBLISHABLE_KEYS.default",
+      "SUPABASE_ANON_KEY"
+    ],
     "userTokenHeader": "Authorization",
     "appCredentialHeader": "X-Shine-App-Token",
     "appCredentialStorage": "SHA-256 only"
@@ -26,10 +31,10 @@
   "requiredPreDeployment": [
     "Apply foundation/postgres/persistence-v1.sql",
     "Apply foundation/postgres/runtime-v1.sql",
-    "Set a strong password for the foundation_gateway database login",
-    "Set FOUNDATION_DATABASE_URL to the transaction-pooler URL for foundation_gateway",
-    "Provision verified foundation.identity_bindings rows",
-    "Provision app credential SHA-256 hashes in foundation.app_credentials",
+    "Apply foundation/postgres/live-advisor-hardening-v1.sql",
+    "Confirm the postgres platform connection can SET LOCAL ROLE foundation_gateway",
+    "Provision verified foundation.identity_bindings rows before user access",
+    "Provision app credential SHA-256 hashes in foundation.app_credentials before app access",
     "Keep Edge Function platform JWT verification enabled"
   ]
 }
