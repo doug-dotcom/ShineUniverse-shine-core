@@ -68,6 +68,7 @@ create or replace function foundation.complete_identity_claim_v1(
   p_source_provider_id text,
   p_source_provider_subject text,
   p_target_provider_id text,
+  p_target_provider_subject text,
   p_target_shine_id uuid,
   p_occurred_at timestamptz
 )
@@ -98,7 +99,15 @@ begin
     return;
   end if;
 
-  if not exists (
+  if p_occurred_at is null
+    or p_occurred_at < now() - interval '5 minutes'
+    or p_occurred_at > now() + interval '1 minute'
+    or length(p_source_provider_subject) not between 1 and 512
+    or length(p_target_provider_subject) not between 1 and 512
+  then
+    result_outcome:='denied';
+    result_reason:='claim-context-invalid';
+  elsif not exists (
     select 1 from foundation.app_registry
     where app_id=p_app_id and status='active'
   ) then
@@ -125,6 +134,7 @@ begin
     from foundation.identity_bindings b
     join foundation.shine_identities i on i.shine_id=b.shine_id
     where b.provider=p_target_provider_id
+      and b.provider_subject=p_target_provider_subject
       and b.shine_id=p_target_shine_id
       and b.verified_at is not null
       and i.account_state='active'
@@ -189,11 +199,11 @@ end;
 $$;
 
 revoke all on function foundation.complete_identity_claim_v1(
-  uuid,uuid,text,text,text,text,uuid,timestamptz
+  uuid,uuid,text,text,text,text,text,uuid,timestamptz
 ) from public, anon, authenticated;
 
 grant execute on function foundation.complete_identity_claim_v1(
-  uuid,uuid,text,text,text,text,uuid,timestamptz
+  uuid,uuid,text,text,text,text,text,uuid,timestamptz
 ) to foundation_runtime;
 
 create or replace view foundation.app_connection_status
