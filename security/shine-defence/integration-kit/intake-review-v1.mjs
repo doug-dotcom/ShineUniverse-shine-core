@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {spawnSync} from 'node:child_process';
 import {readFileSync,renameSync,statSync,writeFileSync} from 'node:fs';
 import {dirname,isAbsolute,join,resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
@@ -216,8 +217,16 @@ function selfTest(){
   expectFail('reviewed app path drift',(input,q,l)=>{
     l.apps.push({id:'new-app',repo:'owner/new-app',path:'security/other.json',profileBlobSha:profile,policies:['baseline'],reviewCommitSha:reviewed,profileVersion:'1.0.0'});
   });
+  expectFail('candidate id collision',(input,q)=>{
+    q.candidates.push({
+      candidateId:'new-app-'+sha.slice(0,12),appId:'other-app',repository:'owner/other',
+      releaseCommitSha:sha.slice(0,12)+'f'.repeat(28),profilePath:'security/shine-defence/profile.json',
+      profileBlobSha:profile,profileVersion:'1.0.0',policies:['baseline'],status:'dismissed',
+      observedAt:'2026-09-27T00:00:00.000Z',evidence
+    });
+  });
 
-  console.log('SHINE DEFENCE CANDIDATE INTAKE SELF-TEST: PASS 2 healthy + 8 fail-closed cases');
+  console.log('SHINE DEFENCE CANDIDATE INTAKE SELF-TEST: PASS 2 healthy + 9 fail-closed cases');
 }
 
 function main(){
