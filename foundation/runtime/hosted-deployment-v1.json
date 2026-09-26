@@ -1,6 +1,6 @@
 {
   "deployment": "shine-foundation/hosted-deployment-v1",
-  "version": "1.8.0",
+  "version": "1.9.0",
   "deployedAt": "2026-09-26",
   "supabase": {
     "projectName": "Shine Foundation",
@@ -19,7 +19,7 @@
   "edgeFunction": {
     "slug": "foundation-gateway",
     "id": "0e219164-32a6-4969-b1dc-9b6402e79e59",
-    "version": 7,
+    "version": 10,
     "status": "ACTIVE",
     "verifyJwt": false,
     "authentication": "custom app credential plus app-approved JWT or opaque-vault identity verification"
@@ -67,7 +67,10 @@
     "skiRailwayDeployment": "SUCCESS",
     "skiContainerStarted": true,
     "skiSessionTableSecurityAdvisorLints": 0,
-    "identityClaimCi": "PENDING"
+    "identityClaimCi": "PASS",
+    "identityClaimHostedAcceptance": "PASS",
+    "identityClaimSecurityAdvisorLints": 0,
+    "identityClaimRealSkiClaims": 0
   },
   "secrets": {
     "included": false,
@@ -92,7 +95,9 @@
     "skiActiveIdentityProviders": 1,
     "skiActiveGrants": 0,
     "skiObservedAllows": 0,
-    "skiObservedDenies": 0
+    "skiObservedDenies": 0,
+    "skiActiveClaimIdentityProviders": 1,
+    "skiSuccessfulIdentityClaims": 0
   },
   "secondAppendage": {
     "appId": "shine.dive",
@@ -165,7 +170,7 @@
     "appProofRequired": true,
     "exposesShineId": false,
     "createsVaultGrant": false,
-    "hostedStatus": "PENDING",
+    "hostedStatus": "ACTIVE",
     "skiClaimProvider": "supabase:shine-l",
     "observedLiveClaims": 0
   }
