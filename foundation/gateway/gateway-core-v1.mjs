@@ -95,7 +95,7 @@ export function createFoundationGateway({adapters,clock=()=>new Date().toISOStri
 
     let verified;
     try{
-      verified=await adapters.verifyIdentity({authContext});
+      verified=await adapters.verifyIdentity({authContext,claimedAppId:permission.appId});
     }catch{
       return response(envelope,'unavailable','foundation-dependency-unavailable');
     }
