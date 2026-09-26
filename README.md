@@ -49,4 +49,10 @@ Reusable Defence policies live under `security/shine-defence/policies/`. They de
 
 `security/shine-defence/ecosystem-profile-ledger-v1.json` records the exact reviewed **app commit**, Defence-profile blob/version, and canonical policies that profile claimed. It is deliberately a review snapshot: later app commits do not inherit certification automatically.
 
+### Release-claim freshness
+
+`security/shine-defence/release-claim-v1.json` defines whether a specific app revision may make the **current** Protected by Shine Defence claim. Only an exact reviewed commit with the exact reviewed Defence-profile blob is `reviewed_release`; later commits are `unreviewed_revision`, changed profiles on the reviewed commit are `profile_drift`, and apps absent from the ledger are `uncertified`.
+
+The deterministic assessor lives at `security/shine-defence/integration-kit/assess-release-claim-v1.mjs`.
+
 An extension policy existing in Core does **not** automatically certify an app. Each app still needs local, testable evidence before claiming that profile.
