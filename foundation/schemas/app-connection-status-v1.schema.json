@@ -1,0 +1,100 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:shine:foundation:schema:app-connection-status-v1",
+  "title": "Shine Foundation App Connection Status v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "status",
+    "schemaVersion",
+    "appId",
+    "registryStatus",
+    "activeCredentials",
+    "activeIdentityProviders",
+    "activeGrants",
+    "observedAllows",
+    "observedDenies",
+    "connectionState"
+  ],
+  "properties": {
+    "status": {
+      "const": "shine-foundation/app-connection-status-v1"
+    },
+    "schemaVersion": {
+      "const": "1.0.0"
+    },
+    "appId": {
+      "type": "string",
+      "pattern": "^shine\\.[a-z0-9][a-z0-9-]*$"
+    },
+    "appName": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "registryStatus": {
+      "enum": [
+        "active",
+        "disabled"
+      ]
+    },
+    "standalonePrimaryPurposeAvailable": {
+      "type": "boolean"
+    },
+    "activeCredentials": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "activeIdentityProviders": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "activeGrants": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "observedAllows": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "observedDenies": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "lastObservedAt": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "lastDecision": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "allow",
+        "deny",
+        null
+      ]
+    },
+    "lastReasonCode": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "connectionState": {
+      "enum": [
+        "disabled",
+        "registered",
+        "credentialed",
+        "identity-ready",
+        "grant-ready",
+        "live-observed"
+      ]
+    }
+  }
+}
