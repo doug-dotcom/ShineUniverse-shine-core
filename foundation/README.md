@@ -114,3 +114,12 @@ No manual "connected" flag is required. The state advances only when the underly
 
 
 Current connection registry state: **Shine Travel = grant-ready** (1 active credential, 1 approved identity provider, 2 active grants, 0 observed production ALLOWs).
+
+
+## Opaque-session federation
+
+Foundation Layer 11 extends Shine ID federation beyond JWT accounts.
+
+Apps may use an app-approved `supabase-opaque-vault` provider. The calling backend sends the user's opaque session token only in the private `X-Shine-User-Token` header. Foundation hashes the token, verifies it against the provider's existing Supabase RLS-protected resource using the configured token header, and maps the verified subject hash to canonical Shine ID.
+
+The raw opaque token is never placed in the Gateway JSON envelope or audit ledger.
