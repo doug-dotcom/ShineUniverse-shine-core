@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:shine:foundation:schema:access-audit-event-v1",
+  "title": "Shine Foundation Access Audit Event v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "event",
+    "schemaVersion",
+    "eventId",
+    "requestId",
+    "appId",
+    "shineId",
+    "scope",
+    "purpose",
+    "decision",
+    "reasonCode",
+    "occurredAt"
+  ],
+  "properties": {
+    "event": {
+      "const": "shine-foundation/access-audit-event-v1"
+    },
+    "schemaVersion": {
+      "const": "1.0.0"
+    },
+    "eventId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "requestId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "appId": {
+      "type": "string",
+      "pattern": "^shine\\.[a-z0-9][a-z0-9-]*$"
+    },
+    "shineId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "scope": {
+      "type": "string"
+    },
+    "purpose": {
+      "type": "string"
+    },
+    "resourceId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "resourceCategory": {
+      "type": "string"
+    },
+    "decision": {
+      "enum": [
+        "allow",
+        "deny"
+      ]
+    },
+    "reasonCode": {
+      "type": "string",
+      "minLength": 1
+    },
+    "grantId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "occurredAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "defenceEvidenceRef": {
+      "type": "string",
+      "maxLength": 1000
+    }
+  }
+}
