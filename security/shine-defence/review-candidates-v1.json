@@ -44,7 +44,7 @@
         "authenticated-session-hardening",
         "external-data-provenance"
       ],
-      "status": "accepted",
+      "status": "superseded",
       "observedAt": "2026-09-26T12:11:54.500Z",
       "evidence": [
         {
@@ -53,6 +53,41 @@
           "reference": "a95651ea-445b-4ae5-a339-cd102866fca9",
           "checkedAt": "2026-09-26T12:11:54.500Z",
           "summary": "Production deployment reached SUCCESS after the full Travel Defence gate and 519 of 519 regression tests."
+        }
+      ],
+      "supersededByCandidateId": "shine-travel-f058b38b"
+    },
+    {
+      "candidateId": "shine-travel-f058b38b",
+      "appId": "shine-travel",
+      "repository": "doug-dotcom/shine-travel",
+      "releaseCommitSha": "f058b38bed6c30e745d9b815c087a7563a3f631f",
+      "profilePath": "security/shine-defence/profile.json",
+      "profileBlobSha": "ba66ee8079a4d22de8f80d7ba30608a9d78bfe00",
+      "profileVersion": "1.3.0",
+      "policies": [
+        "baseline",
+        "certifier",
+        "external-link",
+        "authenticated-session-hardening",
+        "external-data-provenance"
+      ],
+      "status": "accepted",
+      "observedAt": "2026-09-26T12:24:56.103Z",
+      "evidence": [
+        {
+          "source": "railway",
+          "kind": "deployment_success",
+          "reference": "7effb411-b3ea-40d1-8831-a05a978b80a3",
+          "checkedAt": "2026-09-26T12:24:56.103Z",
+          "summary": "Production deployment reached SUCCESS after the full Travel Defence gate and 520 of 520 regression tests."
+        },
+        {
+          "source": "github",
+          "kind": "security_diff_review",
+          "reference": "474c3f109c013c232dd7f78dfaf96a5e405744b2..f058b38bed6c30e745d9b815c087a7563a3f631f",
+          "checkedAt": "2026-09-26T12:25:10.000Z",
+          "summary": "Review found only saved-itinerary helper, Today-page presentation and regression-test changes; no auth, storage, provider, AI, upload, external-link, Foundation, Defence or server trust-boundary changes."
         }
       ]
     }
