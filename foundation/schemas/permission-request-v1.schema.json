@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:shine:foundation:schema:permission-request-v1",
+  "title": "Shine Foundation Permission Request v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "request",
+    "schemaVersion",
+    "requestId",
+    "appId",
+    "shineId",
+    "scope",
+    "purpose",
+    "requestedAt"
+  ],
+  "properties": {
+    "request": {
+      "const": "shine-foundation/permission-request-v1"
+    },
+    "schemaVersion": {
+      "const": "1.0.0"
+    },
+    "requestId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "appId": {
+      "type": "string",
+      "pattern": "^shine\\.[a-z0-9][a-z0-9-]*$"
+    },
+    "shineId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "scope": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._:-]*$"
+    },
+    "purpose": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._:-]*$"
+    },
+    "resourceId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "resourceCategory": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]*$"
+    },
+    "requestedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "context": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  },
+  "allOf": [
+    {
+      "anyOf": [
+        {
+          "required": [
+            "resourceId"
+          ]
+        },
+        {
+          "required": [
+            "resourceCategory"
+          ]
+        }
+      ]
+    }
+  ]
+}
