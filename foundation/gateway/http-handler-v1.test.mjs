@@ -17,6 +17,11 @@ const handler=createFoundationHttpHandler({
     badgeCurrent:releaseSha===reviewed&&profileBlobSha===profile,
     display:'status'
   }),
+  identityClaim:async({envelope})=>({
+    identityClaimResponse:'shine-foundation/identity-claim-response-v1',
+    schemaVersion:'1.0.0',claimId:envelope.claimId??null,appId:envelope.appId??null,
+    status:'linked',reasonCode:'identity-linked'
+  }),
   gateway:async({envelope})=>({
     gatewayResponse:'shine-foundation/gateway-response-v1',schemaVersion:'1.0.0',
     traceId:envelope.traceId,requestId:envelope.permission?.requestId??null,
@@ -94,4 +99,26 @@ test('allowed decisions map to HTTP 200',async()=>{
     body:JSON.stringify({traceId:'t',permission:{requestId:'r'}})
   }));
   assert.equal(res.status,200);
+});
+
+test('identity claim endpoint is authenticated and maps linked result to HTTP 200',async()=>{
+  const res=await handler(new Request(base+'/foundation-gateway/v1/identity/claim',{
+    method:'POST',
+    headers:{authorization:'Bearer good','content-type':'application/json'},
+    body:JSON.stringify({claimId:'c',appId:'shine.ski'})
+  }));
+  assert.equal(res.status,200);
+  assert.equal((await res.json()).status,'linked');
+});
+
+test('identity claim conflicts map to HTTP 409',async()=>{
+  const conflict=createFoundationHttpHandler({
+    gateway:async()=>({status:'invalid'}),
+    authenticate:async()=>({}),
+    identityClaim:async()=>({status:'conflict',reasonCode:'identity-claim-conflict'})
+  });
+  const res=await conflict(new Request(base+'/v1/identity/claim',{
+    method:'POST',headers:{'content-type':'application/json'},body:'{}'
+  }));
+  assert.equal(res.status,409);
 });
