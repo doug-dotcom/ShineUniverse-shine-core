@@ -34,6 +34,21 @@ The v1 operation is `access.evaluate`.
 
 Authentication is intentionally outside the JSON request envelope. The HTTP adapter authenticates the transport/session and passes trusted auth context into the Gateway; request-body identity claims never authenticate themselves.
 
+## Trust-boundary ordering
+
+The Gateway short-circuits in least-privilege order:
+
+1. validate envelope;
+2. verify Shine ID;
+3. load and validate Core app manifest;
+4. only then query Vault resource metadata and effective grants;
+5. apply Shine Defence;
+6. evaluate permission;
+7. persist audit;
+8. return a minimal response.
+
+An identity mismatch therefore cannot trigger a Vault lookup, and an undeclared app scope cannot trigger Vault/grant reads.
+
 ## Fail-closed rules
 
 - malformed envelope -> invalid;
