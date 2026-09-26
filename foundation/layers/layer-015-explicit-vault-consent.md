@@ -1,6 +1,6 @@
 # Foundation Layer 15 — Explicit Vault consent and grant issuance
 
-**Status:** Source complete; hosted deployment pending  
+**Status:** Hosted live — Foundation Gateway v11  
 **Scope:** Shine Vault consent boundary
 
 Layer 15 completes the second half of the opt-in Foundation connection flow.
@@ -48,3 +48,20 @@ Repeated consent for an already-active matching grant returns `already-granted` 
 Layer 15 may be deployed and tested with synthetic/rollback records only.
 
 No real Shine Ski identity claim or Vault grant is part of Layer 15 deployment acceptance.
+
+
+## Hosted acceptance — 26 Sep 2026
+
+- clean Foundation CI: **PASS**;
+- clean PostgreSQL rebuild and Layer 15 SQL acceptance: **PASS**;
+- Deno Edge type-check: **PASS**;
+- hosted synthetic consent/grant transaction with rollback: **PASS**;
+- Foundation Gateway: **v11 ACTIVE**;
+- Supabase security advisor lints: **0**;
+- unindexed foreign-key advisor findings: **0** after the Layer 14/15 evidence indexes;
+- real Shine Ski identity claims: **0**;
+- real Shine Ski active Vault grants: **0**;
+- real Shine Ski grant-consent events: **0**;
+- Shine Ski connection state remains **identity-ready**.
+
+Layer 15 is therefore live as capability without silently connecting or authorising a real user.
