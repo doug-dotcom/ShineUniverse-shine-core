@@ -88,8 +88,8 @@ The runtime uses pinned dependencies and a serverless transaction-pooler databas
 
 - Project ref: `sjpxqeyewahraxvidvcc`
 - Region: `ap-southeast-2`
-- Live function: `foundation-gateway` v3
-- Platform JWT precheck: disabled in favour of custom dual auth (app credential + registered user-token issuer)
+- Live function: `foundation-gateway` v4
+- Platform JWT precheck: disabled in favour of custom dual auth (app credential + registered identity-provider user-token verification)
 - Hosted Supabase security advisor: 0 lints
 
 The Edge Function uses Supabase's built-in database connection but scopes every Foundation query with `SET LOCAL ROLE foundation_gateway`, where `foundation_gateway` is NOLOGIN and does not bypass RLS.
