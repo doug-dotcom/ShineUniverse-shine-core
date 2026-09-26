@@ -1,0 +1,105 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:shine:foundation:schema:vault-resource-v1",
+  "title": "Shine Vault Resource v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "resource",
+    "schemaVersion",
+    "resourceId",
+    "ownerShineId",
+    "category",
+    "sensitivity",
+    "grantRequired",
+    "createdAt",
+    "provenance"
+  ],
+  "properties": {
+    "resource": {
+      "const": "shine-foundation/vault-resource-v1"
+    },
+    "schemaVersion": {
+      "const": "1.0.0"
+    },
+    "resourceId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "ownerShineId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "category": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]*$"
+    },
+    "sensitivity": {
+      "enum": [
+        "personal",
+        "sensitive",
+        "restricted"
+      ]
+    },
+    "grantRequired": {
+      "const": true
+    },
+    "contentType": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "storageRef": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1000
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source"
+      ],
+      "properties": {
+        "source": {
+          "enum": [
+            "user",
+            "shine-app",
+            "import",
+            "system"
+          ]
+        },
+        "sourceAppId": {
+          "type": "string",
+          "pattern": "^shine\\.[a-z0-9][a-z0-9-]*$"
+        },
+        "sourceRef": {
+          "type": "string",
+          "maxLength": 1000
+        }
+      }
+    },
+    "integrity": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-fA-F0-9]{64}$"
+        },
+        "sizeBytes": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    }
+  }
+}
