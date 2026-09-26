@@ -50,7 +50,7 @@ Canonical pilot permission:
 
 ## Travel runtime
 
-Travel's production Railway backend contains a server-only Foundation client and an authenticated `GET /api/foundation/pilot` endpoint.
+Travel's production Railway backend contains a server-only Foundation client and an authenticated `GET /api/foundation/pilot` endpoint. The signed-in account bar now calls that endpoint and displays a small `Foundation connected` / checking / unavailable state without exposing identity, grant or Vault internals.
 
 The client:
 
@@ -65,7 +65,7 @@ Travel's standalone UI and trip functionality continue operating if Foundation i
 
 ## Defence
 
-Travel's real Railway Docker build ran the full Shine Defence/Travel gate, including the `SD-FOUNDATION-001` control, and completed 510/510 tests successfully.
+Travel's real Railway Docker build ran the full Shine Defence/Travel gate, including the `SD-FOUNDATION-001` control, and completed 511/511 tests successfully.
 
 The final reconciled Travel deployment completed successfully and the production container started cleanly.
 
@@ -109,3 +109,16 @@ During Layer 8 reconciliation, a temporary duplicate issuer/connection-test path
 - canonical pilot category: `foundation.pilot`.
 
 Duplicate connection-test grants and the later duplicate Travel app credential were revoked rather than deleted, preserving append-only security history.
+
+
+## Visible connection state
+
+The production Railway UI now checks the authenticated pilot automatically after a user session is established.
+
+The account bar shows:
+
+- **Foundation connected** — the live pilot returned `allowed`;
+- **Checking Foundation…** — the handshake is in progress;
+- **Foundation unavailable** — Foundation could not be reached or did not allow the pilot.
+
+The status is informational only. It does not gate Travel's primary planner, saved journeys, research or document workflows.
