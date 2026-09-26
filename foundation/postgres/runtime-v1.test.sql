@@ -18,6 +18,15 @@ insert into foundation.app_credentials(
 );
 
 reset role;
+
+do $
+begin
+  if (select rolcanlogin from pg_roles where rolname='foundation_gateway') then
+    raise exception 'foundation_gateway must remain NOLOGIN';
+  end if;
+end
+$;
+
 set role foundation_gateway;
 
 do $$
