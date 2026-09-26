@@ -120,14 +120,20 @@
     {
       "id": "review-candidate",
       "path": "security/shine-defence/review-candidate-v1.json",
-      "version": "1.1.0",
-      "blobSha": "6632b0e35a7d7440c8083f5d43146ee59d538e0a"
+      "version": "1.2.0",
+      "blobSha": "768f6fc1a4c477fb3b9028b4726ae1324dc00aeb"
     },
     {
       "id": "review-decision",
       "path": "security/shine-defence/review-decision-v1.json",
       "version": "1.0.0",
       "blobSha": "59f4abc5a214e324925431ba69c76a37beecbcef"
+    },
+    {
+      "id": "review-promotion",
+      "path": "security/shine-defence/review-promotion-v1.json",
+      "version": "1.0.0",
+      "blobSha": "97830a6eb66758151d519b6e80145d81c57874ae"
     }
   ]
 }

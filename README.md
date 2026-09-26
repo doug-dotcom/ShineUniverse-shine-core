@@ -85,4 +85,12 @@ A candidate **never grants the badge**. Only the canonical ecosystem review ledg
 
 Core CI requires every accepted, superseded or dismissed candidate to have exactly one matching decision record, rejects decisions that predate candidate observation, and verifies superseded-candidate successor identity. Pending candidates are forbidden from carrying a decision. This prevents a queue status field from becoming its own evidence while preserving the rule that only the canonical reviewed ledger plus an exact receipt grants the current Defence badge.
 
+Accepted candidates are historical final outcomes. When a later release is reviewed, the older accepted record remains accepted rather than being rewritten as superseded; `superseded` is reserved for a candidate replaced before review completed.
+
+### Atomic review promotion
+
+`security/shine-defence/review-promotion-v1.json` defines the fail-closed promotion unit joining candidate state, the canonical reviewed ledger, the current certification receipt and the independent review decision.
+
+Once an app has review-candidate history, Core CI requires its current reviewed identity to match exactly one accepted candidate, requires that candidate to retain exactly one accepted decision, and requires the app's current receipt to match the same release/profile/policy identity. Partial promotions fail even when the individual files are syntactically valid. Legacy reviewed apps remain valid until they enter the candidate workflow.
+
 An extension policy existing in Core does **not** automatically certify an app. Each app still needs local, testable evidence before claiming that profile.
