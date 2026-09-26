@@ -72,6 +72,7 @@ test('dual-proof claim links opaque session without creating a Vault grant',asyn
   assert.equal(calls[0].sourceProviderId,'supabase:ski-session');
   assert.equal(calls[0].sourceProviderSubject,'a'.repeat(64));
   assert.equal(calls[0].targetProviderId,'supabase:shine-l');
+  assert.equal(calls[0].targetProviderSubject,'canonical-user');
   assert.equal(Object.hasOwn(calls[0],'jwt'),false);
   assert.equal(Object.hasOwn(calls[0],'userToken'),false);
 });
