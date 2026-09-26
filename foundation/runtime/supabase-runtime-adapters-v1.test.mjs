@@ -18,7 +18,7 @@ const makeSql=()=> {
         ? [{credential_id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',app_id:'shine.travel'}] : [];
     }
     if(q.includes('from foundation.identity_providers')){
-      return values[0]===issuer
+      return values[0]===issuer && values[1]==='shine.travel'
         ? [{provider_id:'supabase:test',project_url:'https://identity.example.test',publishable_key:'public-key'}]
         : [];
     }
@@ -78,7 +78,7 @@ test('verifies app caller against active hashed credential',async()=>{
 test('registered external issuer verifies user then maps canonical Shine ID',async()=>{
   const {adapters}=makeAdapters();
   const token=jwt({iss:issuer,sub:'auth-user',session_id:'session-1'});
-  const result=await adapters.verifyIdentity({authContext:{jwt:token}});
+  const result=await adapters.verifyIdentity({authContext:{jwt:token},claimedAppId:'shine.travel'});
   assert.equal(result.shineId,shineId);
   assert.equal(result.authSubject,'auth-user');
   assert.equal(result.providerId,'supabase:test');
@@ -89,7 +89,7 @@ test('unregistered issuer is denied without contacting external Auth',async()=>{
   let calls=0;
   const {adapters}=makeAdapters({fetchImpl:async()=>{calls++;return Response.json({id:'x'})}});
   const result=await adapters.verifyIdentity({
-    authContext:{jwt:jwt({iss:'https://evil.example/auth/v1',sub:'x'})}
+    authContext:{jwt:jwt({iss:'https://evil.example/auth/v1',sub:'x'})},claimedAppId:'shine.travel'
   });
   assert.equal(result,null);
   assert.equal(calls,0);
@@ -97,7 +97,7 @@ test('unregistered issuer is denied without contacting external Auth',async()=>{
 
 test('registered issuer token rejected by provider is not mapped',async()=>{
   const {adapters}=makeAdapters({fetchImpl:async()=>new Response('{}',{status:401})});
-  const result=await adapters.verifyIdentity({authContext:{jwt:jwt({iss:issuer,sub:'auth-user'})}});
+  const result=await adapters.verifyIdentity({authContext:{jwt:jwt({iss:issuer,sub:'auth-user'})},claimedAppId:'shine.travel'});
   assert.equal(result,null);
 });
 
@@ -131,4 +131,17 @@ test('audit writes can record pre-identity denial with null Shine ID',async()=>{
     reasonCode:'app-caller-unverified',occurredAt:'2026-09-26T08:30:00Z'
   });
   assert.equal(audit.length,1);
+});
+
+
+test('registered issuer is denied when it is not linked to the requesting app',async()=>{
+  let calls=0;
+  const {adapters}=makeAdapters({fetchImpl:async()=>{calls++;return Response.json({id:'auth-user'})}});
+  const token=jwt({iss:issuer,sub:'auth-user'});
+  const result=await adapters.verifyIdentity({
+    authContext:{jwt:token},
+    claimedAppId:'shine.dive'
+  });
+  assert.equal(result,null);
+  assert.equal(calls,0);
 });
