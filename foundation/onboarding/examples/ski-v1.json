@@ -1,0 +1,38 @@
+{
+  "spec": "shine-foundation/appendage-connection-spec-v1",
+  "schemaVersion": "1.0.0",
+  "app": {
+    "appId": "shine.ski",
+    "name": "Shine Ski",
+    "primaryPurpose": "Local-first skiing and snowboarding companion for resort discovery, learning, packing and mountain-day tracking."
+  },
+  "source": {
+    "repository": "doug-dotcom/Shine-Ski",
+    "branch": "main",
+    "backendEntrypoint": "railway-server.mjs"
+  },
+  "identity": {
+    "kind": "supabase-opaque-vault",
+    "providerId": "supabase:ski-session",
+    "projectUrl": "https://lqicznkysqqxbrmtxmms.supabase.co",
+    "verificationResource": "ski_foundation_sessions",
+    "subjectField": "session_hash",
+    "tokenHeader": "x-shine-ski-token"
+  },
+  "runtime": {
+    "platform": "railway",
+    "foundationBaseUrlEnv": "SHINE_FOUNDATION_URL",
+    "appTokenEnv": "SHINE_FOUNDATION_APP_TOKEN",
+    "userCredentialMode": "opaque-header"
+  },
+  "pilot": {
+    "scope": "vault.foundation.pilot.read",
+    "purpose": "ski.foundation-pilot",
+    "resourceCategory": "foundation.pilot"
+  },
+  "safety": {
+    "standaloneFallback": true,
+    "secretsInSpec": false,
+    "personalIdsInSpec": false
+  }
+}
