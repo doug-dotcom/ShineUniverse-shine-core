@@ -16,7 +16,7 @@ jobs:
           node-version: '22'
       - run: node foundation/integration-kit/verify-object-registry-v1.mjs
       - run: node --test foundation/integration-kit/permission-engine-v1.test.mjs
-      - run: node --test foundation/gateway/gateway-core-v1.test.mjs foundation/gateway/http-handler-v1.test.mjs
+      - run: node --test foundation/gateway/gateway-core-v1.test.mjs foundation/gateway/defence-status-v1.test.mjs foundation/gateway/http-handler-v1.test.mjs
       - run: node --test foundation/runtime/supabase-runtime-adapters-v1.test.mjs
       - uses: denoland/setup-deno@v2
         with:
