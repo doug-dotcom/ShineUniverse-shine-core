@@ -93,4 +93,10 @@ Accepted candidates are historical final outcomes. When a later release is revie
 
 Once an app has review-candidate history, Core CI requires its current reviewed identity to match exactly one accepted candidate, requires that candidate to retain exactly one accepted decision, and requires the app's current receipt to match the same release/profile/policy identity. Partial promotions fail even when the individual files are syntactically valid. Legacy reviewed apps remain valid until they enter the candidate workflow.
 
+### Review promotion helper
+
+`security/shine-defence/integration-kit/promote-review-v1.mjs` prepares an existing app's re-certification as one controlled operation. It promotes exactly one `pending_review` candidate, advances the canonical reviewed ledger, replaces that app's current certification receipt, appends the independent accepted decision, and creates the immutable current-registry snapshot when needed.
+
+The helper is dry-run by default. `--apply` performs atomic per-file replacement, runs the Defence registry/ledger/receipt/candidate/decision/promotion gates, and restores every touched file if verification fails. It deliberately refuses first-time certification in v1 rather than silently inventing a prior reviewed-app identity.
+
 An extension policy existing in Core does **not** automatically certify an app. Each app still needs local, testable evidence before claiming that profile.
