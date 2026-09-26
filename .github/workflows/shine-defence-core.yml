@@ -21,3 +21,4 @@ jobs:
       - run: node security/shine-defence/integration-kit/verify-certification-receipts-v1.mjs
       - run: node security/shine-defence/integration-kit/evaluate-release-status-v1.mjs --self-test
       - run: node security/shine-defence/integration-kit/consumer-v1.mjs --self-test
+      - run: node security/shine-defence/integration-kit/verify-review-candidates-v1.mjs

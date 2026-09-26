@@ -1,0 +1,57 @@
+{
+  "contract": "shine-defence/review-candidate-v1",
+  "version": "1.0.0",
+  "purpose": "Non-authoritative evidence bundle for an exact application release requesting Shine Defence review.",
+  "statuses": [
+    {
+      "id": "pending_review",
+      "meaning": "Evidence is ready for review; no badge claim is granted."
+    },
+    {
+      "id": "accepted",
+      "meaning": "The candidate was promoted into the canonical reviewed ledger and certification receipt."
+    },
+    {
+      "id": "superseded",
+      "meaning": "A newer candidate replaced this candidate before review completed."
+    },
+    {
+      "id": "dismissed",
+      "meaning": "The candidate was closed without certification."
+    }
+  ],
+  "requiredFields": [
+    "candidateId",
+    "appId",
+    "repository",
+    "releaseCommitSha",
+    "profilePath",
+    "profileBlobSha",
+    "profileVersion",
+    "policies",
+    "status",
+    "observedAt",
+    "evidence"
+  ],
+  "evidenceFields": [
+    "source",
+    "kind",
+    "reference",
+    "checkedAt",
+    "summary"
+  ],
+  "rules": [
+    "A review candidate never grants or extends the Protected by Shine Defence badge.",
+    "At most one pending_review candidate may exist per app.",
+    "Every policy id must exist in the canonical Defence registry.",
+    "An accepted candidate must exactly match that app's canonical reviewed ledger entry and certification receipt.",
+    "A pending candidate must differ from the app's currently reviewed release/profile identity.",
+    "Superseded and dismissed candidates remain historical evidence rather than being deleted.",
+    "Evidence must contain bounded non-secret references; credentials, bearer tokens and private keys are forbidden."
+  ],
+  "nonClaims": [
+    "Candidate status is not certification.",
+    "Build success alone is not a security review.",
+    "A dismissed or superseded candidate does not imply the release is unsafe."
+  ]
+}
