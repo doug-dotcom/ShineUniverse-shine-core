@@ -32,8 +32,8 @@ for(const c of queue.candidates||[]){
   if(!ID.test(c.candidateId||'')||candidates.has(c.candidateId))failures.push((c.candidateId||'<missing>')+': invalid or duplicate candidate id');
   else candidates.set(c.candidateId,c);
   const app=apps.get(c.appId);
-  if(!app){failures.push(c.candidateId+': app not in reviewed ecosystem ledger');continue}
   if(!REPO.test(c.repository||'')||!validPath(c.profilePath))failures.push(c.candidateId+': invalid repository/profile path');
+  if(c.status==='accepted'&&!app)failures.push(c.candidateId+': accepted candidate app not in reviewed ecosystem ledger');
   if(!SHA.test(c.releaseCommitSha||'')||!SHA.test(c.profileBlobSha||''))failures.push(c.candidateId+': invalid release/profile SHA');
   if(!SEMVER.test(c.profileVersion||''))failures.push(c.candidateId+': invalid profile version');
   if(!statuses.has(c.status))failures.push(c.candidateId+': invalid status');
@@ -45,10 +45,11 @@ for(const c of queue.candidates||[]){
     if(!cleanText(e.source,64)||!cleanText(e.kind,64)||!cleanText(e.reference,256)||!cleanText(e.summary,500))failures.push(c.candidateId+': invalid or secret-like evidence '+i);
     if(!ISO.test(e.checkedAt||'')||!Number.isFinite(Date.parse(e.checkedAt)))failures.push(c.candidateId+': invalid evidence checkedAt '+i);
   }
+  if(app&&(c.repository!==app.repo||c.profilePath!==app.path))failures.push(c.candidateId+': repository/profile path mismatch for reviewed app');
   if(c.status==='pending_review'){
     if(pending.has(c.appId))failures.push(c.candidateId+': multiple pending candidates for '+c.appId);
     pending.set(c.appId,c.candidateId);
-    if(matchesCurrent(c,app))failures.push(c.candidateId+': pending candidate is already the reviewed release');
+    if(app&&matchesCurrent(c,app))failures.push(c.candidateId+': pending candidate is already the reviewed release');
   }
   if(c.status==='superseded'){
     if(!ID.test(c.supersededByCandidateId||''))failures.push(c.candidateId+': superseded candidate missing successor');
