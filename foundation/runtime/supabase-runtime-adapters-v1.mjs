@@ -6,15 +6,19 @@ export async function sha256Hex(value){
   return [...new Uint8Array(digest)].map(b=>b.toString(16).padStart(2,'0')).join('');
 }
 
-const decodeIssuer=jwt=>{
+function decodeJwtPayload(jwt){
   try{
-    const part=jwt.split('.')[1];
+    const part=String(jwt||'').split('.')[1];
     if(!part) return null;
     const normalized=part.replace(/-/g,'+').replace(/_/g,'/');
     const padded=normalized+'='.repeat((4-normalized.length%4)%4);
-    return JSON.parse(atob(padded))?.iss??null;
-  }catch{return null}
-};
+    const binary=atob(padded);
+    const bytes=Uint8Array.from(binary,c=>c.charCodeAt(0));
+    return JSON.parse(new TextDecoder().decode(bytes));
+  }catch{
+    return null;
+  }
+}
 
 const toIso=v=>v==null?undefined:(v instanceof Date?v.toISOString():String(v));
 
@@ -50,18 +54,10 @@ const sameAudit=(row,event)=>{
     eq(row.grant_id,event.grantId);
 };
 
-/** @param {{sql:any, authClient:any, defenceGate:any, localAuthUrl?:string, fetchFn?:typeof fetch}} [options] */
-export function createSupabaseRuntimeAdapters({
-  sql,
-  authClient,
-  defenceGate,
-  localAuthUrl,
-  fetchFn=fetch
-}={}){
+export function createSupabaseRuntimeAdapters({sql,defenceGate,fetchImpl=fetch}={}){
   if(typeof sql!=='function') throw new TypeError('sql must be a Postgres.js-compatible tag');
-  if(typeof authClient?.auth?.getClaims!=='function') throw new TypeError('authClient.auth.getClaims is required');
   if(typeof defenceGate!=='function') throw new TypeError('defenceGate is required');
-  if(typeof fetchFn!=='function') throw new TypeError('fetchFn is required');
+  if(typeof fetchImpl!=='function') throw new TypeError('fetchImpl is required');
 
   return {
     async verifyAppCaller({authContext,claimedAppId}={}){
@@ -80,53 +76,39 @@ export function createSupabaseRuntimeAdapters({
 
     async verifyIdentity({authContext}={}){
       const jwt=authContext?.jwt;
-      if(!jwt) return null;
+      const untrusted=decodeJwtPayload(jwt);
+      if(!jwt||!untrusted?.iss) return null;
 
-      const tokenIssuer=decodeIssuer(jwt);
-      const localIssuer=localAuthUrl?localAuthUrl.replace(/\/$/,'')+'/auth/v1':null;
+      const providers=await sql`
+        select provider_id, project_url, publishable_key
+        from foundation.identity_providers
+        where issuer=${String(untrusted.iss)}
+          and status='active'
+        limit 1
+      `;
+      const provider=first(providers);
+      if(!provider) return null;
 
-      let provider='supabase-auth';
-      let subject=null;
-      let sessionId;
+      const verification=await fetchImpl(String(provider.project_url).replace(/\/$/,'')+'/auth/v1/user',{
+        method:'GET',
+        headers:{
+          apikey:String(provider.publishable_key),
+          Authorization:'Bearer '+jwt
+        },
+        signal:AbortSignal.timeout(10000)
+      });
+      if(!verification.ok) return null;
 
-      if(!tokenIssuer||!localIssuer||tokenIssuer===localIssuer){
-        const {data,error}=await authClient.auth.getClaims(jwt);
-        const claims=data?.claims;
-        if(error||!claims?.sub) return null;
-        subject=String(claims.sub);
-        if(claims.session_id) sessionId=String(claims.session_id);
-      }else{
-        const issuers=await sql`
-          select issuer_id, issuer_url, api_url, publishable_key
-          from foundation.trusted_auth_issuers
-          where issuer_url=${tokenIssuer}
-            and status='active'
-          limit 1
-        `;
-        const issuer=first(issuers);
-        if(!issuer) return null;
-
-        const response=await fetchFn(String(issuer.api_url).replace(/\/$/,'')+'/auth/v1/user',{
-          headers:{
-            apikey:String(issuer.publishable_key),
-            Authorization:'Bearer '+jwt
-          },
-          signal:AbortSignal.timeout(15000)
-        });
-        if(!response.ok) return null;
-
-        const user=await response.json();
-        if(!user?.id) return null;
-        provider=String(issuer.issuer_id);
-        subject=String(user.id);
-      }
+      let user;
+      try{ user=await verification.json(); }catch{ return null; }
+      if(!user?.id) return null;
 
       const rows=await sql`
         select b.shine_id::text as shine_id
         from foundation.identity_bindings b
         join foundation.shine_identities i on i.shine_id=b.shine_id
-        where b.provider=${provider}
-          and b.provider_subject=${subject}
+        where b.provider=${String(provider.provider_id)}
+          and b.provider_subject=${String(user.id)}
           and b.verified_at is not null
           and i.account_state='active'
         limit 1
@@ -134,9 +116,9 @@ export function createSupabaseRuntimeAdapters({
       const row=first(rows);
       return row?{
         shineId:String(row.shine_id),
-        authSubject:subject,
-        authProvider:provider,
-        ...(sessionId?{sessionId}:{})
+        authSubject:String(user.id),
+        providerId:String(provider.provider_id),
+        ...(untrusted.session_id?{sessionId:String(untrusted.session_id)}:{})
       }:null;
     },
 
@@ -186,7 +168,7 @@ export function createSupabaseRuntimeAdapters({
           grant_id, occurred_at, defence_evidence_ref, request_context
         ) values (
           ${event.eventId}::uuid, ${event.requestId}::uuid, ${event.appId},
-          ${event.shineId}::uuid, ${event.scope}, ${event.purpose},
+          ${event.shineId??null}::uuid, ${event.scope}, ${event.purpose},
           ${event.resourceId??null}::uuid, ${event.resourceCategory??null},
           ${event.decision}, ${event.reasonCode}, ${event.grantId??null}::uuid,
           ${event.occurredAt}::timestamptz, ${event.defenceEvidenceRef??null},
