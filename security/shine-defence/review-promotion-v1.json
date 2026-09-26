@@ -1,23 +1,27 @@
 {
   "contract": "shine-defence/review-promotion-v1",
-  "version": "1.0.0",
-  "purpose": "Fail-closed integrity contract for promoting a reviewed release across candidate status, canonical reviewed ledger, certification receipt and independent review decision.",
-  "managedAppRule": "An app becomes promotion-managed once it has any record in review-candidates-v1. Legacy reviewed apps with no candidate history remain valid until their first candidate is created.",
+  "version": "1.1.0",
+  "purpose": "Fail-closed integrity contract for candidate-managed Shine Defence review state across pre-certification staging and reviewed-release promotion.",
+  "managedAppRule": "An app becomes candidate-managed once it has any record in review-candidates-v1. Before first certification it may remain pending-only outside the reviewed ledger; after acceptance it must have a coherent reviewed ledger, receipt and accepted decision.",
+  "preCertificationState": [
+    "An app absent from the reviewed ledger must have no accepted candidate, accepted review decision or certification receipt.",
+    "Pending, dismissed and superseded candidate history may exist before first certification.",
+    "A pre-certification pending candidate never grants a badge."
+  ],
   "requiredPromotionState": [
-    "Exactly one accepted candidate for the app must match the app's current canonical reviewed-ledger identity.",
+    "Exactly one accepted candidate for a reviewed candidate-managed app must match the app's current canonical reviewed-ledger identity.",
     "That accepted candidate must have exactly one accepted review-decision record.",
     "The app's current certification receipt must exactly match the accepted candidate and canonical reviewed-ledger identity.",
-    "No other accepted candidate for the app may point at a different reviewed identity.",
     "A pending candidate may not already equal the app's current reviewed identity."
   ],
   "atomicity": [
-    "Candidate status, canonical reviewed ledger, certification receipt and review decision are treated as one promotion unit by CI.",
-    "A partial promotion is invalid even when each changed file is individually well-formed.",
+    "First certification and later promotion both treat candidate state, canonical reviewed ledger, certification receipt and review decision as one CI-verified unit.",
+    "A partial certification or promotion is invalid even when each changed file is individually well-formed.",
     "Repository merge atomicity is supplied by the reviewed pull-request commit; this contract verifies the resulting repository state, not a distributed transaction."
   ],
   "nonClaims": [
     "This contract does not make the review-decision ledger a badge authority.",
     "Certification authority remains the canonical reviewed ledger plus exact certification receipt, subject to current revocation state.",
-    "Legacy apps without review-candidate history are not retroactively required to manufacture candidate records."
+    "Pre-certification candidate history is not certification."
   ]
 }
