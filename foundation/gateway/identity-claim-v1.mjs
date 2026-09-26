@@ -39,6 +39,13 @@ export function createIdentityClaimService({
   return async function handleIdentityClaim({envelope,authContext}={}){
     if(!valid(envelope)) return response(envelope,'invalid','invalid-identity-claim-request');
 
+    const requestedAt=Date.parse(envelope.requestedAt);
+    const now=Date.parse(clock());
+    if(!Number.isFinite(requestedAt)||!Number.isFinite(now)||
+       requestedAt<now-10*60*1000||requestedAt>now+5*60*1000){
+      return response(envelope,'invalid','stale-identity-claim-request');
+    }
+
     let verifiedApp;
     try{
       verifiedApp=await adapters.verifyAppCaller({
@@ -119,6 +126,7 @@ export function createIdentityClaimService({
         sourceProviderId:source.providerId,
         sourceSubject:source.authSubject,
         targetProviderId:target.providerId,
+        targetSubject:target.authSubject,
         targetShineId:target.shineId,
         occurredAt:clock()
       });
