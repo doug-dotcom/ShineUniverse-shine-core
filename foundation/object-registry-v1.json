@@ -1,0 +1,27 @@
+{
+  "registry": "shine-foundation/object-registry-v1",
+  "version": "1.0.0",
+  "foundationContract": "shine-foundation/foundation-v1",
+  "repository": "doug-dotcom/ShineUniverse-shine-core",
+  "entries": [
+    {
+      "id": "app-manifest",
+      "path": "foundation/schemas/app-manifest-v1.schema.json",
+      "version": "1.0.0",
+      "blobSha": "4d3fb65cc2d677fdef437914a9a23e6dec369b28"
+    },
+    {
+      "id": "shine-identity",
+      "path": "foundation/schemas/shine-identity-v1.schema.json",
+      "version": "1.0.0",
+      "blobSha": "cc90e6f7cb92a86941ccdb48c161abc38c4ceab8"
+    },
+    {
+      "id": "vault-resource",
+      "path": "foundation/schemas/vault-resource-v1.schema.json",
+      "version": "1.0.0",
+      "blobSha": "3f9e9972320da2f8403ff5f718c2f4d37865f52c"
+    }
+  ],
+  "rule": "A registered schema may only change through an explicit version/registry update; consumers should pin the schema version they implement."
+}
