@@ -17,6 +17,19 @@ const request={
   resourceCategory:'profile.location'
 };
 
+const appManifest={
+  appId:'shine.travel',
+  foundation:{
+    requestedScopes:[
+      {
+        scope:'vault.location.read',
+        purpose:'travel.home-airport',
+        resourceCategory:'profile.location'
+      }
+    ]
+  }
+};
+
 const resource={
   resourceId,
   ownerShineId:shineId,
@@ -36,9 +49,10 @@ const grant={
 };
 
 const now='2026-09-26T06:00:00Z';
+const base={request,verifiedShineId:shineId,appManifest,resource,grants:[grant],now};
 
 test('allows an exact active grant match',()=>{
-  assert.deepEqual(evaluateAccess({request,resource,grants:[grant],now}),{
+  assert.deepEqual(evaluateAccess(base),{
     requestId,
     decision:'allow',
     reasonCode:'grant-match',
@@ -46,59 +60,94 @@ test('allows an exact active grant match',()=>{
   });
 });
 
+test('denies an unverified identity',()=>{
+  const result=evaluateAccess({...base,verifiedShineId:undefined});
+  assert.equal(result.reasonCode,'identity-unverified');
+});
+
+test('denies an identity mismatch',()=>{
+  const result=evaluateAccess({...base,verifiedShineId:'77777777-7777-4777-8777-777777777777'});
+  assert.equal(result.reasonCode,'identity-mismatch');
+});
+
+test('denies an unregistered app',()=>{
+  const result=evaluateAccess({...base,appManifest:null});
+  assert.equal(result.reasonCode,'app-unregistered');
+});
+
+test('denies a scope not declared by the app manifest',()=>{
+  const changedRequest={...request,scope:'vault.location.write'};
+  const changedGrant={...grant,scope:'vault.location.write'};
+  const result=evaluateAccess({...base,request:changedRequest,grants:[changedGrant]});
+  assert.equal(result.reasonCode,'scope-not-declared');
+});
+
 test('denies when the app has no matching grant',()=>{
-  const result=evaluateAccess({request,resource,grants:[{...grant,appId:'shine.dive'}],now});
+  const result=evaluateAccess({...base,grants:[{...grant,appId:'shine.dive'}]});
   assert.equal(result.decision,'deny');
   assert.equal(result.reasonCode,'no-matching-grant');
 });
 
-test('denies a scope escalation',()=>{
-  const result=evaluateAccess({request:{...request,scope:'vault.location.write'},resource,grants:[grant],now});
+test('denies a scope escalation even when the manifest declares it if the grant does not',()=>{
+  const changedRequest={...request,scope:'vault.location.write'};
+  const expandedManifest={
+    ...appManifest,
+    foundation:{requestedScopes:[
+      ...appManifest.foundation.requestedScopes,
+      {scope:'vault.location.write',purpose:'travel.home-airport',resourceCategory:'profile.location'}
+    ]}
+  };
+  const result=evaluateAccess({...base,request:changedRequest,appManifest:expandedManifest});
   assert.equal(result.reasonCode,'scope-mismatch');
 });
 
 test('denies a purpose change',()=>{
-  const result=evaluateAccess({request:{...request,purpose:'advertising.targeting'},resource,grants:[grant],now});
+  const changedRequest={...request,purpose:'travel.marketing'};
+  const expandedManifest={
+    ...appManifest,
+    foundation:{requestedScopes:[
+      ...appManifest.foundation.requestedScopes,
+      {scope:'vault.location.read',purpose:'travel.marketing',resourceCategory:'profile.location'}
+    ]}
+  };
+  const result=evaluateAccess({...base,request:changedRequest,appManifest:expandedManifest});
   assert.equal(result.reasonCode,'purpose-mismatch');
 });
 
 test('denies a different resource',()=>{
   const result=evaluateAccess({
+    ...base,
     request:{...request,resourceId:'55555555-5555-4555-8555-555555555555'},
-    resource:{...resource,resourceId:'55555555-5555-4555-8555-555555555555'},
-    grants:[grant],
-    now
+    resource:{...resource,resourceId:'55555555-5555-4555-8555-555555555555'}
   });
   assert.equal(result.reasonCode,'resource-mismatch');
 });
 
 test('denies a revoked grant',()=>{
-  const result=evaluateAccess({request,resource,grants:[{...grant,status:'revoked',revokedAt:'2026-09-20T00:00:00Z'}],now});
+  const result=evaluateAccess({...base,grants:[{...grant,status:'revoked',revokedAt:'2026-09-20T00:00:00Z'}]});
   assert.equal(result.reasonCode,'grant-revoked');
 });
 
 test('denies an expired grant',()=>{
-  const result=evaluateAccess({request,resource,grants:[{...grant,expiresAt:'2026-09-25T00:00:00Z'}],now});
+  const result=evaluateAccess({...base,grants:[{...grant,expiresAt:'2026-09-25T00:00:00Z'}]});
   assert.equal(result.reasonCode,'grant-expired');
 });
 
 test('denies a resource owned by another Shine identity',()=>{
   const result=evaluateAccess({
-    request,
-    resource:{...resource,ownerShineId:'66666666-6666-4666-8666-666666666666'},
-    grants:[grant],
-    now
+    ...base,
+    resource:{...resource,ownerShineId:'66666666-6666-4666-8666-666666666666'}
   });
   assert.equal(result.reasonCode,'resource-owner-mismatch');
 });
 
 test('Shine Defence can veto an otherwise valid grant',()=>{
-  const result=evaluateAccess({request,resource,grants:[grant],now,defenceDecision:'deny'});
+  const result=evaluateAccess({...base,defenceDecision:'deny'});
   assert.equal(result.reasonCode,'defence-denied');
 });
 
 test('Foundation denial does not define app standalone behaviour',()=>{
-  const result=evaluateAccess({request,resource,grants:[],now});
+  const result=evaluateAccess({...base,grants:[]});
   assert.equal(result.decision,'deny');
   assert.equal(Object.hasOwn(result,'disableApp'),false);
 });
