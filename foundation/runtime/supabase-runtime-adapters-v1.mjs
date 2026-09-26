@@ -50,6 +50,7 @@ const sameAudit=(row,event)=>{
     eq(row.grant_id,event.grantId);
 };
 
+/** @param {{sql:any, authClient:any, defenceGate:any, localAuthUrl?:string, fetchFn?:typeof fetch}} [options] */
 export function createSupabaseRuntimeAdapters({
   sql,
   authClient,
