@@ -65,4 +65,8 @@ Receipts are verified in Core CI against the ecosystem ledger and the **immutabl
 
 `security/shine-defence/certification-revocation-v1.json` defines the append-only kill-switch for an exact reviewed release. Active records live in `security/shine-defence/revocations-v1.json`. Revocation removes the **current** badge claim but does not delete the historical certification receipt; restoring a badge requires a new reviewed release and receipt.
 
+### App/deployment status
+
+`security/shine-defence/release-status-v1.json` defines the portable consumer-side status model. `evaluate-release-status-v1.mjs` combines a release receipt, the current app commit/profile identity, the receipt's immutable registry snapshot and the current revocation ledger into one display-safe state. Only `reviewed_release` may show the current **Protected by Shine Defence** badge.
+
 An extension policy existing in Core does **not** automatically certify an app. Each app still needs local, testable evidence before claiming that profile.
