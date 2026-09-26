@@ -1,6 +1,6 @@
 {
   "contract": "shine-defence/review-candidate-v1",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "purpose": "Non-authoritative evidence bundle for an exact application release requesting Shine Defence review.",
   "statuses": [
     {
@@ -9,7 +9,7 @@
     },
     {
       "id": "accepted",
-      "meaning": "The candidate was promoted into the canonical reviewed ledger and certification receipt."
+      "meaning": "The candidate passed review and was promoted at that point in history. Accepted is a historical final outcome, not a claim that the release is still current."
     },
     {
       "id": "superseded",
@@ -44,15 +44,18 @@
     "A review candidate never grants or extends the Protected by Shine Defence badge.",
     "At most one pending_review candidate may exist per app.",
     "Every policy id must exist in the canonical Defence registry.",
-    "An accepted candidate must exactly match that app's canonical reviewed ledger entry and certification receipt.",
+    "Accepted is an immutable historical review outcome; an app may accumulate multiple accepted candidates across successive reviewed releases.",
+    "Exactly one accepted candidate for a promotion-managed app must match the current canonical reviewed ledger and receipt; review-promotion-v1 verifies that current binding.",
     "A pending candidate must differ from the app's currently reviewed release/profile identity.",
     "Every accepted, superseded or dismissed candidate must have exactly one matching record in review-decisions-v1.",
     "A pending_review candidate must not have a review decision record.",
+    "Superseded means replaced before review completed; a previously accepted candidate remains accepted when a later release is certified.",
     "Superseded and dismissed candidates remain historical evidence rather than being deleted.",
     "Evidence must contain bounded non-secret references; credentials, bearer tokens and private keys are forbidden."
   ],
   "nonClaims": [
     "Candidate status is not certification.",
+    "Historical accepted status is not a current badge claim.",
     "Build success alone is not a security review.",
     "A dismissed or superseded candidate does not imply the release is unsafe."
   ]
