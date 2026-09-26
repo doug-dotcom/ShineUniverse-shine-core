@@ -54,6 +54,7 @@ const sameAudit=(row,event)=>{
     eq(row.grant_id,event.grantId);
 };
 
+/** @param {{sql:any, defenceGate:any, fetchImpl?:typeof fetch}} [options] */
 export function createSupabaseRuntimeAdapters({sql,defenceGate,fetchImpl=fetch}={}){
   if(typeof sql!=='function') throw new TypeError('sql must be a Postgres.js-compatible tag');
   if(typeof defenceGate!=='function') throw new TypeError('defenceGate is required');
