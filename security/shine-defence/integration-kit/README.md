@@ -38,3 +38,7 @@ A passing security script is necessary but not sufficient. The badge applies to 
 - no declared release-blocking security control is known to be failing.
 
 The badge is a release claim, not a claim that software is invulnerable.
+
+## Canonical registry verification
+
+Certifier v1.1.0 exports `verifyCanonicalPins`. Apps can vendor the canonical registry snapshot and verify that every locally declared policy version/blob pair matches a reviewed Core registry entry before awarding a Defence profile. This supplements, rather than replaces, each app's implementation-specific evidence checks.
