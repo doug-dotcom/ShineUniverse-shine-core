@@ -1,0 +1,35 @@
+{
+  "contract": "shine-defence/certification-revocation-v1",
+  "version": "1.0.0",
+  "purpose": "Append-only withdrawal rules for a current Shine Defence badge on an exact previously reviewed release.",
+  "requiredFields": [
+    "revocationId",
+    "appId",
+    "reviewCommitSha",
+    "profileBlobSha",
+    "revokedAt",
+    "reasonCode",
+    "publicReason"
+  ],
+  "optionalFields": [
+    "replacementReviewCommitSha"
+  ],
+  "reasonCodes": [
+    "critical_defect",
+    "credential_exposure",
+    "policy_breach",
+    "supply_chain",
+    "other"
+  ],
+  "rules": [
+    "A revocation may target only an exact app commit/profile pair already present in the reviewed ecosystem ledger.",
+    "Revocation records are append-only historical facts and are not deleted when a replacement release is certified.",
+    "A revoked release cannot make a current Protected by Shine Defence claim.",
+    "Restoring a current badge requires a new reviewed release and new certification receipt; it does not erase the revocation.",
+    "Public reasons must be concise and must not contain secrets, credentials or exploit instructions."
+  ],
+  "nonClaims": [
+    "Revocation does not claim that every version of an application is unsafe.",
+    "Revocation is not a substitute for incident response, patching or user notification when those are required."
+  ]
+}

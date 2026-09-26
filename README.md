@@ -51,7 +51,7 @@ Reusable Defence policies live under `security/shine-defence/policies/`. They de
 
 ### Release-claim freshness
 
-`security/shine-defence/release-claim-v1.json` defines whether a specific app revision may make the **current** Protected by Shine Defence claim. Only an exact reviewed commit with the exact reviewed Defence-profile blob is `reviewed_release`; later commits are `unreviewed_revision`, changed profiles on the reviewed commit are `profile_drift`, and apps absent from the ledger are `uncertified`.
+`security/shine-defence/release-claim-v1.json` defines whether a specific app revision may make the **current** Protected by Shine Defence claim. A matching active revocation is `revoked_release` and overrides reviewed status. Otherwise only an exact reviewed commit with the exact reviewed Defence-profile blob is `reviewed_release`; later commits are `unreviewed_revision`, changed profiles on the reviewed commit are `profile_drift`, and apps absent from the ledger are `uncertified`.
 
 The deterministic assessor lives at `security/shine-defence/integration-kit/assess-release-claim-v1.mjs`.
 
@@ -60,5 +60,9 @@ The deterministic assessor lives at `security/shine-defence/integration-kit/asse
 `security/shine-defence/certification-receipt-v1.json` defines the portable proof carried by a reviewed release. Core stores one receipt per reviewed app under `security/shine-defence/receipts/`; each receipt binds the app id/repository, exact reviewed commit, exact Defence-profile blob/version, canonical policy ids, canonical registry identity and release-claim contract identity.
 
 Receipts are verified in Core CI against the ecosystem ledger and the **immutable registry snapshot named by the receipt's registry blob SHA**. Snapshots live under `security/shine-defence/registry-snapshots/`, so later additions to the live registry do not invalidate historical receipts.
+
+### Revocation
+
+`security/shine-defence/certification-revocation-v1.json` defines the append-only kill-switch for an exact reviewed release. Active records live in `security/shine-defence/revocations-v1.json`. Revocation removes the **current** badge claim but does not delete the historical certification receipt; restoring a badge requires a new reviewed release and receipt.
 
 An extension policy existing in Core does **not** automatically certify an app. Each app still needs local, testable evidence before claiming that profile.

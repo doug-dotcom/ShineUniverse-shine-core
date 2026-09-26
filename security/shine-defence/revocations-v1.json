@@ -1,0 +1,6 @@
+{
+  "ledger": "shine-defence/revocations-v1",
+  "version": "1.0.0",
+  "meaning": "Append-only withdrawal records for exact reviewed Shine Defence releases. Empty means no reviewed release is currently revoked.",
+  "revocations": []
+}

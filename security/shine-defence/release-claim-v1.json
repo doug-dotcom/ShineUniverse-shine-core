@@ -1,18 +1,24 @@
 {
   "contract": "shine-defence/release-claim-v1",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "purpose": "Machine-readable rules for deciding whether a specific application revision may make a current Shine Defence badge claim.",
   "inputs": [
     "application id",
     "release commit SHA",
     "release Defence-profile Git blob SHA",
-    "ecosystem profile ledger"
+    "ecosystem profile ledger",
+    "revocation ledger"
   ],
   "states": [
     {
+      "id": "revoked_release",
+      "badgeCurrent": false,
+      "rule": "The exact reviewed release has an active revocation entry. Revocation overrides reviewed status without deleting the historical certification receipt."
+    },
+    {
       "id": "reviewed_release",
       "badgeCurrent": true,
-      "rule": "Release commit SHA and Defence-profile blob SHA exactly match the reviewed ledger entry."
+      "rule": "Release commit SHA and Defence-profile blob SHA exactly match the reviewed ledger entry and no revocation applies."
     },
     {
       "id": "profile_drift",
@@ -30,9 +36,17 @@
       "rule": "Application is not present in the reviewed ecosystem ledger."
     }
   ],
-  "badgeRule": "Only reviewed_release may present Protected by Shine Defence as a current release claim. Other states may disclose the last reviewed commit but must not imply that a later or changed revision inherited certification.",
+  "precedence": [
+    "revoked_release",
+    "reviewed_release",
+    "profile_drift",
+    "unreviewed_revision",
+    "uncertified"
+  ],
+  "badgeRule": "Only reviewed_release may present Protected by Shine Defence as a current release claim. Revoked releases retain their historical receipt but must not present the badge as current.",
   "nonClaims": [
     "A reviewed release is not claimed to be invulnerable.",
+    "A revoked release does not imply every version of the application is unsafe.",
     "A later commit is not unsafe merely because it is unreviewed.",
     "This contract does not replace app-specific Defence tests or normal release verification."
   ]
