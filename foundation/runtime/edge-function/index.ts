@@ -44,10 +44,12 @@ const handler=createFoundationHttpHandler({
   authenticate:async(request:Request)=>{
     const authorization=request.headers.get('authorization')??'';
     const appToken=request.headers.get('x-shine-app-token')??'';
-    if(!authorization.startsWith('Bearer ')||!appToken){
+    const userToken=request.headers.get('x-shine-user-token')??'';
+    const jwt=authorization.startsWith('Bearer ')?authorization.slice('Bearer '.length):'';
+    if(!appToken||(!jwt&&!userToken)){
       throw new Error('missing runtime credentials');
     }
-    return {jwt:authorization.slice('Bearer '.length),appToken};
+    return {appToken,...(jwt?{jwt}:{}),...(userToken?{userToken}:{})};
   }
 });
 
