@@ -1,6 +1,6 @@
 # Foundation Layer 11 — Second appendage: Shine Dive
 
-**Status:** Foundation live; Dive production bridge deploying  
+**Status:** Live bridge deployed; first vault-authenticated ALLOW not yet observed  
 **Date:** 2026-09-26  
 **Pilot app:** Shine Dive
 
@@ -93,4 +93,20 @@ Standalone Dive logbook, planning, backup and recovery remain independent of Fou
 
 Foundation and the Dive identity/grant registration are live.
 
-At the time this layer was first recorded, Railway was serialising several Dive branch deployments. No production `dive.foundation-pilot` ALLOW had yet been observed, so this layer does not claim the real-user handshake until the final Dive build reaches production and a vault-authenticated browser opens the online companion.
+The final Dive Foundation revision is live on Railway. The dedicated pilot test revision completed **604/604 tests**, the production image passed `/healthz`, and the final production container started cleanly. No production `dive.foundation-pilot` ALLOW has yet been observed, so this layer does not claim the real-user handshake until a vault-authenticated browser opens the online companion.
+
+
+## Production acceptance
+
+Final Railway deployment:
+
+- status: **SUCCESS**;
+- Foundation bridge tests included in the production suite;
+- test revision: **604 / 604 PASS**;
+- Railway healthcheck: **PASS**;
+- production process: **Shine Dive listening on 8080**;
+- visible Foundation state: deployed in the existing Saved Privately Online panel.
+
+Hosted Foundation remains at **grant-ready** for `shine.dive` because the live audit ledger still contains zero `dive.foundation-pilot` ALLOW decisions.
+
+That state will advance automatically to `live-observed` after the first real vault-authenticated browser handshake.
