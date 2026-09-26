@@ -73,3 +73,16 @@ Foundation Layer 3 defines the access path joining Core, ID, Vault and Defence.
 An allow requires a verified Shine ID, a registered app manifest declaring the requested scope/purpose, a matching active grant, a matching owned resource and no Shine Defence veto.
 
 The Layer 3 build record is `layers/layer-003-permission-grant-engine.md`.
+
+
+## Durable Foundation state
+
+Foundation Layer 4 adds a deployment-ready PostgreSQL persistence model at `postgres/persistence-v1.sql`.
+
+The private `foundation` schema stores app registrations, Shine identities, Vault resource metadata, immutable grant issuance, immutable revocations, a monotonic revocation outbox and an append-only allow/deny audit ledger.
+
+Revocation is event-sourced rather than undone by editing a grant. `effective_access_grants` derives the current state from issuance + time window + revocation history.
+
+GitHub CI validates the model against PostgreSQL 17, including RLS, private-role boundaries, active/revoked state derivation, duplicate-revocation rejection, exactly-once outbox emission and append-only history.
+
+The Layer 4 build record is `layers/layer-004-persistence-and-revocation.md`.
