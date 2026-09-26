@@ -33,7 +33,10 @@
     "pilotPurpose": "travel.foundation-pilot",
     "pilotResourceCategory": "foundation.pilot",
     "deploymentStatus": "SUCCESS",
-    "observedProductionAllow": false
+    "observedProductionAllow": false,
+    "visibleConnectionStatus": true,
+    "productionDeployment": "d2320786d69271893648f35adba1489ab8c1e3a7",
+    "productionDeploymentStatus": "SUCCESS"
   },
   "verification": {
     "controlPlaneActive": true,
@@ -42,9 +45,10 @@
     "travelDefenceCertification": "PASS",
     "directHttpHealthTest": false,
     "directHttpHealthTestReason": "assistant shell DNS resolution unavailable",
-    "travelFoundationBuildTests": "510/510 PASS",
+    "travelFoundationBuildTests": "511/511 PASS",
     "canonicalFederationRegistry": "foundation.identity_providers",
-    "duplicateFederationPathRetired": true
+    "duplicateFederationPathRetired": true,
+    "travelContainerStarted": true
   },
   "secrets": {
     "included": false,
