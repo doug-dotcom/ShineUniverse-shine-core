@@ -1,0 +1,167 @@
+{
+  "contract": "shine-foundation/foundation-v1",
+  "version": "1.0.0",
+  "status": "active",
+  "layer": 1,
+  "purpose": "Canonical contract joining Shine Core, Shine ID and Shine Vault while preserving standalone operation of every Shine application.",
+  "universeRole": {
+    "foundationComponents": [
+      "shine-core",
+      "shine-id",
+      "shine-vault"
+    ],
+    "integratedSystems": [
+      "shine-ai",
+      "shine-defence"
+    ],
+    "applicationRelationship": "Shine applications are independent appendages that may connect to Foundation for shared Universe capabilities."
+  },
+  "principles": {
+    "independence": "connected-by-choice-independent-by-design",
+    "denyByDefault": true,
+    "leastPrivilege": true,
+    "explicitConsentForPrivateResources": true,
+    "auditableAccessDecisions": true,
+    "appLocalContinuity": true,
+    "noImplicitUniverseWideDataAccess": true
+  },
+  "modes": [
+    {
+      "id": "standalone",
+      "requirement": "The application performs its primary purpose without Foundation availability."
+    },
+    {
+      "id": "connected",
+      "requirement": "The application may use Shine ID, Core or Vault services without transferring ownership of its primary local function."
+    },
+    {
+      "id": "universe-enhanced",
+      "requirement": "The application may participate in authorised cross-app experiences through Core."
+    }
+  ],
+  "components": {
+    "core": {
+      "id": "shine-core",
+      "responsibilities": [
+        "canonical app registry",
+        "shared service contracts",
+        "permission orchestration",
+        "event and request envelopes",
+        "authorised app-to-app coordination",
+        "Universe service discovery"
+      ],
+      "nonResponsibilities": [
+        "owning app-specific business logic",
+        "silently granting private data access",
+        "becoming mandatory for an app's primary standalone purpose"
+      ]
+    },
+    "id": {
+      "id": "shine-id",
+      "responsibilities": [
+        "canonical Shine subject identifier",
+        "authentication boundary",
+        "session verification",
+        "account-to-app identity mapping",
+        "identity lifecycle"
+      ],
+      "nonResponsibilities": [
+        "storing arbitrary app data",
+        "using user-editable profile metadata as authorisation authority"
+      ]
+    },
+    "vault": {
+      "id": "shine-vault",
+      "responsibilities": [
+        "protected user resource catalogue",
+        "private resource storage references",
+        "per-app grants",
+        "consent state",
+        "revocation state",
+        "access audit trail"
+      ],
+      "nonResponsibilities": [
+        "granting access merely because an app is a Shine app",
+        "exposing an entire user's resource set when only one category is required"
+      ]
+    }
+  },
+  "canonicalObjects": {
+    "app": {
+      "required": [
+        "appId",
+        "name",
+        "primaryPurpose",
+        "supportedModes",
+        "requestedScopes"
+      ],
+      "appIdFormat": "shine.<app-slug>",
+      "notes": "An app declares what it may request; declaration alone never grants access."
+    },
+    "subject": {
+      "required": [
+        "shineId"
+      ],
+      "shineIdFormat": "uuid",
+      "notes": "Authentication-provider identifiers may map to shineId but are not the cross-Universe primary key."
+    },
+    "resource": {
+      "required": [
+        "resourceId",
+        "ownerShineId",
+        "category",
+        "sensitivity"
+      ],
+      "notes": "The resource catalogue describes protected resources without requiring apps to know Vault storage internals."
+    },
+    "permissionRequest": {
+      "required": [
+        "requestId",
+        "appId",
+        "shineId",
+        "scope",
+        "purpose"
+      ],
+      "optional": [
+        "resourceId",
+        "resourceCategory",
+        "expiresAt"
+      ],
+      "notes": "Permission is purpose-bound and scoped to the minimum resource/category necessary."
+    },
+    "accessDecision": {
+      "required": [
+        "requestId",
+        "decision",
+        "reasonCode",
+        "decidedAt"
+      ],
+      "decisionValues": [
+        "allow",
+        "deny"
+      ],
+      "optional": [
+        "grantId",
+        "expiresAt",
+        "defenceEvidence"
+      ],
+      "notes": "Every decision is explicit and auditable."
+    }
+  },
+  "accessDecisionFlow": [
+    "verify-shine-id-session",
+    "verify-requesting-app-registration",
+    "validate-requested-scope",
+    "evaluate-vault-grant-and-consent",
+    "apply-shine-defence-policy-gates",
+    "emit-explicit-access-decision",
+    "record-audit-event"
+  ],
+  "invariants": [
+    "A registered Shine app has zero private Vault access until a matching grant exists.",
+    "Revocation must prevent future authorised reads after revocation takes effect.",
+    "A denied Foundation request must not disable the application's unrelated standalone capability.",
+    "Cross-app data movement must be mediated by Core and constrained by the user's grants.",
+    "Shine AI may propose or coordinate an action but does not override ID, Vault or Defence authorisation."
+  ]
+}
