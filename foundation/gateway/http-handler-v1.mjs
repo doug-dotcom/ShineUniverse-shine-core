@@ -26,6 +26,7 @@ export function createFoundationHttpHandler({gateway,authenticate,defenceStatus,
       if(!defenceStatus)return json(404,{error:'not-found'});
       const releaseSha=url.searchParams.get('releaseSha')??'';
       const profileBlobSha=url.searchParams.get('profileBlobSha')??'';
+      if(!SHA.test(releaseSha)||!SHA.test(profileBlobSha))return json(400,{error:'invalid-defence-status-query'});
       try{
         return json(200,defenceStatus({appId:defenceMatch[1],releaseSha,profileBlobSha}));
       }catch(error){
