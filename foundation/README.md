@@ -57,6 +57,7 @@ An app is never granted access to a user's entire Vault merely because it belong
 - **Layer 10** — app connection registry and onboarding state.
 - **Layer 11** — second appendage: Shine Dive with opaque-session federation.
 - **Layer 12** — reusable appendage onboarding kit and shared backend client.
+- **Layer 13** — third appendage: Shine Ski with opt-in pseudonymous identity.
 
 ## Durable state
 
@@ -138,7 +139,7 @@ Foundation Layer 12 turns Travel and Dive into repeatable onboarding patterns.
 
 `onboarding/connection-spec-v1.mjs` validates and compiles a secret-free app connection spec. `onboarding/foundation-app-client-v1.mjs` is the shared server-side Gateway client for both bearer-JWT and opaque-session appendages.
 
-The golden Travel and Dive specs contain architecture only. They deliberately contain no app secret, user credential, canonical Shine ID, provider subject, credential ID or resource ID.
+The golden Travel, Dive and Ski specs contain architecture only. They deliberately contain no app secret, user credential, canonical Shine ID, provider subject, credential ID or resource ID.
 
 The intended next-app workflow is:
 
@@ -147,3 +148,14 @@ The intended next-app workflow is:
 3. provision live secrets/bindings/grants separately;
 4. use the shared backend client;
 5. let `foundation.app_connection_status` derive the actual connection state.
+
+
+## Shine Ski
+
+Shine Ski is the third Foundation appendage and the first onboarded from the Layer 12 kit.
+
+Its local-first personal data model is preserved. **Connect to Shine** creates only a pseudonymous Secure HttpOnly browser session whose SHA-256 digest is protected by header-bound Supabase RLS. It does not upload favourites, packing, learning progress or GPS activities and does not automatically bind the browser to a canonical Shine ID.
+
+Current connection registry state: **Shine Ski = identity-ready** (1 active credential, 1 approved pseudonymous-session provider, 0 active grants, 0 observed decisions).
+
+See `layers/layer-013-ski-third-appendage.md`.
