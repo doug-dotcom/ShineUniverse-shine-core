@@ -42,3 +42,9 @@ The badge is a release claim, not a claim that software is invulnerable.
 ## Canonical registry verification
 
 Certifier v1.1.0 exports `verifyCanonicalPins`. Apps can vendor the canonical registry snapshot and verify that every locally declared policy version/blob pair matches a reviewed Core registry entry before awarding a Defence profile. This supplements, rather than replaces, each app's implementation-specific evidence checks.
+
+## Release-status consumer
+
+`consumer-v1.mjs` is the vendorable Node reference for app/deployment status. It verifies the app's certification receipt, exact profile blob and immutable registry snapshot, then delegates state classification to `release-status-v1`.
+
+A consumer may show the current **Protected by Shine Defence** badge only when the build/profile exactly match the receipt **and** the caller supplies `revocationFreshness: 'current'` from a trusted current revocation authority. A vendored/build-time revocation snapshot may safely withhold or show a known revocation, but it cannot by itself authorise a green badge indefinitely.
