@@ -254,9 +254,6 @@ select
     as standalone_primary_purpose_available,
   coalesce(c.active_credentials,0) as active_credentials,
   coalesce(p.active_identity_providers,0) as active_identity_providers,
-  coalesce(cp.active_claim_identity_providers,0) as active_claim_identity_providers,
-  coalesce(ic.successful_identity_claims,0) as successful_identity_claims,
-  ic.last_identity_claim_at,
   coalesce(g.active_grants,0) as active_grants,
   coalesce(a.observed_allows,0) as observed_allows,
   coalesce(a.observed_denies,0) as observed_denies,
@@ -270,7 +267,10 @@ select
     when coalesce(g.active_grants,0)=0 then 'identity-ready'
     when coalesce(a.observed_allows,0)=0 then 'grant-ready'
     else 'live-observed'
-  end as connection_state
+  end as connection_state,
+  coalesce(cp.active_claim_identity_providers,0) as active_claim_identity_providers,
+  coalesce(ic.successful_identity_claims,0) as successful_identity_claims,
+  ic.last_identity_claim_at
 from foundation.app_registry r
 left join credential_counts c on c.app_id=r.app_id
 left join provider_counts p on p.app_id=r.app_id
