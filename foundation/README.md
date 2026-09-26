@@ -27,7 +27,7 @@ The supported operating modes are:
 Foundation uses a deny-by-default, least-privilege flow:
 
 1. Foundation authenticates the **calling Shine app backend**.
-2. Shine ID verifies the **user identity and session**.
+2. Shine ID verifies the **user identity and session** through an identity provider explicitly approved for the requesting app.
 3. Shine Core verifies the app manifest and exact requested scope/purpose.
 4. Shine Vault evaluates the matching protected resource and grant.
 5. Shine Defence may veto the request.
@@ -54,6 +54,7 @@ An app is never granted access to a user's entire Vault merely because it belong
 - **Layer 7** — dedicated hosted Foundation project and live Gateway.
 - **Layer 8** — first appendage connection: Shine Travel.
 - **Layer 9** — public Defence status feed.
+- **Layer 10** — app connection registry and onboarding state.
 
 ## Durable state
 
@@ -97,3 +98,16 @@ The Edge Function uses Supabase's built-in database connection but scopes every 
 Shine Travel is the first connected appendage. It retains its existing Shine-L sign-in and standalone operation while its backend can call Foundation Gateway v2 using a server-only app credential. See `layers/layer-008-travel-first-appendage.md`.
 
 See `layers/layer-007-hosted-foundation.md` and `runtime/hosted-deployment-v1.json` for the hosted deployment record.
+
+
+## App connection registry
+
+Foundation Layer 10 makes appendage onboarding observable and repeatable.
+
+`foundation.app_identity_providers` records which identity issuers each app may use. A provider being trusted by Foundation does not make it valid for every app.
+
+`foundation.app_connection_status` derives the current app state from real evidence:
+
+`registered -> credentialed -> identity-ready -> grant-ready -> live-observed`
+
+No manual "connected" flag is required. The state advances only when the underlying credential, identity-provider link, grants and audited production decisions exist.
