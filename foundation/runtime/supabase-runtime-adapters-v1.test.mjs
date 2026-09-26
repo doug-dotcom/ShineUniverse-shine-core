@@ -54,8 +54,8 @@ const makeSql=()=> {
       return [{request_id:'44444444-4444-4444-8444-444444444444'}];
     }
     if(q.includes('from foundation.access_audit_events')) return [];
-    if(q.includes('foundation.claim_identity_and_issue_grant')){
-      return [{outcome:'linked',binding_created:true,grant_created:true}];
+    if(q.includes('foundation.complete_identity_claim_v1')){
+      return [{outcome:'linked',reason_code:'identity-claim-linked'}];
     }
     throw new Error('unexpected SQL: '+q);
   };
@@ -235,18 +235,17 @@ test('canonical identity proof verifies active auth provider independently of re
   assert.equal(proof.sessionId,'session-2');
 });
 
-test('claim adapter sends only verified identifiers to the database claim function',async()=>{
+test('claim adapter sends only verified identifiers to the audited database claim function',async()=>{
   const {adapters}=makeAdapters();
-  const result=await adapters.claimIdentityAndGrant({
+  const result=await adapters.completeIdentityClaim({
     claimId:'99999999-9999-4999-8999-999999999999',
+    requestId:'88888888-8888-4888-8888-888888888888',
     appId:'shine.ski',
-    providerId:'supabase:ski-session',
-    providerSubject:'d'.repeat(64),
-    shineId,
-    scope:'vault.foundation.pilot.read',
-    purpose:'ski.foundation-pilot',
-    resourceCategory:'foundation.pilot',
-    requestedAt:'2026-09-26T13:00:00Z'
+    sourceProviderId:'supabase:ski-session',
+    sourceProviderSubject:'d'.repeat(64),
+    targetProviderId:'supabase:test',
+    targetShineId:shineId,
+    occurredAt:'2026-09-26T13:00:00Z'
   });
-  assert.deepEqual(result,{outcome:'linked',bindingCreated:true,grantCreated:true});
+  assert.deepEqual(result,{outcome:'linked',reasonCode:'identity-claim-linked'});
 });
