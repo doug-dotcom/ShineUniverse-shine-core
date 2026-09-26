@@ -1,0 +1,23 @@
+{
+  "contract": "shine-defence/review-promotion-v1",
+  "version": "1.0.0",
+  "purpose": "Fail-closed integrity contract for promoting a reviewed release across candidate status, canonical reviewed ledger, certification receipt and independent review decision.",
+  "managedAppRule": "An app becomes promotion-managed once it has any record in review-candidates-v1. Legacy reviewed apps with no candidate history remain valid until their first candidate is created.",
+  "requiredPromotionState": [
+    "Exactly one accepted candidate for the app must match the app's current canonical reviewed-ledger identity.",
+    "That accepted candidate must have exactly one accepted review-decision record.",
+    "The app's current certification receipt must exactly match the accepted candidate and canonical reviewed-ledger identity.",
+    "No other accepted candidate for the app may point at a different reviewed identity.",
+    "A pending candidate may not already equal the app's current reviewed identity."
+  ],
+  "atomicity": [
+    "Candidate status, canonical reviewed ledger, certification receipt and review decision are treated as one promotion unit by CI.",
+    "A partial promotion is invalid even when each changed file is individually well-formed.",
+    "Repository merge atomicity is supplied by the reviewed pull-request commit; this contract verifies the resulting repository state, not a distributed transaction."
+  ],
+  "nonClaims": [
+    "This contract does not make the review-decision ledger a badge authority.",
+    "Certification authority remains the canonical reviewed ledger plus exact certification receipt, subject to current revocation state.",
+    "Legacy apps without review-candidate history are not retroactively required to manufacture candidate records."
+  ]
+}
