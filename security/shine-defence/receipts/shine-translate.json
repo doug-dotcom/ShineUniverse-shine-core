@@ -1,0 +1,20 @@
+{
+  "receipt": "shine-defence/certification-receipt-v1",
+  "version": "1.0.0",
+  "appId": "shine-translate",
+  "repository": "doug-dotcom/shine-translate",
+  "reviewCommitSha": "1ac47373c4ba049cd24a7d2ea6c438e0b1baf5fa",
+  "profilePath": "security/shine-defence/profile.json",
+  "profileBlobSha": "8232d46308e27fc64c17e0b42e199bd556263597",
+  "profileVersion": "1.2.0",
+  "policies": [
+    "baseline",
+    "certifier",
+    "untrusted-content",
+    "external-data-provenance"
+  ],
+  "registryVersion": "1.0.0",
+  "registryBlobSha": "6c38e85b5c52cf398267cc6f22c6467ecfe37f06",
+  "releaseClaimContractVersion": "1.0.0",
+  "releaseClaimContractBlobSha": "b6ad32414a6bba5db77d277addf935e6f993bc55"
+}

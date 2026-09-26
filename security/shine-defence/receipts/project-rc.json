@@ -1,0 +1,17 @@
+{
+  "receipt": "shine-defence/certification-receipt-v1",
+  "version": "1.0.0",
+  "appId": "project-rc",
+  "repository": "doug-dotcom/Project-RC",
+  "reviewCommitSha": "a2d19d002ea7fa588146cd51be6e9b3fa9a0a8f0",
+  "profilePath": "security/shine-defence/profile.json",
+  "profileBlobSha": "0d0b222c823d33cabde9df2dd57651a27055d92a",
+  "profileVersion": "1.1.0",
+  "policies": [
+    "sensitive-memory-governance"
+  ],
+  "registryVersion": "1.0.0",
+  "registryBlobSha": "6c38e85b5c52cf398267cc6f22c6467ecfe37f06",
+  "releaseClaimContractVersion": "1.0.0",
+  "releaseClaimContractBlobSha": "b6ad32414a6bba5db77d277addf935e6f993bc55"
+}

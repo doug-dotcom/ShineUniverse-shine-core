@@ -1,0 +1,17 @@
+{
+  "receipt": "shine-defence/certification-receipt-v1",
+  "version": "1.0.0",
+  "appId": "punt-49",
+  "repository": "doug-dotcom/Punt-49",
+  "reviewCommitSha": "193ec97f5369dcfaeeb4c0ed2603ce3bcfe73d72",
+  "profilePath": "security/shine-defence/profile.json",
+  "profileBlobSha": "013f5919b3994da1a5d864fc4da32c33212438b8",
+  "profileVersion": "1.1.0",
+  "policies": [
+    "wagering-trial-integrity"
+  ],
+  "registryVersion": "1.0.0",
+  "registryBlobSha": "6c38e85b5c52cf398267cc6f22c6467ecfe37f06",
+  "releaseClaimContractVersion": "1.0.0",
+  "releaseClaimContractBlobSha": "b6ad32414a6bba5db77d277addf935e6f993bc55"
+}

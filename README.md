@@ -55,4 +55,10 @@ Reusable Defence policies live under `security/shine-defence/policies/`. They de
 
 The deterministic assessor lives at `security/shine-defence/integration-kit/assess-release-claim-v1.mjs`.
 
+### Certification receipts
+
+`security/shine-defence/certification-receipt-v1.json` defines the portable proof carried by a reviewed release. Core stores one receipt per reviewed app under `security/shine-defence/receipts/`; each receipt binds the app id/repository, exact reviewed commit, exact Defence-profile blob/version, canonical policy ids, canonical registry identity and release-claim contract identity.
+
+Receipts are verified in Core CI against the ecosystem ledger and canonical registry. They prove only the exact reviewed release recorded in the receipt.
+
 An extension policy existing in Core does **not** automatically certify an app. Each app still needs local, testable evidence before claiming that profile.
