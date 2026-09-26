@@ -38,7 +38,10 @@
       "enum": [
         "grant-match",
         "malformed-request",
+        "identity-unverified",
         "identity-mismatch",
+        "app-unregistered",
+        "scope-not-declared",
         "resource-owner-mismatch",
         "no-matching-grant",
         "grant-inactive",
