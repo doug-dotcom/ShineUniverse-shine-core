@@ -78,6 +78,54 @@ export function createFoundationAppClient({
       }catch{
         return {connected:false,status:'unavailable',reasonCode:'foundation-unavailable',httpStatus:null};
       }
+    },
+
+    async claimIdentity({userCredential,canonicalJwt}={}){
+      if(userCredentialMode!=='opaque-header') throw new TypeError('identity claim requires opaque-header source identity');
+      if(typeof userCredential!=='string'||userCredential.length<32) throw new TypeError('userCredential is required');
+      if(typeof canonicalJwt!=='string'||!canonicalJwt) throw new TypeError('canonicalJwt is required');
+
+      const envelope={
+        identityClaimRequest:'shine-foundation/identity-claim-request-v1',
+        schemaVersion:'1.0.0',
+        operation:'identity.claim',
+        claimId:crypto.randomUUID(),
+        requestId:crypto.randomUUID(),
+        appId,
+        requestedAt:new Date().toISOString()
+      };
+
+      try{
+        const response=await fetchImpl(base+'/v1/identity/claim',{
+          method:'POST',
+          headers:{
+            'Content-Type':'application/json',
+            'X-Shine-App-Token':appToken,
+            'X-Shine-User-Token':userCredential,
+            Authorization:'Bearer '+canonicalJwt
+          },
+          body:JSON.stringify(envelope),
+          signal:AbortSignal.timeout(timeoutMs)
+        });
+        const result=await boundedJson(response);
+        if(response.ok&&result.status==='linked'){
+          return {
+            connected:true,status:'linked',
+            reasonCode:result.reasonCode??'identity-claim-linked',
+            bindingCreated:Boolean(result.bindingCreated),
+            httpStatus:response.status
+          };
+        }
+        if(response.status===409||result.status==='conflict'){
+          return {connected:true,status:'conflict',reasonCode:result.reasonCode??'identity-claim-conflict',httpStatus:response.status};
+        }
+        if(response.status===403||result.status==='denied'){
+          return {connected:true,status:'denied',reasonCode:result.reasonCode??'identity-claim-rejected',httpStatus:response.status};
+        }
+        return {connected:false,status:'unavailable',reasonCode:result.reasonCode??'foundation-unavailable',httpStatus:response.status};
+      }catch{
+        return {connected:false,status:'unavailable',reasonCode:'foundation-unavailable',httpStatus:null};
+      }
     }
   };
 }
