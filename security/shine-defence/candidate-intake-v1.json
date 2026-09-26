@@ -1,0 +1,35 @@
+{
+  "contract": "shine-defence/candidate-intake-v1",
+  "version": "1.0.0",
+  "purpose": "Fail-closed construction rules for turning one exact Shine application release and its bounded review evidence into a pending_review Defence candidate.",
+  "inputFields": [
+    "appId",
+    "repository",
+    "releaseCommitSha",
+    "profilePath",
+    "profileBlobSha",
+    "profileVersion",
+    "policies",
+    "observedAt",
+    "evidence"
+  ],
+  "candidateIdRule": "candidateId is deterministic: appId plus '-' plus the first 12 hexadecimal characters of releaseCommitSha.",
+  "rules": [
+    "Intake creates pending_review only; it never writes the reviewed ecosystem ledger, certification receipt, review decision or revocation state.",
+    "The candidate release SHA and profile blob SHA must be full lowercase 40-character Git SHA-1 identities.",
+    "Every claimed policy id must exist in the canonical Defence registry and policy ids must not repeat.",
+    "Evidence must contain 1 to 16 bounded non-secret records with source, kind, reference, checkedAt and summary.",
+    "At most one pending_review candidate may exist per app.",
+    "The exact release/profile/policy identity must not already exist in review-candidate history.",
+    "For an already reviewed app, repository and profile path must match its canonical app identity and the intake candidate must differ from the current reviewed release.",
+    "For a not-yet-reviewed app, prior candidate history may exist only for the same repository and profile path.",
+    "A deterministic candidate-id collision with a different identity fails closed rather than choosing another id.",
+    "Candidate intake does not validate the truth of external evidence; it validates structure, boundedness, canonical policy identity and queue consistency."
+  ],
+  "nonClaims": [
+    "A pending candidate is not certification.",
+    "Candidate intake does not grant or extend the Protected by Shine Defence badge.",
+    "Recorded evidence is not independently verified merely because the intake helper accepted its shape.",
+    "Successful intake does not mean the release will pass review."
+  ]
+}
