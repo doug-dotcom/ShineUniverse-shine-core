@@ -86,3 +86,21 @@ Revocation is event-sourced rather than undone by editing a grant. `effective_ac
 GitHub CI validates the model against PostgreSQL 17, including RLS, private-role boundaries, active/revoked state derivation, duplicate-revocation rejection, exactly-once outbox emission and append-only history.
 
 The Layer 4 build record is `layers/layer-004-persistence-and-revocation.md`.
+
+
+## Foundation Gateway
+
+Foundation Layer 5 adds the first callable Universe boundary.
+
+`gateway/gateway-core-v1.mjs` evaluates one scoped access request through verified Shine ID, the Core app manifest, Vault metadata/effective grants, Shine Defence and the Foundation permission engine, then persists the audit record before returning a minimal decision.
+
+`gateway/http-handler-v1.mjs` exposes the reference HTTP surface:
+
+- `GET /health`
+- `POST /v1/access/evaluate`
+
+The Gateway short-circuits trust boundaries in order: an identity mismatch does not touch Core/Vault, and an undeclared app scope does not touch Vault/grants.
+
+The public wire contracts are pinned in `object-registry-v1.json` and described by `gateway/openapi-v1.json`.
+
+The Layer 5 build record is `layers/layer-005-foundation-gateway.md`.
