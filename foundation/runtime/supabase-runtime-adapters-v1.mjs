@@ -6,6 +6,20 @@ export async function sha256Hex(value){
   return [...new Uint8Array(digest)].map(b=>b.toString(16).padStart(2,'0')).join('');
 }
 
+function decodeJwtPayload(jwt){
+  try{
+    const part=String(jwt||'').split('.')[1];
+    if(!part) return null;
+    const normalized=part.replace(/-/g,'+').replace(/_/g,'/');
+    const padded=normalized+'='.repeat((4-normalized.length%4)%4);
+    const binary=atob(padded);
+    const bytes=Uint8Array.from(binary,c=>c.charCodeAt(0));
+    return JSON.parse(new TextDecoder().decode(bytes));
+  }catch{
+    return null;
+  }
+}
+
 const toIso=v=>v==null?undefined:(v instanceof Date?v.toISOString():String(v));
 
 const mapResource=row=>row?{
@@ -40,10 +54,10 @@ const sameAudit=(row,event)=>{
     eq(row.grant_id,event.grantId);
 };
 
-export function createSupabaseRuntimeAdapters({sql,authClient,defenceGate}={}){
+export function createSupabaseRuntimeAdapters({sql,defenceGate,fetchImpl=fetch}={}){
   if(typeof sql!=='function') throw new TypeError('sql must be a Postgres.js-compatible tag');
-  if(typeof authClient?.auth?.getClaims!=='function') throw new TypeError('authClient.auth.getClaims is required');
   if(typeof defenceGate!=='function') throw new TypeError('defenceGate is required');
+  if(typeof fetchImpl!=='function') throw new TypeError('fetchImpl is required');
 
   return {
     async verifyAppCaller({authContext,claimedAppId}={}){
@@ -62,16 +76,39 @@ export function createSupabaseRuntimeAdapters({sql,authClient,defenceGate}={}){
 
     async verifyIdentity({authContext}={}){
       const jwt=authContext?.jwt;
-      if(!jwt) return null;
-      const {data,error}=await authClient.auth.getClaims(jwt);
-      const claims=data?.claims;
-      if(error||!claims?.sub) return null;
+      const untrusted=decodeJwtPayload(jwt);
+      if(!jwt||!untrusted?.iss) return null;
+
+      const providers=await sql`
+        select provider_id, project_url, publishable_key
+        from foundation.identity_providers
+        where issuer=${String(untrusted.iss)}
+          and status='active'
+        limit 1
+      `;
+      const provider=first(providers);
+      if(!provider) return null;
+
+      const verification=await fetchImpl(String(provider.project_url).replace(/\/$/,'')+'/auth/v1/user',{
+        method:'GET',
+        headers:{
+          apikey:String(provider.publishable_key),
+          Authorization:'Bearer '+jwt
+        },
+        signal:AbortSignal.timeout(10000)
+      });
+      if(!verification.ok) return null;
+
+      let user;
+      try{ user=await verification.json(); }catch{ return null; }
+      if(!user?.id) return null;
+
       const rows=await sql`
         select b.shine_id::text as shine_id
         from foundation.identity_bindings b
         join foundation.shine_identities i on i.shine_id=b.shine_id
-        where b.provider='supabase-auth'
-          and b.provider_subject=${claims.sub}
+        where b.provider=${String(provider.provider_id)}
+          and b.provider_subject=${String(user.id)}
           and b.verified_at is not null
           and i.account_state='active'
         limit 1
@@ -79,8 +116,9 @@ export function createSupabaseRuntimeAdapters({sql,authClient,defenceGate}={}){
       const row=first(rows);
       return row?{
         shineId:String(row.shine_id),
-        authSubject:String(claims.sub),
-        ...(claims.session_id?{sessionId:String(claims.session_id)}:{})
+        authSubject:String(user.id),
+        providerId:String(provider.provider_id),
+        ...(untrusted.session_id?{sessionId:String(untrusted.session_id)}:{})
       }:null;
     },
 
@@ -130,7 +168,7 @@ export function createSupabaseRuntimeAdapters({sql,authClient,defenceGate}={}){
           grant_id, occurred_at, defence_evidence_ref, request_context
         ) values (
           ${event.eventId}::uuid, ${event.requestId}::uuid, ${event.appId},
-          ${event.shineId}::uuid, ${event.scope}, ${event.purpose},
+          ${event.shineId??null}::uuid, ${event.scope}, ${event.purpose},
           ${event.resourceId??null}::uuid, ${event.resourceCategory??null},
           ${event.decision}, ${event.reasonCode}, ${event.grantId??null}::uuid,
           ${event.occurredAt}::timestamptz, ${event.defenceEvidenceRef??null},
