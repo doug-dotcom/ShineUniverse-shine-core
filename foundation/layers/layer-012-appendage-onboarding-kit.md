@@ -89,3 +89,19 @@ The expected workflow for appendage #3 is now:
 5. let `app_connection_status` derive the real state.
 
 The architecture work should therefore decrease with each new Shine appendage.
+
+
+## Acceptance
+
+Layer 12 is verified on commit `9d8bf75430a3d9b1e67eabd8001ef873359ebda5`.
+
+- object registry: **PASS**
+- Foundation contract/runtime suite: **PASS**
+- Travel onboarding example: **PASS**
+- Dive onboarding example: **PASS**
+- connection-spec compiler tests: **PASS**
+- shared backend client tests: **PASS**
+- Deno Edge Function type-check: **PASS**
+- clean PostgreSQL Foundation rebuild and acceptance suite: **PASS**
+
+Layer 12 makes no live credential, user-binding or grant changes. It adds the reusable tooling required to make the next appendage connection materially smaller and safer.
