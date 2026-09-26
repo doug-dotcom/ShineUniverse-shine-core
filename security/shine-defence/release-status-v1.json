@@ -1,0 +1,56 @@
+{
+  "contract": "shine-defence/release-status-v1",
+  "version": "1.0.0",
+  "purpose": "Portable consumer-side rules for deciding what Shine Defence status an application build may display from its certification receipt, current build identity, immutable registry snapshot and revocation ledger.",
+  "inputs": [
+    "certification receipt or absence",
+    "current application commit SHA",
+    "current Defence-profile Git blob SHA",
+    "immutable registry snapshot identified by the receipt",
+    "current revocation ledger"
+  ],
+  "states": [
+    {
+      "id": "reviewed_release",
+      "badgeCurrent": true,
+      "display": "Protected by Shine Defence",
+      "rule": "Current commit/profile exactly match the receipt and no matching revocation exists."
+    },
+    {
+      "id": "revoked_release",
+      "badgeCurrent": false,
+      "display": "Defence certification withdrawn",
+      "rule": "Current commit/profile exactly match the receipt and that reviewed release is revoked."
+    },
+    {
+      "id": "unreviewed_revision",
+      "badgeCurrent": false,
+      "display": "Defence review pending for this revision",
+      "rule": "Current commit differs from the reviewed commit recorded by the receipt."
+    },
+    {
+      "id": "profile_drift",
+      "badgeCurrent": false,
+      "display": "Defence profile changed since review",
+      "rule": "Current commit matches the reviewed commit but the current Defence-profile blob differs from the receipt."
+    },
+    {
+      "id": "receipt_missing",
+      "badgeCurrent": false,
+      "display": "No Defence receipt for this build",
+      "rule": "No certification receipt is supplied."
+    },
+    {
+      "id": "verification_failed",
+      "badgeCurrent": false,
+      "display": "Defence verification failed",
+      "rule": "The receipt, registry snapshot or revocation input fails validation."
+    }
+  ],
+  "badgeRule": "Only reviewed_release may display the current Protected by Shine Defence badge.",
+  "nonClaims": [
+    "An unreviewed revision is not automatically unsafe.",
+    "A revoked reviewed release does not imply later unrelated releases are unsafe.",
+    "This status does not replace app-specific tests, release verification or incident response."
+  ]
+}
