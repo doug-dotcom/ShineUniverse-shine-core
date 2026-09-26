@@ -1,6 +1,6 @@
 {
   "registry": "shine-foundation/object-registry-v1",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "foundationContract": "shine-foundation/foundation-v1",
   "repository": "doug-dotcom/ShineUniverse-shine-core",
   "entries": [
@@ -51,6 +51,18 @@
       "path": "foundation/schemas/access-audit-event-v1.schema.json",
       "version": "1.0.0",
       "blobSha": "7e8e0a324e75f2dea0813c82050763a76a211d40"
+    },
+    {
+      "id": "gateway-request",
+      "path": "foundation/schemas/gateway-request-v1.schema.json",
+      "version": "1.0.0",
+      "blobSha": "bedd4881c7bb5de67e1de8d9b2c86ab6b0229705"
+    },
+    {
+      "id": "gateway-response",
+      "path": "foundation/schemas/gateway-response-v1.schema.json",
+      "version": "1.0.0",
+      "blobSha": "03b4ff581eca13ddac7935d523f39cc1ec99844e"
     }
   ],
   "rule": "A registered schema may only change through an explicit version/registry update; consumers should pin the schema version they implement."
