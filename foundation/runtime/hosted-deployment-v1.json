@@ -1,6 +1,6 @@
 {
   "deployment": "shine-foundation/hosted-deployment-v1",
-  "version": "1.9.0",
+  "version": "2.0.0",
   "deployedAt": "2026-09-26",
   "supabase": {
     "projectName": "Shine Foundation",
@@ -19,7 +19,7 @@
   "edgeFunction": {
     "slug": "foundation-gateway",
     "id": "0e219164-32a6-4969-b1dc-9b6402e79e59",
-    "version": 10,
+    "version": 11,
     "status": "ACTIVE",
     "verifyJwt": false,
     "authentication": "custom app credential plus app-approved JWT or opaque-vault identity verification"
@@ -70,7 +70,14 @@
     "identityClaimCi": "PASS",
     "identityClaimHostedAcceptance": "PASS",
     "identityClaimSecurityAdvisorLints": 0,
-    "identityClaimRealSkiClaims": 0
+    "identityClaimRealSkiClaims": 0,
+    "identityClaimExactTargetSubjectLive": true,
+    "grantConsentCi": "PASS",
+    "grantConsentHostedAcceptance": "PASS",
+    "grantConsentSecurityAdvisorLints": 0,
+    "unindexedForeignKeyAdvisorFindings": 0,
+    "grantConsentRealSkiConsents": 0,
+    "grantConsentRealSkiGrants": 0
   },
   "secrets": {
     "included": false,
@@ -97,7 +104,8 @@
     "skiObservedAllows": 0,
     "skiObservedDenies": 0,
     "skiActiveClaimIdentityProviders": 1,
-    "skiSuccessfulIdentityClaims": 0
+    "skiSuccessfulIdentityClaims": 0,
+    "skiSuccessfulGrantConsents": 0
   },
   "secondAppendage": {
     "appId": "shine.dive",
@@ -173,5 +181,23 @@
     "hostedStatus": "ACTIVE",
     "skiClaimProvider": "supabase:shine-l",
     "observedLiveClaims": 0
+  },
+  "grantConsent": {
+    "version": "1.0.0",
+    "route": "POST /v1/grants/consent",
+    "source": "Foundation Layer 15",
+    "explicitConsentRequired": true,
+    "alreadyBoundIdentityRequired": true,
+    "manifestDeclaredScopeRequired": true,
+    "vaultOwnershipRequired": true,
+    "defenceVetoEnabled": true,
+    "consentEvidenceTable": "foundation.grant_consent_events",
+    "atomicWriteFunction": "foundation.issue_access_grant_v1",
+    "consentMethod": "explicit-user",
+    "exposesShineId": false,
+    "hostedStatus": "ACTIVE",
+    "edgeFunctionVersion": 11,
+    "observedRealSkiConsents": 0,
+    "observedRealSkiGrants": 0
   }
 }
