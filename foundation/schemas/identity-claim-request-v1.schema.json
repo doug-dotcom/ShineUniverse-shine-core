@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:shine:foundation:schema:identity-claim-request-v1",
+  "title": "Shine Foundation Identity Claim Request v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "identityClaim",
+    "schemaVersion",
+    "requestId",
+    "appId",
+    "sourceProviderId",
+    "targetProviderId",
+    "requestedAt"
+  ],
+  "properties": {
+    "identityClaim": {
+      "const": "shine-foundation/identity-claim-v1"
+    },
+    "schemaVersion": {
+      "const": "1.0.0"
+    },
+    "requestId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "appId": {
+      "type": "string",
+      "pattern": "^shine\\.[a-z0-9][a-z0-9-]*$"
+    },
+    "sourceProviderId": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._:-]*$"
+    },
+    "targetProviderId": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._:-]*$"
+    },
+    "requestedAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}
