@@ -1,0 +1,36 @@
+{
+  "deployment": "shine-foundation/hosted-deployment-v1",
+  "version": "1.0.0",
+  "deployedAt": "2026-09-26",
+  "supabase": {
+    "projectName": "Shine Foundation",
+    "projectRef": "sjpxqeyewahraxvidvcc",
+    "region": "ap-southeast-2",
+    "status": "ACTIVE_HEALTHY"
+  },
+  "database": {
+    "schema": "foundation",
+    "runtimeRole": "foundation_gateway",
+    "runtimeRoleLogin": false,
+    "runtimeRoleBypassRls": false,
+    "roleAssumption": "SET LOCAL ROLE foundation_gateway per adapter query transaction",
+    "securityAdvisorLints": 0
+  },
+  "edgeFunction": {
+    "slug": "foundation-gateway",
+    "id": "0e219164-32a6-4969-b1dc-9b6402e79e59",
+    "version": 1,
+    "status": "ACTIVE",
+    "verifyJwt": true
+  },
+  "verification": {
+    "controlPlaneActive": true,
+    "databaseRoleSwitchLiveTest": true,
+    "directHttpHealthTest": false,
+    "directHttpHealthTestReason": "assistant shell DNS resolution unavailable"
+  },
+  "secrets": {
+    "included": false,
+    "note": "No API keys, app tokens, database passwords or secret values are stored in this record."
+  }
+}
