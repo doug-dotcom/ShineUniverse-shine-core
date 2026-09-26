@@ -18,6 +18,8 @@ jobs:
       - run: node --test foundation/integration-kit/permission-engine-v1.test.mjs
       - run: node --test foundation/gateway/gateway-core-v1.test.mjs foundation/gateway/defence-status-v1.test.mjs foundation/gateway/http-handler-v1.test.mjs
       - run: node --test foundation/runtime/supabase-runtime-adapters-v1.test.mjs
+      - run: node --test foundation/onboarding/connection-spec-v1.test.mjs foundation/onboarding/foundation-app-client-v1.test.mjs
+      - run: node foundation/onboarding/verify-examples-v1.mjs
       - uses: denoland/setup-deno@v2
         with:
           deno-version: v2.x
