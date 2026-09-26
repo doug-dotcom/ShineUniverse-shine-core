@@ -1,119 +1,141 @@
 {
   "ledger": "shine-defence/ecosystem-profile-ledger-v1",
-  "version": "1.0.0",
-  "meaning": "Records the exact reviewed app-profile blob and canonical Defence artefacts it claimed at review time. It is not a claim that a later app commit passed certification.",
+  "version": "1.1.0",
+  "meaning": "Records the exact reviewed app commit, Defence-profile blob and canonical Defence artefacts claimed at review time. It is not a claim that later app commits remain certified.",
   "apps": [
     {
       "id": "shine-daash",
       "repo": "doug-dotcom/Shine-DaAsh",
       "path": "security/shine-defence/profile.json",
-      "profileBlobSha": "102bfbadd974fc79ddd604d1a9792bf7df868056",
+      "profileBlobSha": "b4ddb4a071c2792919c0d12b6396fa107e429981",
       "policies": [
         "baseline",
         "certifier",
         "authenticated-session-hardening",
         "exercise-companion-safety"
-      ]
+      ],
+      "reviewCommitSha": "b00bf66843d24424878ac86384c4c621bcbd9953",
+      "profileVersion": "1.3.0"
     },
     {
       "id": "shine-travel",
       "repo": "doug-dotcom/shine-travel",
       "path": "security/shine-defence/profile.json",
-      "profileBlobSha": "666caaaaf763d30a4f2bc76cd275386b42f4c83a",
+      "profileBlobSha": "ba66ee8079a4d22de8f80d7ba30608a9d78bfe00",
       "policies": [
         "baseline",
         "certifier",
         "external-link",
         "authenticated-session-hardening",
         "external-data-provenance"
-      ]
+      ],
+      "reviewCommitSha": "21c3dc54b27ade33989cfacea2df6e2b118fcc49",
+      "profileVersion": "1.3.0"
     },
     {
       "id": "shine-ski",
       "repo": "doug-dotcom/Shine-Ski",
       "path": "security/shine-defence-baseline-v1.json",
-      "profileBlobSha": "2b2601462c60b44a202dddab62c202c99c430bbd",
+      "profileBlobSha": "41784084b368ad62c3fd900e7f0827d4a25ca4b6",
       "policies": [
         "baseline",
         "external-data-provenance"
-      ]
+      ],
+      "reviewCommitSha": "47c6a488cb4d14dbee3d5853bfb759d5cb2bd00c",
+      "profileVersion": "1.0.0"
     },
     {
       "id": "shine-translate",
       "repo": "doug-dotcom/shine-translate",
       "path": "security/shine-defence/profile.json",
-      "profileBlobSha": "ad14a1fc01ed0eef1c48b3e5d723262af9984731",
+      "profileBlobSha": "8232d46308e27fc64c17e0b42e199bd556263597",
       "policies": [
         "baseline",
         "certifier",
         "untrusted-content",
         "external-data-provenance"
-      ]
+      ],
+      "reviewCommitSha": "1ac47373c4ba049cd24a7d2ea6c438e0b1baf5fa",
+      "profileVersion": "1.2.0"
     },
     {
       "id": "shine-music",
       "repo": "doug-dotcom/shine-music",
       "path": "security/shine-defence/profile.json",
-      "profileBlobSha": "7532e077f7d5400d5b4fddf219eabee6355ae9b7",
+      "profileBlobSha": "a13a141f28bd1359b949a557b2025978156ccb3c",
       "policies": [
         "baseline",
         "certifier",
         "malware-quarantine"
-      ]
+      ],
+      "reviewCommitSha": "74601fbe9d83d15113ceb5f92c15013fb5958baa",
+      "profileVersion": "1.1.0"
     },
     {
       "id": "shine-my-money",
       "repo": "doug-dotcom/shine-my-money-",
       "path": "security/shine-defence/profile.json",
-      "profileBlobSha": "c846a6f5c110bcbce63bc4d9e5fc584a5581cb98",
+      "profileBlobSha": "b6fd0087ebfdb973835218601a00a81b5497abbc",
       "policies": [
         "personal-financial-data"
-      ]
+      ],
+      "reviewCommitSha": "ffe987f4d04a1a98de9e5a3c7cb08fdbcd6fb75d",
+      "profileVersion": "1.1.0"
     },
     {
       "id": "punt-49",
       "repo": "doug-dotcom/Punt-49",
       "path": "security/shine-defence/profile.json",
-      "profileBlobSha": "81399ddecd03955cefa7b0e3edb5209153ecd343",
+      "profileBlobSha": "013f5919b3994da1a5d864fc4da32c33212438b8",
       "policies": [
         "wagering-trial-integrity"
-      ]
+      ],
+      "reviewCommitSha": "193ec97f5369dcfaeeb4c0ed2603ce3bcfe73d72",
+      "profileVersion": "1.1.0"
     },
     {
       "id": "fiona-finance",
       "repo": "doug-dotcom/Fiona-Finance",
       "path": "security/shine-defence/profile.json",
-      "profileBlobSha": "e10039a05fe065de1996bb10ed06400d4749d49e",
+      "profileBlobSha": "92ce5122054564ddc9faa55f129d6e216aecdd83",
       "policies": [
         "financial-research-provenance"
-      ]
+      ],
+      "reviewCommitSha": "89c13f27a2a449e4b3de18b9e636008d4f722783",
+      "profileVersion": "1.1.0"
     },
     {
       "id": "project-rc",
       "repo": "doug-dotcom/Project-RC",
       "path": "security/shine-defence/profile.json",
-      "profileBlobSha": "6350e60ec69614e4442f51993ab9a5316e05c9e7",
+      "profileBlobSha": "0d0b222c823d33cabde9df2dd57651a27055d92a",
       "policies": [
         "sensitive-memory-governance"
-      ]
+      ],
+      "reviewCommitSha": "a2d19d002ea7fa588146cd51be6e9b3fa9a0a8f0",
+      "profileVersion": "1.1.0"
     },
     {
       "id": "project-l",
       "repo": "doug-dotcom/Project-L-Modular",
       "path": "security/shine-defence/profile.json",
-      "profileBlobSha": "27905beaf3a00cae2b81e8ac4a192905ea3b605c",
+      "profileBlobSha": "5e8badd4a4d9ace61f9c8d411dcd4b51e989f210",
       "policies": [
         "sensitive-memory-governance"
-      ]
+      ],
+      "reviewCommitSha": "ec2dcd877d362a601682fb910bbc9c497d568c59",
+      "profileVersion": "1.1.0"
     },
     {
       "id": "shine-ai",
       "repo": "doug-dotcom/Shine-Ai",
       "path": "security/shine-defence/profile.json",
-      "profileBlobSha": "5f1ff3535af06300b51a2990a49ba59a2ed0d33b",
+      "profileBlobSha": "d68253c8588c34a132aa5455bf7c09e2f7e30621",
       "policies": [
         "ai-prompt-and-tool-boundaries"
-      ]
+      ],
+      "reviewCommitSha": "e2e51ab6a7bbfc36734a49386f97aa1eb24a2fb1",
+      "profileVersion": "1.1.0"
     }
   ]
 }
