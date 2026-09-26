@@ -95,3 +95,91 @@ test('allowed decisions map to HTTP 200',async()=>{
   }));
   assert.equal(res.status,200);
 });
+
+
+test('identity claim requires its separate three-credential authenticator',async()=>{
+  let accessAuth=0,claimAuth=0;
+  const claimHandler=createFoundationHttpHandler({
+    gateway:async()=>{throw new Error('access gateway must not run')},
+    authenticate:async()=>{accessAuth++;return {}},
+    authenticateIdentityClaim:async request=>{
+      claimAuth++;
+      if(request.headers.get('authorization')!=='Bearer target') throw new Error('target jwt missing');
+      if(request.headers.get('x-shine-user-token')!=='source') throw new Error('source token missing');
+      if(request.headers.get('x-shine-app-token')!=='app') throw new Error('app token missing');
+      return {targetJwt:'target',sourceUserToken:'source',appToken:'app'};
+    },
+    identityClaim:async({envelope})=>({
+      identityClaimResponse:'shine-foundation/identity-claim-response-v1',
+      schemaVersion:'1.0.0',
+      requestId:envelope.requestId,
+      status:'linked',
+      reasonCode:'identity-claim-linked'
+    })
+  });
+
+  const res=await claimHandler(new Request(base+'/foundation-gateway/v1/identity/claim',{
+    method:'POST',
+    headers:{
+      authorization:'Bearer target',
+      'x-shine-user-token':'source',
+      'x-shine-app-token':'app',
+      'content-type':'application/json'
+    },
+    body:JSON.stringify({requestId:'11111111-1111-4111-8111-111111111111'})
+  }));
+
+  assert.equal(res.status,200);
+  assert.equal(accessAuth,0);
+  assert.equal(claimAuth,1);
+  assert.equal((await res.json()).status,'linked');
+});
+
+test('identity claim missing one proof is unauthenticated',async()=>{
+  const claimHandler=createFoundationHttpHandler({
+    gateway:async()=>({status:'allowed'}),
+    authenticate:async()=>({}),
+    authenticateIdentityClaim:async request=>{
+      if(!request.headers.get('authorization')||!request.headers.get('x-shine-user-token')||!request.headers.get('x-shine-app-token')){
+        throw new Error('missing proof');
+      }
+      return {};
+    },
+    identityClaim:async()=>({status:'linked'})
+  });
+
+  const res=await claimHandler(new Request(base+'/v1/identity/claim',{
+    method:'POST',
+    headers:{
+      'x-shine-user-token':'source',
+      'x-shine-app-token':'app',
+      'content-type':'application/json'
+    },
+    body:'{}'
+  }));
+  assert.equal(res.status,401);
+});
+
+test('identity claim denied maps to HTTP 403 without exposing identity details',async()=>{
+  const claimHandler=createFoundationHttpHandler({
+    gateway:async()=>({status:'allowed'}),
+    authenticate:async()=>({}),
+    authenticateIdentityClaim:async()=>({}),
+    identityClaim:async()=>({
+      identityClaimResponse:'shine-foundation/identity-claim-response-v1',
+      schemaVersion:'1.0.0',
+      requestId:'11111111-1111-4111-8111-111111111111',
+      status:'denied',
+      reasonCode:'source-already-bound'
+    })
+  });
+  const res=await claimHandler(new Request(base+'/v1/identity/claim',{
+    method:'POST',
+    headers:{'content-type':'application/json'},
+    body:'{}'
+  }));
+  assert.equal(res.status,403);
+  const body=await res.json();
+  assert.equal(Object.hasOwn(body,'shineId'),false);
+  assert.equal(Object.hasOwn(body,'providerSubject'),false);
+});
