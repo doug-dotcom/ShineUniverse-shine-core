@@ -1,0 +1,44 @@
+{
+  "contract": "shine-defence/review-decision-v1",
+  "version": "1.0.0",
+  "purpose": "Separate, machine-verifiable decision evidence for finalized Shine Defence review candidates.",
+  "outcomes": [
+    {
+      "id": "accepted",
+      "meaning": "The candidate was promoted into the canonical reviewed ledger and certification receipt."
+    },
+    {
+      "id": "superseded",
+      "meaning": "A newer candidate replaced this candidate before review completed."
+    },
+    {
+      "id": "dismissed",
+      "meaning": "The candidate was closed without certification."
+    }
+  ],
+  "requiredFields": [
+    "decisionId",
+    "candidateId",
+    "appId",
+    "outcome",
+    "decidedAt",
+    "authority",
+    "summary"
+  ],
+  "rules": [
+    "Every finalized review candidate must have exactly one decision record.",
+    "A pending_review candidate must not have a decision record.",
+    "The decision candidate id, app id and outcome must exactly match the review-candidate queue.",
+    "A decision timestamp must not predate the candidate observation timestamp.",
+    "Accepted candidates remain subject to the canonical reviewed-ledger and certification-receipt equality checks.",
+    "A superseded decision must name the same successor candidate recorded by the review-candidate queue, and that successor must belong to the same app.",
+    "Decision identifiers are deterministic: candidateId plus '-' plus outcome.",
+    "Decision authority and summary text are bounded, non-empty and must not contain obvious credentials or private-key material.",
+    "Decision records do not grant or extend the Protected by Shine Defence badge; certification authority remains the canonical reviewed ledger plus an exact certification receipt."
+  ],
+  "nonClaims": [
+    "A review decision is not a cryptographic signature.",
+    "A dismissed or superseded decision does not imply the release is unsafe.",
+    "A recorded acceptance does not certify later revisions of the application."
+  ]
+}
