@@ -31,4 +31,6 @@ Reusable Defence policies live under `security/shine-defence/policies/`. They de
 
 `security/shine-defence/canonical-registry-v1.json` is the machine-readable authority for reviewed Defence artefacts. It pins each contract, policy and integration-kit release to its version and exact Git blob SHA. Core CI runs `verify-registry-v1.mjs` and fails if a registered artefact changes without an explicit registry update.
 
+`security/shine-defence/ecosystem-profile-ledger-v1.json` records the exact reviewed Defence-profile blob for each integrated app and the canonical policies that profile claimed. It is deliberately a review snapshot, not a claim that arbitrary later app commits remain certified.
+
 An extension policy existing in Core does **not** automatically certify an app. Each app still needs local, testable evidence before claiming that profile.
