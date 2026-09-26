@@ -1,6 +1,6 @@
 {
   "deployment": "shine-foundation/hosted-deployment-v1",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "deployedAt": "2026-09-26",
   "supabase": {
     "projectName": "Shine Foundation",
@@ -52,7 +52,10 @@
     "appConnectionRegistryCi": "PASS",
     "appSpecificIssuerGate": true,
     "opaqueFederationCi": "PASS",
-    "diveUsesExistingCanonicalShineId": true
+    "diveUsesExistingCanonicalShineId": true,
+    "diveFoundationBuildTests": "604/604 PASS",
+    "diveRailwayHealthcheck": "PASS",
+    "diveContainerStarted": true
   },
   "secrets": {
     "included": false,
@@ -87,6 +90,9 @@
     "activeIdentityProviders": 1,
     "activeGrants": 1,
     "observedProductionAllow": false,
-    "productionDeploymentStatus": "QUEUED"
+    "productionDeploymentStatus": "SUCCESS",
+    "productionDeployment": "56addf9ca4564fa0f8546df9381d7af6ec431df0",
+    "productionDeploymentId": "f035c246-8ccd-4629-bbeb-e3609ec53449",
+    "visibleConnectionStatus": true
   }
 }
