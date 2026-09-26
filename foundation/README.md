@@ -44,3 +44,16 @@ The machine-readable contract is:
 Architectural decisions are recorded under:
 
 - `adr/`
+
+
+## Canonical object models
+
+Foundation Layer 2 defines the first three machine-readable objects shared across the Universe:
+
+- `schemas/app-manifest-v1.schema.json` — app identity, purpose, operating modes and requested scopes.
+- `schemas/shine-identity-v1.schema.json` — canonical `shineId`, account lifecycle and auth-provider mappings.
+- `schemas/vault-resource-v1.schema.json` — protected-resource ownership, classification, provenance and integrity envelope.
+
+`object-registry-v1.json` pins these schemas to exact Git blob identities. CI runs `integration-kit/verify-object-registry-v1.mjs` and rejects silent schema drift.
+
+The Layer 2 build record is `layers/layer-002-canonical-object-models.md`.
