@@ -18,18 +18,31 @@ const makeSql=()=> {
         ? [{credential_id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',app_id:'shine.travel'}] : [];
     }
     if(q.includes('from foundation.identity_providers')){
+      if(q.includes('join foundation.app_claim_identity_providers')){
+        return values[0]==='supabase:test' && values[1]===issuer && values[2]==='shine.ski'
+          ? [{provider_id:'supabase:test',kind:'supabase-auth',project_url:'https://identity.example.test',publishable_key:'public-key'}]
+          : [];
+      }
       if(q.includes("p.kind='supabase-auth'")){
         return values[0]===issuer && values[1]==='shine.travel'
           ? [{provider_id:'supabase:test',kind:'supabase-auth',project_url:'https://identity.example.test',publishable_key:'public-key'}]
           : [];
       }
       if(q.includes("p.kind='supabase-opaque-vault'")){
+        if(q.includes('p.provider_id=?')){
+          return values[0]==='supabase:ski-session' && values[1]==='shine.ski'
+            ? [{provider_id:'supabase:ski-session',kind:'supabase-opaque-vault',project_url:'https://ski.example.test',publishable_key:'public-key',verification_resource:'ski_foundation_sessions',subject_field:'session_hash',token_header:'x-shine-ski-token'}]
+            : [];
+        }
         return values[0]==='shine.dive'
           ? [{provider_id:'supabase:dive-vault',kind:'supabase-opaque-vault',project_url:'https://dive.example.test',publishable_key:'public-key',verification_resource:'dive_companions',subject_field:'vault_hash',token_header:'x-shine-vault-token'}]
           : [];
       }
     }
     if(q.includes('from foundation.identity_bindings')) return [{shine_id:shineId}];
+    if(q.includes('from foundation.complete_identity_claim_v1')){
+      return [{outcome:'linked',reason_code:'identity-claim-linked'}];
+    }
     if(q.includes('from foundation.app_registry')){
       return [{manifest:{appId:'shine.travel',foundation:{requestedScopes:[]}}}];
     }
@@ -191,4 +204,72 @@ test('opaque user token is rejected for an app without an opaque provider link',
   });
   assert.equal(result,null);
   assert.equal(calls,0);
+});
+
+
+test('verifies unbound claim source without requiring an existing Shine binding',async()=>{
+  const raw='d'.repeat(64);
+  const expected=await sha256Hex(raw);
+  let called=false;
+  const {sql}=makeSql();
+  const adapters=createSupabaseRuntimeAdapters({
+    sql,
+    defenceGate:createFoundationRuntimeDefenceGateV1(),
+    fetchImpl:async(url,options)=>{
+      called=true;
+      const parsed=new URL(url);
+      assert.equal(parsed.origin,'https://ski.example.test');
+      assert.equal(parsed.pathname,'/rest/v1/ski_foundation_sessions');
+      assert.equal(parsed.searchParams.get('session_hash'),'eq.'+expected);
+      assert.equal(options.headers['x-shine-ski-token'],raw);
+      return Response.json([{session_hash:expected}]);
+    }
+  });
+  const result=await adapters.verifyClaimSource({
+    appId:'shine.ski',
+    providerId:'supabase:ski-session',
+    userToken:raw
+  });
+  assert.equal(called,true);
+  assert.deepEqual(result,{providerId:'supabase:ski-session',authSubject:expected});
+});
+
+test('claim target must be app-approved and map to an active canonical Shine ID',async()=>{
+  const {adapters}=makeAdapters();
+  const token=jwt({iss:issuer,sub:'auth-user'});
+  const result=await adapters.verifyClaimTarget({
+    appId:'shine.ski',
+    providerId:'supabase:test',
+    jwt:token
+  });
+  assert.equal(result.providerId,'supabase:test');
+  assert.equal(result.authSubject,'auth-user');
+  assert.equal(result.shineId,shineId);
+});
+
+test('unapproved claim target is rejected before external Auth call',async()=>{
+  let calls=0;
+  const {adapters}=makeAdapters({fetchImpl:async()=>{calls++;return Response.json({id:'auth-user'})}});
+  const result=await adapters.verifyClaimTarget({
+    appId:'shine.dive',
+    providerId:'supabase:test',
+    jwt:jwt({iss:issuer,sub:'auth-user'})
+  });
+  assert.equal(result,null);
+  assert.equal(calls,0);
+});
+
+test('complete identity claim delegates to atomic database function',async()=>{
+  const {adapters}=makeAdapters();
+  const result=await adapters.completeIdentityClaim({
+    claimId:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+    requestId:'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
+    appId:'shine.ski',
+    sourceProviderId:'supabase:ski-session',
+    sourceSubject:'source-hash',
+    targetProviderId:'supabase:test',
+    targetShineId:shineId,
+    occurredAt:'2026-09-26T12:30:00Z'
+  });
+  assert.deepEqual(result,{outcome:'linked',reason_code:'identity-claim-linked'});
 });
