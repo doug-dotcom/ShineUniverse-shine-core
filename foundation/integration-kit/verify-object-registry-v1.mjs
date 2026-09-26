@@ -5,6 +5,12 @@ import {readFileSync} from 'node:fs';
 const registry=JSON.parse(readFileSync(new URL('../object-registry-v1.json',import.meta.url),'utf8'));
 const root=new URL('../../',import.meta.url);
 const gitBlobSha=bytes=>createHash('sha1').update(Buffer.from('blob '+bytes.length+'\0')).update(bytes).digest('hex');
+const declaredVersion=value=>{
+  if(typeof value.version==='string') return value.version;
+  if(typeof value.schemaVersion==='string') return value.schemaVersion;
+  if(typeof value?.properties?.schemaVersion?.const==='string') return value.properties.schemaVersion.const;
+  return undefined;
+};
 const failures=[];
 const ids=new Set();
 const paths=new Set();
@@ -33,7 +39,7 @@ for(const entry of registry.entries){
   if(entry.path.endsWith('.json')){
     try{
       const value=JSON.parse(bytes.toString('utf8'));
-      const version=value.version ?? value.schemaVersion;
+      const version=declaredVersion(value);
       if(version!==entry.version){
         failures.push(entry.id+': version drift '+version+' != '+entry.version);
       }
