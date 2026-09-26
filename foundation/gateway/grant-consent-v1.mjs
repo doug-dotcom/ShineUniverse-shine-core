@@ -30,6 +30,7 @@ const requireFunction=(adapters,name)=>{
   if(typeof adapters?.[name]!=='function') throw new TypeError('missing grant consent adapter: '+name);
 };
 
+/** @param {{adapters:any, clock?:()=>string, idFactory?:()=>string}} [options] */
 export function createGrantConsentService({
   adapters,
   clock=()=>new Date().toISOString(),
