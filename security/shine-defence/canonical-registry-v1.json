@@ -120,8 +120,14 @@
     {
       "id": "review-candidate",
       "path": "security/shine-defence/review-candidate-v1.json",
+      "version": "1.1.0",
+      "blobSha": "6632b0e35a7d7440c8083f5d43146ee59d538e0a"
+    },
+    {
+      "id": "review-decision",
+      "path": "security/shine-defence/review-decision-v1.json",
       "version": "1.0.0",
-      "blobSha": "4a8becc1611d1f571f82e1b3f7bf17a77f7fe687"
+      "blobSha": "59f4abc5a214e324925431ba69c76a37beecbcef"
     }
   ]
 }

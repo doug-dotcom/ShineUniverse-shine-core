@@ -1,0 +1,35 @@
+{
+  "ledger": "shine-defence/review-decisions-v1",
+  "version": "1.0.0",
+  "meaning": "Finalized review-candidate outcomes recorded separately from mutable queue status. Certification remains authoritative only through the ecosystem review ledger and exact certification receipt.",
+  "decisions": [
+    {
+      "decisionId": "shine-daash-bae29a40-accepted",
+      "candidateId": "shine-daash-bae29a40",
+      "appId": "shine-daash",
+      "outcome": "accepted",
+      "decidedAt": "2026-09-26T11:04:23.000Z",
+      "authority": "shine-defence-core",
+      "summary": "The healthy DaAsh release was re-reviewed and promoted into the canonical ecosystem ledger and certification receipt."
+    },
+    {
+      "decisionId": "shine-travel-474c3f10-superseded",
+      "candidateId": "shine-travel-474c3f10",
+      "appId": "shine-travel",
+      "outcome": "superseded",
+      "decidedAt": "2026-09-26T12:28:03.000Z",
+      "authority": "shine-defence-core",
+      "successorCandidateId": "shine-travel-f058b38b",
+      "summary": "A newer healthy Travel candidate replaced this release before the final canonical review was completed."
+    },
+    {
+      "decisionId": "shine-travel-f058b38b-accepted",
+      "candidateId": "shine-travel-f058b38b",
+      "appId": "shine-travel",
+      "outcome": "accepted",
+      "decidedAt": "2026-09-26T12:28:03.000Z",
+      "authority": "shine-defence-core",
+      "summary": "Travel Layer 240 was accepted into the canonical ecosystem ledger and certification receipt after healthy deployment and security-diff review evidence."
+    }
+  ]
+}

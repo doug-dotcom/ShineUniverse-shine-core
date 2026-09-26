@@ -1,6 +1,6 @@
 {
   "contract": "shine-defence/review-candidate-v1",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "purpose": "Non-authoritative evidence bundle for an exact application release requesting Shine Defence review.",
   "statuses": [
     {
@@ -46,6 +46,8 @@
     "Every policy id must exist in the canonical Defence registry.",
     "An accepted candidate must exactly match that app's canonical reviewed ledger entry and certification receipt.",
     "A pending candidate must differ from the app's currently reviewed release/profile identity.",
+    "Every accepted, superseded or dismissed candidate must have exactly one matching record in review-decisions-v1.",
+    "A pending_review candidate must not have a review decision record.",
     "Superseded and dismissed candidates remain historical evidence rather than being deleted.",
     "Evidence must contain bounded non-secret references; credentials, bearer tokens and private keys are forbidden."
   ],
