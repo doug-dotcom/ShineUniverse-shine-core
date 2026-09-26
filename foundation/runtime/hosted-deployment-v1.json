@@ -56,7 +56,12 @@
     "diveFoundationBuildTests": "604/604 PASS",
     "diveRailwayHealthcheck": "PASS",
     "diveContainerStarted": true,
-    "onboardingKitCi": "PENDING"
+    "onboardingKitCi": "PASS",
+    "onboardingGoldenExamples": [
+      "shine.travel",
+      "shine.dive"
+    ],
+    "cleanDatabaseRebuildAfterLayer12": "PASS"
   },
   "secrets": {
     "included": false,
@@ -110,6 +115,7 @@
     ],
     "containsSecrets": false,
     "containsPersonalIds": false,
-    "createsLiveAccess": false
+    "createsLiveAccess": false,
+    "verifiedCommit": "9d8bf75430a3d9b1e67eabd8001ef873359ebda5"
   }
 }
