@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:shine:foundation:schema:access-decision-v1",
+  "title": "Shine Foundation Access Decision v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "decisionRecord",
+    "schemaVersion",
+    "decisionId",
+    "requestId",
+    "decision",
+    "reasonCode",
+    "decidedAt"
+  ],
+  "properties": {
+    "decisionRecord": {
+      "const": "shine-foundation/access-decision-v1"
+    },
+    "schemaVersion": {
+      "const": "1.0.0"
+    },
+    "decisionId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "requestId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "decision": {
+      "enum": [
+        "allow",
+        "deny"
+      ]
+    },
+    "reasonCode": {
+      "enum": [
+        "grant-match",
+        "malformed-request",
+        "identity-mismatch",
+        "resource-owner-mismatch",
+        "no-matching-grant",
+        "grant-inactive",
+        "grant-not-yet-active",
+        "grant-expired",
+        "grant-revoked",
+        "scope-mismatch",
+        "purpose-mismatch",
+        "resource-mismatch",
+        "defence-denied"
+      ]
+    },
+    "grantId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "decidedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "defence": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "decision": {
+          "enum": [
+            "allow",
+            "deny",
+            "not-evaluated"
+          ]
+        },
+        "evidenceRef": {
+          "type": "string",
+          "maxLength": 1000
+        }
+      }
+    }
+  }
+}
