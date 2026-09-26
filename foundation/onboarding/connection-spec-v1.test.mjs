@@ -45,3 +45,17 @@ test('pilot purpose must be namespaced to app',async()=>{
   spec.pilot.purpose='dive.foundation-pilot';
   assert.throws(()=>validateAppendageConnectionSpec(spec),/namespaced/);
 });
+
+
+test('Ski example validates as an unclaimed pseudonymous session pattern',async()=>{
+  const spec=await read('ski-v1.json');
+  const plan=compileAppendageConnectionSpec(spec);
+  assert.equal(plan.appManifest.appId,'shine.ski');
+  assert.equal(plan.identityProvider.kind,'supabase-opaque-vault');
+  assert.equal(plan.identityProvider.verificationResource,'ski_foundation_sessions');
+  assert.equal(plan.runtime.userCredentialMode,'opaque-header');
+  assert.equal(plan.pilot.purpose,'ski.foundation-pilot');
+  const encoded=JSON.stringify(spec);
+  assert.equal(encoded.includes('"shineId"'),false);
+  assert.equal(encoded.includes('"providerSubject"'),false);
+});
