@@ -75,16 +75,20 @@ export function createSupabaseRuntimeAdapters({sql,defenceGate,fetchImpl=fetch}=
       return row?{appId:String(row.app_id),credentialId:String(row.credential_id)}:null;
     },
 
-    async verifyIdentity({authContext}={}){
+    async verifyIdentity({authContext,claimedAppId}={}){
       const jwt=authContext?.jwt;
       const untrusted=decodeJwtPayload(jwt);
-      if(!jwt||!untrusted?.iss) return null;
+      if(!jwt||!untrusted?.iss||!claimedAppId) return null;
 
       const providers=await sql`
-        select provider_id, project_url, publishable_key
-        from foundation.identity_providers
-        where issuer=${String(untrusted.iss)}
-          and status='active'
+        select p.provider_id, p.project_url, p.publishable_key
+        from foundation.identity_providers p
+        join foundation.app_identity_providers a
+          on a.provider_id=p.provider_id
+        where p.issuer=${String(untrusted.iss)}
+          and p.status='active'
+          and a.app_id=${claimedAppId}
+          and a.status='active'
         limit 1
       `;
       const provider=first(providers);
