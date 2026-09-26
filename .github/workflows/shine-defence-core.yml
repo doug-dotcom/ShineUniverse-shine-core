@@ -16,5 +16,6 @@ jobs:
           node-version: '22'
       - run: node security/shine-defence/integration-kit/verify-registry-v1.mjs
       - run: node security/shine-defence/integration-kit/verify-ecosystem-ledger-v1.mjs
+      - run: node security/shine-defence/integration-kit/verify-revocations-v1.mjs
       - run: node security/shine-defence/integration-kit/assess-release-claim-v1.mjs --self-test
       - run: node security/shine-defence/integration-kit/verify-certification-receipts-v1.mjs
