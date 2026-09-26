@@ -134,6 +134,12 @@
       "path": "security/shine-defence/review-promotion-v1.json",
       "version": "1.0.0",
       "blobSha": "97830a6eb66758151d519b6e80145d81c57874ae"
+    },
+    {
+      "id": "review-promoter",
+      "path": "security/shine-defence/integration-kit/promote-review-v1.mjs",
+      "version": "1.0.0",
+      "blobSha": "031da7e7ea376e13397f17a2c53d2549b9538803"
     }
   ]
 }
