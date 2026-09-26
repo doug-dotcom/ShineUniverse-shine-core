@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Shine Foundation Gateway",
-    "version": "1.0.0"
+    "version": "1.1.0"
   },
   "paths": {
     "/health": {
@@ -18,10 +18,11 @@
     "/v1/access/evaluate": {
       "post": {
         "operationId": "evaluateFoundationAccess",
-        "description": "Evaluate one scoped Foundation access request. Authentication is supplied outside the JSON envelope.",
+        "description": "Evaluate one scoped Foundation access request. User and calling-app authentication are supplied outside the JSON envelope.",
         "security": [
           {
-            "bearerAuth": []
+            "bearerAuth": [],
+            "appToken": []
           }
         ],
         "requestBody": {
@@ -36,23 +37,19 @@
         },
         "responses": {
           "200": {
-            "description": "Access allowed.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "../schemas/gateway-response-v1.schema.json"
-                }
-              }
-            }
+            "description": "Access allowed."
           },
           "400": {
             "description": "Invalid request."
           },
           "401": {
-            "description": "Authentication failed."
+            "description": "Transport authentication failed."
           },
           "403": {
             "description": "Access denied."
+          },
+          "413": {
+            "description": "Request body exceeds the Gateway limit."
           },
           "503": {
             "description": "Foundation unavailable or audit could not be persisted."
@@ -66,7 +63,13 @@
       "bearerAuth": {
         "type": "http",
         "scheme": "bearer",
-        "bearerFormat": "opaque-or-jwt"
+        "bearerFormat": "Supabase user JWT"
+      },
+      "appToken": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-Shine-App-Token",
+        "description": "Server-side Shine app credential. Never embed in browser/mobile clients."
       }
     }
   }
