@@ -19,8 +19,10 @@
       "const": "1.0.0"
     },
     "traceId": {
-      "type": "string",
-      "format": "uuid"
+      "type": [
+        "string",
+        "null"
+      ]
     },
     "requestId": {
       "type": [
