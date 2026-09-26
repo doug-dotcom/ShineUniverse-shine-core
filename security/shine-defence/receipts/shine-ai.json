@@ -1,0 +1,17 @@
+{
+  "receipt": "shine-defence/certification-receipt-v1",
+  "version": "1.0.0",
+  "appId": "shine-ai",
+  "repository": "doug-dotcom/Shine-Ai",
+  "reviewCommitSha": "e2e51ab6a7bbfc36734a49386f97aa1eb24a2fb1",
+  "profilePath": "security/shine-defence/profile.json",
+  "profileBlobSha": "d68253c8588c34a132aa5455bf7c09e2f7e30621",
+  "profileVersion": "1.1.0",
+  "policies": [
+    "ai-prompt-and-tool-boundaries"
+  ],
+  "registryVersion": "1.0.0",
+  "registryBlobSha": "6c38e85b5c52cf398267cc6f22c6467ecfe37f06",
+  "releaseClaimContractVersion": "1.0.0",
+  "releaseClaimContractBlobSha": "b6ad32414a6bba5db77d277addf935e6f993bc55"
+}

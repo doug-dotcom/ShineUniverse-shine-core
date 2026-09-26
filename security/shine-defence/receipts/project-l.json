@@ -1,0 +1,17 @@
+{
+  "receipt": "shine-defence/certification-receipt-v1",
+  "version": "1.0.0",
+  "appId": "project-l",
+  "repository": "doug-dotcom/Project-L-Modular",
+  "reviewCommitSha": "ec2dcd877d362a601682fb910bbc9c497d568c59",
+  "profilePath": "security/shine-defence/profile.json",
+  "profileBlobSha": "5e8badd4a4d9ace61f9c8d411dcd4b51e989f210",
+  "profileVersion": "1.1.0",
+  "policies": [
+    "sensitive-memory-governance"
+  ],
+  "registryVersion": "1.0.0",
+  "registryBlobSha": "6c38e85b5c52cf398267cc6f22c6467ecfe37f06",
+  "releaseClaimContractVersion": "1.0.0",
+  "releaseClaimContractBlobSha": "b6ad32414a6bba5db77d277addf935e6f993bc55"
+}

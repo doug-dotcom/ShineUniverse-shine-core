@@ -1,0 +1,19 @@
+{
+  "receipt": "shine-defence/certification-receipt-v1",
+  "version": "1.0.0",
+  "appId": "shine-music",
+  "repository": "doug-dotcom/shine-music",
+  "reviewCommitSha": "74601fbe9d83d15113ceb5f92c15013fb5958baa",
+  "profilePath": "security/shine-defence/profile.json",
+  "profileBlobSha": "a13a141f28bd1359b949a557b2025978156ccb3c",
+  "profileVersion": "1.1.0",
+  "policies": [
+    "baseline",
+    "certifier",
+    "malware-quarantine"
+  ],
+  "registryVersion": "1.0.0",
+  "registryBlobSha": "6c38e85b5c52cf398267cc6f22c6467ecfe37f06",
+  "releaseClaimContractVersion": "1.0.0",
+  "releaseClaimContractBlobSha": "b6ad32414a6bba5db77d277addf935e6f993bc55"
+}

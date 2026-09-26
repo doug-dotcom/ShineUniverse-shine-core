@@ -1,0 +1,17 @@
+{
+  "receipt": "shine-defence/certification-receipt-v1",
+  "version": "1.0.0",
+  "appId": "fiona-finance",
+  "repository": "doug-dotcom/Fiona-Finance",
+  "reviewCommitSha": "89c13f27a2a449e4b3de18b9e636008d4f722783",
+  "profilePath": "security/shine-defence/profile.json",
+  "profileBlobSha": "92ce5122054564ddc9faa55f129d6e216aecdd83",
+  "profileVersion": "1.1.0",
+  "policies": [
+    "financial-research-provenance"
+  ],
+  "registryVersion": "1.0.0",
+  "registryBlobSha": "6c38e85b5c52cf398267cc6f22c6467ecfe37f06",
+  "releaseClaimContractVersion": "1.0.0",
+  "releaseClaimContractBlobSha": "b6ad32414a6bba5db77d277addf935e6f993bc55"
+}
