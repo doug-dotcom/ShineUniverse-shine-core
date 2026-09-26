@@ -1,0 +1,38 @@
+{
+  "spec": "shine-foundation/appendage-connection-spec-v1",
+  "schemaVersion": "1.0.0",
+  "app": {
+    "appId": "shine.dive",
+    "name": "Shine Dive",
+    "primaryPurpose": "Personal dive logbook, planning, equipment and diving companion."
+  },
+  "source": {
+    "repository": "doug-dotcom/shine-dive-",
+    "branch": "codex/dive-foundation",
+    "backendEntrypoint": "server.mjs"
+  },
+  "identity": {
+    "kind": "supabase-opaque-vault",
+    "providerId": "supabase:dive-vault",
+    "projectUrl": "https://lqicznkysqqxbrmtxmms.supabase.co",
+    "verificationResource": "dive_companions",
+    "subjectField": "vault_hash",
+    "tokenHeader": "x-shine-vault-token"
+  },
+  "runtime": {
+    "platform": "railway",
+    "foundationBaseUrlEnv": "SHINE_FOUNDATION_URL",
+    "appTokenEnv": "SHINE_FOUNDATION_APP_TOKEN",
+    "userCredentialMode": "opaque-header"
+  },
+  "pilot": {
+    "scope": "vault.foundation.pilot.read",
+    "purpose": "dive.foundation-pilot",
+    "resourceCategory": "foundation.pilot"
+  },
+  "safety": {
+    "standaloneFallback": true,
+    "secretsInSpec": false,
+    "personalIdsInSpec": false
+  }
+}
