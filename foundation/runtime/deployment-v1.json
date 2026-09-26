@@ -1,9 +1,9 @@
 {
   "deployment": "shine-foundation/runtime-deployment-v1",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "target": "supabase-edge-functions",
   "functionName": "foundation-gateway",
-  "verifyJwt": true,
+  "verifyJwt": false,
   "entrypoint": "foundation/runtime/edge-function/index.ts",
   "database": {
     "connectionEnv": "SUPABASE_DB_URL",
@@ -22,7 +22,9 @@
     ],
     "userTokenHeader": "Authorization",
     "appCredentialHeader": "X-Shine-App-Token",
-    "appCredentialStorage": "SHA-256 only"
+    "appCredentialStorage": "SHA-256 only",
+    "platformJwtVerification": false,
+    "customAuthentication": "X-Shine-App-Token attestation followed by issuer-verified user JWT"
   },
   "pinnedDependencies": {
     "@supabase/supabase-js": "2.117.1",
@@ -35,6 +37,6 @@
     "Confirm the postgres platform connection can SET LOCAL ROLE foundation_gateway",
     "Provision verified foundation.identity_bindings rows before user access",
     "Provision app credential SHA-256 hashes in foundation.app_credentials before app access",
-    "Keep Edge Function platform JWT verification enabled"
+    "Deploy Edge Function with verify_jwt=false because user JWTs may come from registered external Shine issuers and authentication is enforced in function code"
   ]
 }
