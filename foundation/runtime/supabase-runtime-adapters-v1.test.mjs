@@ -244,6 +244,7 @@ test('claim adapter sends only verified identifiers to the audited database clai
     sourceProviderId:'supabase:ski-session',
     sourceProviderSubject:'d'.repeat(64),
     targetProviderId:'supabase:test',
+    targetProviderSubject:'auth-user',
     targetShineId:shineId,
     occurredAt:'2026-09-26T13:00:00Z'
   });
