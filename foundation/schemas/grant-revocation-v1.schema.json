@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:shine:foundation:schema:grant-revocation-v1",
+  "title": "Shine Foundation Grant Revocation v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "event",
+    "schemaVersion",
+    "revocationId",
+    "grantId",
+    "ownerShineId",
+    "revokedAt",
+    "reason"
+  ],
+  "properties": {
+    "event": {
+      "const": "shine-foundation/grant-revocation-v1"
+    },
+    "schemaVersion": {
+      "const": "1.0.0"
+    },
+    "revocationId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "grantId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "ownerShineId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "revokedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "reason": {
+      "enum": [
+        "user-revoked",
+        "account-state",
+        "security-event",
+        "app-removed",
+        "expired",
+        "administrative"
+      ]
+    },
+    "detail": {
+      "type": "string",
+      "maxLength": 1000
+    }
+  }
+}
