@@ -1,5 +1,6 @@
 import postgres from 'npm:postgres@3.4.9';
 import {createFoundationGateway} from '../../gateway/gateway-core-v1.mjs';
+import {createIdentityClaimService} from '../../gateway/identity-claim-v1.mjs';
 import {createFoundationHttpHandler} from '../../gateway/http-handler-v1.mjs';
 import {createPublicDefenceStatusService} from '../../gateway/defence-status-v1.mjs';
 import {createSupabaseRuntimeAdapters} from '../supabase-runtime-adapters-v1.mjs';
@@ -32,6 +33,7 @@ const adapters=createSupabaseRuntimeAdapters({
 });
 
 const gateway=createFoundationGateway({adapters});
+const identityClaim=createIdentityClaimService({adapters});
 const defenceStatus=createPublicDefenceStatusService({
   ledger:defenceLedger,
   revocations:defenceRevocations
@@ -39,6 +41,7 @@ const defenceStatus=createPublicDefenceStatusService({
 
 const handler=createFoundationHttpHandler({
   gateway,
+  identityClaim,
   defenceStatus,
   maxBodyBytes:16*1024,
   authenticate:async(request:Request)=>{
@@ -50,6 +53,16 @@ const handler=createFoundationHttpHandler({
       throw new Error('missing runtime credentials');
     }
     return {appToken,...(jwt?{jwt}:{}),...(userToken?{userToken}:{})};
+  },
+  authenticateIdentityClaim:async(request:Request)=>{
+    const authorization=request.headers.get('authorization')??'';
+    const appToken=request.headers.get('x-shine-app-token')??'';
+    const sourceUserToken=request.headers.get('x-shine-user-token')??'';
+    const targetJwt=authorization.startsWith('Bearer ')?authorization.slice('Bearer '.length):'';
+    if(!appToken||!sourceUserToken||!targetJwt){
+      throw new Error('missing identity claim credentials');
+    }
+    return {appToken,sourceUserToken,targetJwt};
   }
 });
 
