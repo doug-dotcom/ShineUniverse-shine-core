@@ -1,0 +1,60 @@
+{
+  "ledger": "shine-defence/review-candidates-v1",
+  "version": "1.0.0",
+  "meaning": "Non-authoritative review queue and historical review-candidate evidence. Only ecosystem-profile-ledger-v1 plus certification receipts determine current certification.",
+  "candidates": [
+    {
+      "candidateId": "shine-daash-bae29a40",
+      "appId": "shine-daash",
+      "repository": "doug-dotcom/Shine-DaAsh",
+      "releaseCommitSha": "bae29a40aca190298b665b0e9f0de76fc8b06d3f",
+      "profilePath": "security/shine-defence/profile.json",
+      "profileBlobSha": "a4d7ea1ad9affd75497a715d11c26469af741470",
+      "profileVersion": "1.4.0",
+      "policies": [
+        "baseline",
+        "certifier",
+        "authenticated-session-hardening",
+        "exercise-companion-safety"
+      ],
+      "status": "accepted",
+      "observedAt": "2026-09-26T11:02:18.867Z",
+      "evidence": [
+        {
+          "source": "railway",
+          "kind": "deployment_success",
+          "reference": "63573b8b-92c3-4b2b-84cd-1b7aa77026de",
+          "checkedAt": "2026-09-26T11:02:18.867Z",
+          "summary": "Production deployment reached SUCCESS after 94 regression suites, TypeScript, Next production build and standalone packaging."
+        }
+      ]
+    },
+    {
+      "candidateId": "shine-travel-474c3f10",
+      "appId": "shine-travel",
+      "repository": "doug-dotcom/shine-travel",
+      "releaseCommitSha": "474c3f109c013c232dd7f78dfaf96a5e405744b2",
+      "profilePath": "security/shine-defence/profile.json",
+      "profileBlobSha": "ba66ee8079a4d22de8f80d7ba30608a9d78bfe00",
+      "profileVersion": "1.3.0",
+      "policies": [
+        "baseline",
+        "certifier",
+        "external-link",
+        "authenticated-session-hardening",
+        "external-data-provenance"
+      ],
+      "status": "accepted",
+      "observedAt": "2026-09-26T12:11:54.500Z",
+      "evidence": [
+        {
+          "source": "railway",
+          "kind": "deployment_success",
+          "reference": "a95651ea-445b-4ae5-a339-cd102866fca9",
+          "checkedAt": "2026-09-26T12:11:54.500Z",
+          "summary": "Production deployment reached SUCCESS after the full Travel Defence gate and 519 of 519 regression tests."
+        }
+      ]
+    }
+  ]
+}

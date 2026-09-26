@@ -73,4 +73,10 @@ Receipts are verified in Core CI against the ecosystem ledger and the **immutabl
 
 `security/shine-defence/integration-kit/consumer-v1.mjs` is the canonical Node consumer for receipt-backed app/deployment status. It fails closed on malformed proof material and requires an explicitly current revocation authority before an exact reviewed release may display the green Defence badge.
 
+### Review candidate queue
+
+`security/shine-defence/review-candidate-v1.json` defines the non-authoritative evidence bundle used to ask for review of an exact app release. The queue lives at `security/shine-defence/review-candidates-v1.json` and preserves pending, accepted, superseded and dismissed candidate history.
+
+A candidate **never grants the badge**. Only the canonical ecosystem review ledger plus an exact certification receipt can make a release `reviewed_release`. Core CI verifies accepted candidates exactly match both of those authorities, limits each app to one pending candidate, validates canonical policy ids and rejects obvious secret material in evidence fields.
+
 An extension policy existing in Core does **not** automatically certify an app. Each app still needs local, testable evidence before claiming that profile.
