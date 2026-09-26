@@ -12,8 +12,8 @@
     {
       "id": "certifier",
       "path": "security/shine-defence/integration-kit/certifier-v1.mjs",
-      "version": "1.0.0",
-      "blobSha": "1f91e073ae700b96f15202f97e692ca6d22a7d5d"
+      "version": "1.1.0",
+      "blobSha": "ccb28b1c373ad4fad1a3064559e1f1741b32b5b0"
     },
     {
       "id": "external-link",
