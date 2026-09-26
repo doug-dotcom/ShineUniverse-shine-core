@@ -7,15 +7,15 @@
       "id": "shine-daash",
       "repo": "doug-dotcom/Shine-DaAsh",
       "path": "security/shine-defence/profile.json",
-      "profileBlobSha": "b4ddb4a071c2792919c0d12b6396fa107e429981",
+      "profileBlobSha": "a4d7ea1ad9affd75497a715d11c26469af741470",
       "policies": [
         "baseline",
         "certifier",
         "authenticated-session-hardening",
         "exercise-companion-safety"
       ],
-      "reviewCommitSha": "b00bf66843d24424878ac86384c4c621bcbd9953",
-      "profileVersion": "1.3.0"
+      "reviewCommitSha": "bae29a40aca190298b665b0e9f0de76fc8b06d3f",
+      "profileVersion": "1.4.0"
     },
     {
       "id": "shine-travel",
