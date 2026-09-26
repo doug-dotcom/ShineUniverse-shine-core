@@ -105,4 +105,10 @@ The helper is dry-run by default. `--apply` performs atomic per-file replacement
 
 `security/shine-defence/integration-kit/onboard-review-v1.mjs` accepts exactly one existing `pending_review` candidate for an app with no prior reviewed-ledger entry, receipt or accepted decision. It creates the initial reviewed-ledger entry, exact certification receipt, accepted decision and immutable current-registry snapshot as one guarded operation. The command is dry-run by default; `--apply` verifies the complete Defence state and restores every touched file if any gate fails.
 
+### Candidate intake
+
+`security/shine-defence/candidate-intake-v1.json` defines the front-door rules for constructing a `pending_review` candidate from an exact app release, Defence-profile identity, canonical policy claims and bounded evidence. Candidate ids are deterministic (`appId` plus the first 12 characters of the release SHA), duplicate or conflicting queue state fails closed, and intake never mutates the reviewed ledger, receipts, decisions or revocations.
+
+`security/shine-defence/integration-kit/intake-review-v1.mjs` consumes one reviewable JSON input file and is dry-run by default. `--apply` writes only the candidate queue, then runs the registry, candidate and promotion-state verifiers; the queue file is restored if any gate fails. Evidence acceptance validates structure and queue consistency, not the truth of external claims.
+
 An extension policy existing in Core does **not** automatically certify an app. Each app still needs local, testable evidence before claiming that profile.
