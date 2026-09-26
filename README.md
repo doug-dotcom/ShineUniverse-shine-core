@@ -69,4 +69,8 @@ Receipts are verified in Core CI against the ecosystem ledger and the **immutabl
 
 `security/shine-defence/release-status-v1.json` defines the portable consumer-side status model. `evaluate-release-status-v1.mjs` combines a release receipt, the current app commit/profile identity, the receipt's immutable registry snapshot and the current revocation ledger into one display-safe state. Only `reviewed_release` may show the current **Protected by Shine Defence** badge.
 
+### Shared app consumer
+
+`security/shine-defence/integration-kit/consumer-v1.mjs` is the canonical Node consumer for receipt-backed app/deployment status. It fails closed on malformed proof material and requires an explicitly current revocation authority before an exact reviewed release may display the green Defence badge.
+
 An extension policy existing in Core does **not** automatically certify an app. Each app still needs local, testable evidence before claiming that profile.
