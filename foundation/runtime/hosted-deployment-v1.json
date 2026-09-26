@@ -1,6 +1,6 @@
 {
   "deployment": "shine-foundation/hosted-deployment-v1",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "deployedAt": "2026-09-26",
   "supabase": {
     "projectName": "Shine Foundation",
@@ -19,10 +19,10 @@
   "edgeFunction": {
     "slug": "foundation-gateway",
     "id": "0e219164-32a6-4969-b1dc-9b6402e79e59",
-    "version": 5,
+    "version": 7,
     "status": "ACTIVE",
     "verifyJwt": false,
-    "authentication": "custom dual authentication: server-only app credential plus app-approved identity-provider verification"
+    "authentication": "custom app credential plus app-approved JWT or opaque-vault identity verification"
   },
   "firstAppendage": {
     "appId": "shine.travel",
@@ -50,7 +50,9 @@
     "duplicateFederationPathRetired": true,
     "travelContainerStarted": true,
     "appConnectionRegistryCi": "PASS",
-    "appSpecificIssuerGate": true
+    "appSpecificIssuerGate": true,
+    "opaqueFederationCi": "PASS",
+    "diveUsesExistingCanonicalShineId": true
   },
   "secrets": {
     "included": false,
@@ -64,6 +66,27 @@
     "travelActiveCredentials": 1,
     "travelActiveIdentityProviders": 1,
     "travelActiveGrants": 2,
-    "travelObservedAllows": 0
+    "travelObservedAllows": 0,
+    "diveState": "grant-ready",
+    "diveActiveCredentials": 1,
+    "diveActiveIdentityProviders": 1,
+    "diveActiveGrants": 1,
+    "diveObservedAllows": 0
+  },
+  "secondAppendage": {
+    "appId": "shine.dive",
+    "runtime": "Railway",
+    "identityProvider": "supabase:dive-vault",
+    "identityKind": "supabase-opaque-vault",
+    "gatewayRequestVersion": "2.0.0",
+    "pilotScope": "vault.foundation.pilot.read",
+    "pilotPurpose": "dive.foundation-pilot",
+    "pilotResourceCategory": "foundation.pilot",
+    "connectionState": "grant-ready",
+    "activeCredentials": 1,
+    "activeIdentityProviders": 1,
+    "activeGrants": 1,
+    "observedProductionAllow": false,
+    "productionDeploymentStatus": "QUEUED"
   }
 }
