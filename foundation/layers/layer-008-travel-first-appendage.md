@@ -33,7 +33,7 @@ Travel does not receive direct Foundation database access and does not know or s
 
 No second Travel login was introduced.
 
-Foundation registers Shine-L as a trusted external Supabase Auth issuer. A Travel user JWT is accepted only after Foundation verifies it against the registered Shine-L Auth service, then maps the verified Auth subject to canonical Shine ID.
+Foundation registers Shine-L in the canonical `identity_providers` federation registry as an external Supabase Auth issuer. A Travel user JWT is accepted only after Foundation verifies it against the registered Shine-L Auth service, then maps the verified Auth subject to canonical Shine ID.
 
 ## Pilot data
 
@@ -65,13 +65,13 @@ Travel's standalone UI and trip functionality continue operating if Foundation i
 
 ## Defence
 
-Travel's real Railway Docker build ran the full Shine Defence certification and passed the new `SD-FOUNDATION-001` control.
+Travel's real Railway Docker build ran the full Shine Defence/Travel gate, including the `SD-FOUNDATION-001` control, and completed 510/510 tests successfully.
 
 The final reconciled Travel deployment completed successfully and the production container started cleanly.
 
 ## Hosted Foundation
 
-The hosted `foundation-gateway` is ACTIVE as version 3 with Supabase's project-local JWT precheck disabled.
+The hosted `foundation-gateway` is ACTIVE as version 4 with Supabase's project-local JWT precheck disabled.
 
 This is intentional: the Gateway performs custom dual authentication in code:
 
@@ -82,7 +82,7 @@ The hosted Supabase security advisor remains at zero security lints.
 
 ## Acceptance boundary
 
-At Layer 8 completion:
+At the current Layer 8 acceptance boundary:
 
 - Travel production bridge: live;
 - app credential: provisioned as a hash in Foundation and secret in Railway;
@@ -96,3 +96,16 @@ At Layer 8 completion:
 No production `travel.foundation-pilot` audit event had yet been observed at the time this layer was recorded, so Layer 8 does not claim that a real logged-in user has completed the first live ALLOW request.
 
 That first observed ALLOW is the next operational milestone, not a missing deployment component.
+
+
+## Federation consolidation
+
+During Layer 8 reconciliation, a temporary duplicate issuer/connection-test path was retired. The active architecture is again the original Gateway v2 design:
+
+- canonical federation registry: `foundation.identity_providers`;
+- canonical Travel request: Gateway v2 with no caller-supplied `shineId`;
+- canonical pilot scope: `vault.foundation.pilot.read`;
+- canonical pilot purpose: `travel.foundation-pilot`;
+- canonical pilot category: `foundation.pilot`.
+
+Duplicate connection-test grants and the later duplicate Travel app credential were revoked rather than deleted, preserving append-only security history.
