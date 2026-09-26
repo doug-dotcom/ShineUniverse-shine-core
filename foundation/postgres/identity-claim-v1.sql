@@ -36,6 +36,8 @@ create table if not exists foundation.identity_claim_events (
   source_provider_subject text not null
     check (length(source_provider_subject) between 1 and 512),
   target_provider_id text not null references foundation.identity_providers(provider_id),
+  target_provider_subject text not null
+    check (length(target_provider_subject) between 1 and 512),
   target_shine_id uuid not null references foundation.shine_identities(shine_id),
   outcome text not null
     check (outcome in ('linked','already-linked','denied')),
@@ -92,6 +94,7 @@ begin
       or prior.source_provider_id<>p_source_provider_id
       or prior.source_provider_subject<>p_source_provider_subject
       or prior.target_provider_id<>p_target_provider_id
+      or prior.target_provider_subject<>p_target_provider_subject
       or prior.target_shine_id<>p_target_shine_id then
       raise exception 'identity-claim-replay-conflict' using errcode='23505';
     end if;
@@ -185,12 +188,12 @@ begin
   insert into foundation.identity_claim_events(
     claim_id,request_id,app_id,
     source_provider_id,source_provider_subject,
-    target_provider_id,target_shine_id,
+    target_provider_id,target_provider_subject,target_shine_id,
     outcome,reason_code,occurred_at
   ) values (
     p_claim_id,p_request_id,p_app_id,
     p_source_provider_id,p_source_provider_subject,
-    p_target_provider_id,p_target_shine_id,
+    p_target_provider_id,p_target_provider_subject,p_target_shine_id,
     result_outcome,result_reason,p_occurred_at
   );
 
@@ -264,9 +267,6 @@ select
     as standalone_primary_purpose_available,
   coalesce(c.active_credentials,0) as active_credentials,
   coalesce(p.active_identity_providers,0) as active_identity_providers,
-  coalesce(cp.active_claim_identity_providers,0) as active_claim_identity_providers,
-  coalesce(ic.successful_identity_claims,0) as successful_identity_claims,
-  ic.last_identity_claim_at,
   coalesce(g.active_grants,0) as active_grants,
   coalesce(a.observed_allows,0) as observed_allows,
   coalesce(a.observed_denies,0) as observed_denies,
@@ -280,7 +280,10 @@ select
     when coalesce(g.active_grants,0)=0 then 'identity-ready'
     when coalesce(a.observed_allows,0)=0 then 'grant-ready'
     else 'live-observed'
-  end as connection_state
+  end as connection_state,
+  coalesce(cp.active_claim_identity_providers,0) as active_claim_identity_providers,
+  coalesce(ic.successful_identity_claims,0) as successful_identity_claims,
+  ic.last_identity_claim_at
 from foundation.app_registry r
 left join credential_counts c on c.app_id=r.app_id
 left join provider_counts p on p.app_id=r.app_id
