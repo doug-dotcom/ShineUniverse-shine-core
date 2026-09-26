@@ -57,7 +57,8 @@ const makeAdapters=({fetchImpl}={})=>{
         assert.equal(options.headers.apikey,'public-key');
         return Response.json({id:'auth-user'});
       }),
-      defenceGate:createFoundationRuntimeDefenceGateV1(),\n      localAuthUrl:'https://foundation.test'
+      defenceGate:createFoundationRuntimeDefenceGateV1(),
+      localAuthUrl:'https://foundation.test'
     })
   };
 };
