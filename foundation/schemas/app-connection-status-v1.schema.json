@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "urn:shine:foundation:schema:app-connection-status-v1",
-  "title": "Shine Foundation App Connection Status v1",
+  "title": "Shine Foundation App Connection Status v1.1",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -95,6 +95,21 @@
         "grant-ready",
         "live-observed"
       ]
+    },
+    "activeClaimIdentityProviders": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "successfulIdentityClaims": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "lastIdentityClaimAt": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
     }
   }
 }
