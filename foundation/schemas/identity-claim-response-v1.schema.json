@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:shine:foundation:schema:identity-claim-response-v1",
+  "title": "Shine Foundation Identity Claim Response v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "identityClaimResponse",
+    "schemaVersion",
+    "requestId",
+    "status",
+    "reasonCode"
+  ],
+  "properties": {
+    "identityClaimResponse": {
+      "const": "shine-foundation/identity-claim-response-v1"
+    },
+    "schemaVersion": {
+      "const": "1.0.0"
+    },
+    "requestId": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "status": {
+      "enum": [
+        "linked",
+        "already-linked",
+        "denied",
+        "invalid",
+        "unavailable"
+      ]
+    },
+    "reasonCode": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}
