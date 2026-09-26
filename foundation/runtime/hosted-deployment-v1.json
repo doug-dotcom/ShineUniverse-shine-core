@@ -1,6 +1,6 @@
 {
   "deployment": "shine-foundation/hosted-deployment-v1",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "deployedAt": "2026-09-26",
   "supabase": {
     "projectName": "Shine Foundation",
@@ -19,13 +19,27 @@
   "edgeFunction": {
     "slug": "foundation-gateway",
     "id": "0e219164-32a6-4969-b1dc-9b6402e79e59",
-    "version": 1,
+    "version": 3,
     "status": "ACTIVE",
-    "verifyJwt": true
+    "verifyJwt": false,
+    "authentication": "custom dual authentication: server-only app credential plus registered user-token issuer verification"
+  },
+  "firstAppendage": {
+    "appId": "shine.travel",
+    "runtime": "Railway",
+    "identityIssuer": "supabase:shine-l",
+    "gatewayRequestVersion": "2.0.0",
+    "pilotScope": "vault.foundation.pilot.read",
+    "pilotPurpose": "travel.foundation-pilot",
+    "pilotResourceCategory": "foundation.pilot",
+    "deploymentStatus": "SUCCESS",
+    "observedProductionAllow": false
   },
   "verification": {
     "controlPlaneActive": true,
     "databaseRoleSwitchLiveTest": true,
+    "hostedSecurityAdvisorLints": 0,
+    "travelDefenceCertification": "PASS",
     "directHttpHealthTest": false,
     "directHttpHealthTestReason": "assistant shell DNS resolution unavailable"
   },
