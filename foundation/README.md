@@ -59,6 +59,7 @@ An app is never granted access to a user's entire Vault merely because it belong
 - **Layer 12** — reusable appendage onboarding kit and shared backend client.
 - **Layer 13** — third appendage: Shine Ski with opt-in pseudonymous identity.
 - **Layer 14** — explicit two-proof identity claim and merge.
+- **Layer 15** — explicit Vault consent and least-privilege grant issuance.
 
 ## Durable state
 
@@ -174,3 +175,14 @@ A successful claim creates only the identity binding and append-only claim evide
 
 
 Current identity-claim state for Shine Ski: **1 approved claim provider, 0 successful claims, 0 active grants**. Ski remains `identity-ready` until a real user explicitly proves both the Ski session and an existing canonical Shine identity.
+
+
+## Explicit Vault consent
+
+Foundation Layer 15 keeps identity and permission as separate user decisions.
+
+`POST /v1/grants/consent` accepts only a fresh explicit consent envelope after the app backend and already-bound user identity are independently verified. The requested scope, purpose and resource category must be declared in the registered app manifest, the Vault resource must belong to that Shine identity, and Shine Defence may still veto the operation.
+
+The atomic `foundation.issue_access_grant_v1` function records an `explicit-user` grant and append-only consent evidence. Repeated consent for the same active permission is idempotent and does not broaden or duplicate access.
+
+Deploying Layer 15 does not create a real user grant. Shine Ski remains `identity-ready` until a user explicitly completes both identity claim and Vault consent.

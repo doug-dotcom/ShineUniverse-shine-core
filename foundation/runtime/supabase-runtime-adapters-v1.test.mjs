@@ -43,6 +43,9 @@ const makeSql=()=> {
     if(q.includes('from foundation.complete_identity_claim_v1')){
       return [{outcome:'linked',reason_code:'identity-claim-linked'}];
     }
+    if(q.includes('from foundation.issue_access_grant_v1')){
+      return [{outcome:'granted',reason_code:'grant-consent-recorded',grant_id:grantId}];
+    }
     if(q.includes('from foundation.app_registry')){
       return [{manifest:{appId:'shine.travel',foundation:{requestedScopes:[]}}}];
     }
@@ -273,4 +276,22 @@ test('complete identity claim delegates to atomic database function',async()=>{
     occurredAt:'2026-09-26T12:30:00Z'
   });
   assert.deepEqual(result,{outcome:'linked',reason_code:'identity-claim-linked'});
+});
+
+
+test('explicit grant consent delegates to the atomic database function',async()=>{
+  const {adapters}=makeAdapters();
+  const result=await adapters.issueAccessGrant({
+    consentId:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+    grantId,
+    requestId:'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
+    ownerShineId:shineId,
+    appId:'shine.travel',
+    scope:'vault.foundation.pilot.read',
+    purpose:'travel.foundation-pilot',
+    resourceId:null,
+    resourceCategory:'foundation.pilot',
+    occurredAt:'2026-09-26T13:15:00Z'
+  });
+  assert.deepEqual(result,{outcome:'granted',reason_code:'grant-consent-recorded',grant_id:grantId});
 });

@@ -183,3 +183,48 @@ test('identity claim denied maps to HTTP 403 without exposing identity details',
   assert.equal(Object.hasOwn(body,'shineId'),false);
   assert.equal(Object.hasOwn(body,'providerSubject'),false);
 });
+
+
+test('explicit grant consent uses normal dual authentication and maps success to HTTP 200',async()=>{
+  let auth=0;
+  const consentHandler=createFoundationHttpHandler({
+    gateway:async()=>{throw new Error('access gateway must not run')},
+    authenticate:async request=>{
+      auth++;
+      if(request.headers.get('x-shine-app-token')!=='app') throw new Error('missing app');
+      if(request.headers.get('x-shine-user-token')!=='user') throw new Error('missing user');
+      return {appToken:'app',userToken:'user'};
+    },
+    grantConsent:async({envelope})=>({
+      grantConsentResponse:'shine-foundation/grant-consent-response-v1',
+      schemaVersion:'1.0.0',
+      requestId:envelope.requestId,
+      status:'granted',
+      reasonCode:'grant-consent-recorded'
+    })
+  });
+  const res=await consentHandler(new Request(base+'/foundation-gateway/v1/grants/consent',{
+    method:'POST',
+    headers:{
+      'x-shine-app-token':'app',
+      'x-shine-user-token':'user',
+      'content-type':'application/json'
+    },
+    body:JSON.stringify({requestId:'11111111-1111-4111-8111-111111111111'})
+  }));
+  assert.equal(res.status,200);
+  assert.equal(auth,1);
+  assert.equal((await res.json()).status,'granted');
+});
+
+test('grant consent denial maps to HTTP 403',async()=>{
+  const consentHandler=createFoundationHttpHandler({
+    gateway:async()=>({status:'allowed'}),
+    authenticate:async()=>({}),
+    grantConsent:async()=>({status:'denied',reasonCode:'scope-not-declared'})
+  });
+  const res=await consentHandler(new Request(base+'/v1/grants/consent',{
+    method:'POST',headers:{'content-type':'application/json'},body:'{}'
+  }));
+  assert.equal(res.status,403);
+});

@@ -308,6 +308,28 @@ export function createSupabaseRuntimeAdapters({sql,defenceGate,fetchImpl=fetch}=
       return first(rows)??null;
     },
 
+    async issueAccessGrant({
+      consentId,grantId,requestId,ownerShineId,appId,scope,purpose,
+      resourceId,resourceCategory,occurredAt
+    }={}){
+      const rows=await sql`
+        select outcome,reason_code,grant_id::text
+        from foundation.issue_access_grant_v1(
+          ${consentId}::uuid,
+          ${grantId}::uuid,
+          ${requestId}::uuid,
+          ${ownerShineId}::uuid,
+          ${appId},
+          ${scope},
+          ${purpose},
+          ${resourceId??null}::uuid,
+          ${resourceCategory},
+          ${occurredAt}::timestamptz
+        )
+      `;
+      return first(rows)??null;
+    },
+
     async getAppManifest({appId}={}){
       const rows=await sql`
         select manifest from foundation.app_registry
