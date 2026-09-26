@@ -1,0 +1,119 @@
+{
+  "ledger": "shine-defence/ecosystem-profile-ledger-v1",
+  "version": "1.0.0",
+  "meaning": "Records the exact reviewed app-profile blob and canonical Defence artefacts it claimed at review time. It is not a claim that a later app commit passed certification.",
+  "apps": [
+    {
+      "id": "shine-daash",
+      "repo": "doug-dotcom/Shine-DaAsh",
+      "path": "security/shine-defence/profile.json",
+      "profileBlobSha": "102bfbadd974fc79ddd604d1a9792bf7df868056",
+      "policies": [
+        "baseline",
+        "certifier",
+        "authenticated-session-hardening",
+        "exercise-companion-safety"
+      ]
+    },
+    {
+      "id": "shine-travel",
+      "repo": "doug-dotcom/shine-travel",
+      "path": "security/shine-defence/profile.json",
+      "profileBlobSha": "666caaaaf763d30a4f2bc76cd275386b42f4c83a",
+      "policies": [
+        "baseline",
+        "certifier",
+        "external-link",
+        "authenticated-session-hardening",
+        "external-data-provenance"
+      ]
+    },
+    {
+      "id": "shine-ski",
+      "repo": "doug-dotcom/Shine-Ski",
+      "path": "security/shine-defence-baseline-v1.json",
+      "profileBlobSha": "2b2601462c60b44a202dddab62c202c99c430bbd",
+      "policies": [
+        "baseline",
+        "external-data-provenance"
+      ]
+    },
+    {
+      "id": "shine-translate",
+      "repo": "doug-dotcom/shine-translate",
+      "path": "security/shine-defence/profile.json",
+      "profileBlobSha": "ad14a1fc01ed0eef1c48b3e5d723262af9984731",
+      "policies": [
+        "baseline",
+        "certifier",
+        "untrusted-content",
+        "external-data-provenance"
+      ]
+    },
+    {
+      "id": "shine-music",
+      "repo": "doug-dotcom/shine-music",
+      "path": "security/shine-defence/profile.json",
+      "profileBlobSha": "7532e077f7d5400d5b4fddf219eabee6355ae9b7",
+      "policies": [
+        "baseline",
+        "certifier",
+        "malware-quarantine"
+      ]
+    },
+    {
+      "id": "shine-my-money",
+      "repo": "doug-dotcom/shine-my-money-",
+      "path": "security/shine-defence/profile.json",
+      "profileBlobSha": "c846a6f5c110bcbce63bc4d9e5fc584a5581cb98",
+      "policies": [
+        "personal-financial-data"
+      ]
+    },
+    {
+      "id": "punt-49",
+      "repo": "doug-dotcom/Punt-49",
+      "path": "security/shine-defence/profile.json",
+      "profileBlobSha": "81399ddecd03955cefa7b0e3edb5209153ecd343",
+      "policies": [
+        "wagering-trial-integrity"
+      ]
+    },
+    {
+      "id": "fiona-finance",
+      "repo": "doug-dotcom/Fiona-Finance",
+      "path": "security/shine-defence/profile.json",
+      "profileBlobSha": "e10039a05fe065de1996bb10ed06400d4749d49e",
+      "policies": [
+        "financial-research-provenance"
+      ]
+    },
+    {
+      "id": "project-rc",
+      "repo": "doug-dotcom/Project-RC",
+      "path": "security/shine-defence/profile.json",
+      "profileBlobSha": "6350e60ec69614e4442f51993ab9a5316e05c9e7",
+      "policies": [
+        "sensitive-memory-governance"
+      ]
+    },
+    {
+      "id": "project-l",
+      "repo": "doug-dotcom/Project-L-Modular",
+      "path": "security/shine-defence/profile.json",
+      "profileBlobSha": "27905beaf3a00cae2b81e8ac4a192905ea3b605c",
+      "policies": [
+        "sensitive-memory-governance"
+      ]
+    },
+    {
+      "id": "shine-ai",
+      "repo": "doug-dotcom/Shine-Ai",
+      "path": "security/shine-defence/profile.json",
+      "profileBlobSha": "5f1ff3535af06300b51a2990a49ba59a2ed0d33b",
+      "policies": [
+        "ai-prompt-and-tool-boundaries"
+      ]
+    }
+  ]
+}
