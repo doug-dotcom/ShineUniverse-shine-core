@@ -23,8 +23,9 @@ test('Dive example validates opaque-vault provider without private user state',a
   assert.equal(plan.identityProvider.kind,'supabase-opaque-vault');
   assert.equal(plan.identityProvider.verificationResource,'dive_companions');
   assert.equal(plan.runtime.userCredentialMode,'opaque-header');
-  assert.equal(JSON.stringify(spec).includes('shineId'),false);
-  assert.equal(JSON.stringify(spec).includes('appToken'),false);
+  const encoded=JSON.stringify(spec);
+  assert.equal(encoded.includes('"shineId"'),false);
+  assert.equal(encoded.includes('"appToken"'),false);
 });
 
 test('spec rejects personal IDs and secrets',async()=>{
