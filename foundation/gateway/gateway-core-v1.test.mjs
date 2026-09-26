@@ -149,3 +149,35 @@ test('Foundation unavailability does not instruct the app to disable itself',asy
   assert.equal(result.status,'unavailable');
   assert.equal(Object.hasOwn(result,'disableApp'),false);
 });
+
+
+test('identity mismatch short-circuits before Core or Vault lookups',async()=>{
+  let manifestCalls=0;
+  let vaultCalls=0;
+  const {gateway}=create({
+    verifyIdentity:async()=>({shineId:'99999999-9999-4999-8999-999999999999'}),
+    getAppManifest:async()=>{manifestCalls++; return manifest},
+    getVaultResource:async()=>{vaultCalls++; return resource}
+  });
+  const result=await gateway({envelope,authContext:{}});
+  assert.equal(result.reasonCode,'identity-mismatch');
+  assert.equal(manifestCalls,0);
+  assert.equal(vaultCalls,0);
+});
+
+test('undeclared app scope short-circuits before Vault and grant lookups',async()=>{
+  let vaultCalls=0;
+  let grantCalls=0;
+  const changedEnvelope={
+    ...envelope,
+    permission:{...envelope.permission,scope:'vault.location.write'}
+  };
+  const {gateway}=create({
+    getVaultResource:async()=>{vaultCalls++; return resource},
+    getEffectiveGrants:async()=>{grantCalls++; return [grant]}
+  });
+  const result=await gateway({envelope:changedEnvelope,authContext:{}});
+  assert.equal(result.reasonCode,'scope-not-declared');
+  assert.equal(vaultCalls,0);
+  assert.equal(grantCalls,0);
+});
