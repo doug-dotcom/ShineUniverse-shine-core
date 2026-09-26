@@ -177,13 +177,9 @@ begin
 end
 $$;
 
-rollback;
-select 'SHINE FOUNDATION IDENTITY CLAIM V1: PASS' as result;
-
-
 -- Exact target provider subject must match the canonical binding proved by Auth.
 set role foundation_gateway;
-do $$
+do $
 declare got_outcome text; got_reason text;
 begin
   select outcome,reason_code into got_outcome,got_reason
@@ -203,6 +199,31 @@ begin
     raise exception 'expected exact target subject denial, got % / %',got_outcome,got_reason;
   end if;
 end
-$$;
+$;
+
+-- Reusing a request ID with a different canonical subject must fail as a replay conflict.
+do $
+begin
+  begin
+    perform *
+    from foundation.complete_identity_claim_v1(
+      'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+      'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
+      'shine.claim-test',
+      'supabase:claim-source',
+      'source-session-hash',
+      'supabase:claim-target',
+      'different-target-user',
+      '11111111-1111-4111-8111-111111111111',
+      now()
+    );
+    raise exception 'identity claim replay unexpectedly accepted a changed target subject';
+  exception
+    when unique_violation then null;
+  end;
+end
+$;
 
 reset role;
+rollback;
+select 'SHINE FOUNDATION IDENTITY CLAIM V1: PASS' as result;
