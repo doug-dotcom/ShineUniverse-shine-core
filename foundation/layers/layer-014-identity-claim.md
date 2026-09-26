@@ -1,6 +1,6 @@
 # Foundation Layer 14 — Explicit identity claim and merge
 
-**Status:** Complete in source; hosted activation pending  
+**Status:** Live; no real user claim executed  
 **Scope:** Shine ID claim boundary
 
 Layer 14 introduces an explicit, two-proof identity claim flow for apps that begin with an unbound pseudonymous session such as Shine Ski.
@@ -85,6 +85,23 @@ It sends:
 - target identity JWT in `Authorization: Bearer ...`.
 
 None of those credentials are placed in the JSON body.
+
+## Hosted acceptance
+
+Layer 14 is live in the dedicated Shine Foundation project.
+
+- Gateway: **v10 ACTIVE**
+- claim route: **ACTIVE**
+- clean CI contracts/runtime: **PASS**
+- clean Postgres claim acceptance: **PASS**
+- hosted rollback acceptance: **PASS**
+- hosted Supabase security advisor: **0 lints**
+- Shine Ski approved claim providers: **1** (`supabase:shine-l`)
+- successful real Ski claims: **0**
+- active Ski grants: **0**
+- Ski connection state: **identity-ready**
+
+No real Ski session was linked during deployment.
 
 ## Acceptance boundary
 
