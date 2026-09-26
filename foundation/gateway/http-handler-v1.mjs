@@ -6,13 +6,15 @@ const JSON_HEADERS={
 const json=(status,body)=>new Response(JSON.stringify(body),{status,headers:JSON_HEADERS});
 const healthPath=p=>p==='/health'||p.endsWith('/foundation-gateway/health');
 const evaluatePath=p=>p==='/v1/access/evaluate'||p.endsWith('/foundation-gateway/v1/access/evaluate');
+const identityClaimPath=p=>p==='/v1/identity/claim'||p.endsWith('/foundation-gateway/v1/identity/claim');
 const defenceStatusMatch=p=>p.match(/(?:^|\/foundation-gateway)\/v1\/defence\/status\/([a-z0-9][a-z0-9-]{0,63})$/);
 const SHA=/^[a-f0-9]{40}$/;
 
-/** @param {{gateway:any, authenticate:any, defenceStatus?:any, maxBodyBytes?:number}} [options] */
-export function createFoundationHttpHandler({gateway,authenticate,defenceStatus,maxBodyBytes=16*1024}={}){
+/** @param {{gateway:any, authenticate:any, identityClaim?:any, defenceStatus?:any, maxBodyBytes?:number}} [options] */
+export function createFoundationHttpHandler({gateway,authenticate,identityClaim,defenceStatus,maxBodyBytes=16*1024}={}){
   if(typeof gateway!=='function') throw new TypeError('gateway must be a function');
   if(typeof authenticate!=='function') throw new TypeError('authenticate must be a function');
+  if(identityClaim!==undefined&&typeof identityClaim!=='function') throw new TypeError('identityClaim must be a function');
   if(defenceStatus!==undefined&&typeof defenceStatus!=='function') throw new TypeError('defenceStatus must be a function');
 
   return async function handle(request){
@@ -36,8 +38,11 @@ export function createFoundationHttpHandler({gateway,authenticate,defenceStatus,
       }
     }
 
-    if(!evaluatePath(url.pathname)) return json(404,{error:'not-found'});
+    const accessRequest=evaluatePath(url.pathname);
+    const claimRequest=identityClaimPath(url.pathname);
+    if(!accessRequest&&!claimRequest) return json(404,{error:'not-found'});
     if(request.method!=='POST') return json(405,{error:'method-not-allowed'});
+    if(claimRequest&&!identityClaim) return json(404,{error:'not-found'});
 
     const contentType=request.headers.get('content-type')??'';
     if(!contentType.toLowerCase().startsWith('application/json')){
@@ -57,8 +62,12 @@ export function createFoundationHttpHandler({gateway,authenticate,defenceStatus,
     let authContext;
     try{ authContext=await authenticate(request); }catch{ return json(401,{error:'unauthenticated'}); }
 
-    const result=await gateway({envelope,authContext});
-    const status={allowed:200,denied:403,invalid:400,unavailable:503}[result.status]??500;
+    const result=claimRequest
+      ? await identityClaim({envelope,authContext})
+      : await gateway({envelope,authContext});
+    const status=claimRequest
+      ? ({linked:200,conflict:409,denied:403,invalid:400,unavailable:503}[result.status]??500)
+      : ({allowed:200,denied:403,invalid:400,unavailable:503}[result.status]??500);
     return json(status,result);
   };
 }
