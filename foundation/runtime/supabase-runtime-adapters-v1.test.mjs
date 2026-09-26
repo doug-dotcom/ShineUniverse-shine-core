@@ -18,9 +18,16 @@ const makeSql=()=> {
         ? [{credential_id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',app_id:'shine.travel'}] : [];
     }
     if(q.includes('from foundation.identity_providers')){
-      return values[0]===issuer && values[1]==='shine.travel'
-        ? [{provider_id:'supabase:test',project_url:'https://identity.example.test',publishable_key:'public-key'}]
-        : [];
+      if(q.includes("p.kind='supabase-auth'")){
+        return values[0]===issuer && values[1]==='shine.travel'
+          ? [{provider_id:'supabase:test',kind:'supabase-auth',project_url:'https://identity.example.test',publishable_key:'public-key'}]
+          : [];
+      }
+      if(q.includes("p.kind='supabase-opaque-vault'")){
+        return values[0]==='shine.dive'
+          ? [{provider_id:'supabase:dive-vault',kind:'supabase-opaque-vault',project_url:'https://dive.example.test',publishable_key:'public-key',verification_resource:'dive_companions',subject_field:'vault_hash',token_header:'x-shine-vault-token'}]
+          : [];
+      }
     }
     if(q.includes('from foundation.identity_bindings')) return [{shine_id:shineId}];
     if(q.includes('from foundation.app_registry')){
@@ -141,6 +148,46 @@ test('registered issuer is denied when it is not linked to the requesting app',a
   const result=await adapters.verifyIdentity({
     authContext:{jwt:token},
     claimedAppId:'shine.dive'
+  });
+  assert.equal(result,null);
+  assert.equal(calls,0);
+});
+
+test('opaque Dive vault token is independently verified through provider RLS and maps to Shine ID',async()=>{
+  const raw='a'.repeat(64);
+  const expected=await sha256Hex(raw);
+  let verified=false;
+  const {sql}=makeSql();
+  const adapters=createSupabaseRuntimeAdapters({
+    sql,
+    defenceGate:createFoundationRuntimeDefenceGateV1(),
+    fetchImpl:async(url,options)=>{
+      verified=true;
+      const parsed=new URL(url);
+      assert.equal(parsed.origin,'https://dive.example.test');
+      assert.equal(parsed.pathname,'/rest/v1/dive_companions');
+      assert.equal(parsed.searchParams.get('vault_hash'),'eq.'+expected);
+      assert.equal(options.headers.apikey,'public-key');
+      assert.equal(options.headers['x-shine-vault-token'],raw);
+      return Response.json([{vault_hash:expected}]);
+    }
+  });
+  const result=await adapters.verifyIdentity({
+    authContext:{userToken:raw},
+    claimedAppId:'shine.dive'
+  });
+  assert.equal(verified,true);
+  assert.equal(result.shineId,shineId);
+  assert.equal(result.authSubject,expected);
+  assert.equal(result.providerId,'supabase:dive-vault');
+});
+
+test('opaque user token is rejected for an app without an opaque provider link',async()=>{
+  let calls=0;
+  const {adapters}=makeAdapters({fetchImpl:async()=>{calls++;return Response.json([])}});
+  const result=await adapters.verifyIdentity({
+    authContext:{userToken:'b'.repeat(64)},
+    claimedAppId:'shine.travel'
   });
   assert.equal(result,null);
   assert.equal(calls,0);
