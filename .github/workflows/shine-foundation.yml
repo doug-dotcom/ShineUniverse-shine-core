@@ -16,9 +16,9 @@ jobs:
           node-version: '22'
       - run: node foundation/integration-kit/verify-object-registry-v1.mjs
       - run: node --test foundation/integration-kit/permission-engine-v1.test.mjs
-      - run: node --test foundation/gateway/gateway-core-v1.test.mjs foundation/gateway/defence-status-v1.test.mjs foundation/gateway/http-handler-v1.test.mjs foundation/gateway/identity-claim-v1.test.mjs
+      - run: node --test foundation/gateway/gateway-core-v1.test.mjs foundation/gateway/defence-status-v1.test.mjs foundation/gateway/http-handler-v1.test.mjs foundation/gateway/identity-claim-v1.test.mjs foundation/gateway/grant-consent-v1.test.mjs
       - run: node --test foundation/runtime/supabase-runtime-adapters-v1.test.mjs
-      - run: node --test foundation/onboarding/connection-spec-v1.test.mjs foundation/onboarding/foundation-app-client-v1.test.mjs foundation/onboarding/identity-claim-client-v1.test.mjs
+      - run: node --test foundation/onboarding/connection-spec-v1.test.mjs foundation/onboarding/foundation-app-client-v1.test.mjs foundation/onboarding/identity-claim-client-v1.test.mjs foundation/onboarding/grant-consent-client-v1.test.mjs
       - run: node foundation/onboarding/verify-examples-v1.mjs
       - uses: denoland/setup-deno@v2
         with:
@@ -67,6 +67,8 @@ jobs:
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/identity-federation-v2.sql
       - name: Apply identity claim v1
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/identity-claim-v1.sql
+      - name: Apply explicit Vault grant consent
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/grant-consent-v1.sql
       - name: Apply hosted-advisor hardening
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/live-advisor-hardening-v1.sql
       - name: Run persistence acceptance tests
@@ -81,3 +83,5 @@ jobs:
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/identity-federation-v2.test.sql
       - name: Run identity claim acceptance tests
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/identity-claim-v1.test.sql
+      - name: Run explicit Vault grant consent acceptance tests
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/grant-consent-v1.test.sql
