@@ -55,6 +55,14 @@ alter table foundation.identity_claim_events enable row level security;
 revoke all on foundation.identity_claim_events from public, anon, authenticated;
 grant select on foundation.identity_claim_events to service_role;
 
+drop policy if exists identity_claim_events_external_deny
+  on foundation.identity_claim_events;
+create policy identity_claim_events_external_deny
+on foundation.identity_claim_events
+for select
+to anon, authenticated
+using (false);
+
 drop trigger if exists identity_claim_events_append_only
   on foundation.identity_claim_events;
 create trigger identity_claim_events_append_only
