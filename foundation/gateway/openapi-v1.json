@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Shine Foundation Gateway",
-    "version": "1.1.0"
+    "version": "1.2.0"
   },
   "paths": {
     "/health": {
@@ -11,6 +11,55 @@
         "responses": {
           "200": {
             "description": "Gateway process is reachable."
+          }
+        }
+      }
+    },
+    "/v1/defence/status/{appId}": {
+      "get": {
+        "operationId": "getShineDefenceReleaseStatus",
+        "description": "Public read-only Shine Defence status for one exact application commit/profile pair. No user or Vault data is exposed.",
+        "parameters": [
+          {
+            "name": "appId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9][a-z0-9-]{0,63}$"
+            }
+          },
+          {
+            "name": "releaseSha",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{40}$"
+            }
+          },
+          {
+            "name": "profileBlobSha",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{40}$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Current Defence state for the supplied release identity."
+          },
+          "400": {
+            "description": "Malformed app or SHA identity."
+          },
+          "405": {
+            "description": "Only GET is supported."
+          },
+          "503": {
+            "description": "Defence status service unavailable."
           }
         }
       }
