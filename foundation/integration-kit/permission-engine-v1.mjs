@@ -42,7 +42,7 @@ const grantTimeState=(grant,nowMs)=>{
   return null;
 };
 
-const manifestDeclares=(manifest,request)=>{
+export const appManifestDeclaresPermission=(manifest,request)=>{
   if(!manifest || manifest.appId!==request.appId) return false;
   const scopes=manifest.foundation?.requestedScopes;
   if(!Array.isArray(scopes)) return false;
@@ -78,7 +78,7 @@ export function evaluateAccess({
     return deny(request,DENY_REASONS.APP_UNREGISTERED);
   }
 
-  if(!manifestDeclares(appManifest,request)){
+  if(!appManifestDeclaresPermission(appManifest,request)){
     return deny(request,DENY_REASONS.SCOPE_NOT_DECLARED);
   }
 
