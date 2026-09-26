@@ -48,3 +48,20 @@ After the first audited ALLOW, the same view automatically advances it to **live
 ## Verification
 
 PostgreSQL acceptance tests exercise the full progression from registered -> credentialed -> identity-ready -> grant-ready -> live-observed, and verify that the dedicated Foundation runtime can read only active app/provider links.
+
+
+## Hosted acceptance
+
+Layer 10 is live in the dedicated Shine Foundation project.
+
+Current Shine Travel status:
+
+- connection state: **grant-ready**;
+- active app credentials: **1**;
+- approved identity providers: **1** (`supabase:shine-l`);
+- effective active grants: **2**;
+- observed ALLOW decisions: **0**.
+
+The hosted Gateway is version **5** and now enforces the app/provider link during user identity verification.
+
+Supabase's hosted security advisor reports **0 security lints** after the Layer 10 deployment. The only Layer 10 performance lint discovered during rollout was the provider foreign-key index; it has been added in both production and source.
