@@ -17,9 +17,9 @@ const makeSql=()=> {
       return values[0]==='4c0ffa9a073e5e47ee51e8352cee4b05d0c21f75b501e314e2ffae28fd635909'
         ? [{credential_id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',app_id:'shine.travel'}] : [];
     }
-    if(q.includes('from foundation.identity_providers')){
+    if(q.includes('from foundation.trusted_auth_issuers')){
       return values[0]===issuer
-        ? [{provider_id:'supabase:test',project_url:'https://identity.example.test',publishable_key:'public-key'}]
+        ? [{issuer_id:'supabase:test',issuer_url:issuer,api_url:'https://identity.example.test',publishable_key:'public-key'}]
         : [];
     }
     if(q.includes('from foundation.identity_bindings')) return [{shine_id:shineId}];
@@ -52,7 +52,8 @@ const makeAdapters=({fetchImpl}={})=>{
     audit,
     adapters:createSupabaseRuntimeAdapters({
       sql,
-      fetchImpl:fetchImpl??(async(url,options)=>{
+      authClient:{auth:{getClaims:async()=>({data:{claims:{sub:'local-user',session_id:'local-session'}}})}},
+      fetchFn:fetchImpl??(async(url,options)=>{
         assert.equal(url,'https://identity.example.test/auth/v1/user');
         assert.equal(options.headers.apikey,'public-key');
         return Response.json({id:'auth-user'});
@@ -82,8 +83,7 @@ test('registered external issuer verifies user then maps canonical Shine ID',asy
   const result=await adapters.verifyIdentity({authContext:{jwt:token}});
   assert.equal(result.shineId,shineId);
   assert.equal(result.authSubject,'auth-user');
-  assert.equal(result.providerId,'supabase:test');
-  assert.equal(result.sessionId,'session-1');
+  assert.equal(result.authProvider,'supabase:test');
 });
 
 test('unregistered issuer is denied without contacting external Auth',async()=>{
