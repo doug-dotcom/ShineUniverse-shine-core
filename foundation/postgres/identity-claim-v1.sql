@@ -36,6 +36,8 @@ create table if not exists foundation.identity_claim_events (
   source_provider_subject text not null
     check (length(source_provider_subject) between 1 and 512),
   target_provider_id text not null references foundation.identity_providers(provider_id),
+  target_provider_subject text not null
+    check (length(target_provider_subject) between 1 and 512),
   target_shine_id uuid not null references foundation.shine_identities(shine_id),
   outcome text not null
     check (outcome in ('linked','already-linked','denied')),
@@ -43,6 +45,10 @@ create table if not exists foundation.identity_claim_events (
   occurred_at timestamptz not null,
   created_at timestamptz not null default now()
 );
+
+-- Compatibility for Layer 14 databases created before exact target-subject hardening.
+alter table foundation.identity_claim_events
+  add column if not exists target_provider_subject text;
 
 create index if not exists identity_claim_events_app_time_idx
   on foundation.identity_claim_events (app_id, occurred_at desc);
@@ -69,6 +75,10 @@ create trigger identity_claim_events_append_only
 before update or delete on foundation.identity_claim_events
 for each row execute function foundation.reject_append_only_mutation();
 
+drop function if exists foundation.complete_identity_claim_v1(
+  uuid,uuid,text,text,text,text,uuid,timestamptz
+);
+
 create or replace function foundation.complete_identity_claim_v1(
   p_claim_id uuid,
   p_request_id uuid,
@@ -76,6 +86,7 @@ create or replace function foundation.complete_identity_claim_v1(
   p_source_provider_id text,
   p_source_provider_subject text,
   p_target_provider_id text,
+  p_target_provider_subject text,
   p_target_shine_id uuid,
   p_occurred_at timestamptz
 )
@@ -99,6 +110,7 @@ begin
       or prior.source_provider_id<>p_source_provider_id
       or prior.source_provider_subject<>p_source_provider_subject
       or prior.target_provider_id<>p_target_provider_id
+      or prior.target_provider_subject is distinct from p_target_provider_subject
       or prior.target_shine_id<>p_target_shine_id then
       raise exception 'identity-claim-replay-conflict' using errcode='23505';
     end if;
@@ -133,6 +145,7 @@ begin
     from foundation.identity_bindings b
     join foundation.shine_identities i on i.shine_id=b.shine_id
     where b.provider=p_target_provider_id
+      and b.provider_subject=p_target_provider_subject
       and b.shine_id=p_target_shine_id
       and b.verified_at is not null
       and i.account_state='active'
@@ -183,12 +196,12 @@ begin
   insert into foundation.identity_claim_events(
     claim_id,request_id,app_id,
     source_provider_id,source_provider_subject,
-    target_provider_id,target_shine_id,
+    target_provider_id,target_provider_subject,target_shine_id,
     outcome,reason_code,occurred_at
   ) values (
     p_claim_id,p_request_id,p_app_id,
     p_source_provider_id,p_source_provider_subject,
-    p_target_provider_id,p_target_shine_id,
+    p_target_provider_id,p_target_provider_subject,p_target_shine_id,
     result_outcome,result_reason,p_occurred_at
   );
 
@@ -197,11 +210,11 @@ end;
 $$;
 
 revoke all on function foundation.complete_identity_claim_v1(
-  uuid,uuid,text,text,text,text,uuid,timestamptz
+  uuid,uuid,text,text,text,text,text,uuid,timestamptz
 ) from public, anon, authenticated;
 
 grant execute on function foundation.complete_identity_claim_v1(
-  uuid,uuid,text,text,text,text,uuid,timestamptz
+  uuid,uuid,text,text,text,text,text,uuid,timestamptz
 ) to foundation_runtime;
 
 create or replace view foundation.app_connection_status

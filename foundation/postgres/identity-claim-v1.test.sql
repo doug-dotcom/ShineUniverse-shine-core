@@ -71,6 +71,7 @@ begin
     'supabase:claim-source',
     'source-session-hash',
     'supabase:claim-target',
+    'target-user',
     '11111111-1111-4111-8111-111111111111',
     now()
   );
@@ -109,6 +110,7 @@ begin
     'supabase:claim-source',
     'source-session-hash',
     'supabase:claim-target',
+    'target-user',
     '11111111-1111-4111-8111-111111111111',
     now()
   );
@@ -149,6 +151,7 @@ begin
     'supabase:claim-source',
     'other-source',
     'supabase:claim-target',
+    'target-user',
     '11111111-1111-4111-8111-111111111111',
     now()
   );
@@ -156,6 +159,57 @@ begin
   if got_outcome<>'denied' or got_reason<>'source-already-bound' then
     raise exception 'expected source-already-bound denial, got % / %',got_outcome,got_reason;
   end if;
+end
+$$;
+
+reset role;
+set role foundation_gateway;
+
+do $$
+declare got_outcome text; got_reason text;
+begin
+  select outcome,reason_code into got_outcome,got_reason
+  from foundation.complete_identity_claim_v1(
+    '12121212-1212-4212-8212-121212121212',
+    '13131313-1313-4313-8313-131313131313',
+    'shine.claim-test',
+    'supabase:claim-source',
+    'unbound-source',
+    'supabase:claim-target',
+    'wrong-target-user',
+    '11111111-1111-4111-8111-111111111111',
+    now()
+  );
+
+  if got_outcome<>'denied' or got_reason<>'target-identity-unverified' then
+    raise exception 'expected exact target subject denial, got % / %',got_outcome,got_reason;
+  end if;
+end
+$$;
+
+reset role;
+set role foundation_gateway;
+
+-- Replay must preserve the exact canonical provider subject as well as the Shine ID.
+do $$
+begin
+  begin
+    perform *
+    from foundation.complete_identity_claim_v1(
+      '14141414-1414-4414-8414-141414141414',
+      'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
+      'shine.claim-test',
+      'supabase:claim-source',
+      'source-session-hash',
+      'supabase:claim-target',
+      'different-target-user',
+      '11111111-1111-4111-8111-111111111111',
+      now()
+    );
+    raise exception 'claim replay unexpectedly accepted a different target subject';
+  exception
+    when unique_violation then null;
+  end;
 end
 $$;
 

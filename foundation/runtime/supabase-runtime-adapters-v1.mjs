@@ -288,7 +288,7 @@ export function createSupabaseRuntimeAdapters({sql,defenceGate,fetchImpl=fetch}=
     async completeIdentityClaim({
       claimId,requestId,appId,
       sourceProviderId,sourceSubject,
-      targetProviderId,targetShineId,
+      targetProviderId,targetSubject,targetShineId,
       occurredAt
     }={}){
       const rows=await sql`
@@ -300,6 +300,7 @@ export function createSupabaseRuntimeAdapters({sql,defenceGate,fetchImpl=fetch}=
           ${sourceProviderId},
           ${sourceSubject},
           ${targetProviderId},
+          ${targetSubject},
           ${targetShineId}::uuid,
           ${occurredAt}::timestamptz
         )

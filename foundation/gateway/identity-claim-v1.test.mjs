@@ -62,6 +62,7 @@ test('links only after app, source and target proofs all verify',async()=>{
     sourceProviderId:'supabase:ski-session',
     sourceSubject:'source-hash',
     targetProviderId:'supabase:shine-l',
+    targetSubject:'target-user',
     targetShineId:shineId,
     occurredAt:'2026-09-26T12:10:00Z'
   });
@@ -140,4 +141,21 @@ test('invalid claim envelope is rejected before adapters run',async()=>{
   const result=await claim({envelope:{...envelope,targetProviderId:'supabase:ski-session'},authContext:{}});
   assert.equal(result.status,'invalid');
   assert.equal(called,false);
+});
+
+
+test('stale identity claim is rejected before any proof or write runs',async()=>{
+  let appCalls=0,writes=0;
+  const {claim}=make({
+    verifyAppCaller:async()=>{appCalls++;return {appId:'shine.ski'}},
+    completeIdentityClaim:async()=>{writes++;return null}
+  });
+  const result=await claim({
+    envelope:{...envelope,requestedAt:'2026-09-26T11:59:59Z'},
+    authContext:{}
+  });
+  assert.equal(result.status,'invalid');
+  assert.equal(result.reasonCode,'stale-identity-claim-request');
+  assert.equal(appCalls,0);
+  assert.equal(writes,0);
 });
