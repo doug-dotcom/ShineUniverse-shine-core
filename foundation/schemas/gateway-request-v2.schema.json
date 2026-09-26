@@ -1,0 +1,90 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:shine:foundation:schema:gateway-request-v2",
+  "title": "Shine Foundation Gateway Request v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "gatewayRequest",
+    "schemaVersion",
+    "operation",
+    "traceId",
+    "permission"
+  ],
+  "properties": {
+    "gatewayRequest": {
+      "const": "shine-foundation/gateway-request-v2"
+    },
+    "schemaVersion": {
+      "const": "2.0.0"
+    },
+    "operation": {
+      "const": "access.evaluate"
+    },
+    "traceId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "permission": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "requestId",
+        "appId",
+        "scope",
+        "purpose",
+        "requestedAt"
+      ],
+      "properties": {
+        "requestId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "appId": {
+          "type": "string",
+          "pattern": "^shine\\.[a-z0-9][a-z0-9-]*$"
+        },
+        "shineId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "scope": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9._:-]*$"
+        },
+        "purpose": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9._:-]*$"
+        },
+        "resourceId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "resourceCategory": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9._-]*$"
+        },
+        "requestedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "context": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      },
+      "anyOf": [
+        {
+          "required": [
+            "resourceId"
+          ]
+        },
+        {
+          "required": [
+            "resourceCategory"
+          ]
+        }
+      ]
+    }
+  }
+}
