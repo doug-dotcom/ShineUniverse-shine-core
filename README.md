@@ -79,4 +79,10 @@ Receipts are verified in Core CI against the ecosystem ledger and the **immutabl
 
 A candidate **never grants the badge**. Only the canonical ecosystem review ledger plus an exact certification receipt can make a release `reviewed_release`. Core CI verifies accepted candidates exactly match both of those authorities, limits each app to one pending candidate, validates canonical policy ids and rejects obvious secret material in evidence fields.
 
+### Review decision ledger
+
+`security/shine-defence/review-decision-v1.json` defines the separate decision record required when a review candidate leaves `pending_review`. Final decisions live in `security/shine-defence/review-decisions-v1.json` and are checked independently from the candidate queue.
+
+Core CI requires every accepted, superseded or dismissed candidate to have exactly one matching decision record, rejects decisions that predate candidate observation, and verifies superseded-candidate successor identity. Pending candidates are forbidden from carrying a decision. This prevents a queue status field from becoming its own evidence while preserving the rule that only the canonical reviewed ledger plus an exact receipt grants the current Defence badge.
+
 An extension policy existing in Core does **not** automatically certify an app. Each app still needs local, testable evidence before claiming that profile.
