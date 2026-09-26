@@ -18,7 +18,7 @@
       "const": "shine-foundation/access-decision-v1"
     },
     "schemaVersion": {
-      "const": "1.0.0"
+      "const": "1.0.1"
     },
     "decisionId": {
       "type": "string",
@@ -42,6 +42,7 @@
         "identity-mismatch",
         "app-unregistered",
         "scope-not-declared",
+        "resource-not-found",
         "resource-owner-mismatch",
         "no-matching-grant",
         "grant-inactive",
