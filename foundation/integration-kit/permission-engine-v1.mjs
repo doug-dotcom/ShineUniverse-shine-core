@@ -4,6 +4,7 @@ export const DENY_REASONS = Object.freeze({
   IDENTITY_MISMATCH: 'identity-mismatch',
   APP_UNREGISTERED: 'app-unregistered',
   SCOPE_NOT_DECLARED: 'scope-not-declared',
+  RESOURCE_NOT_FOUND: 'resource-not-found',
   RESOURCE_OWNER_MISMATCH: 'resource-owner-mismatch',
   NO_MATCHING_GRANT: 'no-matching-grant',
   GRANT_INACTIVE: 'grant-inactive',
@@ -24,12 +25,13 @@ const deny=(request,reasonCode,extra={})=>({
 });
 
 const resourceMatches=(selector,request,resource)=>{
-  if(!selector) return false;
+  if(!selector || !resource) return false;
   if(selector.resourceId){
-    return selector.resourceId===request.resourceId && (!resource || resource.resourceId===selector.resourceId);
+    return selector.resourceId===request.resourceId && resource.resourceId===selector.resourceId;
   }
   if(selector.resourceCategory){
-    return selector.resourceCategory===(request.resourceCategory ?? resource?.category);
+    return selector.resourceCategory===request.resourceCategory &&
+      resource.category===selector.resourceCategory;
   }
   return false;
 };
@@ -48,7 +50,7 @@ export const appManifestDeclaresPermission=(manifest,request)=>{
   if(!Array.isArray(scopes)) return false;
   return scopes.some(entry=>{
     if(entry.scope!==request.scope || entry.purpose!==request.purpose) return false;
-    if(entry.resourceCategory && entry.resourceCategory!==(request.resourceCategory)) return false;
+    if(entry.resourceCategory && entry.resourceCategory!==request.resourceCategory) return false;
     return true;
   });
 };
@@ -66,25 +68,12 @@ export function evaluateAccess({
     return deny(request,DENY_REASONS.MALFORMED_REQUEST);
   }
 
-  if(!verifiedShineId){
-    return deny(request,DENY_REASONS.IDENTITY_UNVERIFIED);
-  }
-
-  if(verifiedShineId!==request.shineId){
-    return deny(request,DENY_REASONS.IDENTITY_MISMATCH);
-  }
-
-  if(!appManifest || appManifest.appId!==request.appId){
-    return deny(request,DENY_REASONS.APP_UNREGISTERED);
-  }
-
-  if(!appManifestDeclaresPermission(appManifest,request)){
-    return deny(request,DENY_REASONS.SCOPE_NOT_DECLARED);
-  }
-
-  if(resource && resource.ownerShineId!==request.shineId){
-    return deny(request,DENY_REASONS.RESOURCE_OWNER_MISMATCH);
-  }
+  if(!verifiedShineId) return deny(request,DENY_REASONS.IDENTITY_UNVERIFIED);
+  if(verifiedShineId!==request.shineId) return deny(request,DENY_REASONS.IDENTITY_MISMATCH);
+  if(!appManifest || appManifest.appId!==request.appId) return deny(request,DENY_REASONS.APP_UNREGISTERED);
+  if(!appManifestDeclaresPermission(appManifest,request)) return deny(request,DENY_REASONS.SCOPE_NOT_DECLARED);
+  if(!resource) return deny(request,DENY_REASONS.RESOURCE_NOT_FOUND);
+  if(resource.ownerShineId!==request.shineId) return deny(request,DENY_REASONS.RESOURCE_OWNER_MISMATCH);
 
   const sameIdentityAndApp=grants.filter(g=>g.ownerShineId===request.shineId && g.appId===request.appId);
   if(!sameIdentityAndApp.length) return deny(request,DENY_REASONS.NO_MATCHING_GRANT);
