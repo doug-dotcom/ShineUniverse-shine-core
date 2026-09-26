@@ -184,6 +184,123 @@ export function createSupabaseRuntimeAdapters({sql,defenceGate,fetchImpl=fetch}=
         providerId:String(provider.provider_id)
       }:null;
     },
+    async verifyOpaqueIdentityProof({userToken,claimedAppId}={}){
+      if(!claimedAppId||typeof userToken!=='string'||userToken.length<32||userToken.length>2048) return null;
+
+      const providers=await sql`
+        select p.provider_id,p.kind,p.project_url,p.publishable_key,
+               p.verification_resource,p.subject_field,p.token_header
+        from foundation.identity_providers p
+        join foundation.app_identity_providers a on a.provider_id=p.provider_id
+        where p.kind='supabase-opaque-vault'
+          and p.status='active'
+          and a.app_id=${claimedAppId}
+          and a.status='active'
+        limit 2
+      `;
+      if(!Array.isArray(providers)||providers.length!==1) return null;
+      const provider=providers[0];
+      const subject=await sha256Hex(userToken);
+      if(!subject) return null;
+
+      const url=new URL('/rest/v1/'+String(provider.verification_resource),String(provider.project_url));
+      url.search=new URLSearchParams({
+        [String(provider.subject_field)]:'eq.'+subject,
+        select:String(provider.subject_field),
+        limit:'1'
+      }).toString();
+
+      const verification=await fetchImpl(url,{
+        method:'GET',
+        headers:{
+          apikey:String(provider.publishable_key),
+          [String(provider.token_header)]:userToken
+        },
+        signal:AbortSignal.timeout(10000)
+      });
+      if(!verification.ok) return null;
+
+      let verifiedRows;
+      try{verifiedRows=await verification.json()}catch{return null}
+      if(!Array.isArray(verifiedRows)||verifiedRows.length!==1||String(verifiedRows[0]?.[provider.subject_field])!==subject) return null;
+
+      return {
+        providerId:String(provider.provider_id),
+        providerSubject:subject
+      };
+    },
+
+    async verifyCanonicalIdentityProof({jwt}={}){
+      if(typeof jwt!=='string'||!jwt) return null;
+      const untrusted=decodeJwtPayload(jwt);
+      if(!untrusted?.iss) return null;
+
+      const providers=await sql`
+        select p.provider_id,p.project_url,p.publishable_key
+        from foundation.identity_providers p
+        where p.kind='supabase-auth'
+          and p.issuer=${String(untrusted.iss)}
+          and p.status='active'
+        limit 2
+      `;
+      if(!Array.isArray(providers)||providers.length!==1) return null;
+      const provider=providers[0];
+
+      const verification=await fetchImpl(String(provider.project_url).replace(/\/$/,'')+'/auth/v1/user',{
+        method:'GET',
+        headers:{apikey:String(provider.publishable_key),Authorization:'Bearer '+jwt},
+        signal:AbortSignal.timeout(10000)
+      });
+      if(!verification.ok) return null;
+
+      let user;
+      try{user=await verification.json()}catch{return null}
+      if(!user?.id) return null;
+
+      const rows=await sql`
+        select b.shine_id::text as shine_id
+        from foundation.identity_bindings b
+        join foundation.shine_identities i on i.shine_id=b.shine_id
+        where b.provider=${String(provider.provider_id)}
+          and b.provider_subject=${String(user.id)}
+          and b.verified_at is not null
+          and i.account_state='active'
+        limit 1
+      `;
+      const row=first(rows);
+      return row?{
+        shineId:String(row.shine_id),
+        providerId:String(provider.provider_id),
+        authSubject:String(user.id),
+        ...(untrusted.session_id?{sessionId:String(untrusted.session_id)}:{})
+      }:null;
+    },
+
+    async claimIdentityAndGrant({
+      claimId,appId,providerId,providerSubject,shineId,scope,purpose,resourceCategory,requestedAt
+    }={}){
+      const rows=await sql`
+        select outcome,binding_created,grant_created
+        from foundation.claim_identity_and_issue_grant(
+          ${claimId}::uuid,
+          ${appId}::text,
+          ${providerId}::text,
+          ${providerSubject}::text,
+          ${shineId}::uuid,
+          ${scope}::text,
+          ${purpose}::text,
+          ${resourceCategory}::text,
+          ${requestedAt}::timestamptz
+        )
+      `;
+      const row=first(rows);
+      return row?{
+        outcome:String(row.outcome),
+        bindingCreated:Boolean(row.binding_created),
+        grantCreated:Boolean(row.grant_created)
+      }:null;
+    },
+
     async getAppManifest({appId}={}){
       const rows=await sql`
         select manifest from foundation.app_registry
