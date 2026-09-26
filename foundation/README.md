@@ -56,6 +56,7 @@ An app is never granted access to a user's entire Vault merely because it belong
 - **Layer 9** — public Defence status feed.
 - **Layer 10** — app connection registry and onboarding state.
 - **Layer 11** — second appendage: Shine Dive with opaque-session federation.
+- **Layer 12** — reusable appendage onboarding kit and shared backend client.
 
 ## Durable state
 
@@ -129,3 +130,20 @@ The raw opaque token is never placed in the Gateway JSON envelope or audit ledge
 Current connection registry state: **Shine Dive = grant-ready** (1 active credential, 1 approved opaque-vault identity provider, 1 active grant, 0 observed production ALLOWs).
 
 See `layers/layer-011-dive-second-appendage.md` for the second appendage integration.
+
+
+## Appendage onboarding kit
+
+Foundation Layer 12 turns Travel and Dive into repeatable onboarding patterns.
+
+`onboarding/connection-spec-v1.mjs` validates and compiles a secret-free app connection spec. `onboarding/foundation-app-client-v1.mjs` is the shared server-side Gateway client for both bearer-JWT and opaque-session appendages.
+
+The golden Travel and Dive specs contain architecture only. They deliberately contain no app secret, user credential, canonical Shine ID, provider subject, credential ID or resource ID.
+
+The intended next-app workflow is:
+
+1. write one connection spec;
+2. pass CI validation;
+3. provision live secrets/bindings/grants separately;
+4. use the shared backend client;
+5. let `foundation.app_connection_status` derive the actual connection state.
