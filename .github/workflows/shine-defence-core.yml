@@ -23,3 +23,5 @@ jobs:
       - run: node security/shine-defence/integration-kit/consumer-v1.mjs --self-test
       - run: node security/shine-defence/integration-kit/verify-review-candidates-v1.mjs
       - run: node security/shine-defence/integration-kit/verify-review-decisions-v1.mjs
+      - run: node security/shine-defence/integration-kit/verify-review-promotions-v1.mjs --self-test
+      - run: node security/shine-defence/integration-kit/verify-review-promotions-v1.mjs
