@@ -59,6 +59,8 @@ jobs:
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/runtime-v1.sql
       - name: Apply identity federation
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/identity-federation-v1.sql
+      - name: Apply app connection registry
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/app-connection-registry-v1.sql
       - name: Apply hosted-advisor hardening
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/live-advisor-hardening-v1.sql
       - name: Run persistence acceptance tests
@@ -67,3 +69,5 @@ jobs:
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/runtime-v1.test.sql
       - name: Run identity federation acceptance tests
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/identity-federation-v1.test.sql
+      - name: Run app connection registry acceptance tests
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/app-connection-registry-v1.test.sql
