@@ -25,6 +25,7 @@ const requireFunction=(adapters,name)=>{
   if(typeof adapters?.[name]!=='function') throw new TypeError('missing identity claim adapter: '+name);
 };
 
+/** @param {{adapters:any, clock?:()=>string, idFactory?:()=>string}} [options] */
 export function createIdentityClaimService({
   adapters,
   clock=()=>new Date().toISOString(),
