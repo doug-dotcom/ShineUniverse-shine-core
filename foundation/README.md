@@ -89,8 +89,8 @@ The runtime uses pinned dependencies and a serverless transaction-pooler databas
 
 - Project ref: `sjpxqeyewahraxvidvcc`
 - Region: `ap-southeast-2`
-- Live function: `foundation-gateway` v4
-- Platform JWT precheck: disabled in favour of custom dual auth (app credential + registered identity-provider user-token verification)
+- Live function: `foundation-gateway` v5
+- Platform JWT precheck: disabled in favour of custom dual auth (app credential + app-approved identity-provider user-token verification)
 - Hosted Supabase security advisor: 0 lints
 
 The Edge Function uses Supabase's built-in database connection but scopes every Foundation query with `SET LOCAL ROLE foundation_gateway`, where `foundation_gateway` is NOLOGIN and does not bypass RLS.
@@ -111,3 +111,6 @@ Foundation Layer 10 makes appendage onboarding observable and repeatable.
 `registered -> credentialed -> identity-ready -> grant-ready -> live-observed`
 
 No manual "connected" flag is required. The state advances only when the underlying credential, identity-provider link, grants and audited production decisions exist.
+
+
+Current connection registry state: **Shine Travel = grant-ready** (1 active credential, 1 approved identity provider, 2 active grants, 0 observed production ALLOWs).
