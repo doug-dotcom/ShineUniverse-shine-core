@@ -1,0 +1,269 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:shine:foundation:schema:appendage-connection-spec-v1",
+  "title": "Shine Foundation Appendage Connection Spec v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "spec",
+    "schemaVersion",
+    "app",
+    "source",
+    "identity",
+    "runtime",
+    "pilot",
+    "safety"
+  ],
+  "properties": {
+    "spec": {
+      "const": "shine-foundation/appendage-connection-spec-v1"
+    },
+    "schemaVersion": {
+      "const": "1.0.0"
+    },
+    "app": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "appId",
+        "name",
+        "primaryPurpose"
+      ],
+      "properties": {
+        "appId": {
+          "type": "string",
+          "pattern": "^shine\\.[a-z0-9][a-z0-9-]*$"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "primaryPurpose": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500
+        }
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "repository",
+        "branch",
+        "backendEntrypoint"
+      ],
+      "properties": {
+        "repository": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"
+        },
+        "branch": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "backendEntrypoint": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500
+        }
+      }
+    },
+    "identity": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "providerId",
+            "projectUrl",
+            "issuer"
+          ],
+          "properties": {
+            "kind": {
+              "const": "supabase-auth"
+            },
+            "providerId": {
+              "type": "string",
+              "pattern": "^[a-z0-9][a-z0-9._:-]*$"
+            },
+            "projectUrl": {
+              "type": "string",
+              "pattern": "^https://[a-z0-9.-]+$"
+            },
+            "issuer": {
+              "type": "string",
+              "pattern": "^https://[a-z0-9.-]+/auth/v1$"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "providerId",
+            "projectUrl",
+            "verificationResource",
+            "subjectField",
+            "tokenHeader"
+          ],
+          "properties": {
+            "kind": {
+              "const": "supabase-opaque-vault"
+            },
+            "providerId": {
+              "type": "string",
+              "pattern": "^[a-z0-9][a-z0-9._:-]*$"
+            },
+            "projectUrl": {
+              "type": "string",
+              "pattern": "^https://[a-z0-9.-]+$"
+            },
+            "verificationResource": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]{0,62}$"
+            },
+            "subjectField": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]{0,62}$"
+            },
+            "tokenHeader": {
+              "type": "string",
+              "pattern": "^x-[a-z0-9-]{1,62}$"
+            }
+          }
+        }
+      ]
+    },
+    "runtime": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "platform",
+        "foundationBaseUrlEnv",
+        "appTokenEnv",
+        "userCredentialMode"
+      ],
+      "properties": {
+        "platform": {
+          "enum": [
+            "railway",
+            "supabase-edge",
+            "other-server"
+          ]
+        },
+        "foundationBaseUrlEnv": {
+          "type": "string",
+          "pattern": "^[A-Z][A-Z0-9_]*$"
+        },
+        "appTokenEnv": {
+          "type": "string",
+          "pattern": "^[A-Z][A-Z0-9_]*$"
+        },
+        "userCredentialMode": {
+          "enum": [
+            "bearer-jwt",
+            "opaque-header"
+          ]
+        }
+      }
+    },
+    "pilot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "scope",
+        "purpose",
+        "resourceCategory"
+      ],
+      "properties": {
+        "scope": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9._:-]*$"
+        },
+        "purpose": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9._:-]*$"
+        },
+        "resourceCategory": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9._-]*$"
+        }
+      }
+    },
+    "safety": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "standaloneFallback",
+        "secretsInSpec",
+        "personalIdsInSpec"
+      ],
+      "properties": {
+        "standaloneFallback": {
+          "const": true
+        },
+        "secretsInSpec": {
+          "const": false
+        },
+        "personalIdsInSpec": {
+          "const": false
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "identity": {
+            "properties": {
+              "kind": {
+                "const": "supabase-auth"
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "runtime": {
+            "properties": {
+              "userCredentialMode": {
+                "const": "bearer-jwt"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "identity": {
+            "properties": {
+              "kind": {
+                "const": "supabase-opaque-vault"
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "runtime": {
+            "properties": {
+              "userCredentialMode": {
+                "const": "opaque-header"
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}
