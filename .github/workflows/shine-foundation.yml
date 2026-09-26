@@ -69,6 +69,8 @@ jobs:
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/identity-claim-v1.sql
       - name: Apply explicit Vault grant consent
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/grant-consent-v1.sql
+      - name: Apply advisor FK indexes
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/advisor-fk-indexes-v1.sql
       - name: Apply hosted-advisor hardening
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/live-advisor-hardening-v1.sql
       - name: Run persistence acceptance tests
