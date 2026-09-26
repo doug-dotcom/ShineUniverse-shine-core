@@ -1,10 +1,31 @@
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { extname, join, relative } from 'node:path';
 
-export const SHINE_DEFENCE_KIT_VERSION = '1.0.0';
+export const SHINE_DEFENCE_KIT_VERSION = '1.1.0';
 
 export function readUtf8(root, path) {
   return readFileSync(join(root, path), 'utf8');
+}
+
+
+export function verifyCanonicalPins({ root = process.cwd(), registryPath, pins = [] }) {
+  if (!registryPath) throw new Error('Shine Defence canonical verification needs a registry path.');
+  const registry = JSON.parse(readUtf8(root, registryPath));
+  if (registry.registry !== 'shine-defence/canonical-registry-v1' || registry.version !== '1.0.0') {
+    throw new Error('Unsupported Shine Defence canonical registry.');
+  }
+  const entries = new Map(registry.entries.map(entry => [entry.id, entry]));
+  const results = [];
+  for (const pin of pins) {
+    const entry = entries.get(pin.id);
+    const ok = Boolean(entry && entry.version === pin.version && entry.blobSha === pin.blobSha);
+    results.push({
+      id: pin.id,
+      ok,
+      evidence: ok ? 'matches canonical registry' : 'does not match canonical registry'
+    });
+  }
+  return { registry, results, ok: results.every(result => result.ok) };
 }
 
 export function createCertification({ root = process.cwd(), appName, contractPath }) {
