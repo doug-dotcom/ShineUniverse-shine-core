@@ -1,4 +1,3 @@
-import {createClient} from 'npm:@supabase/supabase-js@2.117.1';
 import postgres from 'npm:postgres@3.4.9';
 import {createFoundationGateway} from '../../gateway/gateway-core-v1.mjs';
 import {createFoundationHttpHandler} from '../../gateway/http-handler-v1.mjs';
@@ -14,12 +13,6 @@ const requireEnv=(name:string)=>{
   return value;
 };
 
-const supabaseUrl=requireEnv('SUPABASE_URL');
-const publishableKeys=Deno.env.get('SUPABASE_PUBLISHABLE_KEYS');
-const supabaseKey=publishableKeys
-  ? JSON.parse(publishableKeys)['default']
-  : requireEnv('SUPABASE_ANON_KEY');
-
 const rawSql=postgres(requireEnv('SUPABASE_DB_URL'),{
   max:1,
   prepare:false,
@@ -32,16 +25,10 @@ const sql:any=(strings:any,...values:any[])=>rawSql.begin(async(tx:any)=>{
   return tx(strings,...values);
 });
 
-const authClient=createClient(supabaseUrl,supabaseKey,{
-  auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}
-});
-
 const adapters=createSupabaseRuntimeAdapters({
   sql,
-  authClient,
-  defenceGate:createFoundationRuntimeDefenceGateV1(),
-  localAuthUrl:supabaseUrl,
-  fetchFn:fetch
+  fetchImpl:fetch,
+  defenceGate:createFoundationRuntimeDefenceGateV1()
 });
 
 const gateway=createFoundationGateway({adapters});
@@ -57,15 +44,10 @@ const handler=createFoundationHttpHandler({
   authenticate:async(request:Request)=>{
     const authorization=request.headers.get('authorization')??'';
     const appToken=request.headers.get('x-shine-app-token')??'';
-
     if(!authorization.startsWith('Bearer ')||!appToken){
       throw new Error('missing runtime credentials');
     }
-
-    return {
-      jwt:authorization.slice('Bearer '.length),
-      appToken
-    };
+    return {jwt:authorization.slice('Bearer '.length),appToken};
   }
 });
 
