@@ -97,6 +97,12 @@ Once an app has review-candidate history, Core CI requires its current reviewed 
 
 `security/shine-defence/integration-kit/promote-review-v1.mjs` prepares an existing app's re-certification as one controlled operation. It promotes exactly one `pending_review` candidate, advances the canonical reviewed ledger, replaces that app's current certification receipt, appends the independent accepted decision, and creates the immutable current-registry snapshot when needed.
 
-The helper is dry-run by default. `--apply` performs atomic per-file replacement, runs the Defence registry/ledger/receipt/candidate/decision/promotion gates, and restores every touched file if verification fails. It deliberately refuses first-time certification in v1 rather than silently inventing a prior reviewed-app identity.
+The helper is dry-run by default. `--apply` performs atomic per-file replacement, runs the Defence registry/ledger/receipt/candidate/decision/promotion gates, and restores every touched file if verification fails. It handles re-certification only; first-time certification uses the separate onboarding helper below.
+
+### First certification onboarding
+
+`security/shine-defence/first-certification-v1.json` defines the bootstrap rules for a brand-new app. Before first certification, the app may exist in the review queue as pending, dismissed or superseded history while remaining absent from the reviewed ledger, receipts and accepted decisions. That staged state never grants the Defence badge.
+
+`security/shine-defence/integration-kit/onboard-review-v1.mjs` accepts exactly one existing `pending_review` candidate for an app with no prior reviewed-ledger entry, receipt or accepted decision. It creates the initial reviewed-ledger entry, exact certification receipt, accepted decision and immutable current-registry snapshot as one guarded operation. The command is dry-run by default; `--apply` verifies the complete Defence state and restores every touched file if any gate fails.
 
 An extension policy existing in Core does **not** automatically certify an app. Each app still needs local, testable evidence before claiming that profile.
