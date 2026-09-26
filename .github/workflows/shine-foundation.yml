@@ -8,7 +8,7 @@ permissions:
 jobs:
   foundation-contracts:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 8
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -17,6 +17,11 @@ jobs:
       - run: node foundation/integration-kit/verify-object-registry-v1.mjs
       - run: node --test foundation/integration-kit/permission-engine-v1.test.mjs
       - run: node --test foundation/gateway/gateway-core-v1.test.mjs foundation/gateway/http-handler-v1.test.mjs
+      - run: node --test foundation/runtime/supabase-runtime-adapters-v1.test.mjs
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - run: deno check foundation/runtime/edge-function/index.ts
 
   persistence:
     runs-on: ubuntu-latest
@@ -50,5 +55,9 @@ jobs:
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/test-bootstrap.sql
       - name: Apply Foundation persistence schema
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/persistence-v1.sql
+      - name: Apply Foundation runtime schema
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/runtime-v1.sql
       - name: Run persistence acceptance tests
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/persistence-v1.test.sql
+      - name: Run runtime acceptance tests
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/runtime-v1.test.sql
