@@ -165,7 +165,7 @@ $$;
 reset role;
 set role foundation_gateway;
 
-do $
+do $$
 declare got_outcome text; got_reason text;
 begin
   select outcome,reason_code into got_outcome,got_reason
@@ -185,11 +185,37 @@ begin
     raise exception 'expected exact target subject denial, got % / %',got_outcome,got_reason;
   end if;
 end
-$;
+$$;
+
+reset role;
+set role foundation_gateway;
+
+-- Replay must preserve the exact canonical provider subject as well as the Shine ID.
+do $$
+begin
+  begin
+    perform *
+    from foundation.complete_identity_claim_v1(
+      '14141414-1414-4414-8414-141414141414',
+      'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
+      'shine.claim-test',
+      'supabase:claim-source',
+      'source-session-hash',
+      'supabase:claim-target',
+      'different-target-user',
+      '11111111-1111-4111-8111-111111111111',
+      now()
+    );
+    raise exception 'claim replay unexpectedly accepted a different target subject';
+  exception
+    when unique_violation then null;
+  end;
+end
+$$;
 
 reset role;
 
-do $
+do $$
 begin
   begin
     update foundation.identity_claim_events
