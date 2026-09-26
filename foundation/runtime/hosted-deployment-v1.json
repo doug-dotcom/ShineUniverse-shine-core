@@ -1,6 +1,6 @@
 {
   "deployment": "shine-foundation/hosted-deployment-v1",
-  "version": "1.5.0",
+  "version": "1.6.0",
   "deployedAt": "2026-09-26",
   "supabase": {
     "projectName": "Shine Foundation",
@@ -55,7 +55,8 @@
     "diveUsesExistingCanonicalShineId": true,
     "diveFoundationBuildTests": "604/604 PASS",
     "diveRailwayHealthcheck": "PASS",
-    "diveContainerStarted": true
+    "diveContainerStarted": true,
+    "onboardingKitCi": "PENDING"
   },
   "secrets": {
     "included": false,
@@ -94,5 +95,21 @@
     "productionDeployment": "56addf9ca4564fa0f8546df9381d7af6ec431df0",
     "productionDeploymentId": "f035c246-8ccd-4629-bbeb-e3609ec53449",
     "visibleConnectionStatus": true
+  },
+  "onboardingKit": {
+    "version": "1.0.0",
+    "connectionSpec": "shine-foundation/appendage-connection-spec-v1",
+    "sharedBackendClient": "foundation/onboarding/foundation-app-client-v1.mjs",
+    "goldenExamples": [
+      "shine.travel",
+      "shine.dive"
+    ],
+    "supportedUserCredentialModes": [
+      "bearer-jwt",
+      "opaque-header"
+    ],
+    "containsSecrets": false,
+    "containsPersonalIds": false,
+    "createsLiveAccess": false
   }
 }
