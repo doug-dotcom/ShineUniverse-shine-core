@@ -11,7 +11,10 @@ create table if not exists foundation.app_identity_providers (
   primary key (app_id, provider_id)
 );
 
-create index if not exists app_identity_providers_provider_idx\n  on foundation.app_identity_providers (provider_id);\n\nalter table foundation.app_identity_providers enable row level security;
+create index if not exists app_identity_providers_provider_idx
+  on foundation.app_identity_providers (provider_id);
+
+alter table foundation.app_identity_providers enable row level security;
 
 revoke all on foundation.app_identity_providers from public, anon, authenticated;
 grant select, insert, update on foundation.app_identity_providers to service_role;
