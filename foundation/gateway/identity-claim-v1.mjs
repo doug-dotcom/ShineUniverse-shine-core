@@ -83,7 +83,7 @@ export function createIdentityClaimService({
     }catch{
       return response(envelope,'unavailable','foundation-dependency-unavailable');
     }
-    if(!target?.shineId||target.providerId!==envelope.targetProviderId){
+    if(!target?.shineId||!target?.authSubject||target.providerId!==envelope.targetProviderId){
       return response(envelope,'denied','target-identity-unverified');
     }
 
