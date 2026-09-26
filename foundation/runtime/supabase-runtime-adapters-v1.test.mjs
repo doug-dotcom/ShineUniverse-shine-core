@@ -57,7 +57,7 @@ const makeAdapters=({fetchImpl}={})=>{
         assert.equal(options.headers.apikey,'public-key');
         return Response.json({id:'auth-user'});
       }),
-      defenceGate:createFoundationRuntimeDefenceGateV1()
+      defenceGate:createFoundationRuntimeDefenceGateV1(),\n      localAuthUrl:'https://foundation.test'
     })
   };
 };
@@ -131,4 +131,40 @@ test('audit writes can record pre-identity denial with null Shine ID',async()=>{
     reasonCode:'app-caller-unverified',occurredAt:'2026-09-26T08:30:00Z'
   });
   assert.equal(audit.length,1);
+});
+
+
+test('verifies a trusted external Shine Supabase issuer before identity mapping',async()=>{
+  const externalShineId='99999999-9999-4999-8999-999999999999';
+  const issuer='https://shine-l.test/auth/v1';
+  const payload=Buffer.from(JSON.stringify({iss:issuer,sub:'untrusted-sub'})).toString('base64url');
+  const jwt='x.'+payload+'.x';
+  const sql=async(strings,...values)=>{
+    const q=strings.join('?').replace(/\s+/g,' ').trim().toLowerCase();
+    if(q.includes('from foundation.trusted_auth_issuers')){
+      assert.equal(values[0],issuer);
+      return [{issuer_id:'supabase:shine-l',issuer_url:issuer,api_url:'https://shine-l.test',publishable_key:'public'}];
+    }
+    if(q.includes('from foundation.identity_bindings')){
+      assert.equal(values[0],'supabase:shine-l');
+      assert.equal(values[1],externalShineId);
+      return [{shine_id:externalShineId}];
+    }
+    throw new Error('unexpected SQL '+q);
+  };
+  const adapters=createSupabaseRuntimeAdapters({
+    sql,
+    authClient:{auth:{getClaims:async()=>{throw new Error('local auth must not verify external token')}}},
+    defenceGate:createFoundationRuntimeDefenceGateV1(),
+    localAuthUrl:'https://foundation.test',
+    fetchFn:async(url,options)=>{
+      assert.equal(url,'https://shine-l.test/auth/v1/user');
+      assert.equal(options.headers.apikey,'public');
+      assert.equal(options.headers.Authorization,'Bearer '+jwt);
+      return Response.json({id:externalShineId});
+    }
+  });
+  const result=await adapters.verifyIdentity({authContext:{jwt}});
+  assert.equal(result.shineId,externalShineId);
+  assert.equal(result.authProvider,'supabase:shine-l');
 });
