@@ -7,6 +7,7 @@ const json=(status,body)=>new Response(JSON.stringify(body),{status,headers:JSON
 const healthPath=p=>p==='/health'||p.endsWith('/foundation-gateway/health');
 const evaluatePath=p=>p==='/v1/access/evaluate'||p.endsWith('/foundation-gateway/v1/access/evaluate');
 const defenceStatusMatch=p=>p.match(/(?:^|\/foundation-gateway)\/v1\/defence\/status\/([a-z0-9][a-z0-9-]{0,63})$/);
+const SHA=/^[a-f0-9]{40}$/;
 
 /** @param {{gateway:any, authenticate:any, defenceStatus?:any, maxBodyBytes?:number}} [options] */
 export function createFoundationHttpHandler({gateway,authenticate,defenceStatus,maxBodyBytes=16*1024}={}){
