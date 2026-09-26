@@ -1,6 +1,6 @@
 {
   "deployment": "shine-foundation/hosted-deployment-v1",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "deployedAt": "2026-09-26",
   "supabase": {
     "projectName": "Shine Foundation",
@@ -19,10 +19,10 @@
   "edgeFunction": {
     "slug": "foundation-gateway",
     "id": "0e219164-32a6-4969-b1dc-9b6402e79e59",
-    "version": 4,
+    "version": 5,
     "status": "ACTIVE",
     "verifyJwt": false,
-    "authentication": "custom dual authentication: server-only app credential plus registered identity-provider user-token verification"
+    "authentication": "custom dual authentication: server-only app credential plus app-approved identity-provider verification"
   },
   "firstAppendage": {
     "appId": "shine.travel",
@@ -48,10 +48,22 @@
     "travelFoundationBuildTests": "511/511 PASS",
     "canonicalFederationRegistry": "foundation.identity_providers",
     "duplicateFederationPathRetired": true,
-    "travelContainerStarted": true
+    "travelContainerStarted": true,
+    "appConnectionRegistryCi": "PASS",
+    "appSpecificIssuerGate": true
   },
   "secrets": {
     "included": false,
     "note": "No API keys, app tokens, database passwords or secret values are stored in this record."
+  },
+  "connectionRegistry": {
+    "schema": "foundation",
+    "statusView": "foundation.app_connection_status",
+    "appProviderTable": "foundation.app_identity_providers",
+    "travelState": "grant-ready",
+    "travelActiveCredentials": 1,
+    "travelActiveIdentityProviders": 1,
+    "travelActiveGrants": 2,
+    "travelObservedAllows": 0
   }
 }
