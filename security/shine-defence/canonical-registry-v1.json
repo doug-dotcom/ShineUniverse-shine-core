@@ -152,6 +152,18 @@
       "path": "security/shine-defence/integration-kit/onboard-review-v1.mjs",
       "version": "1.0.0",
       "blobSha": "cf1dc49f9f9a10c5efc0d985fb2ba181b1d679db"
+    },
+    {
+      "id": "candidate-intake",
+      "path": "security/shine-defence/candidate-intake-v1.json",
+      "version": "1.0.0",
+      "blobSha": "380b785ce9ba4dfb7f6132102c5d3447457a7d2b"
+    },
+    {
+      "id": "candidate-intake-helper",
+      "path": "security/shine-defence/integration-kit/intake-review-v1.mjs",
+      "version": "1.0.0",
+      "blobSha": "47690eae32f0bb09face6f897c9a59600e03eedf"
     }
   ]
 }
