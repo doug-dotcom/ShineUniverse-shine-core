@@ -19,28 +19,38 @@ Layer 3 defines and tests the permission path that joins the Layer 2 Foundation 
 
 An allow requires all of the following:
 
-1. request has the required identity/app/scope/purpose fields;
-2. resource owner matches the requesting Shine identity;
-3. grant belongs to that identity and app;
-4. requested scope matches exactly;
-5. requested purpose matches exactly;
-6. resource selector matches the requested resource or category;
-7. grant is active and inside its time window;
-8. grant has not been revoked;
-9. Shine Defence has not denied the request.
+1. the request has the required identity/app/scope/purpose fields;
+2. Shine ID has supplied a verified `shineId` matching the request;
+3. Core has supplied the registered manifest for the requesting app;
+4. that manifest declares the exact requested scope and purpose;
+5. the Vault resource owner matches the requesting Shine identity;
+6. the grant belongs to that identity and app;
+7. requested scope matches the grant exactly;
+8. requested purpose matches the grant exactly;
+9. the resource selector matches the requested resource or category;
+10. the grant is active and inside its time window;
+11. the grant has not been revoked;
+12. Shine Defence has not denied the request.
 
 Everything else denies.
 
-## Important boundary
+## Important boundaries
 
-An access denial disables only the requested connected capability. It does **not** tell the app to disable its unrelated standalone purpose.
+- A manifest declaration is **not** a grant.
+- A valid grant cannot bypass ID verification or app registration.
+- A grant cannot be reused for a different scope, purpose, app, identity or resource boundary.
+- Shine Defence can veto an otherwise valid access path.
+- An access denial disables only the requested connected capability. It does **not** tell the app to disable its unrelated standalone purpose.
 
 ## Tests
 
-The reference test suite covers:
+The reference suite covers exact allow plus fail-closed behaviour for:
 
-- exact allow;
-- wrong app;
+- unverified identity;
+- identity mismatch;
+- unregistered app;
+- undeclared scope;
+- missing app grant;
 - scope escalation;
 - purpose substitution;
 - resource substitution;
@@ -50,4 +60,4 @@ The reference test suite covers:
 - Defence veto;
 - preservation of the standalone boundary.
 
-CI executes the permission-engine tests on every push and pull request.
+CI executes both the canonical object registry verifier and the permission-engine tests on every push and pull request.
