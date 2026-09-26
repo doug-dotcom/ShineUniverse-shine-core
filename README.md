@@ -1,5 +1,21 @@
 # Shine Universe Core
 
+
+## Shine Foundation
+
+`foundation/` is the canonical home for the shared infrastructure that connects independent Shine applications into the Shine Universe.
+
+Foundation currently contains three systems:
+
+- **Shine Core** — app registry, shared contracts, permission orchestration and authorised app-to-app coordination.
+- **Shine ID** — canonical Shine identity and authenticated-session boundary.
+- **Shine Vault** — protected resources, per-app grants, consent, revocation and access auditing.
+
+The governing rule is **connected by choice, independent by design**: Foundation enhances apps without becoming a mandatory dependency for their primary standalone purpose.
+
+The current machine-readable Foundation contract is `foundation/contracts/foundation-v1.json`.
+
+
 Shared contracts and platform standards for the Shine Universe.
 
 ## Shine Defence
