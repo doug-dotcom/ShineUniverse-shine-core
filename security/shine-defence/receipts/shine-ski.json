@@ -1,0 +1,18 @@
+{
+  "receipt": "shine-defence/certification-receipt-v1",
+  "version": "1.0.0",
+  "appId": "shine-ski",
+  "repository": "doug-dotcom/Shine-Ski",
+  "reviewCommitSha": "47c6a488cb4d14dbee3d5853bfb759d5cb2bd00c",
+  "profilePath": "security/shine-defence-baseline-v1.json",
+  "profileBlobSha": "41784084b368ad62c3fd900e7f0827d4a25ca4b6",
+  "profileVersion": "1.0.0",
+  "policies": [
+    "baseline",
+    "external-data-provenance"
+  ],
+  "registryVersion": "1.0.0",
+  "registryBlobSha": "6c38e85b5c52cf398267cc6f22c6467ecfe37f06",
+  "releaseClaimContractVersion": "1.0.0",
+  "releaseClaimContractBlobSha": "b6ad32414a6bba5db77d277addf935e6f993bc55"
+}

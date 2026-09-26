@@ -1,0 +1,32 @@
+{
+  "contract": "shine-defence/certification-receipt-v1",
+  "version": "1.0.0",
+  "purpose": "Portable proof object for a specific reviewed Shine application release.",
+  "requiredFields": [
+    "receipt",
+    "version",
+    "appId",
+    "repository",
+    "reviewCommitSha",
+    "profilePath",
+    "profileBlobSha",
+    "profileVersion",
+    "policies",
+    "registryVersion",
+    "registryBlobSha",
+    "releaseClaimContractVersion",
+    "releaseClaimContractBlobSha"
+  ],
+  "rules": [
+    "The receipt must exactly match one reviewed entry in the ecosystem profile ledger.",
+    "Every policy id in the receipt must exist in the canonical Defence registry.",
+    "The registry version/blob in the receipt identifies the reviewed canonical policy set used for the receipt.",
+    "The release-claim contract version/blob must match the canonical release-claim entry.",
+    "A receipt is evidence for its exact reviewed release only and is not inherited by later app commits."
+  ],
+  "nonClaims": [
+    "A receipt does not prove software is invulnerable.",
+    "A receipt does not replace app-specific tests or release verification.",
+    "A receipt does not certify later commits unless a new reviewed receipt is issued."
+  ]
+}

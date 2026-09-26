@@ -1,0 +1,17 @@
+{
+  "receipt": "shine-defence/certification-receipt-v1",
+  "version": "1.0.0",
+  "appId": "shine-my-money",
+  "repository": "doug-dotcom/shine-my-money-",
+  "reviewCommitSha": "ffe987f4d04a1a98de9e5a3c7cb08fdbcd6fb75d",
+  "profilePath": "security/shine-defence/profile.json",
+  "profileBlobSha": "b6fd0087ebfdb973835218601a00a81b5497abbc",
+  "profileVersion": "1.1.0",
+  "policies": [
+    "personal-financial-data"
+  ],
+  "registryVersion": "1.0.0",
+  "registryBlobSha": "6c38e85b5c52cf398267cc6f22c6467ecfe37f06",
+  "releaseClaimContractVersion": "1.0.0",
+  "releaseClaimContractBlobSha": "b6ad32414a6bba5db77d277addf935e6f993bc55"
+}

@@ -92,6 +92,12 @@
       "path": "security/shine-defence/release-claim-v1.json",
       "version": "1.0.0",
       "blobSha": "b6ad32414a6bba5db77d277addf935e6f993bc55"
+    },
+    {
+      "id": "certification-receipt",
+      "path": "security/shine-defence/certification-receipt-v1.json",
+      "version": "1.0.0",
+      "blobSha": "65c276e6dbfd3f5e32b57c748d49d7c2b097dec0"
     }
   ]
 }
