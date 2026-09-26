@@ -1,0 +1,141 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:shine:foundation:schema:access-grant-v1",
+  "title": "Shine Foundation Access Grant v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "grant",
+    "schemaVersion",
+    "grantId",
+    "ownerShineId",
+    "appId",
+    "scope",
+    "purpose",
+    "resourceSelector",
+    "status",
+    "issuedAt"
+  ],
+  "properties": {
+    "grant": {
+      "const": "shine-foundation/access-grant-v1"
+    },
+    "schemaVersion": {
+      "const": "1.0.0"
+    },
+    "grantId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "ownerShineId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "appId": {
+      "type": "string",
+      "pattern": "^shine\\.[a-z0-9][a-z0-9-]*$"
+    },
+    "scope": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._:-]*$"
+    },
+    "purpose": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._:-]*$"
+    },
+    "resourceSelector": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "resourceId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "resourceCategory": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9._-]*$"
+        }
+      },
+      "anyOf": [
+        {
+          "required": [
+            "resourceId"
+          ]
+        },
+        {
+          "required": [
+            "resourceCategory"
+          ]
+        }
+      ]
+    },
+    "status": {
+      "enum": [
+        "active",
+        "revoked",
+        "expired"
+      ]
+    },
+    "issuedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "notBefore": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "expiresAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "revokedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "revocationReason": {
+      "type": "string",
+      "maxLength": 500
+    },
+    "consent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "method",
+        "recordedAt"
+      ],
+      "properties": {
+        "method": {
+          "enum": [
+            "explicit-user",
+            "admin-authorised",
+            "system-migration"
+          ]
+        },
+        "recordedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "evidenceRef": {
+          "type": "string",
+          "maxLength": 1000
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "revoked"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "revokedAt"
+        ]
+      }
+    }
+  ]
+}
