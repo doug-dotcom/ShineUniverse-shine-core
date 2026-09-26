@@ -19,14 +19,20 @@ const makeSql=()=> {
     }
     if(q.includes('from foundation.identity_providers')){
       if(q.includes("p.kind='supabase-auth'")){
-        return values[0]===issuer && values[1]==='shine.travel'
+        const appLinked=q.includes('join foundation.app_identity_providers');
+        const allowed=values[0]===issuer&&(!appLinked||values[1]==='shine.travel');
+        return allowed
           ? [{provider_id:'supabase:test',kind:'supabase-auth',project_url:'https://identity.example.test',publishable_key:'public-key'}]
           : [];
       }
       if(q.includes("p.kind='supabase-opaque-vault'")){
-        return values[0]==='shine.dive'
-          ? [{provider_id:'supabase:dive-vault',kind:'supabase-opaque-vault',project_url:'https://dive.example.test',publishable_key:'public-key',verification_resource:'dive_companions',subject_field:'vault_hash',token_header:'x-shine-vault-token'}]
-          : [];
+        if(values[0]==='shine.dive'){
+          return [{provider_id:'supabase:dive-vault',kind:'supabase-opaque-vault',project_url:'https://dive.example.test',publishable_key:'public-key',verification_resource:'dive_companions',subject_field:'vault_hash',token_header:'x-shine-vault-token'}];
+        }
+        if(values[0]==='shine.ski'){
+          return [{provider_id:'supabase:ski-session',kind:'supabase-opaque-vault',project_url:'https://ski.example.test',publishable_key:'public-key',verification_resource:'ski_foundation_sessions',subject_field:'session_hash',token_header:'x-shine-ski-token'}];
+        }
+        return [];
       }
     }
     if(q.includes('from foundation.identity_bindings')) return [{shine_id:shineId}];
@@ -48,6 +54,9 @@ const makeSql=()=> {
       return [{request_id:'44444444-4444-4444-8444-444444444444'}];
     }
     if(q.includes('from foundation.access_audit_events')) return [];
+    if(q.includes('foundation.claim_identity_and_issue_grant')){
+      return [{outcome:'linked',binding_created:true,grant_created:true}];
+    }
     throw new Error('unexpected SQL: '+q);
   };
   return {sql,audit};
@@ -191,4 +200,53 @@ test('opaque user token is rejected for an app without an opaque provider link',
   });
   assert.equal(result,null);
   assert.equal(calls,0);
+});
+
+
+test('unbound Ski opaque proof verifies possession without requiring a canonical binding',async()=>{
+  const raw='c'.repeat(64);
+  const expected=await sha256Hex(raw);
+  const {sql}=makeSql();
+  const adapters=createSupabaseRuntimeAdapters({
+    sql,
+    defenceGate:createFoundationRuntimeDefenceGateV1(),
+    fetchImpl:async(url,options)=>{
+      const parsed=new URL(url);
+      assert.equal(parsed.origin,'https://ski.example.test');
+      assert.equal(parsed.pathname,'/rest/v1/ski_foundation_sessions');
+      assert.equal(parsed.searchParams.get('session_hash'),'eq.'+expected);
+      assert.equal(options.headers['x-shine-ski-token'],raw);
+      return Response.json([{session_hash:expected}]);
+    }
+  });
+  const proof=await adapters.verifyOpaqueIdentityProof({userToken:raw,claimedAppId:'shine.ski'});
+  assert.equal(proof.providerId,'supabase:ski-session');
+  assert.equal(proof.providerSubject,expected);
+  assert.equal(Object.hasOwn(proof,'shineId'),false);
+});
+
+test('canonical identity proof verifies active auth provider independently of requesting appendage',async()=>{
+  const {adapters}=makeAdapters();
+  const token=jwt({iss:issuer,sub:'auth-user',session_id:'session-2'});
+  const proof=await adapters.verifyCanonicalIdentityProof({jwt:token});
+  assert.equal(proof.shineId,shineId);
+  assert.equal(proof.providerId,'supabase:test');
+  assert.equal(proof.authSubject,'auth-user');
+  assert.equal(proof.sessionId,'session-2');
+});
+
+test('claim adapter sends only verified identifiers to the database claim function',async()=>{
+  const {adapters}=makeAdapters();
+  const result=await adapters.claimIdentityAndGrant({
+    claimId:'99999999-9999-4999-8999-999999999999',
+    appId:'shine.ski',
+    providerId:'supabase:ski-session',
+    providerSubject:'d'.repeat(64),
+    shineId,
+    scope:'vault.foundation.pilot.read',
+    purpose:'ski.foundation-pilot',
+    resourceCategory:'foundation.pilot',
+    requestedAt:'2026-09-26T13:00:00Z'
+  });
+  assert.deepEqual(result,{outcome:'linked',bindingCreated:true,grantCreated:true});
 });
