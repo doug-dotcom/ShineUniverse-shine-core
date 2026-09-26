@@ -74,7 +74,7 @@
       "id": "app-connection-status",
       "path": "foundation/schemas/app-connection-status-v1.schema.json",
       "version": "1.1.0",
-      "blobSha": "8e6d817e997b28886ff614822a2f7fb9c8e8b928"
+      "blobSha": "50a83dd56db67c51ba5c13d1c3de1836b5a61a22"
     },
     {
       "id": "appendage-connection-spec",
