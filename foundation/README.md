@@ -57,3 +57,19 @@ Foundation Layer 2 defines the first three machine-readable objects shared acros
 `object-registry-v1.json` pins these schemas to exact Git blob identities. CI runs `integration-kit/verify-object-registry-v1.mjs` and rejects silent schema drift.
 
 The Layer 2 build record is `layers/layer-002-canonical-object-models.md`.
+
+
+## Permission and grant engine
+
+Foundation Layer 3 defines the access path joining Core, ID, Vault and Defence.
+
+- `schemas/permission-request-v1.schema.json` — scoped app request.
+- `schemas/access-grant-v1.schema.json` — explicit user/resource grant.
+- `schemas/access-decision-v1.schema.json` — allow/deny result and reason.
+- `schemas/grant-revocation-v1.schema.json` — grant termination event.
+- `schemas/access-audit-event-v1.schema.json` — auditable decision record.
+- `integration-kit/permission-engine-v1.mjs` — deterministic reference evaluator.
+
+An allow requires a verified Shine ID, a registered app manifest declaring the requested scope/purpose, a matching active grant, a matching owned resource and no Shine Defence veto.
+
+The Layer 3 build record is `layers/layer-003-permission-grant-engine.md`.
