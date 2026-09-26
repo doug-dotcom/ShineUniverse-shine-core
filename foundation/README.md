@@ -55,6 +55,7 @@ An app is never granted access to a user's entire Vault merely because it belong
 - **Layer 8** — first appendage connection: Shine Travel.
 - **Layer 9** — public Defence status feed.
 - **Layer 10** — app connection registry and onboarding state.
+- **Layer 11** — second appendage: Shine Dive with opaque-session federation.
 
 ## Durable state
 
@@ -89,7 +90,7 @@ The runtime uses pinned dependencies and a serverless transaction-pooler databas
 
 - Project ref: `sjpxqeyewahraxvidvcc`
 - Region: `ap-southeast-2`
-- Live function: `foundation-gateway` v5
+- Live function: `foundation-gateway` v7
 - Platform JWT precheck: disabled in favour of custom dual auth (app credential + app-approved identity-provider user-token verification)
 - Hosted Supabase security advisor: 0 lints
 
@@ -123,3 +124,8 @@ Foundation Layer 11 extends Shine ID federation beyond JWT accounts.
 Apps may use an app-approved `supabase-opaque-vault` provider. The calling backend sends the user's opaque session token only in the private `X-Shine-User-Token` header. Foundation hashes the token, verifies it against the provider's existing Supabase RLS-protected resource using the configured token header, and maps the verified subject hash to canonical Shine ID.
 
 The raw opaque token is never placed in the Gateway JSON envelope or audit ledger.
+
+
+Current connection registry state: **Shine Dive = grant-ready** (1 active credential, 1 approved opaque-vault identity provider, 1 active grant, 0 observed production ALLOWs).
+
+See `layers/layer-011-dive-second-appendage.md` for the second appendage integration.
