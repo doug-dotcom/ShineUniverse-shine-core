@@ -1,0 +1,115 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:shine:foundation:schema:app-manifest-v1",
+  "title": "Shine Foundation App Manifest v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "manifest",
+    "schemaVersion",
+    "appId",
+    "name",
+    "version",
+    "primaryPurpose",
+    "supportedModes",
+    "foundation"
+  ],
+  "properties": {
+    "manifest": {
+      "const": "shine-foundation/app-manifest-v1"
+    },
+    "schemaVersion": {
+      "const": "1.0.0"
+    },
+    "appId": {
+      "type": "string",
+      "pattern": "^shine\\.[a-z0-9][a-z0-9-]*$"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(?:[-+][0-9A-Za-z.-]+)?$"
+    },
+    "primaryPurpose": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 500
+    },
+    "supportedModes": {
+      "type": "array",
+      "uniqueItems": true,
+      "minItems": 1,
+      "items": {
+        "enum": [
+          "standalone",
+          "connected",
+          "universe-enhanced"
+        ]
+      },
+      "contains": {
+        "const": "standalone"
+      },
+      "minContains": 1
+    },
+    "foundation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "contract",
+        "standalonePrimaryPurposeAvailable",
+        "requestedScopes"
+      ],
+      "properties": {
+        "contract": {
+          "const": "shine-foundation/foundation-v1"
+        },
+        "standalonePrimaryPurposeAvailable": {
+          "const": true
+        },
+        "requestedScopes": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "scope",
+              "purpose"
+            ],
+            "properties": {
+              "scope": {
+                "type": "string",
+                "pattern": "^[a-z0-9][a-z0-9._:-]*$"
+              },
+              "purpose": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 500
+              },
+              "resourceCategory": {
+                "type": "string",
+                "pattern": "^[a-z0-9][a-z0-9._-]*$"
+              },
+              "optional": {
+                "type": "boolean",
+                "default": true
+              }
+            }
+          }
+        },
+        "onFoundationUnavailable": {
+          "enum": [
+            "continue-standalone",
+            "disable-foundation-features",
+            "read-only-foundation-cache"
+          ],
+          "default": "continue-standalone"
+        }
+      }
+    }
+  }
+}
