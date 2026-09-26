@@ -7,7 +7,7 @@ const json=(status,body)=>new Response(JSON.stringify(body),{status,headers:JSON
 const healthPath=p=>p==='/health'||p.endsWith('/foundation-gateway/health');
 const evaluatePath=p=>p==='/v1/access/evaluate'||p.endsWith('/foundation-gateway/v1/access/evaluate');
 
-export function createFoundationHttpHandler({gateway,authenticate,maxBodyBytes=16*1024}={}){
+/** @param {{gateway:any, authenticate:any, maxBodyBytes?:number}} [options] */\nexport function createFoundationHttpHandler({gateway,authenticate,maxBodyBytes=16*1024}={}){
   if(typeof gateway!=='function') throw new TypeError('gateway must be a function');
   if(typeof authenticate!=='function') throw new TypeError('authenticate must be a function');
 
