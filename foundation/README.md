@@ -51,6 +51,9 @@ An app is never granted access to a user's entire Vault merely because it belong
 - **Layer 4** — durable grants, audit ledger and revocation propagation.
 - **Layer 5** — Foundation Gateway.
 - **Layer 6** — Supabase runtime, app attestation and deployable Edge Function.
+- **Layer 7** — dedicated hosted Foundation project and live Gateway.
+- **Layer 8** — first appendage connection: Shine Travel.
+- **Layer 9** — public Defence status feed.
 
 ## Durable state
 
@@ -85,10 +88,12 @@ The runtime uses pinned dependencies and a serverless transaction-pooler databas
 
 - Project ref: `sjpxqeyewahraxvidvcc`
 - Region: `ap-southeast-2`
-- Live function: `foundation-gateway` v1
-- Platform JWT verification: enabled
+- Live function: `foundation-gateway` v3
+- Platform JWT precheck: disabled in favour of custom dual auth (app credential + registered user-token issuer)
 - Hosted Supabase security advisor: 0 lints
 
 The Edge Function uses Supabase's built-in database connection but scopes every Foundation query with `SET LOCAL ROLE foundation_gateway`, where `foundation_gateway` is NOLOGIN and does not bypass RLS.
 
-See `layers/layer-007-hosted-foundation.md` and `runtime/hosted-deployment-v1.json` for the live deployment record.
+Shine Travel is the first connected appendage. It retains its existing Shine-L sign-in and standalone operation while its backend can call Foundation Gateway v2 using a server-only app credential. See `layers/layer-008-travel-first-appendage.md`.
+
+See `layers/layer-007-hosted-foundation.md` and `runtime/hosted-deployment-v1.json` for the hosted deployment record.
