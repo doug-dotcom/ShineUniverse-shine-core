@@ -151,3 +151,10 @@ test('Foundation denial does not define app standalone behaviour',()=>{
   assert.equal(result.decision,'deny');
   assert.equal(Object.hasOwn(result,'disableApp'),false);
 });
+
+
+test('denies when the requested Vault resource does not exist',()=>{
+  const result=evaluateAccess({...base,resource:null});
+  assert.equal(result.decision,'deny');
+  assert.equal(result.reasonCode,'resource-not-found');
+});
