@@ -3,11 +3,16 @@ import {
   appManifestDeclaresPermission
 } from '../integration-kit/permission-engine-v1.mjs';
 
-const GATEWAY_VERSION='1.0.0';
+const RESPONSE_VERSION='1.0.0';
+const requestVersion=envelope=>{
+  if(envelope?.gatewayRequest==='shine-foundation/gateway-request-v1' && envelope?.schemaVersion==='1.0.0') return 1;
+  if(envelope?.gatewayRequest==='shine-foundation/gateway-request-v2' && envelope?.schemaVersion==='2.0.0') return 2;
+  return 0;
+};
 
 const response=(envelope,status,reasonCode,decision)=>({
   gatewayResponse:'shine-foundation/gateway-response-v1',
-  schemaVersion:GATEWAY_VERSION,
+  schemaVersion:RESPONSE_VERSION,
   traceId:envelope?.traceId??null,
   requestId:envelope?.permission?.requestId??null,
   status,
@@ -20,21 +25,21 @@ const requireFunction=(adapters,name)=>{
 };
 
 const isEnvelopeValid=envelope=>{
-  if(!envelope||envelope.gatewayRequest!=='shine-foundation/gateway-request-v1') return false;
-  if(envelope.schemaVersion!==GATEWAY_VERSION||envelope.operation!=='access.evaluate') return false;
-  if(!envelope.traceId) return false;
+  const v=requestVersion(envelope);
+  if(!v || envelope.operation!=='access.evaluate' || !envelope.traceId) return false;
   const p=envelope.permission;
-  if(!p||!p.requestId||!p.appId||!p.shineId||!p.scope||!p.purpose||!p.requestedAt) return false;
+  if(!p || !p.requestId || !p.appId || !p.scope || !p.purpose || !p.requestedAt) return false;
+  if(v===1 && !p.shineId) return false;
   return Boolean(p.resourceId||p.resourceCategory);
 };
 
-const toAuditEvent=({envelope,decision,defenceEvidenceRef,occurredAt})=>({
+const toAuditEvent=({envelope,decision,defenceEvidenceRef,occurredAt,shineId})=>({
   event:'shine-foundation/access-audit-event-v1',
   schemaVersion:'1.0.0',
   eventId:envelope.traceId,
   requestId:envelope.permission.requestId,
   appId:envelope.permission.appId,
-  shineId:envelope.permission.shineId,
+  shineId:shineId??null,
   scope:envelope.permission.scope,
   purpose:envelope.permission.purpose,
   ...(envelope.permission.resourceId?{resourceId:envelope.permission.resourceId}:{}),
@@ -57,11 +62,12 @@ export function createFoundationGateway({adapters,clock=()=>new Date().toISOStri
     if(!isEnvelopeValid(envelope)) return response(envelope,'invalid','invalid-gateway-request');
 
     const permission=envelope.permission;
+    const v=requestVersion(envelope);
     const now=clock();
 
-    const persistAndRespond=async(decision,defenceEvidenceRef)=>{
+    const persistAndRespond=async(decision,defenceEvidenceRef,shineId=permission.shineId??null)=>{
       try{
-        await adapters.writeAuditEvent(toAuditEvent({envelope,decision,defenceEvidenceRef,occurredAt:now}));
+        await adapters.writeAuditEvent(toAuditEvent({envelope,decision,defenceEvidenceRef,occurredAt:now,shineId}));
       }catch{
         return response(envelope,'unavailable','audit-write-failed');
       }
@@ -81,54 +87,60 @@ export function createFoundationGateway({adapters,clock=()=>new Date().toISOStri
     }
 
     if(!verifiedApp?.appId){
-      return persistAndRespond({decision:'deny',reasonCode:'app-caller-unverified'});
+      return persistAndRespond({decision:'deny',reasonCode:'app-caller-unverified'},undefined,null);
     }
     if(verifiedApp.appId!==permission.appId){
-      return persistAndRespond({decision:'deny',reasonCode:'app-caller-mismatch'});
+      return persistAndRespond({decision:'deny',reasonCode:'app-caller-mismatch'},undefined,null);
     }
 
     let verified;
     try{
-      verified=await adapters.verifyIdentity({authContext,claimedShineId:permission.shineId});
+      verified=await adapters.verifyIdentity({authContext});
     }catch{
       return response(envelope,'unavailable','foundation-dependency-unavailable');
     }
 
-    if(!verified?.shineId||verified.shineId!==permission.shineId){
-      return persistAndRespond(evaluateAccess({
-        request:permission,
-        verifiedShineId:verified?.shineId
-      }));
+    if(!verified?.shineId){
+      return persistAndRespond({decision:'deny',reasonCode:'identity-unverified'},undefined,null);
     }
+    if(v===1 && permission.shineId!==verified.shineId){
+      return persistAndRespond({decision:'deny',reasonCode:'identity-mismatch'},undefined,verified.shineId);
+    }
+    if(v===2 && permission.shineId && permission.shineId!==verified.shineId){
+      return persistAndRespond({decision:'deny',reasonCode:'identity-mismatch'},undefined,verified.shineId);
+    }
+
+    const effectiveRequest={...permission,shineId:verified.shineId};
 
     let manifest;
     try{
-      manifest=await adapters.getAppManifest({appId:permission.appId});
+      manifest=await adapters.getAppManifest({appId:effectiveRequest.appId});
     }catch{
       return response(envelope,'unavailable','foundation-dependency-unavailable');
     }
 
-    if(!manifest||manifest.appId!==permission.appId||!appManifestDeclaresPermission(manifest,permission)){
-      return persistAndRespond(evaluateAccess({
-        request:permission,
+    if(!manifest || manifest.appId!==effectiveRequest.appId || !appManifestDeclaresPermission(manifest,effectiveRequest)){
+      const decision=evaluateAccess({
+        request:effectiveRequest,
         verifiedShineId:verified.shineId,
         appManifest:manifest
-      }));
+      });
+      return persistAndRespond(decision,undefined,verified.shineId);
     }
 
     let resource,grants;
     try{
       [resource,grants]=await Promise.all([
         adapters.getVaultResource({
-          resourceId:permission.resourceId,
-          resourceCategory:permission.resourceCategory,
-          ownerShineId:permission.shineId
+          resourceId:effectiveRequest.resourceId,
+          resourceCategory:effectiveRequest.resourceCategory,
+          ownerShineId:verified.shineId
         }),
         adapters.getEffectiveGrants({
-          shineId:permission.shineId,
-          appId:permission.appId,
-          scope:permission.scope,
-          purpose:permission.purpose
+          shineId:verified.shineId,
+          appId:effectiveRequest.appId,
+          scope:effectiveRequest.scope,
+          purpose:effectiveRequest.purpose
         })
       ]);
     }catch{
@@ -138,7 +150,7 @@ export function createFoundationGateway({adapters,clock=()=>new Date().toISOStri
     let defence;
     try{
       defence=await adapters.evaluateDefence({
-        envelope,
+        envelope:{...envelope,permission:effectiveRequest},
         verifiedIdentity:verified,
         verifiedApp,
         appManifest:manifest,
@@ -149,7 +161,7 @@ export function createFoundationGateway({adapters,clock=()=>new Date().toISOStri
     }
 
     const decision=evaluateAccess({
-      request:permission,
+      request:effectiveRequest,
       verifiedShineId:verified.shineId,
       appManifest:manifest,
       resource,
@@ -158,6 +170,6 @@ export function createFoundationGateway({adapters,clock=()=>new Date().toISOStri
       defenceDecision:defence?.decision??'not-evaluated'
     });
 
-    return persistAndRespond(decision,defence?.evidenceRef);
+    return persistAndRespond(decision,defence?.evidenceRef,verified.shineId);
   };
 }
