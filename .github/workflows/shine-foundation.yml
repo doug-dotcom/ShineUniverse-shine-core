@@ -6,7 +6,7 @@ on:
 permissions:
   contents: read
 jobs:
-  object-contracts:
+  foundation-contracts:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -15,3 +15,4 @@ jobs:
         with:
           node-version: '22'
       - run: node foundation/integration-kit/verify-object-registry-v1.mjs
+      - run: node --test foundation/integration-kit/permission-engine-v1.test.mjs
