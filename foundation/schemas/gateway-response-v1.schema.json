@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:shine:foundation:schema:gateway-response-v1",
+  "title": "Shine Foundation Gateway Response v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "gatewayResponse",
+    "schemaVersion",
+    "traceId",
+    "requestId",
+    "status"
+  ],
+  "properties": {
+    "gatewayResponse": {
+      "const": "shine-foundation/gateway-response-v1"
+    },
+    "schemaVersion": {
+      "const": "1.0.0"
+    },
+    "traceId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "requestId": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "status": {
+      "enum": [
+        "allowed",
+        "denied",
+        "unavailable",
+        "invalid"
+      ]
+    },
+    "reasonCode": {
+      "type": "string",
+      "minLength": 1
+    },
+    "decision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "decision",
+        "reasonCode"
+      ],
+      "properties": {
+        "decision": {
+          "enum": [
+            "allow",
+            "deny"
+          ]
+        },
+        "reasonCode": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}
