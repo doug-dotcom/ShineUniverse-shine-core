@@ -120,8 +120,8 @@
     {
       "id": "review-candidate",
       "path": "security/shine-defence/review-candidate-v1.json",
-      "version": "1.2.0",
-      "blobSha": "768f6fc1a4c477fb3b9028b4726ae1324dc00aeb"
+      "version": "1.3.0",
+      "blobSha": "8daa47794f66f3f3d66ed51176158fa5e2f7260b"
     },
     {
       "id": "review-decision",
@@ -132,14 +132,26 @@
     {
       "id": "review-promotion",
       "path": "security/shine-defence/review-promotion-v1.json",
-      "version": "1.0.0",
-      "blobSha": "97830a6eb66758151d519b6e80145d81c57874ae"
+      "version": "1.1.0",
+      "blobSha": "f49c4823dfec7b3cfd93a8e688564d8695aa1f47"
     },
     {
       "id": "review-promoter",
       "path": "security/shine-defence/integration-kit/promote-review-v1.mjs",
       "version": "1.0.0",
       "blobSha": "031da7e7ea376e13397f17a2c53d2549b9538803"
+    },
+    {
+      "id": "first-certification",
+      "path": "security/shine-defence/first-certification-v1.json",
+      "version": "1.0.0",
+      "blobSha": "1225f3ce3118c311f8a6624146c54bbc6b94f147"
+    },
+    {
+      "id": "first-certification-onboarder",
+      "path": "security/shine-defence/integration-kit/onboard-review-v1.mjs",
+      "version": "1.0.0",
+      "blobSha": "cf1dc49f9f9a10c5efc0d985fb2ba181b1d679db"
     }
   ]
 }

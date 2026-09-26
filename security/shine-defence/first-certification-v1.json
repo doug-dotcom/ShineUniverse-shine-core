@@ -1,0 +1,31 @@
+{
+  "contract": "shine-defence/first-certification-v1",
+  "version": "1.0.0",
+  "purpose": "Fail-closed rules for admitting a brand-new Shine application into the canonical reviewed ecosystem for the first time.",
+  "preconditions": [
+    "Exactly one pending_review candidate identifies the application release being reviewed.",
+    "The application id is absent from the canonical reviewed ecosystem ledger.",
+    "No current certification receipt exists for the application.",
+    "No accepted review candidate or accepted review decision already exists for the application.",
+    "The candidate repository, profile path, release/profile identities, policies and evidence are valid under the canonical review-candidate contract.",
+    "The decision timestamp is not earlier than candidate observation."
+  ],
+  "onboardingState": [
+    "The pending candidate becomes accepted.",
+    "A new reviewed ecosystem ledger entry is created from the exact candidate identity.",
+    "A certification receipt is created for that exact reviewed identity and the current immutable canonical-registry snapshot.",
+    "Exactly one accepted review decision is appended for the candidate.",
+    "After onboarding, the app becomes promotion-managed and must satisfy review-promotion-v1 for later re-certifications."
+  ],
+  "atomicity": [
+    "Candidate acceptance, initial reviewed-ledger entry, certification receipt and accepted review decision are one onboarding unit.",
+    "A partial first certification is invalid even when each changed file is individually well-formed.",
+    "The onboarding helper is dry-run first, verifies the resulting Defence state after writing, and restores every touched file when verification fails."
+  ],
+  "nonClaims": [
+    "A pending onboarding candidate does not grant a Defence badge.",
+    "First certification does not certify later application commits.",
+    "The onboarding helper does not replace app-specific review evidence or tests.",
+    "Certification remains subject to current revocation and release-claim rules."
+  ]
+}
