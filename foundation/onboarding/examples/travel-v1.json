@@ -1,0 +1,36 @@
+{
+  "spec": "shine-foundation/appendage-connection-spec-v1",
+  "schemaVersion": "1.0.0",
+  "app": {
+    "appId": "shine.travel",
+    "name": "Shine Travel",
+    "primaryPurpose": "Private holiday planning and on-trip guidance."
+  },
+  "source": {
+    "repository": "doug-dotcom/shine-travel",
+    "branch": "main",
+    "backendEntrypoint": "railway/server.mjs"
+  },
+  "identity": {
+    "kind": "supabase-auth",
+    "providerId": "supabase:shine-l",
+    "projectUrl": "https://raxfwycrnviwxxzykhfq.supabase.co",
+    "issuer": "https://raxfwycrnviwxxzykhfq.supabase.co/auth/v1"
+  },
+  "runtime": {
+    "platform": "railway",
+    "foundationBaseUrlEnv": "SHINE_FOUNDATION_URL",
+    "appTokenEnv": "SHINE_FOUNDATION_APP_TOKEN",
+    "userCredentialMode": "bearer-jwt"
+  },
+  "pilot": {
+    "scope": "vault.foundation.pilot.read",
+    "purpose": "travel.foundation-pilot",
+    "resourceCategory": "foundation.pilot"
+  },
+  "safety": {
+    "standaloneFallback": true,
+    "secretsInSpec": false,
+    "personalIdsInSpec": false
+  }
+}
