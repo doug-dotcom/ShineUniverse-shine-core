@@ -17,9 +17,9 @@ const makeSql=()=> {
       return values[0]==='4c0ffa9a073e5e47ee51e8352cee4b05d0c21f75b501e314e2ffae28fd635909'
         ? [{credential_id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',app_id:'shine.travel'}] : [];
     }
-    if(q.includes('from foundation.trusted_auth_issuers')){
+    if(q.includes('from foundation.identity_providers')){
       return values[0]===issuer
-        ? [{issuer_id:'supabase:test',issuer_url:issuer,api_url:'https://identity.example.test',publishable_key:'public-key'}]
+        ? [{provider_id:'supabase:test',project_url:'https://identity.example.test',publishable_key:'public-key'}]
         : [];
     }
     if(q.includes('from foundation.identity_bindings')) return [{shine_id:shineId}];
@@ -52,14 +52,12 @@ const makeAdapters=({fetchImpl}={})=>{
     audit,
     adapters:createSupabaseRuntimeAdapters({
       sql,
-      authClient:{auth:{getClaims:async()=>({data:{claims:{sub:'local-user',session_id:'local-session'}}})}},
-      fetchFn:fetchImpl??(async(url,options)=>{
+      fetchImpl:fetchImpl??(async(url,options)=>{
         assert.equal(url,'https://identity.example.test/auth/v1/user');
         assert.equal(options.headers.apikey,'public-key');
         return Response.json({id:'auth-user'});
       }),
-      defenceGate:createFoundationRuntimeDefenceGateV1(),
-      localAuthUrl:'https://foundation.test'
+      defenceGate:createFoundationRuntimeDefenceGateV1()
     })
   };
 };
@@ -83,7 +81,8 @@ test('registered external issuer verifies user then maps canonical Shine ID',asy
   const result=await adapters.verifyIdentity({authContext:{jwt:token}});
   assert.equal(result.shineId,shineId);
   assert.equal(result.authSubject,'auth-user');
-  assert.equal(result.authProvider,'supabase:test');
+  assert.equal(result.providerId,'supabase:test');
+  assert.equal(result.sessionId,'session-1');
 });
 
 test('unregistered issuer is denied without contacting external Auth',async()=>{
@@ -132,40 +131,4 @@ test('audit writes can record pre-identity denial with null Shine ID',async()=>{
     reasonCode:'app-caller-unverified',occurredAt:'2026-09-26T08:30:00Z'
   });
   assert.equal(audit.length,1);
-});
-
-
-test('verifies a trusted external Shine Supabase issuer before identity mapping',async()=>{
-  const externalShineId='99999999-9999-4999-8999-999999999999';
-  const issuer='https://shine-l.test/auth/v1';
-  const payload=Buffer.from(JSON.stringify({iss:issuer,sub:'untrusted-sub'})).toString('base64url');
-  const jwt='x.'+payload+'.x';
-  const sql=async(strings,...values)=>{
-    const q=strings.join('?').replace(/\s+/g,' ').trim().toLowerCase();
-    if(q.includes('from foundation.trusted_auth_issuers')){
-      assert.equal(values[0],issuer);
-      return [{issuer_id:'supabase:shine-l',issuer_url:issuer,api_url:'https://shine-l.test',publishable_key:'public'}];
-    }
-    if(q.includes('from foundation.identity_bindings')){
-      assert.equal(values[0],'supabase:shine-l');
-      assert.equal(values[1],externalShineId);
-      return [{shine_id:externalShineId}];
-    }
-    throw new Error('unexpected SQL '+q);
-  };
-  const adapters=createSupabaseRuntimeAdapters({
-    sql,
-    authClient:{auth:{getClaims:async()=>{throw new Error('local auth must not verify external token')}}},
-    defenceGate:createFoundationRuntimeDefenceGateV1(),
-    localAuthUrl:'https://foundation.test',
-    fetchFn:async(url,options)=>{
-      assert.equal(url,'https://shine-l.test/auth/v1/user');
-      assert.equal(options.headers.apikey,'public');
-      assert.equal(options.headers.Authorization,'Bearer '+jwt);
-      return Response.json({id:externalShineId});
-    }
-  });
-  const result=await adapters.verifyIdentity({authContext:{jwt}});
-  assert.equal(result.shineId,externalShineId);
-  assert.equal(result.authProvider,'supabase:shine-l');
 });
