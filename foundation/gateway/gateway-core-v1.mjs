@@ -46,7 +46,7 @@ const toAuditEvent=({envelope,decision,defenceEvidenceRef,occurredAt})=>({
   ...(defenceEvidenceRef?{defenceEvidenceRef}:{})
 });
 
-export function createFoundationGateway({adapters,clock=()=>new Date().toISOString()}={}){
+/** @param {{adapters:any, clock?:()=>string}} [options] */\nexport function createFoundationGateway({adapters,clock=()=>new Date().toISOString()}={}){
   for(const name of [
     'verifyAppCaller','verifyIdentity','getAppManifest','getVaultResource',
     'getEffectiveGrants','evaluateDefence','writeAuditEvent'
