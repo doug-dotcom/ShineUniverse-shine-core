@@ -71,7 +71,7 @@ export function createIdentityClaimService({adapters,clock=()=>new Date().toISOS
     if(!source?.providerId||!source?.providerSubject){
       return response(envelope,'denied','appendage-proof-unverified');
     }
-    if(!target?.shineId||!target?.providerId){
+    if(!target?.shineId||!target?.providerId||!target?.authSubject){
       return response(envelope,'denied','canonical-proof-unverified');
     }
 
@@ -84,6 +84,7 @@ export function createIdentityClaimService({adapters,clock=()=>new Date().toISOS
         sourceProviderId:source.providerId,
         sourceProviderSubject:source.providerSubject,
         targetProviderId:target.providerId,
+        targetProviderSubject:target.authSubject,
         targetShineId:target.shineId,
         occurredAt:clock()
       });
