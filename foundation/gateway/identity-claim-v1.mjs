@@ -1,13 +1,10 @@
-import {appManifestDeclaresPermission} from '../integration-kit/permission-engine-v1.mjs';
-
 const RESPONSE_VERSION='1.0.0';
+
 const requestValid=envelope=>{
   if(envelope?.identityClaimRequest!=='shine-foundation/identity-claim-request-v1') return false;
   if(envelope?.schemaVersion!=='1.0.0'||envelope?.operation!=='identity.claim') return false;
-  if(!envelope.claimId||!envelope.appId||!envelope.requestedAt) return false;
-  if(envelope.shineId!==undefined||envelope.providerSubject!==undefined) return false;
-  const p=envelope.permission;
-  if(!p?.scope||!p?.purpose||!p?.resourceCategory) return false;
+  if(!envelope.claimId||!envelope.requestId||!envelope.appId||!envelope.requestedAt) return false;
+  if(envelope.shineId!==undefined||envelope.providerSubject!==undefined||envelope.targetProviderId!==undefined) return false;
   return true;
 };
 
@@ -15,6 +12,7 @@ const response=(envelope,status,reasonCode,extra={})=>({
   identityClaimResponse:'shine-foundation/identity-claim-response-v1',
   schemaVersion:RESPONSE_VERSION,
   claimId:envelope?.claimId??null,
+  requestId:envelope?.requestId??null,
   appId:envelope?.appId??null,
   status,
   ...(reasonCode?{reasonCode}:{}),
@@ -26,19 +24,26 @@ const requireFunction=(adapters,name)=>{
 };
 
 /**
- * Links an already-verified opaque appendage identity to an already-existing canonical Shine identity.
- * Both proofs must be present in the same request. The caller never supplies a Shine ID.
+ * Links an already-verified opaque appendage identity to an existing canonical Shine identity.
+ * The request must carry both identity proofs at the same time. No Shine ID or provider subject
+ * is accepted from the caller body, and linking does not create a Vault grant.
  */
-export function createIdentityClaimService({adapters}={}){
+export function createIdentityClaimService({adapters,clock=()=>new Date().toISOString()}={}){
   for(const name of [
     'verifyAppCaller','verifyOpaqueIdentityProof','verifyCanonicalIdentityProof',
-    'getAppManifest','claimIdentityAndGrant'
+    'completeIdentityClaim'
   ]) requireFunction(adapters,name);
 
   return async function claimIdentity({envelope,authContext}={}){
     if(!requestValid(envelope)) return response(envelope,'invalid','invalid-identity-claim-request');
     if(!authContext?.appToken||!authContext?.userToken||!authContext?.jwt){
       return response(envelope,'denied','dual-proof-required');
+    }
+
+    const requestedAt=Date.parse(envelope.requestedAt);
+    const now=Date.parse(clock());
+    if(!Number.isFinite(requestedAt)||!Number.isFinite(now)||requestedAt<now-10*60*1000||requestedAt>now+5*60*1000){
+      return response(envelope,'invalid','stale-identity-claim-request');
     }
 
     let verifiedApp;
@@ -50,9 +55,9 @@ export function createIdentityClaimService({adapters}={}){
     if(!verifiedApp?.appId) return response(envelope,'denied','app-caller-unverified');
     if(verifiedApp.appId!==envelope.appId) return response(envelope,'denied','app-caller-mismatch');
 
-    let opaque,canonical;
+    let source,target;
     try{
-      [opaque,canonical]=await Promise.all([
+      [source,target]=await Promise.all([
         adapters.verifyOpaqueIdentityProof({
           userToken:authContext.userToken,
           claimedAppId:envelope.appId
@@ -63,55 +68,38 @@ export function createIdentityClaimService({adapters}={}){
       return response(envelope,'unavailable','foundation-dependency-unavailable');
     }
 
-    if(!opaque?.providerId||!opaque?.providerSubject){
+    if(!source?.providerId||!source?.providerSubject){
       return response(envelope,'denied','appendage-proof-unverified');
     }
-    if(!canonical?.shineId){
+    if(!target?.shineId||!target?.providerId){
       return response(envelope,'denied','canonical-proof-unverified');
     }
 
-    let manifest;
-    try{ manifest=await adapters.getAppManifest({appId:envelope.appId}); }
-    catch{ return response(envelope,'unavailable','foundation-dependency-unavailable'); }
-
-    const permission={
-      appId:envelope.appId,
-      scope:envelope.permission.scope,
-      purpose:envelope.permission.purpose,
-      resourceCategory:envelope.permission.resourceCategory,
-      requestedAt:envelope.requestedAt
-    };
-    if(!manifest||manifest.appId!==envelope.appId||!appManifestDeclaresPermission(manifest,permission)){
-      return response(envelope,'denied','permission-not-declared');
-    }
-
-    let linked;
+    let result;
     try{
-      linked=await adapters.claimIdentityAndGrant({
+      result=await adapters.completeIdentityClaim({
         claimId:envelope.claimId,
+        requestId:envelope.requestId,
         appId:envelope.appId,
-        providerId:opaque.providerId,
-        providerSubject:opaque.providerSubject,
-        shineId:canonical.shineId,
-        scope:permission.scope,
-        purpose:permission.purpose,
-        resourceCategory:permission.resourceCategory,
-        requestedAt:envelope.requestedAt
+        sourceProviderId:source.providerId,
+        sourceProviderSubject:source.providerSubject,
+        targetProviderId:target.providerId,
+        targetShineId:target.shineId,
+        occurredAt:clock()
       });
     }catch{
       return response(envelope,'unavailable','identity-claim-write-failed');
     }
 
-    if(linked?.outcome==='conflict'){
+    if(!result) return response(envelope,'unavailable','identity-claim-write-failed');
+    if(result.outcome==='linked'||result.outcome==='already-linked'){
+      return response(envelope,'linked',result.reasonCode??'identity-claim-linked',{
+        bindingCreated:result.outcome==='linked'
+      });
+    }
+    if(result.reasonCode==='source-already-bound'){
       return response(envelope,'conflict','identity-claim-conflict');
     }
-    if(linked?.outcome!=='linked'){
-      return response(envelope,'denied','identity-claim-rejected');
-    }
-
-    return response(envelope,'linked','identity-linked',{
-      bindingCreated:Boolean(linked.bindingCreated),
-      grantCreated:Boolean(linked.grantCreated)
-    });
+    return response(envelope,'denied',result.reasonCode??'identity-claim-rejected');
   };
 }
