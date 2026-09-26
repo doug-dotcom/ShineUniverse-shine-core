@@ -86,6 +86,12 @@
       "path": "security/shine-defence/policies/exercise-companion-safety-v1.json",
       "version": "1.0.0",
       "blobSha": "10a457f1e40499c893af29f732bdb84e6de5d038"
+    },
+    {
+      "id": "release-claim",
+      "path": "security/shine-defence/release-claim-v1.json",
+      "version": "1.0.0",
+      "blobSha": "b6ad32414a6bba5db77d277addf935e6f993bc55"
     }
   ]
 }

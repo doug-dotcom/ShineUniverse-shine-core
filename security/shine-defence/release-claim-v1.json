@@ -1,0 +1,39 @@
+{
+  "contract": "shine-defence/release-claim-v1",
+  "version": "1.0.0",
+  "purpose": "Machine-readable rules for deciding whether a specific application revision may make a current Shine Defence badge claim.",
+  "inputs": [
+    "application id",
+    "release commit SHA",
+    "release Defence-profile Git blob SHA",
+    "ecosystem profile ledger"
+  ],
+  "states": [
+    {
+      "id": "reviewed_release",
+      "badgeCurrent": true,
+      "rule": "Release commit SHA and Defence-profile blob SHA exactly match the reviewed ledger entry."
+    },
+    {
+      "id": "profile_drift",
+      "badgeCurrent": false,
+      "rule": "Release commit matches the reviewed commit but the Defence-profile blob differs from the reviewed profile."
+    },
+    {
+      "id": "unreviewed_revision",
+      "badgeCurrent": false,
+      "rule": "Application exists in the ledger but the release commit differs from the reviewed commit."
+    },
+    {
+      "id": "uncertified",
+      "badgeCurrent": false,
+      "rule": "Application is not present in the reviewed ecosystem ledger."
+    }
+  ],
+  "badgeRule": "Only reviewed_release may present Protected by Shine Defence as a current release claim. Other states may disclose the last reviewed commit but must not imply that a later or changed revision inherited certification.",
+  "nonClaims": [
+    "A reviewed release is not claimed to be invulnerable.",
+    "A later commit is not unsafe merely because it is unreviewed.",
+    "This contract does not replace app-specific Defence tests or normal release verification."
+  ]
+}
