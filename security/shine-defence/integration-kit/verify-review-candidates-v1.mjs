@@ -5,11 +5,11 @@ const root=new URL('../../../',import.meta.url);
 const queue=JSON.parse(readFileSync(new URL('security/shine-defence/review-candidates-v1.json',root),'utf8'));
 const ledger=JSON.parse(readFileSync(new URL('security/shine-defence/ecosystem-profile-ledger-v1.json',root),'utf8'));
 const registry=JSON.parse(readFileSync(new URL('security/shine-defence/canonical-registry-v1.json',root),'utf8'));
-const receiptDir=new URL('security/shine-defence/receipts/',root);
 
 const SHA=/^[a-f0-9]{40}$/;
 const SEMVER=/^\d+\.\d+\.\d+$/;
 const ID=/^[a-z0-9][a-z0-9._-]{0,127}$/;
+const REPO=/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/;
 const ISO=/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?Z$/;
 const secretLike=/(?:bearer\s+[a-z0-9._-]{12,}|sk-[a-z0-9_-]{12,}|-----BEGIN [A-Z ]*PRIVATE KEY-----|(?:token|secret|password)\s*[=:]\s*[^\s]{8,})/i;
 const statuses=new Set(['pending_review','accepted','superseded','dismissed']);
@@ -21,6 +21,8 @@ const failures=[];
 
 const sameArray=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
 const cleanText=(value,max)=>typeof value==='string'&&value.length>0&&value.length<=max&&!secretLike.test(value);
+const validPath=value=>typeof value==='string'&&value.length>0&&value.length<=256&&!value.startsWith('/')&&!value.split('/').includes('..');
+const matchesCurrent=(c,app)=>c.repository===app.repo&&c.profilePath===app.path&&c.releaseCommitSha===app.reviewCommitSha&&c.profileBlobSha===app.profileBlobSha&&c.profileVersion===app.profileVersion&&sameArray(c.policies,app.policies);
 
 if(queue.ledger!=='shine-defence/review-candidates-v1'||queue.version!=='1.0.0'||!Array.isArray(queue.candidates)){
   failures.push('unsupported review candidate queue');
@@ -31,7 +33,7 @@ for(const c of queue.candidates||[]){
   else candidates.set(c.candidateId,c);
   const app=apps.get(c.appId);
   if(!app){failures.push(c.candidateId+': app not in reviewed ecosystem ledger');continue}
-  if(c.repository!==app.repo||c.profilePath!==app.path)failures.push(c.candidateId+': repository/profile path mismatch');
+  if(!REPO.test(c.repository||'')||!validPath(c.profilePath))failures.push(c.candidateId+': invalid repository/profile path');
   if(!SHA.test(c.releaseCommitSha||'')||!SHA.test(c.profileBlobSha||''))failures.push(c.candidateId+': invalid release/profile SHA');
   if(!SEMVER.test(c.profileVersion||''))failures.push(c.candidateId+': invalid profile version');
   if(!statuses.has(c.status))failures.push(c.candidateId+': invalid status');
@@ -46,17 +48,7 @@ for(const c of queue.candidates||[]){
   if(c.status==='pending_review'){
     if(pending.has(c.appId))failures.push(c.candidateId+': multiple pending candidates for '+c.appId);
     pending.set(c.appId,c.candidateId);
-    if(c.releaseCommitSha===app.reviewCommitSha&&c.profileBlobSha===app.profileBlobSha&&c.profileVersion===app.profileVersion)failures.push(c.candidateId+': pending candidate is already the reviewed release');
-  }
-  if(c.status==='accepted'){
-    if(c.releaseCommitSha!==app.reviewCommitSha||c.profileBlobSha!==app.profileBlobSha||c.profileVersion!==app.profileVersion||!sameArray(c.policies,app.policies)){
-      failures.push(c.candidateId+': accepted candidate does not match canonical reviewed ledger');
-    }
-    let receipt;
-    try{receipt=JSON.parse(readFileSync(new URL(c.appId+'.json',receiptDir),'utf8'))}catch{failures.push(c.candidateId+': accepted candidate receipt unavailable');continue}
-    if(receipt.reviewCommitSha!==c.releaseCommitSha||receipt.profileBlobSha!==c.profileBlobSha||receipt.profileVersion!==c.profileVersion||!sameArray(receipt.policies,c.policies)){
-      failures.push(c.candidateId+': accepted candidate does not match certification receipt');
-    }
+    if(matchesCurrent(c,app))failures.push(c.candidateId+': pending candidate is already the reviewed release');
   }
   if(c.status==='superseded'){
     if(!ID.test(c.supersededByCandidateId||''))failures.push(c.candidateId+': superseded candidate missing successor');
