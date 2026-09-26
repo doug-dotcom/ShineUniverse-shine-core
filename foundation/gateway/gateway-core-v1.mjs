@@ -1,4 +1,7 @@
-import {evaluateAccess} from '../integration-kit/permission-engine-v1.mjs';
+import {
+  evaluateAccess,
+  appManifestDeclaresPermission
+} from '../integration-kit/permission-engine-v1.mjs';
 
 const GATEWAY_VERSION='1.0.0';
 
@@ -60,26 +63,86 @@ export function createFoundationGateway({adapters,clock=()=>new Date().toISOStri
     }
 
     const permission=envelope.permission;
+    const now=clock();
+
+    const persistAndRespond=async(decision,defenceEvidenceRef)=>{
+      const audit=toAuditEvent({
+        envelope,
+        decision,
+        defenceEvidenceRef,
+        occurredAt:now
+      });
+
+      try{
+        await adapters.writeAuditEvent(audit);
+      }catch{
+        return response(envelope,'unavailable','audit-write-failed');
+      }
+
+      return response(
+        envelope,
+        decision.decision==='allow' ? 'allowed' : 'denied',
+        decision.reasonCode,
+        {decision:decision.decision,reasonCode:decision.reasonCode}
+      );
+    };
+
     let verified;
+    try{
+      verified=await adapters.verifyIdentity({
+        authContext,
+        claimedShineId:permission.shineId
+      });
+    }catch{
+      return response(envelope,'unavailable','foundation-dependency-unavailable');
+    }
+
+    if(!verified?.shineId || verified.shineId!==permission.shineId){
+      const decision=evaluateAccess({
+        request:permission,
+        verifiedShineId:verified?.shineId
+      });
+      return persistAndRespond(decision);
+    }
+
     let manifest;
+    try{
+      manifest=await adapters.getAppManifest({appId:permission.appId});
+    }catch{
+      return response(envelope,'unavailable','foundation-dependency-unavailable');
+    }
+
+    if(!manifest || manifest.appId!==permission.appId || !appManifestDeclaresPermission(manifest,permission)){
+      const decision=evaluateAccess({
+        request:permission,
+        verifiedShineId:verified.shineId,
+        appManifest:manifest
+      });
+      return persistAndRespond(decision);
+    }
+
     let resource;
     let grants;
-    let defence;
-
     try{
-      verified=await adapters.verifyIdentity({authContext,claimedShineId:permission.shineId});
-      manifest=await adapters.getAppManifest({appId:permission.appId});
-      resource=await adapters.getVaultResource({
-        resourceId:permission.resourceId,
-        resourceCategory:permission.resourceCategory,
-        ownerShineId:permission.shineId
-      });
-      grants=await adapters.getEffectiveGrants({
-        shineId:permission.shineId,
-        appId:permission.appId,
-        scope:permission.scope,
-        purpose:permission.purpose
-      });
+      [resource,grants]=await Promise.all([
+        adapters.getVaultResource({
+          resourceId:permission.resourceId,
+          resourceCategory:permission.resourceCategory,
+          ownerShineId:permission.shineId
+        }),
+        adapters.getEffectiveGrants({
+          shineId:permission.shineId,
+          appId:permission.appId,
+          scope:permission.scope,
+          purpose:permission.purpose
+        })
+      ]);
+    }catch{
+      return response(envelope,'unavailable','foundation-dependency-unavailable');
+    }
+
+    let defence;
+    try{
       defence=await adapters.evaluateDefence({
         envelope,
         verifiedIdentity:verified,
@@ -90,10 +153,9 @@ export function createFoundationGateway({adapters,clock=()=>new Date().toISOStri
       return response(envelope,'unavailable','foundation-dependency-unavailable');
     }
 
-    const now=clock();
     const decision=evaluateAccess({
       request:permission,
-      verifiedShineId:verified?.shineId,
+      verifiedShineId:verified.shineId,
       appManifest:manifest,
       resource,
       grants:Array.isArray(grants) ? grants : [],
@@ -101,24 +163,6 @@ export function createFoundationGateway({adapters,clock=()=>new Date().toISOStri
       defenceDecision:defence?.decision ?? 'not-evaluated'
     });
 
-    const audit=toAuditEvent({
-      envelope,
-      decision,
-      defenceEvidenceRef:defence?.evidenceRef,
-      occurredAt:now
-    });
-
-    try{
-      await adapters.writeAuditEvent(audit);
-    }catch{
-      return response(envelope,'unavailable','audit-write-failed');
-    }
-
-    return response(
-      envelope,
-      decision.decision==='allow' ? 'allowed' : 'denied',
-      decision.reasonCode,
-      {decision:decision.decision,reasonCode:decision.reasonCode}
-    );
+    return persistAndRespond(decision,defence?.evidenceRef);
   };
 }
