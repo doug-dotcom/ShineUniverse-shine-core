@@ -19,6 +19,7 @@
     "The candidate release SHA and profile blob SHA must be full lowercase 40-character Git SHA-1 identities.",
     "Every claimed policy id must exist in the canonical Defence registry and policy ids must not repeat.",
     "Evidence must contain 1 to 16 bounded non-secret records with source, kind, reference, checkedAt and summary.",
+    "Every evidence checkedAt timestamp must be at or before the candidate observedAt timestamp.",
     "At most one pending_review candidate may exist per app.",
     "The exact release/profile/policy identity must not already exist in review-candidate history.",
     "For an already reviewed app, repository and profile path must match its canonical app identity and the intake candidate must differ from the current reviewed release.",
