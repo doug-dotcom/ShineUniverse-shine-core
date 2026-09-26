@@ -1,6 +1,6 @@
 {
   "registry": "shine-foundation/object-registry-v1",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "foundationContract": "shine-foundation/foundation-v1",
   "repository": "doug-dotcom/ShineUniverse-shine-core",
   "entries": [
@@ -75,6 +75,12 @@
       "path": "foundation/schemas/app-connection-status-v1.schema.json",
       "version": "1.0.0",
       "blobSha": "8f0c785ff6b0649d3f9dbf9f8d249938dbea2bbd"
+    },
+    {
+      "id": "appendage-connection-spec",
+      "path": "foundation/schemas/appendage-connection-spec-v1.schema.json",
+      "version": "1.0.0",
+      "blobSha": "be60f6738b717a3c8e4ec9ee65c531f8593c4be8"
     }
   ],
   "rule": "A registered schema may only change through an explicit version/registry update; consumers should pin the schema version they implement."
