@@ -276,28 +276,27 @@ export function createSupabaseRuntimeAdapters({sql,defenceGate,fetchImpl=fetch}=
       }:null;
     },
 
-    async claimIdentityAndGrant({
-      claimId,appId,providerId,providerSubject,shineId,scope,purpose,resourceCategory,requestedAt
+    async completeIdentityClaim({
+      claimId,requestId,appId,sourceProviderId,sourceProviderSubject,
+      targetProviderId,targetShineId,occurredAt
     }={}){
       const rows=await sql`
-        select outcome,binding_created,grant_created
-        from foundation.claim_identity_and_issue_grant(
+        select outcome,reason_code
+        from foundation.complete_identity_claim_v1(
           ${claimId}::uuid,
+          ${requestId}::uuid,
           ${appId}::text,
-          ${providerId}::text,
-          ${providerSubject}::text,
-          ${shineId}::uuid,
-          ${scope}::text,
-          ${purpose}::text,
-          ${resourceCategory}::text,
-          ${requestedAt}::timestamptz
+          ${sourceProviderId}::text,
+          ${sourceProviderSubject}::text,
+          ${targetProviderId}::text,
+          ${targetShineId}::uuid,
+          ${occurredAt}::timestamptz
         )
       `;
       const row=first(rows);
       return row?{
         outcome:String(row.outcome),
-        bindingCreated:Boolean(row.binding_created),
-        grantCreated:Boolean(row.grant_created)
+        reasonCode:String(row.reason_code)
       }:null;
     },
 
