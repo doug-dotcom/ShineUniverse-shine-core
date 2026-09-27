@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import {readFileSync} from 'node:fs';
 import {join} from 'node:path';
-import {fileURLToPath} from 'node:url';
+import {fileURLToPath,pathToFileURL} from 'node:url';
 
 const root=fileURLToPath(new URL('../../../',import.meta.url));
 const ledger=JSON.parse(readFileSync(join(root,'security/shine-defence/ecosystem-profile-ledger-v1.json'),'utf8'));
@@ -38,9 +38,10 @@ function selfTest(){
   if(s.get('a')!=='observed'||s.get('b')!=='mapped_unobserved'||s.get('c')!=='partial_service'||s.get('d')!=='unmapped')throw new Error('coverage state mismatch');
   console.log('SHINE DEFENCE DEPLOYMENT COVERAGE SELF-TEST: PASS 4 states');
 }
+export const SHINE_DEFENCE_DEPLOYMENT_COVERAGE_VERSION='1.1.0';
 function main(){
   if(process.argv.includes('--self-test'))return selfTest();
   const r=buildCoverage({ledger,sources,observations,exceptions});
   console.log(process.argv.includes('--json')?JSON.stringify(r,null,2):JSON.stringify(r,null,2));
 }
-main();
+if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href)main();

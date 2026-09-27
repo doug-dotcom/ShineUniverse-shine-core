@@ -195,5 +195,11 @@ A reviewer records each changed file as `reviewed_no_issue`, `reviewed_attention
 
 A successful bridge result is `candidate_intake_ready` and includes the deterministic candidate-id preview plus the fully validated candidate-intake payload. It does **not** write `review-candidates-v1`. Operations Controller v1.3 may surface that ready state and point to `intake-review-v1.mjs --input <validated-candidate-intake.json> --apply`; that separate explicit apply remains the only action that can create `pending_review` state. With no accepted human diff reviews yet, the live readiness report correctly contains zero ready candidates.
 
+### Defence Command Centre
+
+`security/shine-defence/command-centre-v1.json` defines the read-only estate dashboard contract. `command-centre-v1.mjs` joins the existing Operations Controller, deployment coverage, deployment observations, Review Intake Planner, candidate-intake readiness and durable human diff-review progress into one deterministic row per canonically reviewed app.
+
+Each row shows estate/certification state, deployment coverage, observed deployment identity/status, pre-candidate human-review progress, intake readiness/candidate preview when available, and the exact next action already selected by Operations Controller. The Command Centre deliberately does not recompute certification or release status and invokes no helper; missing data is shown explicitly rather than inferred. This makes it an operational projection, not a new authority.
+
 
 An extension policy existing in Core does **not** automatically certify an app. Each app still needs local, testable evidence before claiming that profile.

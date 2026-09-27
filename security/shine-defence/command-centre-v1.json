@@ -1,0 +1,38 @@
+{
+  "contract": "shine-defence/command-centre-v1",
+  "version": "1.0.0",
+  "purpose": "Read-only estate-wide projection of Shine Defence certification, deployment observation, coverage, review progress, intake readiness and exact next action.",
+  "sources": [
+    "operations-controller-v1",
+    "deployment-coverage-v1",
+    "review-intake-planner-v1",
+    "candidate-intake-readiness-v1",
+    "human-diff-review artifacts"
+  ],
+  "rules": [
+    "The Command Centre joins existing authoritative/read-only projections and does not reimplement certification or deployment-status logic.",
+    "Every canonically reviewed app appears exactly once in app-id order.",
+    "Certification state and next action come from Operations Controller.",
+    "Deployment coverage comes from deployment-coverage-v1.",
+    "Observed deployment state and identities come from Operations Controller deployment data.",
+    "Pre-candidate review progress is derived only from the current intake-planner identity plus any durable human diff review bound to that exact identity.",
+    "Candidate intake readiness comes from candidate-intake-readiness-v1.",
+    "Missing data is reported explicitly as none, unobserved or not_started rather than inferred.",
+    "The report is read-only and never invokes any recommended helper."
+  ],
+  "reviewProgressStates": [
+    "not_applicable",
+    "profile_refresh_required",
+    "not_started",
+    "in_progress",
+    "evidence_accepted",
+    "candidate_intake_ready",
+    "pending_candidate"
+  ],
+  "nonClaims": [
+    "The Command Centre is not certification authority.",
+    "A next action shown in the report has not been executed.",
+    "Review progress is not checklist approval.",
+    "Coverage does not imply a protected deployment."
+  ]
+}
