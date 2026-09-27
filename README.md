@@ -161,5 +161,13 @@ Pending reviews take workflow precedence and preserve human-required boundaries 
 
 Observed release status is translated into five estate-level deployment states: `protected`, `deployment_drift`, `profile_drift`, `revoked` and `needs_review`. Operations Controller v1.1 consumes those results. When an observation exists, observed deployment state takes precedence over idle canonical status; a revocation on an older reviewed release therefore does not mislabel a different observed deployment as revoked. Apps without an observation remain explicitly `unobserved` and are routed to the recorder rather than guessed. None of these observation tools certify, deploy, revoke or modify an app.
 
+### Railway + GitHub deployment collectors
+
+`security/shine-defence/deployment-sources-v1.json` is the non-secret source registry for automated observation collection. Each binding names a reviewed app plus its Railway project/environment/service and exact GitHub repository/profile path. `verify-deployment-sources-v1.mjs` requires those repository/profile identities to match the canonical reviewed ledger.
+
+`collect-deployment-observations-v1.mjs` queries Railway for the latest successful deployment in each registered scope, takes Railway's exact deployment `commitHash`, and asks GitHub for the Defence-profile Git blob at that same commit. It converts those two independently sourced identities into the standard deployment-observation shape, deduplicates by Railway deployment id, and appends only new evidence. Railway/GitHub credentials remain runner-owned and are never stored in Core. The observation ledger is deliberately **not** pinned in the canonical code registry because it is append-only operational evidence; its schema and collector/evaluator code remain pinned and CI validates the ledger on every change.
+
+The initial live source registry covers `shine-daash`, `shine-ski`, `shine-translate` and `shine-my-money`. The first observations were collected from Railway deployment metadata and GitHub commit-specific profile blobs rather than inferred from branch heads.
+
 
 An extension policy existing in Core does **not** automatically certify an app. Each app still needs local, testable evidence before claiming that profile.
