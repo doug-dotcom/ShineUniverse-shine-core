@@ -1,0 +1,38 @@
+{
+  "contract": "shine-defence/operations-controller-v1",
+  "version": "1.0.0",
+  "purpose": "Read-only orchestration view across canonical Shine Defence review and certification state, identifying the exact guarded helper appropriate for the next workflow step without executing it.",
+  "scope": [
+    "Review workflow state comes from review-queue-v1.",
+    "Canonical certification state comes from the reviewed ecosystem ledger, exact receipt presence and revocation ledger.",
+    "The controller does not infer the commit currently deployed by an application; deployment freshness still requires app/deployment-specific release-status evaluation."
+  ],
+  "states": [
+    "review_action_required",
+    "human_review_required",
+    "certification_action_ready",
+    "canonical_reviewed_idle",
+    "reviewed_release_revoked",
+    "uncertified_idle",
+    "blocked_canonical_state"
+  ],
+  "rules": [
+    "Every known app appears exactly once in deterministic app-id order.",
+    "A pending review candidate takes workflow precedence over idle certification state.",
+    "Human-required review-queue actions remain explicitly human-required and are never converted into executable automation.",
+    "Approved checklist states route only to the existing guarded first-certification or re-certification helpers.",
+    "Human-rejected pending reviews route only to the guarded rejection finalizer.",
+    "A reviewed app with no pending candidate and an active revocation on its exact reviewed commit/profile is reported as reviewed_release_revoked and requires a new release candidate before badge restoration.",
+    "A reviewed app with no pending candidate, no matching revocation and an exact receipt file is canonical_reviewed_idle.",
+    "Missing canonical receipt state is blocked rather than automatically repaired.",
+    "An app known only through finalized candidate history and absent from the reviewed ledger is uncertified_idle and may begin again through candidate intake.",
+    "The controller returns helper paths and arguments as recommendations only; it never invokes a mutating helper.",
+    "JSON output is deterministic and suitable for future dashboards or external orchestration."
+  ],
+  "nonClaims": [
+    "The controller is not certification authority.",
+    "canonical_reviewed_idle does not prove that the reviewed commit is the commit currently deployed.",
+    "A recommended helper has not been executed merely because it appears in controller output.",
+    "The controller does not replace human checklist decisions."
+  ]
+}
