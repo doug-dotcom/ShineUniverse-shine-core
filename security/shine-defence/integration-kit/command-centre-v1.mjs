@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import {existsSync,readFileSync} from 'node:fs';
 import {join} from 'node:path';
-import {fileURLToPath} from 'node:url';
+import {fileURLToPath,pathToFileURL} from 'node:url';
 import {loadLiveOperations} from './operations-controller-v1.mjs';
 import {buildCoverage} from './deployment-coverage-v1.mjs';
 import {buildIntakePlan} from './plan-review-intake-v1.mjs';
@@ -134,4 +134,4 @@ function selfTest(){
   console.log('SHINE DEFENCE COMMAND CENTRE SELF-TEST: PASS estate join, reviewed-only scope, deterministic ordering and readiness/progress counts');
 }
 function main(){if(process.argv.includes('--self-test'))return selfTest();const r=loadLiveCommandCentre();if(process.argv.includes('--json'))console.log(JSON.stringify(r,null,2));else printHuman(r)}
-main();
+if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href)main();
