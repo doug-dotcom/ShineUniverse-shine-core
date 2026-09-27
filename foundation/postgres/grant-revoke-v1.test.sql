@@ -54,22 +54,22 @@ begin
   if state<>'revoked' then raise exception 'grant remained effective: %',state; end if;
 
 end
-$;
+$$;
 
 reset role;
 set role service_role;
-do $
+do $$
 declare outbox_n integer;
 begin
   select count(*) into outbox_n from foundation.revocation_outbox
   where grant_id='44444444-4444-4444-8444-444444444444';
   if outbox_n<>1 then raise exception 'revocation outbox not populated'; end if;
 end
-$;
+$$;
 reset role;
 set role foundation_gateway;
 
-do $
+do $$
 declare got_outcome text; got_reason text; n integer;
 begin
   select outcome,reason_code into got_outcome,got_reason
