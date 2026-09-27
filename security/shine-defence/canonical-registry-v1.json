@@ -318,8 +318,8 @@
     {
       "id": "deployment-coverage-helper",
       "path": "security/shine-defence/integration-kit/deployment-coverage-v1.mjs",
-      "version": "1.0.0",
-      "blobSha": "300e5215cf8338e86ee806435c234559125aac4e"
+      "version": "1.1.0",
+      "blobSha": "79a350f946d7155662f97d5520d9561c1d7c1f01"
     },
     {
       "id": "review-intake-planner",
@@ -368,6 +368,18 @@
       "path": "security/shine-defence/integration-kit/candidate-intake-readiness-v1.mjs",
       "version": "1.0.0",
       "blobSha": "5df6da0bcd6fc26c3377062d33b5083ea728f308"
+    },
+    {
+      "id": "command-centre",
+      "path": "security/shine-defence/command-centre-v1.json",
+      "version": "1.0.0",
+      "blobSha": "0aa95b194a6a5ba6b96c99f542589e02925556e9"
+    },
+    {
+      "id": "command-centre-helper",
+      "path": "security/shine-defence/integration-kit/command-centre-v1.mjs",
+      "version": "1.0.0",
+      "blobSha": "7222be02563665f0ef10799e66ef68a1145826c6"
     }
   ]
 }
