@@ -405,4 +405,4 @@ function main(){
 }
 
 
-if(process.argv[1]&&join(process.cwd(),process.argv[1])===fileURLToPath(import.meta.url))main();
+if(process.argv[1]===fileURLToPath(import.meta.url))main();
