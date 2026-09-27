@@ -49,6 +49,21 @@ const makeSql=()=> {
     if(q.includes('from foundation.revoke_access_grant_v1')){
       return [{outcome:'revoked',reason_code:'grant-revoked-by-user',revocation_id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'}];
     }
+    if(q.includes('from foundation.list_app_revocations_v1')){
+      return [{sequence_no:7,event_payload:{event:'shine-foundation/grant-revocation-v1'},created_at:'2026-09-27T13:20:00Z'}];
+    }
+    if(q.includes('from foundation.record_app_revocation_delivery_v1')){
+      return [{delivery_id:'dddddddd-dddd-4ddd-8ddd-dddddddddddd',terminal_sequence:7,event_count:1}];
+    }
+    if(q.includes('from foundation.ack_app_revocations_v2')){
+      return [{outcome:'advanced',reason_code:'revocation-checkpoint-advanced',checkpoint_sequence:7}];
+    }
+    if(q.includes('from foundation.get_app_revocation_status_v1')){
+      return [{checkpoint_sequence:6,last_ack_at:'2026-09-27T13:00:00Z',latest_sequence:7,pending_count:1,oldest_pending_at:'2026-09-27T13:20:00Z'}];
+    }
+    if(q.includes('from foundation.get_app_revocation_health_v1')){
+      return [{app_id:'shine.travel',checkpoint_sequence:6,latest_sequence:7,pending_count:1,oldest_pending_at:'2026-09-27T13:20:00Z',pending_age_seconds:600,max_pending_age_seconds:900,freshness_state:'pending',stale_action:'observe',recommended_action:'consume-revocations'}];
+    }
     if(q.includes('from foundation.app_registry')){
       return [{manifest:{appId:'shine.travel',foundation:{requestedScopes:[]}}}];
     }
@@ -312,4 +327,45 @@ test('explicit grant revoke delegates to the atomic database function',async()=>
     occurredAt:'2026-09-27T13:20:00Z'
   });
   assert.deepEqual(result,{outcome:'revoked',reason_code:'grant-revoked-by-user',revocation_id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'});
+});
+
+
+test('revocation propagation adapters map feed, receipt, ack and freshness contracts',async()=>{
+  const {adapters}=makeAdapters();
+  const feed=await adapters.listAppRevocations({appId:'shine.travel',afterSequence:6,limit:2});
+  assert.deepEqual(feed,[{
+    sequenceNo:7,
+    event:{event:'shine-foundation/grant-revocation-v1'},
+    createdAt:'2026-09-27T13:20:00Z'
+  }]);
+
+  const delivery=await adapters.recordAppRevocationDelivery({
+    deliveryId:'dddddddd-dddd-4ddd-8ddd-dddddddddddd',
+    appId:'shine.travel',afterSequence:6,sequenceNos:[7],
+    occurredAt:'2026-09-27T13:30:00Z'
+  });
+  assert.deepEqual(delivery,{
+    deliveryId:'dddddddd-dddd-4ddd-8ddd-dddddddddddd',
+    terminalSequence:7,eventCount:1
+  });
+
+  const ack=await adapters.acknowledgeAppRevocations({
+    ackId:'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee',
+    requestId:'ffffffff-ffff-4fff-8fff-ffffffffffff',
+    deliveryId:'dddddddd-dddd-4ddd-8ddd-dddddddddddd',
+    appId:'shine.travel',sequenceNo:7,occurredAt:'2026-09-27T13:31:00Z'
+  });
+  assert.deepEqual(ack,{
+    outcome:'advanced',
+    reasonCode:'revocation-checkpoint-advanced',
+    checkpointSequence:7
+  });
+
+  const status=await adapters.getAppRevocationStatus({appId:'shine.travel'});
+  assert.equal(status.pendingCount,1);
+  assert.equal(status.checkpointSequence,6);
+
+  const health=await adapters.getAppRevocationHealth({appId:'shine.travel'});
+  assert.equal(health.freshnessState,'pending');
+  assert.equal(health.recommendedAction,'consume-revocations');
 });
