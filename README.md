@@ -229,6 +229,12 @@ The manifest includes every app in the reviewed ecosystem ledger exactly once bu
 
 The per-app audit hash provides deeper change sensitivity even when the headline identity dimensions are unchanged. The diff reports both manifest hashes and `asOf` timestamps but makes no judgement about whether a change is good, bad, expected, risky or safe. A changed app simply means the recorded manifest dimensions changed; deeper cause analysis belongs in the corresponding per-app audit exports/evidence. Invalid or tampered input manifests fail closed.
 
+### Estate audit timeline
+
+`security/shine-defence/estate-audit-timeline-v1.json` defines an append-only chronological history of valid Estate Audit Manifests. `estate-audit-timeline-v1.mjs` appends one complete manifest per strictly increasing `asOf`, links each entry to the previous `manifestSha256`, and stores the exact neutral Estate Manifest Diff from the previous snapshot to the new snapshot. Verification recomputes every manifest hash and every stored transition diff, so edited linkage or transition history fails closed.
+
+The helper can report the first **recorded** timeline entry where an app or specific manifest dimension changed. That is intentionally not described as the exact real-world change time: it is the first later snapshot in which Defence recorded the difference. An unchanged estate may still produce a different manifest hash at a later `asOf` because `asOf` is part of the deterministic snapshot; its transition diff will correctly show all app dimensions unchanged. Timeline mutation is explicit via `--apply`; default execution is a dry run. The timeline is audit history only and grants no workflow authority.
+
 ### Candidate intake readiness
 
 `security/shine-defence/candidate-intake-readiness-v1.json` defines the final fail-closed bridge between accepted human diff-review evidence and candidate intake. `candidate-intake-readiness-v1.mjs` requires the accepted review and separate evidence record to bind the current deployment-drift identity exactly, re-derives the evidence record from the durable human review, rejects tampering or stale deployment identity, and then runs the canonical candidate-intake validator over the resulting payload.

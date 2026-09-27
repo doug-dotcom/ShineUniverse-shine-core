@@ -1,0 +1,21 @@
+{
+  "contract": "shine-defence/estate-audit-timeline-v1",
+  "version": "1.0.0",
+  "purpose": "Append-only chronological history of verified Estate Audit Manifest snapshots with neutral transition diffs.",
+  "rules": [
+    "Each timeline entry contains one complete valid Estate Audit Manifest.",
+    "Entry sequence numbers are contiguous beginning at 1.",
+    "Manifest asOf timestamps must increase strictly across entries.",
+    "Each entry after the first records previousManifestSha256 equal to the immediately preceding manifest hash.",
+    "Each entry after the first contains the deterministic Estate Manifest Diff from the previous manifest to the current manifest.",
+    "The stored transition diff must exactly equal recomputation from the two stored manifests.",
+    "An unchanged estate snapshot may still be appended at a later asOf; its transition diff records all apps unchanged while the manifest hash may differ because asOf is part of the snapshot.",
+    "Timeline entries are append-only operational audit history; contract/verifier code are canonical-registry pinned.",
+    "The timeline mutates no reviewed, deployment, review, candidate, checklist or certification state."
+  ],
+  "nonClaims": [
+    "The first timeline entry establishes the beginning of recorded timeline history, not the beginning of the estate itself.",
+    "A transition timestamp shows when the later snapshot was recorded, not necessarily the exact instant an underlying real-world change occurred.",
+    "A changed transition is neutral recorded-state history, not a severity or cause judgement."
+  ]
+}

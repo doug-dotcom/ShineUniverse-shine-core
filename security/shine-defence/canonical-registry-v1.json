@@ -474,8 +474,20 @@
     {
       "id": "estate-manifest-diff-helper",
       "path": "security/shine-defence/integration-kit/estate-manifest-diff-v1.mjs",
+      "version": "1.0.1",
+      "blobSha": "18cd11bb1a0c60a22ae244011bf4e7f51c905c28"
+    },
+    {
+      "id": "estate-audit-timeline",
+      "path": "security/shine-defence/estate-audit-timeline-v1.json",
       "version": "1.0.0",
-      "blobSha": "97d72a94582670b22f9e0dde986aec70c3399560"
+      "blobSha": "7fae09369ce3c92ac18151a821212eaf3f075e19"
+    },
+    {
+      "id": "estate-audit-timeline-helper",
+      "path": "security/shine-defence/integration-kit/estate-audit-timeline-v1.mjs",
+      "version": "1.0.0",
+      "blobSha": "71d5471ffdb88406a14fa332168740c91a459e1c"
     }
   ]
 }
