@@ -131,4 +131,10 @@ A reviewer records one requirement at a time through a small JSON action file co
 
 Suggestion artifacts never edit checklist state, evidence references, reviewer notes or human authorization. `verify-review-evidence-suggestions-v1.mjs` recomputes the deterministic output and rejects candidate, checklist, registry, evidence or score drift. Historical suggestion artifacts remain valid after a candidate is later finalized. Review Workspace v1.1 displays validated suggestions beside the next outstanding requirement when available, but the reviewer must still explicitly record any evidence mapping before it affects the checklist.
 
+### Review queue
+
+`security/shine-defence/review-queue-v1.json` defines the read-only consolidated view of every `pending_review` candidate. `review-queue-v1.mjs` combines candidate identity, whether the app is already reviewed, checklist progress, human authorization, advisory evidence-assistance health and evidence-gap counts into one deterministic queue ordered by observation time.
+
+Each queue item exposes one workflow state and one next action: generate a missing checklist, review the next requirement, explicitly approve/reject a completed checklist, run first certification/re-certification after approval, repair invalid checklist state, or finalize a human-rejected candidate. Advisory suggestion drift is surfaced separately and never blocks otherwise-valid human approval or certification readiness. The queue is read-only and can render either a reviewer-friendly summary or deterministic `--json` output.
+
 An extension policy existing in Core does **not** automatically certify an app. Each app still needs local, testable evidence before claiming that profile.
