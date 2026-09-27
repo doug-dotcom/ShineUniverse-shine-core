@@ -382,6 +382,73 @@ test('capability discovery maps invalid catalogue requests to 400',async()=>{
   assert.equal(res.status,400);
 });
 
+test('integration client status requires client-only authentication',async()=>{
+  let clientAuth=0,normalAuth=0,appAuth=0;
+  const clientStatusHandler=createFoundationHttpHandler({
+    gateway:async()=>({status:'allowed'}),
+    authenticate:async()=>{normalAuth++;return {}},
+    authenticateApp:async()=>{appAuth++;return {}},
+    authenticateIntegrationClient:async request=>{
+      clientAuth++;
+      if(request.headers.get('x-shine-client-token')!=='client-secret') throw new Error('missing client');
+      return {clientToken:'client-secret'};
+    },
+    integrationClientStatus:async({clientId,authContext})=>({
+      integrationClientStatusResponse:'shine-foundation/integration-client-status-response-v1',
+      schemaVersion:'1.0.0',
+      integrationProtocol:'shine-foundation/open-integration-v1',
+      status:'ok',
+      clientId,
+      clientKind:'first-party-companion',
+      authenticated:authContext.clientToken==='client-secret',
+      supportedOperations:['capabilities.discover']
+    })
+  });
+
+  const res=await clientStatusHandler(new Request(
+    base+'/foundation-gateway/v1/integration/client/status?clientId=shine.companion',
+    {headers:{'x-shine-client-token':'client-secret'}}
+  ));
+  assert.equal(res.status,200);
+  assert.equal(clientAuth,1);
+  assert.equal(normalAuth,0);
+  assert.equal(appAuth,0);
+  const body=await res.json();
+  assert.equal(body.clientId,'shine.companion');
+  assert.equal(body.authenticated,true);
+  assert.deepEqual(body.supportedOperations,['capabilities.discover']);
+});
+
+test('integration client status rejects missing client credential',async()=>{
+  const clientStatusHandler=createFoundationHttpHandler({
+    gateway:async()=>({status:'allowed'}),
+    authenticate:async()=>({}),
+    authenticateIntegrationClient:async()=>{throw new Error('missing')},
+    integrationClientStatus:async()=>({status:'ok'})
+  });
+  const res=await clientStatusHandler(new Request(
+    base+'/v1/integration/client/status?clientId=shine.companion'
+  ));
+  assert.equal(res.status,401);
+});
+
+test('integration client status maps client mismatch denial to 403',async()=>{
+  const clientStatusHandler=createFoundationHttpHandler({
+    gateway:async()=>({status:'allowed'}),
+    authenticate:async()=>({}),
+    authenticateIntegrationClient:async()=>({clientToken:'secret'}),
+    integrationClientStatus:async()=>({
+      status:'denied',
+      reasonCode:'integration-client-mismatch'
+    })
+  });
+  const res=await clientStatusHandler(new Request(
+    base+'/v1/integration/client/status?clientId=shine.companion',
+    {headers:{'x-shine-client-token':'secret'}}
+  ));
+  assert.equal(res.status,403);
+});
+
 test('app operational status uses app-only authentication',async()=>{
   let appAuth=0,normalAuth=0;
   const statusHandler=createFoundationHttpHandler({
