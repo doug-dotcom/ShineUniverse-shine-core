@@ -8,8 +8,9 @@ import {buildIntakePlan} from './plan-review-intake-v1.mjs';
 import {loadLiveDeploymentReport} from './deployment-observations-v1.mjs';
 import {loadLiveReadiness} from './candidate-intake-readiness-v1.mjs';
 import {buildStaleness} from './staleness-visibility-v1.mjs';
+import {verifyCheckpointStore} from './review-integrity-checkpoint-v1.mjs';
 
-export const SHINE_DEFENCE_COMMAND_CENTRE_VERSION='1.2.0';
+export const SHINE_DEFENCE_COMMAND_CENTRE_VERSION='1.3.0';
 const root=fileURLToPath(new URL('../../../',import.meta.url));
 const P={
   ledger:'security/shine-defence/ecosystem-profile-ledger-v1.json',
@@ -18,7 +19,9 @@ const P={
   observations:'security/shine-defence/deployment-observations-v1.json',
   exceptions:'security/shine-defence/deployment-source-exceptions-v1.json',
   reviews:'security/shine-defence/human-diff-reviews',
-  decisions:'security/shine-defence/review-decisions-v1.json'
+  decisions:'security/shine-defence/review-decisions-v1.json',
+  events:'security/shine-defence/human-review-events',
+  checkpoints:'security/shine-defence/human-review-checkpoints'
 };
 const readJson=p=>JSON.parse(readFileSync(join(root,p),'utf8'));
 
@@ -39,6 +42,21 @@ function reviewProgress({appId,operation,planItem,readyItem}){
     }catch{return {state:'in_progress',detail:'Human diff review artifact is unreadable; existing Defence validators should investigate.'}}
   }
   return {state:'not_applicable',detail:null};
+}
+
+export function checkpointIntegrity({appId,reviewProgress,deployment}){
+  if(reviewProgress?.state!=='evidence_accepted'&&reviewProgress?.state!=='candidate_intake_ready')return {state:'not_applicable',checkpointCount:0,latestCheckpointAt:null};
+  const release=deployment?.releaseCommitSha;
+  if(!release)return {state:'invalid',checkpointCount:0,latestCheckpointAt:null,reason:'Accepted review has no observed release identity.'};
+  const id=appId+'-'+release.slice(0,12),eventPath=join(root,P.events,id+'.json'),checkpointPath=join(root,P.checkpoints,id+'.json');
+  if(!existsSync(checkpointPath))return {state:'pending',checkpointCount:0,latestCheckpointAt:null,reason:'Accepted review has no integrity checkpoint yet.'};
+  if(!existsSync(eventPath))return {state:'invalid',checkpointCount:0,latestCheckpointAt:null,reason:'Checkpoint exists but event ledger is missing.'};
+  try{
+    const store=JSON.parse(readFileSync(checkpointPath,'utf8')),ledger=JSON.parse(readFileSync(eventPath,'utf8'));
+    const failures=verifyCheckpointStore({store,ledger});
+    if(failures.length)return {state:'invalid',checkpointCount:store.checkpoints?.length||0,latestCheckpointAt:store.checkpoints?.at(-1)?.checkpointAt||null,reason:failures.join('; ')};
+    return {state:'verified',checkpointCount:store.checkpoints.length,latestCheckpointAt:store.checkpoints.at(-1)?.checkpointAt||null,latestMilestone:store.checkpoints.at(-1)?.milestone||null};
+  }catch(error){return {state:'invalid',checkpointCount:0,latestCheckpointAt:null,reason:error.message}}
 }
 
 export function buildCommandCentre({operations,coverage,plan,readiness,reviewProgressFn=reviewProgress}){
@@ -93,7 +111,9 @@ export function loadLiveCommandCentre(asOf=new Date().toISOString()){
     readReview:id=>{const p=join(root,P.reviews,id+'.json');return existsSync(p)?JSON.parse(readFileSync(p,'utf8')):null}
   });
   const ages=new Map(stale.items.map(i=>[i.appId,i]));
-  return {...report,version:'1.2.0',asOf,stalenessCounts:stale.counts,items:report.items.map(i=>({...i,staleness:ages.get(i.appId)}))};
+  const items=report.items.map(i=>({...i,staleness:ages.get(i.appId),checkpointIntegrity:checkpointIntegrity({appId:i.appId,reviewProgress:i.reviewProgress,deployment:i.deployment})}));
+  const checkpointCounts={not_applicable:0,pending:0,verified:0,invalid:0};for(const i of items)checkpointCounts[i.checkpointIntegrity.state]++;
+  return {...report,version:'1.3.0',asOf,stalenessCounts:stale.counts,checkpointIntegrityCounts:checkpointCounts,items};
 }
 function printHuman(report){
   console.log('SHINE DEFENCE COMMAND CENTRE');
@@ -112,10 +132,17 @@ function printHuman(report){
     console.log('  review: '+i.reviewProgress.state+(i.reviewProgress.totalFiles!==undefined?' '+i.reviewProgress.reviewedFiles+'/'+i.reviewProgress.totalFiles:''));
     console.log('  intake: '+i.intakeReadiness+(i.candidateId?' '+i.candidateId:''));
     if(i.staleness)console.log('  ages: deploy '+i.staleness.deploymentObservation.band+', review '+i.staleness.humanReview.band+', candidate '+i.staleness.pendingCandidate.band+', certification '+i.staleness.certification.band);
+    if(i.checkpointIntegrity)console.log('  checkpoint: '+i.checkpointIntegrity.state+(i.checkpointIntegrity.latestCheckpointAt?' @ '+i.checkpointIntegrity.latestCheckpointAt:''));
     console.log('  next: '+i.nextAction.id);
   }
 }
+function checkpointSelfTest(){
+  const na=checkpointIntegrity({appId:'x',reviewProgress:{state:'not_started'},deployment:{releaseCommitSha:'a'.repeat(40)}});
+  const pending=checkpointIntegrity({appId:'definitely-missing-checkpoint-fixture',reviewProgress:{state:'evidence_accepted'},deployment:{releaseCommitSha:'b'.repeat(40)}});
+  if(na.state!=='not_applicable'||pending.state!=='pending')throw new Error('checkpoint integrity basic state mismatch');
+}
 function selfTest(){
+  checkpointSelfTest();
   const operations={items:[
     {appId:'a',repository:'o/a',state:'protected',reviewState:'none',certificationState:'canonical_reviewed_release',deployment:{state:'protected',observedReleaseCommitSha:'a'.repeat(40)},nextAction:{id:'none'}},
     {appId:'b',repository:'o/b',state:'deployment_drift',reviewState:'none',certificationState:'canonical_reviewed_release',deployment:{state:'deployment_drift',observedReleaseCommitSha:'b'.repeat(40)},nextAction:{id:'plan_observed_release_review'}},
@@ -131,7 +158,7 @@ function selfTest(){
   if(report.items.map(i=>i.appId).join(',')!=='a,b,c,d')throw new Error('command centre ordering mismatch');
   if(report.counts.intakeReady!==1||report.counts.deployment.deployment_drift!==3)throw new Error('command centre counts mismatch');
   if(report.items.find(i=>i.appId==='d').reviewProgress.state!=='pending_candidate')throw new Error('pending candidate progress mismatch');
-  console.log('SHINE DEFENCE COMMAND CENTRE SELF-TEST: PASS estate join, reviewed-only scope, deterministic ordering and readiness/progress counts');
+  console.log('SHINE DEFENCE COMMAND CENTRE SELF-TEST: PASS estate join, reviewed-only scope, deterministic ordering, readiness/progress counts and checkpoint not-applicable/pending states');
 }
 function main(){if(process.argv.includes('--self-test'))return selfTest();const r=loadLiveCommandCentre();if(process.argv.includes('--json'))console.log(JSON.stringify(r,null,2));else printHuman(r)}
 if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href)main();
