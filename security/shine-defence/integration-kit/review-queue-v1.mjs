@@ -5,7 +5,7 @@ import {fileURLToPath} from 'node:url';
 import {validateReviewChecklist} from './review-checklist-lib-v1.mjs';
 import {validateEvidenceSuggestions} from './review-evidence-assistant-lib-v1.mjs';
 
-export const SHINE_DEFENCE_REVIEW_QUEUE_VERSION='1.0.0';
+export const SHINE_DEFENCE_REVIEW_QUEUE_VERSION='1.1.0';
 
 const root=fileURLToPath(new URL('../../../',import.meta.url));
 const queuePath='security/shine-defence/review-candidates-v1.json';
@@ -106,8 +106,9 @@ export function deriveReviewQueueItem({
       nextAction={
         id:'finalize_rejection',
         humanRequired:false,
-        automationAvailable:false,
-        description:'Finalize the rejected pending candidate as dismissed with a matching review decision.'
+        automationAvailable:true,
+        helper:'security/shine-defence/integration-kit/finalize-rejection-v1.mjs',
+        description:'Run the guarded rejection finalizer to atomically dismiss the rejected candidate and append its matching decision.'
       };
     }else if(checklistInfo.unreviewed>0){
       state='review_in_progress';
@@ -385,7 +386,7 @@ function selfTest(){
   if(items[1].evidenceAssistance.nextItemSuggestions[0]?.evidenceId!=='E1')fail('self-test: next evidence lead missing');
   if(items[7].evidenceAssistance.status!=='invalid')fail('self-test: invalid advisory artifact was not surfaced');
   if(items[4].nextAction.id!=='run_first_certification'||items[5].nextAction.id!=='run_recertification')fail('self-test: certification routing mismatch');
-  if(items[6].nextAction.id!=='finalize_rejection'||items[6].nextAction.automationAvailable!==false)fail('self-test: rejected closure gap not surfaced');
+  if(items[6].nextAction.id!=='finalize_rejection'||items[6].nextAction.automationAvailable!==true)fail('self-test: rejection finalizer routing mismatch');
 
   const report=buildReviewQueueReport([...items].reverse());
   if(report.items[0].candidateId!=='new-no-checklist'||report.pendingCandidates!==8)fail('self-test: deterministic queue ordering/count mismatch');
