@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import {loadLiveCommandCentre} from './command-centre-v1.mjs';
 
-export const SHINE_DEFENCE_ATTENTION_QUEUE_VERSION='1.0.0';
+export const SHINE_DEFENCE_ATTENTION_QUEUE_VERSION='1.1.0';
 const BUCKET_ORDER={human_attention:0,blocked:1,machine_action_available:2,healthy_no_action:3};
 const STAGE_ORDER={
   review_requirement:0,authorize_approve:1,authorize_reject:1,
@@ -41,7 +41,7 @@ export function buildAttentionQueue(commandCentre){
     return {
       appId:item.appId,repository:item.repository,bucket:attention.bucket,reason:attention.reason,
       estateState:item.estateState,coverage:item.coverage,deploymentState:item.deployment.state,
-      reviewProgress:item.reviewProgress,intakeReadiness:item.intakeReadiness,nextAction:item.nextAction
+      reviewProgress:item.reviewProgress,intakeReadiness:item.intakeReadiness,staleness:item.staleness||null,nextAction:item.nextAction
     };
   });
   items.sort((a,b)=>
