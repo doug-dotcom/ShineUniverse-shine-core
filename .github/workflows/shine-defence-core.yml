@@ -60,6 +60,8 @@ jobs:
       - run: node security/shine-defence/integration-kit/command-centre-v1.mjs --json
       - run: node security/shine-defence/integration-kit/attention-queue-v1.mjs --self-test
       - run: node security/shine-defence/integration-kit/attention-queue-v1.mjs --json
+      - run: node security/shine-defence/integration-kit/audit-export-v1.mjs --self-test
+      - run: node security/shine-defence/integration-kit/audit-export-v1.mjs --app shine-translate --as-of 2026-09-27T07:00:00.000Z
       - run: node security/shine-defence/integration-kit/verify-review-checklists-v1.mjs
       - run: node security/shine-defence/integration-kit/verify-review-evidence-suggestions-v1.mjs
       - run: node security/shine-defence/integration-kit/verify-review-rejections-v1.mjs
