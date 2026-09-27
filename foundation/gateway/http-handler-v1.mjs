@@ -12,10 +12,11 @@ const grantRevocationPath=p=>p==='/v1/grants/revoke'||p.endsWith('/foundation-ga
 const revocationFeedPath=p=>p==='/v1/revocations'||p.endsWith('/foundation-gateway/v1/revocations');
 const revocationAckPath=p=>p==='/v1/revocations/ack'||p.endsWith('/foundation-gateway/v1/revocations/ack');
 const revocationStatusPath=p=>p==='/v1/revocations/status'||p.endsWith('/foundation-gateway/v1/revocations/status');
+const appStatusPath=p=>p==='/v1/status'||p.endsWith('/foundation-gateway/v1/status');
 const defenceStatusMatch=p=>p.match(/(?:^|\/foundation-gateway)\/v1\/defence\/status\/([a-z0-9][a-z0-9-]{0,63})$/);
 const SHA=/^[a-f0-9]{40}$/;
 
-/** @param {{gateway:any, authenticate:any, authenticateApp?:any, defenceStatus?:any, identityClaim?:any, authenticateIdentityClaim?:any, grantConsent?:any, grantRevocation?:any, revocationFeed?:any, revocationAck?:any, revocationHealth?:any, maxBodyBytes?:number}} [options] */
+/** @param {{gateway:any, authenticate:any, authenticateApp?:any, defenceStatus?:any, identityClaim?:any, authenticateIdentityClaim?:any, grantConsent?:any, grantRevocation?:any, revocationFeed?:any, revocationAck?:any, revocationHealth?:any, appOperationalStatus?:any, maxBodyBytes?:number}} [options] */
 export function createFoundationHttpHandler({
   gateway,
   authenticate,
@@ -28,6 +29,7 @@ export function createFoundationHttpHandler({
   revocationFeed,
   revocationAck,
   revocationHealth,
+  appOperationalStatus,
   maxBodyBytes=16*1024
 }={}){
   if(typeof gateway!=='function') throw new TypeError('gateway must be a function');
@@ -41,6 +43,7 @@ export function createFoundationHttpHandler({
   if(revocationFeed!==undefined&&typeof revocationFeed!=='function') throw new TypeError('revocationFeed must be a function');
   if(revocationAck!==undefined&&typeof revocationAck!=='function') throw new TypeError('revocationAck must be a function');
   if(revocationHealth!==undefined&&typeof revocationHealth!=='function') throw new TypeError('revocationHealth must be a function');
+  if(appOperationalStatus!==undefined&&typeof appOperationalStatus!=='function') throw new TypeError('appOperationalStatus must be a function');
 
   return async function handle(request){
     const url=new URL(request.url);
@@ -61,6 +64,18 @@ export function createFoundationHttpHandler({
         if(error instanceof TypeError)return json(400,{error:'invalid-defence-status-query'});
         return json(503,{error:'defence-status-unavailable'});
       }
+    }
+
+    if(request.method==='GET'&&appStatusPath(url.pathname)){
+      if(typeof appOperationalStatus!=='function'||typeof authenticateApp!=='function'){
+        return json(404,{error:'not-found'});
+      }
+      const appId=url.searchParams.get('appId')??'';
+      let authContext;
+      try{ authContext=await authenticateApp(request); }catch{ return json(401,{error:'unauthenticated'}); }
+      const result=await appOperationalStatus({appId,authContext});
+      const status={ok:200,denied:403,invalid:400,unavailable:503}[result.status]??500;
+      return json(status,result);
     }
 
     if(request.method==='GET'&&revocationStatusPath(url.pathname)){
