@@ -2,7 +2,7 @@
 import {spawnSync} from 'node:child_process';
 import {readFileSync} from 'node:fs';
 import {join} from 'node:path';
-import {fileURLToPath} from 'node:url';
+import {fileURLToPath,pathToFileURL} from 'node:url';
 import {buildIntakePlan} from './plan-review-intake-v1.mjs';
 import {loadLiveDeploymentReport} from './deployment-observations-v1.mjs';
 
@@ -112,5 +112,16 @@ function selfTest(){
   console.log('SHINE DEFENCE REVIEW EVIDENCE PACK SELF-TEST: PASS bounded metadata, review focus, unreviewed gate and divergent fail-closed');
 }
 
-function main(){if(process.argv.includes('--self-test'))return selfTest();const r=buildLiveEvidencePacks();console.log(JSON.stringify(r,null,2))}
-main();
+function main(){
+  if(process.argv.includes('--self-test'))return selfTest();
+  const args=process.argv.slice(2),appIndex=args.indexOf('--app');
+  const r=buildLiveEvidencePacks();
+  if(appIndex>=0){
+    if(!args[appIndex+1])fail('--app requires a value');
+    const item=r.items.find(x=>x.appId===args[appIndex+1]);
+    if(!item)fail('no draftable evidence pack for '+args[appIndex+1]);
+    console.log(JSON.stringify(item,null,2));return;
+  }
+  console.log(JSON.stringify(r,null,2));
+}
+if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href)main();
