@@ -6,7 +6,7 @@ import {dirname,join} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {assertApprovedReviewChecklist} from './review-checklist-lib-v1.mjs';
 
-export const SHINE_DEFENCE_ONBOARDER_VERSION='2.0.0';
+export const SHINE_DEFENCE_ONBOARDER_VERSION='2.1.0';
 
 const root=fileURLToPath(new URL('../../../',import.meta.url));
 const paths={
@@ -262,6 +262,12 @@ function main(){
     registryBytes,
     receiptExists:existsSync(join(root,receiptPath))
   });
+
+  const checklistBytes=readFileSync(checklistFull);
+  const finalDecision=built.decisions.decisions.find(decision=>decision.candidateId===candidate.candidateId&&decision.outcome==='accepted');
+  if(!finalDecision)fail('accepted review decision missing from planned state');
+  finalDecision.reviewChecklistBlobSha=gitBlobSha(checklistBytes);
+  finalDecision.reviewRegistryBlobSha=checklist.registryBlobSha;
 
   const snapshotPath=join(paths.snapshots,built.registryBlobSha+'.json');
   const planned=[

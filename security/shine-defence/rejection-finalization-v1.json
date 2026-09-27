@@ -1,0 +1,41 @@
+{
+  "contract": "shine-defence/rejection-finalization-v1",
+  "version": "1.0.0",
+  "purpose": "Fail-closed closure of a human-rejected pending Shine Defence review candidate without creating certification state.",
+  "preconditions": [
+    "Exactly one pending_review candidate exists for the supplied candidate id.",
+    "The canonical review checklist for that candidate exists and validates against the exact candidate and current canonical registry.",
+    "The checklist humanAuthorization status is rejected.",
+    "The rejected checklist contains an explicit human reviewer id, reviewedAt timestamp and summary.",
+    "At least one checklist requirement is not_satisfied.",
+    "The candidate does not already have a review decision record."
+  ],
+  "finalizationState": [
+    "The candidate status becomes dismissed.",
+    "The candidate decisionReason is set to the exact human rejection summary from the canonical checklist.",
+    "Exactly one dismissed review decision is appended.",
+    "The decision authority equals the checklist reviewerId.",
+    "The decision decidedAt equals the checklist reviewedAt.",
+    "The decision summary equals the checklist human rejection summary.",
+    "The dismissed decision pins reviewChecklistBlobSha to the exact rejected checklist Git blob.",
+    "The dismissed decision pins reviewRegistryBlobSha to the rejected checklist registry identity."
+  ],
+  "atomicity": [
+    "Candidate dismissal and the matching review decision are one repository state transition.",
+    "The helper is dry-run by default.",
+    "Apply mode writes only review-candidates-v1 and review-decisions-v1.",
+    "After writing, Defence validators run and any failure restores both files to their prior bytes.",
+    "Checklist fingerprint fields are derived from the already-validated canonical checklist; they are not supplied by the caller."
+  ],
+  "boundaries": [
+    "Rejection finalization does not add or alter the reviewed ecosystem ledger.",
+    "Rejection finalization does not create, replace or delete a certification receipt.",
+    "Rejection finalization does not alter revocation state.",
+    "A dismissed candidate does not imply that the release is unsafe; it means only that this review closed without certification."
+  ],
+  "nonClaims": [
+    "A checklist rejection is not automatically a candidate dismissal until this finalization completes.",
+    "The decision record is not certification authority.",
+    "The helper does not verify the real-world identity of the reviewer."
+  ]
+}

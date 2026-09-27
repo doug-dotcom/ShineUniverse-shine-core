@@ -83,7 +83,7 @@ A candidate **never grants the badge**. Only the canonical ecosystem review ledg
 
 `security/shine-defence/review-decision-v1.json` defines the separate decision record required when a review candidate leaves `pending_review`. Final decisions live in `security/shine-defence/review-decisions-v1.json` and are checked independently from the candidate queue.
 
-Core CI requires every accepted, superseded or dismissed candidate to have exactly one matching decision record, rejects decisions that predate candidate observation, and verifies superseded-candidate successor identity. Pending candidates are forbidden from carrying a decision. This prevents a queue status field from becoming its own evidence while preserving the rule that only the canonical reviewed ledger plus an exact receipt grants the current Defence badge.
+Core CI requires every accepted, superseded or dismissed candidate to have exactly one matching decision record, rejects decisions that predate candidate observation, and verifies superseded-candidate successor identity. Pending candidates are forbidden from carrying a decision. For checklist-backed final decisions, the decision also pins the exact checklist Git blob plus the checklist's registry identity. This preserves the human review artifact byte-for-byte after finalization while keeping certification authority exclusively in the canonical reviewed ledger plus exact receipt.
 
 Accepted candidates are historical final outcomes. When a later release is reviewed, the older accepted record remains accepted rather than being rewritten as superseded; `superseded` is reserved for a candidate replaced before review completed.
 
@@ -115,7 +115,7 @@ The helper is dry-run by default. It requires the candidate's canonical structur
 
 `security/shine-defence/review-checklist-v1.json` defines a non-authoritative review worksheet bound to one exact candidate and one exact canonical-registry snapshot. `generate-review-checklist-v1.mjs` derives checklist items directly from every claimed canonical policy requirement, copies the candidate evidence as reference material, and always generates `humanAuthorization.status = pending`. Canonical artefacts without a `requirements` array receive an explicit artefact-integrity review item rather than being treated as automatically satisfied.
 
-A human reviewer may mark requirements `satisfied` or `not_satisfied`, cite candidate evidence ids and add bounded reviewer notes. Approval is valid only when every item is satisfied and the checklist contains an explicit reviewer id, reviewed timestamp and review summary. `verify-review-checklists-v1.mjs` re-derives the canonical requirements and rejects candidate, policy, registry, requirement or evidence drift.
+A human reviewer may mark requirements `satisfied` or `not_satisfied`, cite candidate evidence ids and add bounded reviewer notes. Approval is valid only when every item is satisfied and the checklist contains an explicit reviewer id, reviewed timestamp and review summary. While a candidate is pending, `verify-review-checklists-v1.mjs` re-derives the checklist against the current canonical registry and rejects candidate, policy, registry, requirement or evidence drift. After a checklist-backed candidate is finalized, CI instead verifies the exact decision-pinned checklist bytes and human outcome metadata so later Defence-policy evolution does not rewrite historical review evidence.
 
 First certification and re-certification now read only the canonical checklist at `security/shine-defence/review-checklists/<candidateId>.json`. They no longer accept a command-line authority, decision timestamp or free-form acceptance summary. The accepted decision inherits those fields from the independently validated human approval. A generated or merely pending checklist cannot authorize certification.
 
@@ -135,6 +135,13 @@ Suggestion artifacts never edit checklist state, evidence references, reviewer n
 
 `security/shine-defence/review-queue-v1.json` defines the read-only consolidated view of every `pending_review` candidate. `review-queue-v1.mjs` combines candidate identity, whether the app is already reviewed, checklist progress, human authorization, advisory evidence-assistance health and evidence-gap counts into one deterministic queue ordered by observation time.
 
-Each queue item exposes one workflow state and one next action: generate a missing checklist, review the next requirement, explicitly approve/reject a completed checklist, run first certification/re-certification after approval, repair invalid checklist state, or finalize a human-rejected candidate. Advisory suggestion drift is surfaced separately and never blocks otherwise-valid human approval or certification readiness. The queue is read-only and can render either a reviewer-friendly summary or deterministic `--json` output.
+Each queue item exposes one workflow state and one next action: generate a missing checklist, review the next requirement, explicitly approve/reject a completed checklist, run first certification/re-certification after approval, repair invalid checklist state, or run the guarded rejection finalizer for a human-rejected candidate. Advisory suggestion drift is surfaced separately and never blocks otherwise-valid human approval or certification readiness. The queue is read-only and can render either a reviewer-friendly summary or deterministic `--json` output.
+
+### Rejection finalization
+
+`security/shine-defence/rejection-finalization-v1.json` defines the fail-closed closure path for a human-rejected pending candidate. `finalize-rejection-v1.mjs` requires the exact canonical checklist to validate against the still-pending candidate and to contain explicit human rejection. It then changes only two authorities: the candidate becomes `dismissed` with the human rejection summary as `decisionReason`, and one matching dismissed review decision is appended.
+
+Reviewer id, rejection timestamp and summary come only from the rejected checklist. The decision pins the exact checklist Git blob and registry identity, so later edits or registry changes cannot silently rewrite the historical rejection. The helper never changes the ecosystem reviewed ledger, certification receipt or revocation state. Apply mode runs candidate, decision, checklist, rejection-binding and queue verification and restores both mutated ledgers if any check fails.
+
 
 An extension policy existing in Core does **not** automatically certify an app. Each app still needs local, testable evidence before claiming that profile.

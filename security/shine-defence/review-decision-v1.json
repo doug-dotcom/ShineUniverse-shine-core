@@ -1,6 +1,6 @@
 {
   "contract": "shine-defence/review-decision-v1",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "purpose": "Separate, machine-verifiable decision evidence for finalized Shine Defence review candidates.",
   "outcomes": [
     {
@@ -34,11 +34,14 @@
     "A superseded decision must name the same successor candidate recorded by the review-candidate queue, and that successor must belong to the same app.",
     "Decision identifiers are deterministic: candidateId plus '-' plus outcome.",
     "Decision authority and summary text are bounded, non-empty and must not contain obvious credentials or private-key material.",
-    "Decision records do not grant or extend the Protected by Shine Defence badge; certification authority remains the canonical reviewed ledger plus an exact certification receipt."
+    "Decision records do not grant or extend the Protected by Shine Defence badge; certification authority remains the canonical reviewed ledger plus an exact certification receipt.",
+    "When a finalized candidate has a canonical structured review checklist, its decision must pin reviewChecklistBlobSha to the exact checklist Git blob and reviewRegistryBlobSha to the checklist registryBlobSha.",
+    "Checklist fingerprints preserve the exact reviewed human artifact as historical evidence; later canonical-registry evolution does not rewrite the prior decision."
   ],
   "nonClaims": [
     "A review decision is not a cryptographic signature.",
     "A dismissed or superseded decision does not imply the release is unsafe.",
-    "A recorded acceptance does not certify later revisions of the application."
+    "A recorded acceptance does not certify later revisions of the application.",
+    "A checklist Git-blob fingerprint proves byte identity of the recorded artifact, not the real-world identity of the reviewer."
   ]
 }
