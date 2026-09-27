@@ -66,6 +66,8 @@ jobs:
       - run: node security/shine-defence/integration-kit/estate-audit-manifest-v1.mjs --as-of 2026-09-27T08:00:00.000Z
       - run: node security/shine-defence/integration-kit/estate-manifest-diff-v1.mjs --self-test
       - run: node security/shine-defence/integration-kit/estate-audit-timeline-v1.mjs --self-test
+      - run: node security/shine-defence/integration-kit/timeline-snapshot-planner-v1.mjs --self-test
+      - run: node security/shine-defence/integration-kit/timeline-snapshot-planner-v1.mjs --as-of 2026-09-27T08:10:00.000Z
       - run: node security/shine-defence/integration-kit/estate-audit-timeline-v1.mjs --as-of 2026-09-27T09:00:00.000Z
       - run: node security/shine-defence/integration-kit/verify-review-checklists-v1.mjs
       - run: node security/shine-defence/integration-kit/verify-review-evidence-suggestions-v1.mjs
