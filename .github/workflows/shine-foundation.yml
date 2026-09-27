@@ -85,6 +85,8 @@ jobs:
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/connection-status-runtime-select-v1.sql
       - name: Apply final app operational status function
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/app-operational-status-function-v1.sql
+      - name: Seed historical capability prerequisites
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/open-capability-prerequisites.test.sql
       - name: Apply open capability contract
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/open-capability-contract-v1.sql
       - name: Apply integration client FK index
