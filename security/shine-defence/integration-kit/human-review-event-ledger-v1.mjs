@@ -2,7 +2,7 @@
 import {createHash} from 'node:crypto';
 import {existsSync,readdirSync,readFileSync} from 'node:fs';
 import {join} from 'node:path';
-import {fileURLToPath} from 'node:url';
+import {fileURLToPath,pathToFileURL} from 'node:url';
 import {applyAction,createReview} from './human-diff-review-v1.mjs';
 
 export const SHINE_DEFENCE_HUMAN_REVIEW_EVENT_LEDGER_VERSION='1.0.0';
@@ -89,4 +89,4 @@ function selfTest(){
   console.log('SHINE DEFENCE HUMAN REVIEW EVENT LEDGER SELF-TEST: PASS append-only hash chain, superseded finding history, replay projection and tamper detection');
 }
 function main(){if(process.argv.includes('--self-test'))return selfTest();const r=loadLive();console.log(JSON.stringify(r,null,2));if(r.failures.length)process.exitCode=1}
-main();
+if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href)main();
