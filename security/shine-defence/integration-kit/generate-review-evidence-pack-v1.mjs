@@ -6,7 +6,7 @@ import {fileURLToPath,pathToFileURL} from 'node:url';
 import {buildIntakePlan} from './plan-review-intake-v1.mjs';
 import {loadLiveDeploymentReport} from './deployment-observations-v1.mjs';
 
-export const SHINE_DEFENCE_REVIEW_EVIDENCE_PACK_VERSION='1.0.0';
+export const SHINE_DEFENCE_REVIEW_EVIDENCE_PACK_VERSION='1.1.0';
 const root=fileURLToPath(new URL('../../../',import.meta.url));
 const P={ledger:'security/shine-defence/ecosystem-profile-ledger-v1.json',candidates:'security/shine-defence/review-candidates-v1.json'};
 const readJson=p=>JSON.parse(readFileSync(join(root,p),'utf8'));
