@@ -450,8 +450,20 @@
     {
       "id": "audit-export-helper",
       "path": "security/shine-defence/integration-kit/audit-export-v1.mjs",
+      "version": "1.0.1",
+      "blobSha": "88894084d93de1c857202fbc91f1be1777036dd1"
+    },
+    {
+      "id": "estate-audit-manifest",
+      "path": "security/shine-defence/estate-audit-manifest-v1.json",
       "version": "1.0.0",
-      "blobSha": "04242782982474f982925fca4988d23ec1175c7c"
+      "blobSha": "70bd9da5425d799d660e43242398a69c15dc41f4"
+    },
+    {
+      "id": "estate-audit-manifest-helper",
+      "path": "security/shine-defence/integration-kit/estate-audit-manifest-v1.mjs",
+      "version": "1.0.0",
+      "blobSha": "5553bfeba904e19940049ecf80d6d2a6337ae2f8"
     }
   ]
 }
