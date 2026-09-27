@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import {spawnSync} from 'node:child_process';
-import {readFileSync,renameSync,statSync,writeFileSync} from 'node:fs';
+import {existsSync,readFileSync,renameSync,statSync,writeFileSync} from 'node:fs';
 import {isAbsolute,join,resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {
@@ -8,13 +8,15 @@ import {
   gitBlobSha,
   validateReviewChecklist
 } from './review-checklist-lib-v1.mjs';
+import {validateEvidenceSuggestions} from './review-evidence-assistant-lib-v1.mjs';
 
-export const SHINE_DEFENCE_REVIEW_WORKSPACE_VERSION='1.0.0';
+export const SHINE_DEFENCE_REVIEW_WORKSPACE_VERSION='1.1.0';
 
 const root=fileURLToPath(new URL('../../../',import.meta.url));
 const queuePath='security/shine-defence/review-candidates-v1.json';
 const registryPath='security/shine-defence/canonical-registry-v1.json';
 const reviewDir='security/shine-defence/review-checklists';
+const suggestionDir='security/shine-defence/review-evidence-suggestions';
 
 const json=value=>JSON.stringify(value,null,2)+'\n';
 const clone=value=>JSON.parse(JSON.stringify(value));
@@ -169,7 +171,7 @@ function printEvidence(checklist){
   }
 }
 
-function printStatus(checklist){
+function printStatus(checklist,suggestionArtifact=null){
   const status=summariseWorkspace(checklist);
   console.log('SHINE DEFENCE REVIEW WORKSPACE');
   console.log('candidate: '+status.candidateId);
@@ -181,6 +183,18 @@ function printStatus(checklist){
   if(status.next){
     console.log('  '+status.next.itemId+' ['+status.next.policyId+']');
     console.log('  '+status.next.requirement);
+    const advisory=(suggestionArtifact?.items||[]).find(item=>item.itemId===status.next.itemId);
+    if(advisory){
+      console.log('ADVISORY EVIDENCE SUGGESTIONS');
+      if(advisory.evidenceGap){
+        console.log('  evidence gap: no deterministic match found');
+      }else{
+        for(const suggestion of advisory.suggestions){
+          console.log('  '+suggestion.evidenceId+' ['+suggestion.confidence+'; score '+suggestion.score+'] '+suggestion.reason);
+        }
+      }
+      console.log('  reviewer confirmation required before any mapping is recorded');
+    }
   }else{
     console.log('  none');
     if(status.authorization==='pending'){
@@ -333,8 +347,19 @@ function main(){
   const currentFailures=validateReviewChecklist({checklist,candidate,registry,registryBytes,readArtefact:readCanonical});
   if(currentFailures.length)fail('current checklist is invalid: '+currentFailures.join('; '));
 
+  let suggestionArtifact=null;
+  const suggestionPath=join(suggestionDir,candidate.candidateId+'.json');
+  const suggestionFull=join(root,suggestionPath);
+  if(existsSync(suggestionFull)){
+    suggestionArtifact=JSON.parse(readFileSync(suggestionFull,'utf8'));
+    const suggestionFailures=validateEvidenceSuggestions({
+      artifact:suggestionArtifact,candidate,checklist,registry,registryBytes,readArtefact:readCanonical
+    });
+    if(suggestionFailures.length)fail('evidence suggestion artifact invalid: '+suggestionFailures.join('; '));
+  }
+
   if(!args.actionFile){
-    printStatus(checklist);
+    printStatus(checklist,suggestionArtifact);
     return;
   }
 
@@ -352,7 +377,7 @@ function main(){
   console.log('candidate: '+candidate.candidateId);
   console.log('action: '+action.action+(action.action==='record'?' '+action.itemId+' -> '+action.state:' -> '+action.decision));
   console.log((args.apply?'WRITE ':'WOULD WRITE ')+relativePath);
-  printStatus(next);
+  printStatus(next,suggestionArtifact);
 
   if(!args.apply){
     console.log('DRY RUN: no files changed.');

@@ -1,0 +1,43 @@
+{
+  "contract": "shine-defence/review-evidence-assistant-v1",
+  "version": "1.0.0",
+  "purpose": "Non-authoritative evidence-to-requirement suggestions for one exact Shine Defence review checklist.",
+  "artifact": "security/shine-defence/review-evidence-suggestions/<candidateId>.json",
+  "binding": [
+    "The suggestion artifact binds to one exact candidate id, release/profile identity, checklist generation timestamp and canonical registry blob.",
+    "Suggestions are derived only from the candidate evidence already copied into the canonical checklist and the exact checklist requirement text.",
+    "Suggestion generation never changes checklist item state, evidenceRefs, reviewer notes, humanAuthorization, candidate status, certification receipt, reviewed ledger or review decision."
+  ],
+  "confidence": [
+    {
+      "id": "high",
+      "meaning": "Strong lexical/topic overlap between the requirement and candidate evidence; still requires human confirmation."
+    },
+    {
+      "id": "medium",
+      "meaning": "Meaningful but incomplete overlap; reviewer should inspect the evidence before using it."
+    },
+    {
+      "id": "low",
+      "meaning": "Weak contextual overlap; surfaced only as a possible lead."
+    }
+  ],
+  "rules": [
+    "Each checklist requirement receives zero or more ranked evidence suggestions and an explicit evidenceGap boolean.",
+    "A suggestion must reference an evidence id present in the canonical checklist and an item id present in that same checklist.",
+    "Scores are deterministic numeric heuristics from 0 to 1; they are not probabilities or security verdicts.",
+    "At most three evidence suggestions are retained per checklist item.",
+    "Matched terms and evidence metadata used in the heuristic are recorded so the reviewer can understand why a suggestion appeared.",
+    "A requirement with no retained suggestion has evidenceGap=true.",
+    "A requirement with one or more retained suggestions has evidenceGap=false.",
+    "Suggestions never mark a requirement satisfied and never authorize approval.",
+    "The review workspace or human reviewer must explicitly confirm any evidence mapping before it becomes part of the canonical checklist.",
+    "Suggestion artifacts fail closed on candidate, checklist, registry or evidence drift."
+  ],
+  "nonClaims": [
+    "A high-confidence suggestion does not prove a requirement is satisfied.",
+    "The heuristic does not understand source code, deployment state or external evidence beyond the bounded evidence metadata supplied to the candidate.",
+    "No score is a probability of safety, correctness or certification success.",
+    "The evidence assistant cannot approve, reject, certify or revoke a release."
+  ]
+}

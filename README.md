@@ -125,4 +125,10 @@ First certification and re-certification now read only the canonical checklist a
 
 A reviewer records one requirement at a time through a small JSON action file containing the item id, review state, evidence ids and/or reviewer notes. The workspace validates the proposed mutation against the exact candidate and current canonical registry before writing it. Approval or rejection is a separate explicit action: approval requires literal `APPROVE` confirmation and every item satisfied; rejection requires literal `REJECT` confirmation and at least one `not_satisfied` item. Finalized checklists are locked in workspace v1. Apply mode changes only the canonical checklist file and restores the previous version if checklist verification fails.
 
+### Review evidence assistant
+
+`security/shine-defence/review-evidence-assistant-v1.json` defines a strictly advisory evidence-mapping layer. `review-evidence-assistant-v1.mjs` compares each checklist requirement with only the bounded candidate evidence already copied into that checklist and writes a separate suggestion artifact under `security/shine-defence/review-evidence-suggestions/`. The deterministic engine records matched terms, a non-probabilistic score, a low/medium/high advisory confidence label and explicit evidence gaps; it retains at most three evidence leads per requirement.
+
+Suggestion artifacts never edit checklist state, evidence references, reviewer notes or human authorization. `verify-review-evidence-suggestions-v1.mjs` recomputes the deterministic output and rejects candidate, checklist, registry, evidence or score drift. Historical suggestion artifacts remain valid after a candidate is later finalized. Review Workspace v1.1 displays validated suggestions beside the next outstanding requirement when available, but the reviewer must still explicitly record any evidence mapping before it affects the checklist.
+
 An extension policy existing in Core does **not** automatically certify an app. Each app still needs local, testable evidence before claiming that profile.
