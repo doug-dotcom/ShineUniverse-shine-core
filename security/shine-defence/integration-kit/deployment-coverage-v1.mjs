@@ -16,6 +16,8 @@ export function buildCoverage({ledger,sources,observations,exceptions}){
   const items=[];
   for(const app of [...(ledger.apps||[])].sort((a,b)=>a.id.localeCompare(b.id))){
     const source=src.get(app.id),exception=exc.get(app.id);
+    if(source&&source.repository&&source.repository!==app.repo)throw new Error(app.id+': source repository mismatch');
+    if(exception&&exception.repository!==app.repo)throw new Error(app.id+': exception repository mismatch');
     let state='unmapped';
     if(source) state=obs.has(app.id)?'observed':'mapped_unobserved';
     else if(exception?.state==='partial_service') state='partial_service';
