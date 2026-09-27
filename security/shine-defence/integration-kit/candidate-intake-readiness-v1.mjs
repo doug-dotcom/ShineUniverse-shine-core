@@ -2,7 +2,6 @@
 import {existsSync,readFileSync} from 'node:fs';
 import {join} from 'node:path';
 import {fileURLToPath} from 'node:url';
-import {buildLiveEvidencePacks} from './generate-review-evidence-pack-v1.mjs';
 import {acceptedEvidence,validateReview,reviewKey} from './human-diff-review-v1.mjs';
 import {buildIntakePlan,materializeDraft} from './plan-review-intake-v1.mjs';
 import {loadLiveDeploymentReport} from './deployment-observations-v1.mjs';
@@ -57,11 +56,22 @@ export function buildReadinessReport({plan,packs,queue,ledger,registry,readArtif
 export function loadLiveReadiness(){
   const ledger=readJson(P.ledger),queue=readJson(P.candidates),registry=readJson(P.registry);
   const plan=buildIntakePlan({deploymentReport:loadLiveDeploymentReport(),ledger,candidates:queue});
-  const packs=buildLiveEvidencePacks();
-  return buildReadinessReport({plan,packs,queue,ledger,registry,readArtifact:(kind,id)=>{
-    const path=join(root,kind==='review'?P.reviews:P.evidence,id+'.json');
-    return existsSync(path)?JSON.parse(readFileSync(path,'utf8')):null;
-  }});
+  const items=[];
+  for(const planItem of plan.items.filter(i=>i.state==='needs_review_evidence')){
+    const prefix=planItem.appId+'-'+planItem.intakeDraft.releaseCommitSha.slice(0,12);
+    const reviewFile=join(root,P.reviews,prefix+'.json'),evidenceFile=join(root,P.evidence,prefix+'.json');
+    if(!existsSync(reviewFile)||!existsSync(evidenceFile))continue;
+    const review=JSON.parse(readFileSync(reviewFile,'utf8')),evidence=JSON.parse(readFileSync(evidenceFile,'utf8'));
+    const pack={
+      appId:review.appId,repository:review.repository,reviewedCommitSha:review.reviewedCommitSha,
+      observedCommitSha:review.observedCommitSha,deploymentObservationId:review.deploymentObservationId,
+      compare:review.packSummary,reviewFocus:{files:review.findings.map(f=>({filename:f.filename,reviewFocus:f.reviewFocus}))}
+    };
+    try{items.push(buildReadyItem({planItem,pack,review,evidence,queue,ledger,registry}))}
+    catch(error){items.push({appId:planItem.appId,repository:planItem.repository,state:'accepted_evidence_invalid',reason:error.message})}
+  }
+  items.sort((a,b)=>a.appId.localeCompare(b.appId));
+  return {report:'shine-defence/candidate-intake-readiness-v1',version:'1.0.0',ready:items.filter(i=>i.state==='candidate_intake_ready').length,invalid:items.filter(i=>i.state==='accepted_evidence_invalid').length,items};
 }
 
 function selfTest(){
