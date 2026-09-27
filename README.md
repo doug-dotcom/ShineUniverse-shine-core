@@ -189,5 +189,11 @@ The generator assigns deterministic review-focus labels such as `security_or_aut
 
 A reviewer records each changed file as `reviewed_no_issue`, `reviewed_attention` or `reviewed_blocker` with optional bounded notes. Evidence cannot be accepted until every changed file has a human finding, and any blocker prevents acceptance. Final acceptance requires literal `ACCEPT EVIDENCE`, reviewer id, UTC review timestamp and bounded summary. Only then does the workspace emit a separate candidate-intake-compatible `security_diff_review` evidence record. That record still does not create a candidate, approve a checklist or certify a release; the Review Intake Planner and candidate intake remain separate guarded steps. Accepted review artifacts are immutable in workspace v1.
 
+### Candidate intake readiness
+
+`security/shine-defence/candidate-intake-readiness-v1.json` defines the final fail-closed bridge between accepted human diff-review evidence and candidate intake. `candidate-intake-readiness-v1.mjs` requires the accepted review and separate evidence record to bind the current deployment-drift identity exactly, re-derives the evidence record from the durable human review, rejects tampering or stale deployment identity, and then runs the canonical candidate-intake validator over the resulting payload.
+
+A successful bridge result is `candidate_intake_ready` and includes the deterministic candidate-id preview plus the fully validated candidate-intake payload. It does **not** write `review-candidates-v1`. Operations Controller v1.3 may surface that ready state and point to `intake-review-v1.mjs --input <validated-candidate-intake.json> --apply`; that separate explicit apply remains the only action that can create `pending_review` state. With no accepted human diff reviews yet, the live readiness report correctly contains zero ready candidates.
+
 
 An extension policy existing in Core does **not** automatically certify an app. Each app still needs local, testable evidence before claiming that profile.
