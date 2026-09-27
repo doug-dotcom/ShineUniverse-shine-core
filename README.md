@@ -171,5 +171,11 @@ The live source registry now covers ten canonically reviewed apps: `shine-daash`
 
 `security/shine-defence/deployment-coverage-v1.json` defines coverage accounting across the entire reviewed estate. `deployment-coverage-v1.mjs` reports `observed`, `mapped_unobserved`, `partial_service` and `unmapped` states. `shine-music` is explicitly recorded as `partial_service`: Railway currently exposes the `rivers-malware-scanner` subservice from the same repository, but that subservice is not treated as the full reviewed app deployment. Partial services do not count as full observation coverage.
 
+### Review intake planner
+
+`security/shine-defence/review-intake-planner-v1.json` defines a read-only bridge from observed `deployment_drift` to candidate-intake preparation. `plan-review-intake-v1.mjs` may prefill app/repository, deployed release SHA, profile path/blob, reviewed profile version and reviewed policy ids only when the deployed Defence-profile blob still exactly matches the reviewed profile. The generated draft deliberately contains `evidence: []` and no candidate observation timestamp, so it is not valid candidate-intake input and cannot create `pending_review` state.
+
+If the deployed profile changed, the planner reports `profile_changed_requires_refresh` rather than inheriting stale profileVersion/policy claims. If a pending candidate already exists, the planner reports `pending_candidate_exists`. Materialization requires explicit bounded review evidence plus a candidate observation timestamp, then re-runs the canonical candidate-intake validator and prints ordinary intake JSON only; it never writes the review-candidate queue. Operations Controller v1.2 routes deployment drift through this planner instead of directly to candidate intake.
+
 
 An extension policy existing in Core does **not** automatically certify an app. Each app still needs local, testable evidence before claiming that profile.
