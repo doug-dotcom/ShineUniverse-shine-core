@@ -224,6 +224,18 @@
       "path": "security/shine-defence/integration-kit/verify-review-evidence-suggestions-v1.mjs",
       "version": "1.0.0",
       "blobSha": "3c2f4ce34e7b5da937d42a1379f29a8f41feca57"
+    },
+    {
+      "id": "review-queue",
+      "path": "security/shine-defence/review-queue-v1.json",
+      "version": "1.0.0",
+      "blobSha": "fd7ca9622ad39475d606a3a1184e4c7abf76dd9c"
+    },
+    {
+      "id": "review-queue-helper",
+      "path": "security/shine-defence/integration-kit/review-queue-v1.mjs",
+      "version": "1.0.0",
+      "blobSha": "853ac95e25917922895c75d71579104d6d2dfbd8"
     }
   ]
 }
