@@ -207,5 +207,11 @@ Each row shows estate/certification state, deployment coverage, observed deploym
 
 Explicit human-required actions and pre-candidate diff reviews that are not started/in progress take the human-attention bucket. Canonical blocks, profile-claim refresh and no-helper remediation states are blocked. Existing guarded non-human helpers are machine-action available, and `nextAction: none` is healthy/no-action unless another explicit condition applies. Ordering is deterministic by bucket, workflow stage and app id; it is operational ordering only, never a security risk score. The queue invokes nothing.
 
+### Staleness visibility
+
+`security/shine-defence/staleness-visibility-v1.json` defines timestamp and age visibility for deployment observations, human review, pending candidates and certification completion. `staleness-visibility-v1.mjs` reports elapsed hours/days plus `current` (<24h), `ageing` (24h–7d), `stale` (7d+) and explicit `unknown` / `not_applicable` states against a supplied report `asOf` time. Future timestamps fail closed.
+
+Deployment age comes from the exact latest observation. Pending-candidate age comes from candidate `observedAt`. Accepted human review age comes from its explicit `reviewedAt`; Workspace v1 does not timestamp individual findings, so an in-progress review's last-touch age remains `unknown` rather than being guessed from filesystem or Git metadata. Certification age uses a dated accepted review decision only when that decision binds the app's current reviewed release; legacy reviewed apps without that evidence remain `unknown`. Command Centre v1.1 includes these four age dimensions per app, and Attention Queue v1.1 carries them as context without changing bucket or ordering. Age is operational visibility, never a security score.
+
 
 An extension policy existing in Core does **not** automatically certify an app. Each app still needs local, testable evidence before claiming that profile.
