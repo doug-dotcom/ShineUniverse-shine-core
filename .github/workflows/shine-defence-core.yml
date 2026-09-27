@@ -40,6 +40,7 @@ jobs:
       - run: node security/shine-defence/integration-kit/deployment-coverage-v1.mjs --self-test
       - run: node security/shine-defence/integration-kit/deployment-coverage-v1.mjs --json
       - run: node security/shine-defence/integration-kit/plan-review-intake-v1.mjs --self-test
+      - run: node security/shine-defence/integration-kit/generate-review-evidence-pack-v1.mjs --self-test
       - run: node security/shine-defence/integration-kit/plan-review-intake-v1.mjs --json
       - run: node security/shine-defence/integration-kit/record-deployment-observation-v1.mjs --self-test
       - run: node security/shine-defence/integration-kit/deployment-observations-v1.mjs --json
