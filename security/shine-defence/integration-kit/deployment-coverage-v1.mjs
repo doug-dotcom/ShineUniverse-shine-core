@@ -38,6 +38,7 @@ function selfTest(){
   if(s.get('a')!=='observed'||s.get('b')!=='mapped_unobserved'||s.get('c')!=='partial_service'||s.get('d')!=='unmapped')throw new Error('coverage state mismatch');
   console.log('SHINE DEFENCE DEPLOYMENT COVERAGE SELF-TEST: PASS 4 states');
 }
+export const SHINE_DEFENCE_DEPLOYMENT_COVERAGE_VERSION='1.1.0';
 function main(){
   if(process.argv.includes('--self-test'))return selfTest();
   const r=buildCoverage({ledger,sources,observations,exceptions});
