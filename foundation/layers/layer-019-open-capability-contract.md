@@ -63,4 +63,6 @@ Layer 19 is correctly represented when:
 - clean Postgres rebuild verifies catalogue isolation, DB privileges and integration-client credential revocation state;
 - Node/Deno/Postgres CI is green.
 
+Production already had the three seeded specialist apps present in `foundation.app_registry` before the capability migration ran. Those registry rows were operational data rather than migration-created data, so the clean CI rebuild uses `open-capability-prerequisites.test.sql` as a **test-only historical fixture**. The production migration itself remains byte-for-byte identical to hosted migration history.
+
 No production deployment is required because the capability is already live.
