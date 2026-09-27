@@ -1,6 +1,6 @@
 {
   "contract": "shine-defence/review-session-summary-v1",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "purpose": "Read-only audit summary of explicit Human Diff Review v1.2 activity for one exact review artifact.",
   "rules": [
     "Summaries are derived only from durable per-file reviewerId/reviewedAt metadata and the explicit acceptance event.",
@@ -9,13 +9,13 @@
     "Elapsed span is wall-clock distance between explicit actions and is not claimed as active review duration.",
     "Inactivity gaps are reported between sessions with exact start/end and elapsed minutes.",
     "Acceptance is represented as its own explicit action and may form or extend a session.",
-    "The summary reports only the latest durable finding action per file because Human Diff Review v1.2 is not an event-sourced history of superseded findings.",
+    "When a Human Review Event Ledger exists, summaries use its full explicit action history including superseded finding changes; projection-only legacy reviews remain limited to the latest durable finding per file.",
     "The summary mutates nothing and never changes review, evidence, candidate, checklist or certification state."
   ],
   "nonClaims": [
     "Session span is not time spent actively reviewing.",
     "A gap does not prove the reviewer was inactive outside the Defence workspace.",
-    "The summary does not reconstruct overwritten earlier findings that are not present in the durable v1.2 artifact.",
+    "Projection-only legacy summaries cannot reconstruct overwritten earlier findings; v1.3 event-ledger summaries can reconstruct explicit superseded finding actions from the ledger.",
     "Reviewer counts and finding counts are audit facts, not quality or risk scores."
   ]
 }
