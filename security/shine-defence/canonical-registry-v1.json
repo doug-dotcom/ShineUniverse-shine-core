@@ -332,6 +332,18 @@
       "path": "security/shine-defence/integration-kit/plan-review-intake-v1.mjs",
       "version": "1.0.0",
       "blobSha": "b72b8a9c77b4115473c8b6aeffa10a1f7dcb252c"
+    },
+    {
+      "id": "review-evidence-pack",
+      "path": "security/shine-defence/review-evidence-pack-v1.json",
+      "version": "1.0.0",
+      "blobSha": "00ecd45683f4c2eaaeeb3f0f9194bd5fe0a866d2"
+    },
+    {
+      "id": "review-evidence-pack-generator",
+      "path": "security/shine-defence/integration-kit/generate-review-evidence-pack-v1.mjs",
+      "version": "1.0.0",
+      "blobSha": "b6cd0aae3a1eaac4d051e74a04c7e3c4cdf58120"
     }
   ]
 }
