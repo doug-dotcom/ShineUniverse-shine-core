@@ -1,13 +1,14 @@
 {
   "contract": "shine-defence/command-centre-v1",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "purpose": "Read-only estate-wide projection of Shine Defence certification, deployment observation, coverage, review progress, intake readiness and exact next action.",
   "sources": [
     "operations-controller-v1",
     "deployment-coverage-v1",
     "review-intake-planner-v1",
     "candidate-intake-readiness-v1",
-    "human-diff-review artifacts"
+    "human-diff-review artifacts",
+    "human-review integrity checkpoints"
   ],
   "rules": [
     "The Command Centre joins existing authoritative/read-only projections and does not reimplement certification or deployment-status logic.",
@@ -22,7 +23,10 @@
     "Each reviewed-app row includes staleness visibility for deployment observation, human review, pending candidate and certification completion.",
     "Unknown and not_applicable age states remain distinct and are never converted into stale.",
     "Age bands are operational visibility only and do not change next-action selection or attention priority.",
-    "Human review progress exposes lastActivityAt only from explicit Human Diff Review workspace activity."
+    "Human review progress exposes lastActivityAt only from explicit Human Diff Review workspace activity.",
+    "Accepted pre-candidate reviews expose checkpoint integrity as pending, verified or invalid; reviews without accepted evidence expose not_applicable.",
+    "Checkpoint integrity is display/audit context only and does not alter estate state, next action, attention bucket, review state or certification.",
+    "verified requires the checkpoint store to validate against the bound Human Review Event Ledger including historical-prefix replay."
   ],
   "reviewProgressStates": [
     "not_applicable",
@@ -38,6 +42,7 @@
     "A next action shown in the report has not been executed.",
     "Review progress is not checklist approval.",
     "Coverage does not imply a protected deployment.",
-    "Age or staleness bands are not security risk scores."
+    "Age or staleness bands are not security risk scores.",
+    "A verified integrity checkpoint does not mean the human review judgement was correct."
   ]
 }
