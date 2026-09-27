@@ -223,6 +223,12 @@ The export intentionally excludes raw GitHub patches/source contents, environmen
 
 The manifest includes every app in the reviewed ecosystem ledger exactly once but does not embed all full audit bundles, keeping it compact and portable. Any per-app audit-export hash change changes the estate manifest hash. Repeating generation at the same `asOf` over unchanged Defence state yields the same manifest. A matching fingerprint means the recorded estate snapshot is unchanged relative to its inputs; it is not an external notarisation or a claim that every app is secure.
 
+### Estate manifest diff
+
+`security/shine-defence/estate-manifest-diff-v1.json` defines a neutral comparison of two valid Estate Audit Manifests. `estate-manifest-diff-v1.mjs` first verifies each input's own `manifestSha256`, then deterministically reports apps as `added`, `removed`, `changed` or `unchanged`. For changed apps it lists exact before/after values for repository, per-app audit-export hash, reviewed commit, observed deployed commit, deployment state and checkpoint-integrity state.
+
+The per-app audit hash provides deeper change sensitivity even when the headline identity dimensions are unchanged. The diff reports both manifest hashes and `asOf` timestamps but makes no judgement about whether a change is good, bad, expected, risky or safe. A changed app simply means the recorded manifest dimensions changed; deeper cause analysis belongs in the corresponding per-app audit exports/evidence. Invalid or tampered input manifests fail closed.
+
 ### Candidate intake readiness
 
 `security/shine-defence/candidate-intake-readiness-v1.json` defines the final fail-closed bridge between accepted human diff-review evidence and candidate intake. `candidate-intake-readiness-v1.mjs` requires the accepted review and separate evidence record to bind the current deployment-drift identity exactly, re-derives the evidence record from the durable human review, rejects tampering or stale deployment identity, and then runs the canonical candidate-intake validator over the resulting payload.

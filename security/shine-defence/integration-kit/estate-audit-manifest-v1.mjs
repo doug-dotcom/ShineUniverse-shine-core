@@ -2,14 +2,14 @@
 import {createHash} from 'node:crypto';
 import {readFileSync} from 'node:fs';
 import {join} from 'node:path';
-import {fileURLToPath} from 'node:url';
+import {fileURLToPath,pathToFileURL} from 'node:url';
 import {loadAuditExport} from './audit-export-v1.mjs';
 
-export const SHINE_DEFENCE_ESTATE_AUDIT_MANIFEST_VERSION='1.0.0';
+export const SHINE_DEFENCE_ESTATE_AUDIT_MANIFEST_VERSION='1.0.1';
 const root=fileURLToPath(new URL('../../../',import.meta.url));
 const ledgerPath='security/shine-defence/ecosystem-profile-ledger-v1.json';
 const readJson=p=>JSON.parse(readFileSync(join(root,p),'utf8'));
-const sha=v=>createHash('sha256').update(JSON.stringify(v)).digest('hex');
+export const estateManifestSha=v=>createHash('sha256').update(JSON.stringify(v)).digest('hex');
 const fail=m=>{throw new Error(m)};
 
 export function buildEstateAuditManifest({apps,asOf,exportForApp}){
@@ -34,7 +34,7 @@ export function buildEstateAuditManifest({apps,asOf,exportForApp}){
     reviewedApps:entries.length,entries,
     provenance:{reviewedLedger:ledgerPath,auditExportContract:'security/shine-defence/audit-export-v1.json'}
   };
-  return {...body,manifestSha256:sha(body)};
+  return {...body,manifestSha256:estateManifestSha(body)};
 }
 export function loadEstateAuditManifest(asOf){
   const ledger=readJson(ledgerPath);
@@ -64,4 +64,4 @@ function main(){
   if(ti<0||!args[ti+1])fail('--as-of is required for deterministic estate audit manifest');
   console.log(JSON.stringify(loadEstateAuditManifest(args[ti+1]),null,2));
 }
-main();
+if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href)main();
