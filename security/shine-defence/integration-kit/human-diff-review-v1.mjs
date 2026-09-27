@@ -72,7 +72,7 @@ export function applyAction({review,pack,action}){
     if(action.confirmation!=='ACCEPT EVIDENCE')fail('literal ACCEPT EVIDENCE confirmation required');
     if(!ID.test(action.reviewerId||''))fail('invalid reviewerId');
     if(!ISO.test(action.reviewedAt||'')||!Number.isFinite(Date.parse(action.reviewedAt)))fail('invalid reviewedAt');
-    if(!clean(action.summary,500))fail('invalid or secret-like acceptance summary');
+    if(!clean(action.summary,300))fail('invalid or secret-like acceptance summary');
     if(next.findings.some(f=>f.state==='unreviewed'))fail('every changed file requires a human finding before evidence acceptance');
     if(next.findings.some(f=>f.state==='reviewed_blocker'))fail('blocker findings prevent evidence acceptance');
     next.state='evidence_accepted';
