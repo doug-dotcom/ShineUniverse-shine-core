@@ -1,6 +1,6 @@
 {
   "contract": "shine-defence/command-centre-v1",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "purpose": "Read-only estate-wide projection of Shine Defence certification, deployment observation, coverage, review progress, intake readiness and exact next action.",
   "sources": [
     "operations-controller-v1",
@@ -21,7 +21,8 @@
     "The report is read-only and never invokes any recommended helper.",
     "Each reviewed-app row includes staleness visibility for deployment observation, human review, pending candidate and certification completion.",
     "Unknown and not_applicable age states remain distinct and are never converted into stale.",
-    "Age bands are operational visibility only and do not change next-action selection or attention priority."
+    "Age bands are operational visibility only and do not change next-action selection or attention priority.",
+    "Human review progress exposes lastActivityAt only from explicit Human Diff Review workspace activity."
   ],
   "reviewProgressStates": [
     "not_applicable",
