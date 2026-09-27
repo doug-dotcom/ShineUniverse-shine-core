@@ -5,7 +5,7 @@ import {fileURLToPath} from 'node:url';
 import {validateReviewChecklist} from './review-checklist-lib-v1.mjs';
 import {validateEvidenceSuggestions} from './review-evidence-assistant-lib-v1.mjs';
 
-export const SHINE_DEFENCE_REVIEW_QUEUE_VERSION='1.1.0';
+export const SHINE_DEFENCE_REVIEW_QUEUE_VERSION='1.2.0';
 
 const root=fileURLToPath(new URL('../../../',import.meta.url));
 const queuePath='security/shine-defence/review-candidates-v1.json';
@@ -188,7 +188,7 @@ export function buildReviewQueueReport(items){
   };
 }
 
-function loadLiveQueue(){
+export function loadLiveQueue(){
   const queue=readJson(queuePath);
   const ledger=readJson(ledgerPath);
   const registryBytes=readFileSync(join(root,registryPath));
@@ -404,4 +404,5 @@ function main(){
   else printHuman(report);
 }
 
-main();
+
+if(process.argv[1]&&join(process.cwd(),process.argv[1])===fileURLToPath(import.meta.url))main();
