@@ -106,7 +106,7 @@ function selfTest(){
     {filename:'tests/session.test.ts',status:'added',additions:30,deletions:0,changes:30}
   ]};
   const pack=buildEvidencePack({planItem,reviewedApp,compare});
-  if(pack.compare.changedFiles!==3||pack.reviewFocus.counts.api_or_server!==1||pack.reviewFocus.counts.database_or_migration!==1||pack.reviewFocus.counts.tests!==1)fail('self-test: focus/count mismatch');
+  if(pack.compare.changedFiles!==3||pack.reviewFocus.counts.security_or_auth!==1||pack.reviewFocus.counts.database_or_migration!==1||pack.reviewFocus.counts.tests!==1)fail('self-test: focus/count mismatch');
   if(pack.proposedEvidence.status!=='unreviewed'||!pack.proposedEvidence.summary.startsWith('UNREVIEWED'))fail('self-test: pack must remain unreviewed');
   let blocked=false;try{buildEvidencePack({planItem,reviewedApp,compare:{...compare,status:'diverged',behind_by:1}})}catch{blocked=true}if(!blocked)fail('self-test: divergent compare accepted');
   console.log('SHINE DEFENCE REVIEW EVIDENCE PACK SELF-TEST: PASS bounded metadata, review focus, unreviewed gate and divergent fail-closed');
