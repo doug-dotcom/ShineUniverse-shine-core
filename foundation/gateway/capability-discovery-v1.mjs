@@ -1,4 +1,4 @@
-const APP=/^shine\\.[a-z0-9][a-z0-9-]*$/;
+const APP=/^shine\.[a-z0-9][a-z0-9-]*$/;
 
 const response=(status,body={})=>({
   capabilityDiscoveryResponse:'shine-foundation/capability-discovery-response-v1',
