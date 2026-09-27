@@ -1,14 +1,15 @@
 #!/usr/bin/env node
 import {existsSync,readFileSync} from 'node:fs';
 import {join} from 'node:path';
-import {fileURLToPath} from 'node:url';
+import {fileURLToPath,pathToFileURL} from 'node:url';
 import {loadLiveOperations} from './operations-controller-v1.mjs';
 import {buildCoverage} from './deployment-coverage-v1.mjs';
 import {buildIntakePlan} from './plan-review-intake-v1.mjs';
 import {loadLiveDeploymentReport} from './deployment-observations-v1.mjs';
 import {loadLiveReadiness} from './candidate-intake-readiness-v1.mjs';
+import {buildStaleness} from './staleness-visibility-v1.mjs';
 
-export const SHINE_DEFENCE_COMMAND_CENTRE_VERSION='1.0.0';
+export const SHINE_DEFENCE_COMMAND_CENTRE_VERSION='1.1.0';
 const root=fileURLToPath(new URL('../../../',import.meta.url));
 const P={
   ledger:'security/shine-defence/ecosystem-profile-ledger-v1.json',
@@ -16,7 +17,8 @@ const P={
   sources:'security/shine-defence/deployment-sources-v1.json',
   observations:'security/shine-defence/deployment-observations-v1.json',
   exceptions:'security/shine-defence/deployment-source-exceptions-v1.json',
-  reviews:'security/shine-defence/human-diff-reviews'
+  reviews:'security/shine-defence/human-diff-reviews',
+  decisions:'security/shine-defence/review-decisions-v1.json'
 };
 const readJson=p=>JSON.parse(readFileSync(join(root,p),'utf8'));
 
@@ -78,14 +80,20 @@ export function buildCommandCentre({operations,coverage,plan,readiness,reviewPro
   return {report:'shine-defence/command-centre-v1',version:'1.0.0',reviewedApps:items.length,counts,items};
 }
 
-export function loadLiveCommandCentre(){
+export function loadLiveCommandCentre(asOf=new Date().toISOString()){
   const ledger=readJson(P.ledger),candidates=readJson(P.candidates),deployment=loadLiveDeploymentReport();
-  return buildCommandCentre({
+  const report=buildCommandCentre({
     operations:loadLiveOperations(),
     coverage:buildCoverage({ledger,sources:readJson(P.sources),observations:readJson(P.observations),exceptions:readJson(P.exceptions)}),
     plan:buildIntakePlan({deploymentReport:deployment,ledger,candidates}),
     readiness:loadLiveReadiness()
   });
+  const stale=buildStaleness({
+    commandCentre:report,ledger,candidates,decisions:readJson(P.decisions),asOf,
+    readReview:id=>{const p=join(root,P.reviews,id+'.json');return existsSync(p)?JSON.parse(readFileSync(p,'utf8')):null}
+  });
+  const ages=new Map(stale.items.map(i=>[i.appId,i]));
+  return {...report,version:'1.1.0',asOf,stalenessCounts:stale.counts,items:report.items.map(i=>({...i,staleness:ages.get(i.appId)}))};
 }
 function printHuman(report){
   console.log('SHINE DEFENCE COMMAND CENTRE');
@@ -103,6 +111,7 @@ function printHuman(report){
     console.log('  deployment: '+i.deployment.state+(i.deployment.releaseCommitSha?' '+i.deployment.releaseCommitSha.slice(0,12):''));
     console.log('  review: '+i.reviewProgress.state+(i.reviewProgress.totalFiles!==undefined?' '+i.reviewProgress.reviewedFiles+'/'+i.reviewProgress.totalFiles:''));
     console.log('  intake: '+i.intakeReadiness+(i.candidateId?' '+i.candidateId:''));
+    if(i.staleness)console.log('  ages: deploy '+i.staleness.deploymentObservation.band+', review '+i.staleness.humanReview.band+', candidate '+i.staleness.pendingCandidate.band+', certification '+i.staleness.certification.band);
     console.log('  next: '+i.nextAction.id);
   }
 }
@@ -125,4 +134,4 @@ function selfTest(){
   console.log('SHINE DEFENCE COMMAND CENTRE SELF-TEST: PASS estate join, reviewed-only scope, deterministic ordering and readiness/progress counts');
 }
 function main(){if(process.argv.includes('--self-test'))return selfTest();const r=loadLiveCommandCentre();if(process.argv.includes('--json'))console.log(JSON.stringify(r,null,2));else printHuman(r)}
-main();
+if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href)main();

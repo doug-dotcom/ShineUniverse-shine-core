@@ -372,14 +372,14 @@
     {
       "id": "command-centre",
       "path": "security/shine-defence/command-centre-v1.json",
-      "version": "1.0.0",
-      "blobSha": "0aa95b194a6a5ba6b96c99f542589e02925556e9"
+      "version": "1.1.0",
+      "blobSha": "4fe0af255c4b9b59cc53ff930f6f989831b64e64"
     },
     {
       "id": "command-centre-helper",
       "path": "security/shine-defence/integration-kit/command-centre-v1.mjs",
-      "version": "1.0.0",
-      "blobSha": "7222be02563665f0ef10799e66ef68a1145826c6"
+      "version": "1.1.0",
+      "blobSha": "1d42592fed620112fe06c1c7417aa11817a41815"
     },
     {
       "id": "attention-queue",
@@ -390,8 +390,20 @@
     {
       "id": "attention-queue-helper",
       "path": "security/shine-defence/integration-kit/attention-queue-v1.mjs",
+      "version": "1.1.0",
+      "blobSha": "d4c1d28edfb2d53460135fd26a375155d8917f52"
+    },
+    {
+      "id": "staleness-visibility",
+      "path": "security/shine-defence/staleness-visibility-v1.json",
       "version": "1.0.0",
-      "blobSha": "e8fa7261f86655f6667efb4a58930c0b4e983a90"
+      "blobSha": "89c0997bde4c233535096ce92f33962005bf23f0"
+    },
+    {
+      "id": "staleness-visibility-helper",
+      "path": "security/shine-defence/integration-kit/staleness-visibility-v1.mjs",
+      "version": "1.0.0",
+      "blobSha": "c86e77d3cd73e1699f66fa31caee80092c75d058"
     }
   ]
 }
