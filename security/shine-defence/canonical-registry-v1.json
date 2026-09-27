@@ -162,8 +162,8 @@
     {
       "id": "candidate-intake-helper",
       "path": "security/shine-defence/integration-kit/intake-review-v1.mjs",
-      "version": "1.0.0",
-      "blobSha": "47690eae32f0bb09face6f897c9a59600e03eedf"
+      "version": "1.1.0",
+      "blobSha": "236ff79caf0ee5b13ca39cf5d91c8ad37db78223"
     },
     {
       "id": "review-checklist",
@@ -254,6 +254,18 @@
       "path": "security/shine-defence/integration-kit/verify-review-rejections-v1.mjs",
       "version": "1.0.0",
       "blobSha": "fc531f39053828425e21c49f4f82a7ed67836a56"
+    },
+    {
+      "id": "candidate-supersession",
+      "path": "security/shine-defence/candidate-supersession-v1.json",
+      "version": "1.0.0",
+      "blobSha": "a6bfee029ad82921de46fe9096f562bc934c6d6c"
+    },
+    {
+      "id": "candidate-supersession-helper",
+      "path": "security/shine-defence/integration-kit/supersede-candidate-v1.mjs",
+      "version": "1.0.0",
+      "blobSha": "fd255586f1a4fde1e4101a1207f26c2d1ec40fd3"
     }
   ]
 }

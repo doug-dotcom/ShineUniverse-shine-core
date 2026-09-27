@@ -1,0 +1,44 @@
+{
+  "contract": "shine-defence/candidate-supersession-v1",
+  "version": "1.0.0",
+  "purpose": "Atomic replacement of one pending Shine Defence review candidate by one newer pending candidate for the same app.",
+  "transactionInput": [
+    "supersedeCandidateId",
+    "supersededAt",
+    "authority",
+    "summary",
+    "successor"
+  ],
+  "successor": "The successor object is the same bounded candidate-intake payload accepted by candidate-intake-v1.",
+  "preconditions": [
+    "The superseded candidate exists exactly once and is pending_review.",
+    "The old candidate has no final review decision.",
+    "If the old candidate has a canonical checklist, humanAuthorization must still be pending; an approved or rejected human decision must be finalized through its matching acceptance or rejection path instead.",
+    "The successor belongs to the same app, repository and profile path as the old candidate.",
+    "The successor release identity differs from the old candidate and passes the canonical candidate-intake validator.",
+    "The successor observedAt timestamp is not earlier than the old candidate observedAt timestamp.",
+    "The supersededAt timestamp is not earlier than either candidate observation timestamp."
+  ],
+  "atomicState": [
+    "The old candidate becomes superseded and records supersededByCandidateId equal to the deterministic successor candidate id.",
+    "Exactly one superseded review decision is appended for the old candidate and names the same successor candidate id.",
+    "The successor is appended as the app's only pending_review candidate.",
+    "If the old candidate already has a canonical checklist, the superseded decision pins its exact checklist Git blob and checklist registry identity."
+  ],
+  "boundaries": [
+    "Supersession does not certify either candidate.",
+    "Supersession does not change the reviewed ecosystem ledger, certification receipts or revocations.",
+    "Supersession does not delete an old checklist or advisory evidence suggestions; if present, they become fingerprint-locked historical review assistance.",
+    "The successor starts with no checklist authorization and must proceed through the normal structured-review workflow."
+  ],
+  "atomicity": [
+    "The candidate queue and review-decision ledger are one guarded repository transition.",
+    "Apply mode validates the complete resulting Defence state and restores both files if any gate fails.",
+    "At no valid repository state may the same app have two pending_review candidates."
+  ],
+  "nonClaims": [
+    "Superseded does not mean rejected or unsafe.",
+    "The supersession authority is operational provenance, not certification authority.",
+    "A newer candidate does not inherit checklist findings or human authorization from the superseded candidate."
+  ]
+}

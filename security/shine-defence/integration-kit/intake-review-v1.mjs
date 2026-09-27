@@ -4,7 +4,7 @@ import {readFileSync,renameSync,statSync,writeFileSync} from 'node:fs';
 import {dirname,isAbsolute,join,resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 
-export const SHINE_DEFENCE_INTAKE_VERSION='1.0.0';
+export const SHINE_DEFENCE_INTAKE_VERSION='1.1.0';
 
 const root=fileURLToPath(new URL('../../../',import.meta.url));
 const queuePath='security/shine-defence/review-candidates-v1.json';
@@ -267,4 +267,5 @@ function main(){
   }
 }
 
-main();
+
+if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url))main();
