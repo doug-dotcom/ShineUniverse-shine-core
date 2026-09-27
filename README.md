@@ -211,6 +211,12 @@ Human Diff Review v1.4 automatically creates an `evidence_accepted` checkpoint a
 
 Command Centre v1.3 exposes checkpoint integrity per reviewed app as `not_applicable`, `pending`, `verified` or `invalid`. Reviews without accepted evidence are `not_applicable`; an accepted review without an anchor is `pending`; `verified` requires the checkpoint store to validate against its bound event ledger and historical replay; missing/broken bindings or verification failures are `invalid`. This is audit context only: it does not change Operations Controller state, Attention Queue ordering, next action, review state or certification.
 
+### Defence audit export
+
+`security/shine-defence/audit-export-v1.json` defines a deterministic read-only per-app audit bundle. `audit-export-v1.mjs` requires an app id plus explicit `asOf` timestamp and exports the canonical reviewed identity, current Command Centre snapshot, exact bound deployment observation, current Human Diff Review projection when present, verified event-ledger history, review-session summary, checkpoint store/verification and explicit provenance paths. The bundle receives its own SHA-256 over the complete bounded body.
+
+The export intentionally excludes raw GitHub patches/source contents, environment variables, credentials/tokens/Vault material and arbitrary files. Review notes/summaries are already bounded workspace metadata governed by Human Diff Review secret-like-content checks. `nextAction` is exported only as descriptive id/human-required/description metadata—helper paths and executable args are stripped. Repeating an export at the same `asOf` over unchanged Defence state is deterministic. The bundle is a recorded-state snapshot, not external attestation, and grants no authority.
+
 ### Candidate intake readiness
 
 `security/shine-defence/candidate-intake-readiness-v1.json` defines the final fail-closed bridge between accepted human diff-review evidence and candidate intake. `candidate-intake-readiness-v1.mjs` requires the accepted review and separate evidence record to bind the current deployment-drift identity exactly, re-derives the evidence record from the durable human review, rejects tampering or stale deployment identity, and then runs the canonical candidate-intake validator over the resulting payload.
