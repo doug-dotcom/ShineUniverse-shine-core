@@ -8,10 +8,11 @@ const healthPath=p=>p==='/health'||p.endsWith('/foundation-gateway/health');
 const evaluatePath=p=>p==='/v1/access/evaluate'||p.endsWith('/foundation-gateway/v1/access/evaluate');
 const identityClaimPath=p=>p==='/v1/identity/claim'||p.endsWith('/foundation-gateway/v1/identity/claim');
 const grantConsentPath=p=>p==='/v1/grants/consent'||p.endsWith('/foundation-gateway/v1/grants/consent');
+const grantRevokePath=p=>p==='/v1/grants/revoke'||p.endsWith('/foundation-gateway/v1/grants/revoke');
 const defenceStatusMatch=p=>p.match(/(?:^|\/foundation-gateway)\/v1\/defence\/status\/([a-z0-9][a-z0-9-]{0,63})$/);
 const SHA=/^[a-f0-9]{40}$/;
 
-/** @param {{gateway:any, authenticate:any, defenceStatus?:any, identityClaim?:any, authenticateIdentityClaim?:any, grantConsent?:any, maxBodyBytes?:number}} [options] */
+/** @param {{gateway:any, authenticate:any, defenceStatus?:any, identityClaim?:any, authenticateIdentityClaim?:any, grantConsent?:any, grantRevoke?:any, maxBodyBytes?:number}} [options] */
 export function createFoundationHttpHandler({
   gateway,
   authenticate,
@@ -19,6 +20,7 @@ export function createFoundationHttpHandler({
   identityClaim,
   authenticateIdentityClaim,
   grantConsent,
+  grantRevoke,
   maxBodyBytes=16*1024
 }={}){
   if(typeof gateway!=='function') throw new TypeError('gateway must be a function');
@@ -27,6 +29,7 @@ export function createFoundationHttpHandler({
   if(identityClaim!==undefined&&typeof identityClaim!=='function') throw new TypeError('identityClaim must be a function');
   if(authenticateIdentityClaim!==undefined&&typeof authenticateIdentityClaim!=='function') throw new TypeError('authenticateIdentityClaim must be a function');
   if(grantConsent!==undefined&&typeof grantConsent!=='function') throw new TypeError('grantConsent must be a function');
+  if(grantRevoke!==undefined&&typeof grantRevoke!=='function') throw new TypeError('grantRevoke must be a function');
 
   return async function handle(request){
     const url=new URL(request.url);
@@ -51,8 +54,9 @@ export function createFoundationHttpHandler({
 
     const isClaim=identityClaimPath(url.pathname);
     const isGrantConsent=grantConsentPath(url.pathname);
+    const isGrantRevoke=grantRevokePath(url.pathname);
     const isEvaluate=evaluatePath(url.pathname);
-    if(!isClaim&&!isGrantConsent&&!isEvaluate) return json(404,{error:'not-found'});
+    if(!isClaim&&!isGrantConsent&&!isGrantRevoke&&!isEvaluate) return json(404,{error:'not-found'});
     if(request.method!=='POST') return json(405,{error:'method-not-allowed'});
 
     const contentType=request.headers.get('content-type')??'';
@@ -96,6 +100,13 @@ export function createFoundationHttpHandler({
       if(typeof grantConsent!=='function') return json(404,{error:'not-found'});
       const result=await grantConsent({envelope,authContext});
       const status={granted:200,'already-granted':200,denied:403,invalid:400,unavailable:503}[result.status]??500;
+      return json(status,result);
+    }
+
+    if(isGrantRevoke){
+      if(typeof grantRevoke!=='function') return json(404,{error:'not-found'});
+      const result=await grantRevoke({envelope,authContext});
+      const status={revoked:200,'already-revoked':200,denied:403,invalid:400,unavailable:503}[result.status]??500;
       return json(status,result);
     }
 
