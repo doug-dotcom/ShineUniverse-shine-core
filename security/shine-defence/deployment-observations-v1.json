@@ -2,5 +2,46 @@
   "ledger": "shine-defence/deployment-observations-v1",
   "version": "1.0.0",
   "meaning": "Append-only observed deployment identities. These observations are operational evidence, not certification authority.",
-  "observations": []
+  "observations": [
+    {
+      "observationId": "railway-cb202230-6fa6-488e-b3a2-d6a991c674e4",
+      "appId": "shine-daash",
+      "repository": "doug-dotcom/Shine-DaAsh",
+      "releaseCommitSha": "cb46e92f1fcbc8b5997048af286e112eaef256ae",
+      "profileBlobSha": "a4d7ea1ad9affd75497a715d11c26469af741470",
+      "observedAt": "2026-09-27T00:59:49.957Z",
+      "source": "railway",
+      "reference": "deployment:cb202230-6fa6-488e-b3a2-d6a991c674e4"
+    },
+    {
+      "observationId": "railway-a95e23fa-4c43-4b34-b45b-a980ff228d86",
+      "appId": "shine-ski",
+      "repository": "doug-dotcom/Shine-Ski",
+      "releaseCommitSha": "9593d689cc68201a804ed1c8420d47bc96b1ea68",
+      "profileBlobSha": "2c7347442aa69ff9b4410af84bc876656dcc29e6",
+      "observedAt": "2026-09-27T03:46:54.995Z",
+      "source": "railway",
+      "reference": "deployment:a95e23fa-4c43-4b34-b45b-a980ff228d86"
+    },
+    {
+      "observationId": "railway-cae70515-3009-4b41-9a90-b76377670445",
+      "appId": "shine-translate",
+      "repository": "doug-dotcom/shine-translate",
+      "releaseCommitSha": "1ac47373c4ba049cd24a7d2ea6c438e0b1baf5fa",
+      "profileBlobSha": "8232d46308e27fc64c17e0b42e199bd556263597",
+      "observedAt": "2026-09-26T03:32:23.529Z",
+      "source": "railway",
+      "reference": "deployment:cae70515-3009-4b41-9a90-b76377670445"
+    },
+    {
+      "observationId": "railway-4037ed1b-f11c-4dd9-b399-aa448c224031",
+      "appId": "shine-my-money",
+      "repository": "doug-dotcom/shine-my-money-",
+      "releaseCommitSha": "bb41e1c914d9278f6129e8bb617e481a7671941e",
+      "profileBlobSha": "b6fd0087ebfdb973835218601a00a81b5497abbc",
+      "observedAt": "2026-09-27T02:47:55.514Z",
+      "source": "railway",
+      "reference": "deployment:4037ed1b-f11c-4dd9-b399-aa448c224031"
+    }
+  ]
 }
