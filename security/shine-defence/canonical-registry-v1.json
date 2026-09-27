@@ -188,6 +188,18 @@
       "path": "security/shine-defence/integration-kit/verify-review-checklists-v1.mjs",
       "version": "1.0.0",
       "blobSha": "c1b8e0c2daa70d3cb64a5d5c435e791584ee0728"
+    },
+    {
+      "id": "review-workspace",
+      "path": "security/shine-defence/review-workspace-v1.json",
+      "version": "1.0.0",
+      "blobSha": "d360c94ebd2a7fb307f28b129b8aa2d2d7787bd5"
+    },
+    {
+      "id": "review-workspace-helper",
+      "path": "security/shine-defence/integration-kit/review-workspace-v1.mjs",
+      "version": "1.0.0",
+      "blobSha": "e94485d589a4df58c0ee69d8388890fa06b60007"
     }
   ]
 }
