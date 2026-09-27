@@ -64,7 +64,7 @@ const makeSql=()=> {
     if(q.includes('from foundation.get_app_revocation_health_v1')){
       return [{app_id:'shine.travel',checkpoint_sequence:6,latest_sequence:7,pending_count:1,oldest_pending_at:'2026-09-27T13:20:00Z',pending_age_seconds:600,max_pending_age_seconds:900,freshness_state:'pending',stale_action:'observe',recommended_action:'consume-revocations'}];
     }
-    if(q.includes('from foundation.get_app_operational_status_v1')){
+    if(q.includes('foundation.get_app_operational_status_v1')){
       return [{status:{appId:'shine.travel',operationalState:'revocation-pending',operationalHealth:'attention'}}];
     }
     if(q.includes('from foundation.app_registry')){
