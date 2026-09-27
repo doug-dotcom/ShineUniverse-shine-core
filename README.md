@@ -183,5 +183,11 @@ If the deployed profile changed, the planner reports `profile_changed_requires_r
 
 The generator assigns deterministic review-focus labels such as `security_or_auth`, `api_or_server`, `database_or_migration`, `dependency_or_build`, `ci_or_deployment` and `tests` from paths only. These labels and change counts are navigation aids, not risk scores or findings. Every proposed evidence record is stamped `unreviewed` and `UNREVIEWED`; a human must inspect the pack and any underlying code/tests needed for judgement, then separately author the bounded review-evidence record used by the intake planner. Evidence packs never create candidates, satisfy checklist requirements or certify releases.
 
+### Human diff review workspace
+
+`security/shine-defence/human-diff-review-v1.json` defines the durable human judgement layer between an advisory evidence pack and candidate-intake evidence. `human-diff-review-v1.mjs` opens one current draftable app at a time and orders changed files with security/auth, API/server, database/migration, dependency/build and CI/deployment paths before tests and other files. Review state is stored separately from the generated pack and is bound to the exact reviewed commit, observed deployed commit and deployment observation.
+
+A reviewer records each changed file as `reviewed_no_issue`, `reviewed_attention` or `reviewed_blocker` with optional bounded notes. Evidence cannot be accepted until every changed file has a human finding, and any blocker prevents acceptance. Final acceptance requires literal `ACCEPT EVIDENCE`, reviewer id, UTC review timestamp and bounded summary. Only then does the workspace emit a separate candidate-intake-compatible `security_diff_review` evidence record. That record still does not create a candidate, approve a checklist or certify a release; the Review Intake Planner and candidate intake remain separate guarded steps. Accepted review artifacts are immutable in workspace v1.
+
 
 An extension policy existing in Core does **not** automatically certify an app. Each app still needs local, testable evidence before claiming that profile.

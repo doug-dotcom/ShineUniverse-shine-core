@@ -1,0 +1,24 @@
+{
+  "contract": "shine-defence/human-diff-review-v1",
+  "version": "1.0.0",
+  "purpose": "Durable human review of one exact deployment-drift evidence pack before bounded review evidence may be accepted for candidate intake.",
+  "reviewStates": ["in_progress","evidence_accepted"],
+  "findingStates": ["reviewed_no_issue","reviewed_attention","reviewed_blocker"],
+  "rules": [
+    "A review artifact is bound to one app, repository, reviewed commit, observed deployed commit and deployment observation id.",
+    "The workspace surfaces security/auth, API/server, database/migration, dependency/build and CI/deployment paths before tests and other paths.",
+    "A reviewer may record bounded notes and findings for changed files without changing candidate, checklist or certification state.",
+    "Every changed file must have a human finding before evidence can be accepted.",
+    "Any reviewed_blocker finding prevents ACCEPT EVIDENCE.",
+    "Acceptance requires the literal confirmation ACCEPT EVIDENCE, a reviewer id, reviewedAt timestamp and bounded summary.",
+    "Acceptance creates a separate candidate-intake-compatible evidence record with source github and kind security_diff_review.",
+    "The accepted evidence record is bound to the exact reviewed...observed commit comparison and includes the human reviewer id in its bounded summary.",
+    "Evidence acceptance does not create a pending_review candidate; candidate materialization/intake remain separate guarded actions.",
+    "An accepted review artifact is immutable in workspace v1."
+  ],
+  "nonClaims": [
+    "reviewed_no_issue does not prove a file is bug-free or secure.",
+    "Evidence acceptance is not checklist approval or Defence certification.",
+    "The workspace does not replace review of underlying code, tests or runtime behaviour when needed."
+  ]
+}

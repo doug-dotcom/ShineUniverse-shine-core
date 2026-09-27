@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 import {readFileSync,statSync} from 'node:fs';
 import {isAbsolute,join,resolve} from 'node:path';
-import {fileURLToPath} from 'node:url';
+import {fileURLToPath,pathToFileURL} from 'node:url';
 import {loadLiveDeploymentReport} from './deployment-observations-v1.mjs';
 import {buildCandidateIntake} from './intake-review-v1.mjs';
 
-export const SHINE_DEFENCE_REVIEW_INTAKE_PLANNER_VERSION='1.0.0';
+export const SHINE_DEFENCE_REVIEW_INTAKE_PLANNER_VERSION='1.1.0';
 const root=fileURLToPath(new URL('../../../',import.meta.url));
 const P={
   ledger:'security/shine-defence/ecosystem-profile-ledger-v1.json',
@@ -185,4 +185,4 @@ function main(){
   const output=a.app?{...plan,items:plan.items.filter(x=>x.appId===a.app)}:plan;
   console.log(a.json?JSON.stringify(output,null,2):JSON.stringify(output,null,2));
 }
-main();
+if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href)main();

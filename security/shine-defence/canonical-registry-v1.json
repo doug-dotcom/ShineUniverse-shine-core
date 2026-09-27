@@ -330,8 +330,8 @@
     {
       "id": "review-intake-planner-helper",
       "path": "security/shine-defence/integration-kit/plan-review-intake-v1.mjs",
-      "version": "1.0.0",
-      "blobSha": "b72b8a9c77b4115473c8b6aeffa10a1f7dcb252c"
+      "version": "1.1.0",
+      "blobSha": "f4d6c079dba7931f79192f791be499fd3d0fc93a"
     },
     {
       "id": "review-evidence-pack",
@@ -342,8 +342,20 @@
     {
       "id": "review-evidence-pack-generator",
       "path": "security/shine-defence/integration-kit/generate-review-evidence-pack-v1.mjs",
+      "version": "1.1.0",
+      "blobSha": "e909ffd0f7fe0af34a1dac3e9ccacb0137f2beb5"
+    },
+    {
+      "id": "human-diff-review",
+      "path": "security/shine-defence/human-diff-review-v1.json",
       "version": "1.0.0",
-      "blobSha": "6a359b9a7957384242a7561f6069745f5bfc6e36"
+      "blobSha": "97d0af7d0c5f35cc2c373c0dfde2b5a82d62bfc2"
+    },
+    {
+      "id": "human-diff-review-helper",
+      "path": "security/shine-defence/integration-kit/human-diff-review-v1.mjs",
+      "version": "1.0.0",
+      "blobSha": "df5246d5ff99d9c297a1cc3a058a78dfb23215fa"
     }
   ]
 }
