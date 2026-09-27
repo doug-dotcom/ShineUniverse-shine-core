@@ -230,7 +230,7 @@ test('grant consent denial maps to HTTP 403',async()=>{
 });
 
 
-test('explicit grant revoke uses normal dual authentication and maps success to HTTP 200',async()=>{
+test('explicit grant revocation uses normal dual authentication and maps success to HTTP 200',async()=>{
   let auth=0;
   const revokeHandler=createFoundationHttpHandler({
     gateway:async()=>{throw new Error('access gateway must not run')},
@@ -240,8 +240,8 @@ test('explicit grant revoke uses normal dual authentication and maps success to 
       if(request.headers.get('x-shine-user-token')!=='user') throw new Error('missing user');
       return {appToken:'app',userToken:'user'};
     },
-    grantRevoke:async({envelope})=>({
-      grantRevokeResponse:'shine-foundation/grant-revoke-response-v1',
+    grantRevocation:async({envelope})=>({
+      grantRevocationResponse:'shine-foundation/grant-revocation-response-v1',
       schemaVersion:'1.0.0',
       requestId:envelope.requestId,
       status:'revoked',
@@ -262,11 +262,11 @@ test('explicit grant revoke uses normal dual authentication and maps success to 
   assert.equal((await res.json()).status,'revoked');
 });
 
-test('grant revoke denial maps to HTTP 403',async()=>{
+test('grant revocation denial maps to HTTP 403',async()=>{
   const revokeHandler=createFoundationHttpHandler({
     gateway:async()=>({status:'allowed'}),
     authenticate:async()=>({}),
-    grantRevoke:async()=>({status:'denied',reasonCode:'grant-not-found'})
+    grantRevocation:async()=>({status:'denied',reasonCode:'grant-not-found'})
   });
   const res=await revokeHandler(new Request(base+'/v1/grants/revoke',{
     method:'POST',headers:{'content-type':'application/json'},body:'{}'

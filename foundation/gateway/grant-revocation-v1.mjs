@@ -2,7 +2,7 @@ const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]
 const APP=/^shine\.[a-z0-9][a-z0-9-]*$/;
 
 const response=(envelope,status,reasonCode)=>({
-  grantRevokeResponse:'shine-foundation/grant-revoke-response-v1',
+  grantRevocationResponse:'shine-foundation/grant-revocation-response-v1',
   schemaVersion:'1.0.0',
   requestId:envelope?.requestId??null,
   status,
@@ -10,35 +10,36 @@ const response=(envelope,status,reasonCode)=>({
 });
 
 const valid=envelope=>{
-  if(!envelope||envelope.grantRevoke!=='shine-foundation/grant-revoke-v1') return false;
+  if(!envelope||envelope.grantRevocation!=='shine-foundation/grant-revocation-v1') return false;
   if(envelope.schemaVersion!=='1.0.0') return false;
   if(!UUID.test(envelope.requestId??'')) return false;
-  if(!APP.test(envelope.appId??'')) return false;
   if(!UUID.test(envelope.grantId??'')) return false;
+  if(!APP.test(envelope.appId??'')) return false;
+  if(envelope.revoke!==true) return false;
   if(!Number.isFinite(Date.parse(envelope.requestedAt??''))) return false;
   return true;
 };
 
 const requireFunction=(adapters,name)=>{
-  if(typeof adapters?.[name]!=='function') throw new TypeError('missing grant revoke adapter: '+name);
+  if(typeof adapters?.[name]!=='function') throw new TypeError('missing grant revocation adapter: '+name);
 };
 
 /** @param {{adapters:any, clock?:()=>string, idFactory?:()=>string}} [options] */
-export function createGrantRevokeService({
+export function createGrantRevocationService({
   adapters,
   clock=()=>new Date().toISOString(),
   idFactory=()=>crypto.randomUUID()
 }={}){
   for(const name of ['verifyAppCaller','verifyIdentity','revokeAccessGrant']) requireFunction(adapters,name);
 
-  return async function handleGrantRevoke({envelope,authContext}={}){
-    if(!valid(envelope)) return response(envelope,'invalid','invalid-grant-revoke-request');
+  return async function handleGrantRevocation({envelope,authContext}={}){
+    if(!valid(envelope)) return response(envelope,'invalid','invalid-grant-revocation-request');
 
     const requestedAt=Date.parse(envelope.requestedAt);
     const now=Date.parse(clock());
     if(!Number.isFinite(requestedAt)||!Number.isFinite(now)||
        requestedAt<now-10*60*1000||requestedAt>now+5*60*1000){
-      return response(envelope,'invalid','stale-grant-revoke-request');
+      return response(envelope,'invalid','stale-grant-revocation-request');
     }
 
     let verifiedApp;
@@ -61,18 +62,20 @@ export function createGrantRevokeService({
     let result;
     try{
       result=await adapters.revokeAccessGrant({
+        eventId:idFactory(),
         revocationId:idFactory(),
+        requestId:envelope.requestId,
         grantId:envelope.grantId,
         ownerShineId:verifiedIdentity.shineId,
         appId:envelope.appId,
-        revokedAt:clock()
+        occurredAt:clock()
       });
     }catch{
-      return response(envelope,'unavailable','grant-revoke-write-failed');
+      return response(envelope,'unavailable','grant-revocation-write-failed');
     }
 
     if(!result?.outcome||!result?.reason_code){
-      return response(envelope,'unavailable','grant-revoke-write-failed');
+      return response(envelope,'unavailable','grant-revocation-write-failed');
     }
     if(result.outcome==='revoked') return response(envelope,'revoked',result.reason_code);
     if(result.outcome==='already-revoked') return response(envelope,'already-revoked',result.reason_code);

@@ -47,7 +47,7 @@ const makeSql=()=> {
       return [{outcome:'granted',reason_code:'grant-consent-recorded',grant_id:grantId}];
     }
     if(q.includes('from foundation.revoke_access_grant_v1')){
-      return [{outcome:'revoked',reason_code:'grant-revoked-by-user',grant_id:grantId}];
+      return [{outcome:'revoked',reason_code:'grant-revoked-by-user',revocation_id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'}];
     }
     if(q.includes('from foundation.app_registry')){
       return [{manifest:{appId:'shine.travel',foundation:{requestedScopes:[]}}}];
@@ -303,11 +303,13 @@ test('explicit grant consent delegates to the atomic database function',async()=
 test('explicit grant revoke delegates to the atomic database function',async()=>{
   const {adapters}=makeAdapters();
   const result=await adapters.revokeAccessGrant({
+    eventId:'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
     revocationId:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+    requestId:'cccccccc-cccc-4ccc-8ccc-cccccccccccc',
     grantId,
     ownerShineId:shineId,
     appId:'shine.travel',
-    revokedAt:'2026-09-27T13:20:00Z'
+    occurredAt:'2026-09-27T13:20:00Z'
   });
-  assert.deepEqual(result,{outcome:'revoked',reason_code:'grant-revoked-by-user',grant_id:grantId});
+  assert.deepEqual(result,{outcome:'revoked',reason_code:'grant-revoked-by-user',revocation_id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'});
 });

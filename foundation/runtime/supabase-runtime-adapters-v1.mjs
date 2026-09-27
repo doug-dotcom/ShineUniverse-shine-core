@@ -330,15 +330,19 @@ export function createSupabaseRuntimeAdapters({sql,defenceGate,fetchImpl=fetch}=
       return first(rows)??null;
     },
 
-    async revokeAccessGrant({revocationId,grantId,ownerShineId,appId,revokedAt}={}){
+    async revokeAccessGrant({
+      eventId,revocationId,requestId,grantId,ownerShineId,appId,occurredAt
+    }={}){
       const rows=await sql`
-        select outcome,reason_code,grant_id::text
+        select outcome,reason_code,revocation_id::text
         from foundation.revoke_access_grant_v1(
+          ${eventId}::uuid,
           ${revocationId}::uuid,
+          ${requestId}::uuid,
           ${grantId}::uuid,
           ${ownerShineId}::uuid,
           ${appId},
-          ${revokedAt}::timestamptz
+          ${occurredAt}::timestamptz
         )
       `;
       return first(rows)??null;
