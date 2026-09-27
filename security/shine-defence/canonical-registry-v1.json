@@ -440,6 +440,18 @@
       "path": "security/shine-defence/integration-kit/review-integrity-checkpoint-v1.mjs",
       "version": "1.0.0",
       "blobSha": "8736c08dbdb9288a5d52fcd6c9c0000a210454f1"
+    },
+    {
+      "id": "audit-export",
+      "path": "security/shine-defence/audit-export-v1.json",
+      "version": "1.0.0",
+      "blobSha": "5da714e423b60cee8657da59d464a6d36a8ec417"
+    },
+    {
+      "id": "audit-export-helper",
+      "path": "security/shine-defence/integration-kit/audit-export-v1.mjs",
+      "version": "1.0.0",
+      "blobSha": "04242782982474f982925fca4988d23ec1175c7c"
     }
   ]
 }
