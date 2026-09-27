@@ -286,12 +286,6 @@
       "blobSha": "9b4691e7eb5c71278168b7ad79fe0ea340aebcec"
     },
     {
-      "id": "deployment-observation-ledger",
-      "path": "security/shine-defence/deployment-observations-v1.json",
-      "version": "1.0.0",
-      "blobSha": "ba017d75fea0c6048b38757f5d55e7b265822fb8"
-    },
-    {
       "id": "deployment-observation-evaluator",
       "path": "security/shine-defence/integration-kit/deployment-observations-v1.mjs",
       "version": "1.0.0",
@@ -302,6 +296,18 @@
       "path": "security/shine-defence/integration-kit/record-deployment-observation-v1.mjs",
       "version": "1.0.0",
       "blobSha": "1e908ac932868023f31795d53439610d57a9533d"
+    },
+    {
+      "id": "deployment-collector",
+      "path": "security/shine-defence/integration-kit/collect-deployment-observations-v1.mjs",
+      "version": "1.0.0",
+      "blobSha": "c4558e86f1af20dc8f0196b0798597737af6136d"
+    },
+    {
+      "id": "deployment-source-verifier",
+      "path": "security/shine-defence/integration-kit/verify-deployment-sources-v1.mjs",
+      "version": "1.0.0",
+      "blobSha": "54039827dd774c87eb348f60e3206a4ed05fc022"
     }
   ]
 }
