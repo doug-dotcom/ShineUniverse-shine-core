@@ -62,15 +62,8 @@ function flatItems(checklist){
   );
 }
 
-export function buildEvidenceSuggestions({candidate,checklist,registry,registryBytes,generatedAt,readArtefact}){
-  if(candidate.status!=='pending_review')fail('evidence suggestions require a pending_review candidate');
-  if(typeof readArtefact!=='function')fail('readArtefact callback is required');
-  const checklistFailures=validateReviewChecklist({checklist,candidate,registry,registryBytes,readArtefact});
-  if(checklistFailures.length)fail('canonical checklist invalid: '+checklistFailures.join('; '));
-  if(!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?Z$/.test(generatedAt||'')||!Number.isFinite(Date.parse(generatedAt)))fail('generatedAt must be an ISO UTC timestamp');
-  if(Date.parse(generatedAt)<Date.parse(checklist.generatedAt))fail('suggestions cannot predate checklist generation');
-
-  const items=flatItems(checklist).map(item=>{
+function deriveSuggestionItems(checklist){
+  return flatItems(checklist).map(item=>{
     const ranked=(checklist.candidateEvidence||[])
       .map(evidence=>scoreEvidence(item.requirement,evidence))
       .filter(Boolean)
@@ -83,6 +76,17 @@ export function buildEvidenceSuggestions({candidate,checklist,registry,registryB
       suggestions:ranked
     };
   });
+}
+
+export function buildEvidenceSuggestions({candidate,checklist,registry,registryBytes,generatedAt,readArtefact}){
+  if(candidate.status!=='pending_review')fail('evidence suggestions require a pending_review candidate');
+  if(typeof readArtefact!=='function')fail('readArtefact callback is required');
+  const checklistFailures=validateReviewChecklist({checklist,candidate,registry,registryBytes,readArtefact});
+  if(checklistFailures.length)fail('canonical checklist invalid: '+checklistFailures.join('; '));
+  if(!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?Z$/.test(generatedAt||'')||!Number.isFinite(Date.parse(generatedAt)))fail('generatedAt must be an ISO UTC timestamp');
+  if(Date.parse(generatedAt)<Date.parse(checklist.generatedAt))fail('suggestions cannot predate checklist generation');
+
+  const items=deriveSuggestionItems(checklist);
 
   return {
     artifact:'shine-defence/review-evidence-suggestions-v1',
@@ -125,18 +129,17 @@ export function validateEvidenceSuggestions({artifact,candidate,checklist,regist
   if(!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?Z$/.test(artifact.generatedAt||'')||!Number.isFinite(Date.parse(artifact.generatedAt)))failures.push('invalid generatedAt');
   else if(Date.parse(artifact.generatedAt)<Date.parse(checklist.generatedAt))failures.push('generatedAt predates checklist');
 
-  let expected;
+  let checklistFailures=[];
   try{
-    expected=buildEvidenceSuggestions({
-      candidate,checklist,registry,registryBytes,
-      generatedAt:artifact.generatedAt,
-      readArtefact
-    });
+    checklistFailures=validateReviewChecklist({checklist,candidate,registry,registryBytes,readArtefact});
   }catch(error){
     failures.push(String(error.message||error));
     return failures;
   }
+  for(const failure of checklistFailures)failures.push('checklist: '+failure);
+  if(checklistFailures.length)return failures;
 
-  if(JSON.stringify(artifact.items)!==JSON.stringify(expected.items))failures.push('suggestion items do not match deterministic engine output');
+  const expectedItems=deriveSuggestionItems(checklist);
+  if(JSON.stringify(artifact.items)!==JSON.stringify(expectedItems))failures.push('suggestion items do not match deterministic engine output');
   return failures;
 }
