@@ -111,6 +111,12 @@ The helper is dry-run by default. It requires the candidate's canonical structur
 
 `security/shine-defence/integration-kit/intake-review-v1.mjs` consumes one reviewable JSON input file and is dry-run by default. `--apply` writes only the candidate queue, then runs the registry, candidate and promotion-state verifiers; the queue file is restored if any gate fails. Evidence acceptance validates structure and queue consistency, not the truth of external claims.
 
+### Candidate supersession
+
+`security/shine-defence/candidate-supersession-v1.json` defines the atomic replacement path when a newer release arrives while the same app already has a `pending_review` candidate. `supersede-candidate-v1.mjs` consumes one transaction containing the old candidate id, supersession provenance and a complete successor candidate-intake payload. It stages the old candidate as `superseded`, reuses the canonical intake validator to construct the successor, appends the matching superseded decision and commits the resulting queue/decision state together.
+
+The helper never permits two pending candidates for one app, never carries checklist findings or authorization into the successor, and refuses to supersede an old checklist that a human has already approved or rejected. If review work exists but is still pending, the superseded decision fingerprints that exact checklist so it remains immutable historical evidence. `--apply` leaves certification, receipts and revocations untouched and restores both changed ledgers if any Defence gate fails.
+
 ### Structured human review
 
 `security/shine-defence/review-checklist-v1.json` defines a non-authoritative review worksheet bound to one exact candidate and one exact canonical-registry snapshot. `generate-review-checklist-v1.mjs` derives checklist items directly from every claimed canonical policy requirement, copies the candidate evidence as reference material, and always generates `humanAuthorization.status = pending`. Canonical artefacts without a `requirements` array receive an explicit artefact-integrity review item rather than being treated as automatically satisfied.
