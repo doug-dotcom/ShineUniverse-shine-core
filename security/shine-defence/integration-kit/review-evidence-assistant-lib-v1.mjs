@@ -62,7 +62,7 @@ function flatItems(checklist){
   );
 }
 
-function deriveSuggestionItems(checklist){
+export function deriveSuggestionItems(checklist){
   return flatItems(checklist).map(item=>{
     const ranked=(checklist.candidateEvidence||[])
       .map(evidence=>scoreEvidence(item.requirement,evidence))
@@ -141,5 +141,33 @@ export function validateEvidenceSuggestions({artifact,candidate,checklist,regist
 
   const expectedItems=deriveSuggestionItems(checklist);
   if(JSON.stringify(artifact.items)!==JSON.stringify(expectedItems))failures.push('suggestion items do not match deterministic engine output');
+  return failures;
+}
+
+
+export function validateHistoricalEvidenceSuggestions({artifact,candidate,checklist}){
+  const failures=[];
+  if(!artifact||typeof artifact!=='object'||Array.isArray(artifact)){failures.push('suggestion artifact must be an object');return failures}
+  if(artifact.artifact!=='shine-defence/review-evidence-suggestions-v1'||artifact.version!=='1.0.0')failures.push('unsupported suggestion artifact');
+  if(artifact.engine!==SHINE_DEFENCE_EVIDENCE_ENGINE)failures.push('unsupported suggestion engine');
+
+  const bindings={
+    candidateId:candidate.candidateId,
+    appId:candidate.appId,
+    repository:candidate.repository,
+    releaseCommitSha:candidate.releaseCommitSha,
+    profileBlobSha:candidate.profileBlobSha,
+    profileVersion:candidate.profileVersion,
+    checklistGeneratedAt:checklist.generatedAt,
+    registryVersion:checklist.registryVersion,
+    registryBlobSha:checklist.registryBlobSha
+  };
+  for(const [key,expected] of Object.entries(bindings))if(artifact[key]!==expected)failures.push(key+' historical binding mismatch');
+
+  if(!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?Z$/.test(artifact.generatedAt||'')||!Number.isFinite(Date.parse(artifact.generatedAt)))failures.push('invalid generatedAt');
+  else if(Date.parse(artifact.generatedAt)<Date.parse(checklist.generatedAt))failures.push('generatedAt predates checklist');
+
+  const expectedItems=deriveSuggestionItems(checklist);
+  if(JSON.stringify(artifact.items)!==JSON.stringify(expectedItems))failures.push('suggestion items do not match deterministic historical output');
   return failures;
 }
