@@ -380,6 +380,18 @@
       "path": "security/shine-defence/integration-kit/command-centre-v1.mjs",
       "version": "1.0.0",
       "blobSha": "7222be02563665f0ef10799e66ef68a1145826c6"
+    },
+    {
+      "id": "attention-queue",
+      "path": "security/shine-defence/attention-queue-v1.json",
+      "version": "1.0.0",
+      "blobSha": "0de44917db7dacdd9d2b2e7a881e78508b05896a"
+    },
+    {
+      "id": "attention-queue-helper",
+      "path": "security/shine-defence/integration-kit/attention-queue-v1.mjs",
+      "version": "1.0.0",
+      "blobSha": "e8fa7261f86655f6667efb4a58930c0b4e983a90"
     }
   ]
 }
