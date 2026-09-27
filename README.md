@@ -197,11 +197,17 @@ Session `spanMinutes` is only the wall-clock distance between the first and last
 
 ### Human review event ledger
 
-Human Diff Review v1.3 adds an append-only event ledger under `security/shine-defence/human-review-events/`, one ledger per exact review identity. `human-review-event-ledger-v1.mjs` creates a `review_started` event then appends every accepted `record_finding` and `ACCEPT EVIDENCE` action with contiguous sequence numbers and a SHA-256 `previousEventHash` → `eventHash` chain. Reordering, deletion or mutation of an earlier event breaks verification.
+Human Diff Review v1.4 uses an append-only event ledger under `security/shine-defence/human-review-events/`, one ledger per exact review identity. `human-review-event-ledger-v1.mjs` creates a `review_started` event then appends every accepted `record_finding` and `ACCEPT EVIDENCE` action with contiguous sequence numbers and a SHA-256 `previousEventHash` → `eventHash` chain. Reordering, deletion or mutation of an earlier event breaks verification.
 
 The current Human Diff Review JSON is now a **derived projection**: every apply action is appended to the ledger, replayed through the canonical review reducer, and required to produce exactly the projection that will be stored. This preserves superseded finding history from v1.3 onward while keeping existing Command Centre/readiness consumers on the convenient current-state artifact. If a review projection already contains activity but no event ledger, v1.3 fails closed rather than inventing historical events. Accepted reviews remain immutable because replay uses the same canonical reducer. The hash chain is repository-level tamper evidence, not external notarisation.
 
 Review Session Summary v1.1 uses the event ledger when present, so superseded finding changes now appear in session/action counts and timelines. Projection-only legacy reviews remain explicitly limited to their latest durable finding state.
+
+### Human review integrity checkpoints
+
+`security/shine-defence/review-integrity-checkpoint-v1.json` defines compact integrity anchors over an event-ledger state and its exact replay-derived Human Diff Review projection. Each checkpoint records the review id, milestone/time, event count, ledger tip hash, SHA-256 of the full ledger prefix, SHA-256 of the derived projection, and a combined integrity digest over those bindings.
+
+Human Diff Review v1.4 automatically creates an `evidence_accepted` checkpoint after the accepted event has been appended, replayed and proven to match the proposed projection. Checkpoints are append-only per review and can later be verified against the exact historical event-ledger prefix they anchored, so subsequent events would not invalidate earlier anchors. Checkpoint stores themselves are operational audit evidence rather than immutable code; the checkpoint contract/verifier are canonical-registry pinned. A valid checkpoint proves recorded ledger/projection consistency, not that the human judgement was correct, and it grants no review or certification authority.
 
 ### Candidate intake readiness
 
