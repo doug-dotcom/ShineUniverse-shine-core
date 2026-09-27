@@ -2,6 +2,7 @@ import postgres from 'npm:postgres@3.4.9';
 import {createFoundationGateway} from '../../gateway/gateway-core-v1.mjs';
 import {createIdentityClaimService} from '../../gateway/identity-claim-v1.mjs';
 import {createGrantConsentService} from '../../gateway/grant-consent-v1.mjs';
+import {createGrantRevokeService} from '../../gateway/grant-revoke-v1.mjs';
 import {createFoundationHttpHandler} from '../../gateway/http-handler-v1.mjs';
 import {createPublicDefenceStatusService} from '../../gateway/defence-status-v1.mjs';
 import {createSupabaseRuntimeAdapters} from '../supabase-runtime-adapters-v1.mjs';
@@ -36,6 +37,7 @@ const adapters=createSupabaseRuntimeAdapters({
 const gateway=createFoundationGateway({adapters});
 const identityClaim=createIdentityClaimService({adapters});
 const grantConsent=createGrantConsentService({adapters});
+const grantRevoke=createGrantRevokeService({adapters});
 const defenceStatus=createPublicDefenceStatusService({
   ledger:defenceLedger,
   revocations:defenceRevocations
@@ -45,6 +47,7 @@ const handler=createFoundationHttpHandler({
   gateway,
   identityClaim,
   grantConsent,
+  grantRevoke,
   defenceStatus,
   maxBodyBytes:16*1024,
   authenticate:async(request:Request)=>{
