@@ -3,7 +3,7 @@ import {existsSync,readFileSync} from 'node:fs';
 import {join} from 'node:path';
 import {fileURLToPath,pathToFileURL} from 'node:url';
 
-export const SHINE_DEFENCE_STALENESS_VISIBILITY_VERSION='1.0.0';
+export const SHINE_DEFENCE_STALENESS_VISIBILITY_VERSION='1.1.0';
 const root=fileURLToPath(new URL('../../../',import.meta.url));
 const P={ledger:'security/shine-defence/ecosystem-profile-ledger-v1.json',candidates:'security/shine-defence/review-candidates-v1.json',decisions:'security/shine-defence/review-decisions-v1.json',reviews:'security/shine-defence/human-diff-reviews'};
 const readJson=p=>JSON.parse(readFileSync(join(root,p),'utf8'));
@@ -40,7 +40,12 @@ export function buildStaleness({commandCentre,ledger,candidates,decisions,asOf,r
 
     let reviewAge=na();
     if(item.reviewProgress?.state==='not_started')reviewAge=unknown();
-    else if(item.reviewProgress?.state==='in_progress')reviewAge=unknown();
+    else if(item.reviewProgress?.state==='in_progress'){
+      const release=item.deployment?.releaseCommitSha;
+      const id=release?item.appId+'-'+release.slice(0,12):null;
+      const review=id?readReview(id):null;
+      reviewAge=review?.lastActivityAt?ageAt(review.lastActivityAt,asOf):unknown();
+    }
     else if(item.reviewProgress?.state==='evidence_accepted'||item.reviewProgress?.state==='candidate_intake_ready'){
       const release=item.deployment?.releaseCommitSha;
       const id=release?item.appId+'-'+release.slice(0,12):null;
@@ -55,7 +60,7 @@ export function buildStaleness({commandCentre,ledger,candidates,decisions,asOf,r
   }
   const counts={deploymentObservation:{},humanReview:{},pendingCandidate:{},certification:{}};
   for(const i of items)for(const k of Object.keys(counts)){const b=i[k].band;counts[k][b]=(counts[k][b]||0)+1}
-  return {report:'shine-defence/staleness-visibility-v1',version:'1.0.0',asOf,apps:items.length,counts,items};
+  return {report:'shine-defence/staleness-visibility-v1',version:'1.1.0',asOf,apps:items.length,counts,items};
 }
 function candidateMatch(decision,candidates,app){
   const c=(candidates.candidates||[]).find(x=>x.candidateId===decision.candidateId);
