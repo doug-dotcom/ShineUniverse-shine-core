@@ -540,6 +540,13 @@ export function createSupabaseRuntimeAdapters({sql,defenceGate,fetchImpl=fetch}=
       }:null;
     },
 
+    async listDiscoverableCapabilities({appId=null}={}){
+      const rows=await sql`
+        select foundation.list_discoverable_capabilities_v1(${appId}) as capabilities
+      `;
+      return first(rows)?.capabilities??[];
+    },
+
     async getAppOperationalStatus({appId}={}){
       const rows=await sql`
         select foundation.get_app_operational_status_v1(${appId}) as status

@@ -342,6 +342,46 @@ test('revocation acknowledgement uses app-only authentication and maps success t
 });
 
 
+test('capability discovery is public metadata and supports app filtering',async()=>{
+  let normalAuth=0,appAuth=0,seenAppId;
+  const discoveryHandler=createFoundationHttpHandler({
+    gateway:async()=>({status:'allowed'}),
+    authenticate:async()=>{normalAuth++;throw new Error('must not authenticate')},
+    authenticateApp:async()=>{appAuth++;throw new Error('must not authenticate app')},
+    capabilityDiscovery:async({appId})=>{
+      seenAppId=appId;
+      return {
+        capabilityDiscoveryResponse:'shine-foundation/capability-discovery-response-v1',
+        schemaVersion:'1.0.0',
+        integrationProtocol:'shine-foundation/open-integration-v1',
+        status:'ok',
+        companionAgnostic:true,
+        executionRequiresAuthorization:true,
+        appId,
+        capabilities:[{capabilityId:'travel.plan_trip',invocable:false}]
+      };
+    }
+  });
+  const res=await discoveryHandler(new Request(base+'/foundation-gateway/v1/integration/capabilities?appId=shine.travel'));
+  assert.equal(res.status,200);
+  assert.equal(normalAuth,0);
+  assert.equal(appAuth,0);
+  assert.equal(seenAppId,'shine.travel');
+  const body=await res.json();
+  assert.equal(body.executionRequiresAuthorization,true);
+  assert.equal(body.capabilities[0].invocable,false);
+});
+
+test('capability discovery maps invalid catalogue requests to 400',async()=>{
+  const discoveryHandler=createFoundationHttpHandler({
+    gateway:async()=>({status:'allowed'}),
+    authenticate:async()=>({}),
+    capabilityDiscovery:async()=>({status:'invalid',reasonCode:'invalid-app-id'})
+  });
+  const res=await discoveryHandler(new Request(base+'/v1/integration/capabilities?appId=BAD'));
+  assert.equal(res.status,400);
+});
+
 test('app operational status uses app-only authentication',async()=>{
   let appAuth=0,normalAuth=0;
   const statusHandler=createFoundationHttpHandler({
