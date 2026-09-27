@@ -201,5 +201,11 @@ A successful bridge result is `candidate_intake_ready` and includes the determin
 
 Each row shows estate/certification state, deployment coverage, observed deployment identity/status, pre-candidate human-review progress, intake readiness/candidate preview when available, and the exact next action already selected by Operations Controller. The Command Centre deliberately does not recompute certification or release status and invokes no helper; missing data is shown explicitly rather than inferred. This makes it an operational projection, not a new authority.
 
+### Command Centre attention queue
+
+`security/shine-defence/attention-queue-v1.json` defines a read-only prioritised projection over Command Centre rows. `attention-queue-v1.mjs` groups reviewed apps into `human_attention`, `blocked`, `machine_action_available` and `healthy_no_action`, preserving the exact next action already selected downstream rather than inventing a new workflow decision.
+
+Explicit human-required actions and pre-candidate diff reviews that are not started/in progress take the human-attention bucket. Canonical blocks, profile-claim refresh and no-helper remediation states are blocked. Existing guarded non-human helpers are machine-action available, and `nextAction: none` is healthy/no-action unless another explicit condition applies. Ordering is deterministic by bucket, workflow stage and app id; it is operational ordering only, never a security risk score. The queue invokes nothing.
+
 
 An extension policy existing in Core does **not** automatically certify an app. Each app still needs local, testable evidence before claiming that profile.
