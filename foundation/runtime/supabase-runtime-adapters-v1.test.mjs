@@ -64,6 +64,14 @@ const makeSql=()=> {
     if(q.includes('from foundation.get_app_revocation_health_v1')){
       return [{app_id:'shine.travel',checkpoint_sequence:6,latest_sequence:7,pending_count:1,oldest_pending_at:'2026-09-27T13:20:00Z',pending_age_seconds:600,max_pending_age_seconds:900,freshness_state:'pending',stale_action:'observe',recommended_action:'consume-revocations'}];
     }
+    if(q.includes('foundation.list_discoverable_capabilities_v1')){
+      return [{capabilities:[{
+        capabilityId:'travel.plan_trip',
+        appId:'shine.travel',
+        invocationState:'declared',
+        invocable:false
+      }]}];
+    }
     if(q.includes('foundation.get_app_operational_status_v1')){
       return [{status:{appId:'shine.travel',operationalState:'revocation-pending',operationalHealth:'attention'}}];
     }
@@ -373,6 +381,17 @@ test('revocation propagation adapters map feed, receipt, ack and freshness contr
   assert.equal(health.recommendedAction,'consume-revocations');
 });
 
+
+test('capability discovery delegates to the hosted database function',async()=>{
+  const {adapters}=makeAdapters();
+  const result=await adapters.listDiscoverableCapabilities({appId:'shine.travel'});
+  assert.deepEqual(result,[{
+    capabilityId:'travel.plan_trip',
+    appId:'shine.travel',
+    invocationState:'declared',
+    invocable:false
+  }]);
+});
 
 test('app operational status delegates to the hosted database function',async()=>{
   const {adapters}=makeAdapters();
