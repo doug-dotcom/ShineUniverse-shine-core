@@ -1,6 +1,6 @@
 {
   "contract": "shine-defence/operations-controller-v1",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "purpose": "Read-only orchestration view across canonical Shine Defence review and certification state, identifying the exact guarded helper appropriate for the next workflow step without executing it.",
   "scope": [
     "Review workflow state comes from review-queue-v1.",
@@ -35,7 +35,10 @@
     "JSON output is deterministic and suitable for future dashboards or external orchestration.",
     "When a valid latest deployment observation exists, observed deployment status takes precedence over idle canonical certification state.",
     "A canonical revocation on the reviewed release does not label a different observed deployment as revoked; the observed commit/profile is evaluated through release-status-v1.",
-    "Apps without deployment observations remain explicitly unobserved and are routed to the deployment-observation recorder rather than guessed."
+    "Apps without deployment observations remain explicitly unobserved and are routed to the deployment-observation recorder rather than guessed.",
+    "Observed deployment_drift routes through review-intake-planner-v1 rather than directly into candidate intake.",
+    "Observed profile_drift is not auto-drafted because the reviewed profileVersion and policy claims may no longer describe the deployed profile.",
+    "Deployment-proof verification failure is investigated before review state is created."
   ],
   "nonClaims": [
     "The controller is not certification authority.",

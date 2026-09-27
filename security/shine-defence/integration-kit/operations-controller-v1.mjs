@@ -5,7 +5,7 @@ import {fileURLToPath} from 'node:url';
 import {loadLiveQueue} from './review-queue-v1.mjs';
 import {loadLiveDeploymentReport} from './deployment-observations-v1.mjs';
 
-export const SHINE_DEFENCE_OPERATIONS_CONTROLLER_VERSION='1.1.0';
+export const SHINE_DEFENCE_OPERATIONS_CONTROLLER_VERSION='1.2.0';
 const root=fileURLToPath(new URL('../../../',import.meta.url));
 const P={candidates:'security/shine-defence/review-candidates-v1.json',ledger:'security/shine-defence/ecosystem-profile-ledger-v1.json',revocations:'security/shine-defence/revocations-v1.json',receipts:'security/shine-defence/receipts'};
 const readJson=p=>JSON.parse(readFileSync(join(root,p),'utf8'));
@@ -86,17 +86,20 @@ export function buildOperationsReport({queueReport,ledger,candidates,revocations
       }else if(deployment){
         const stateMap={protected:'protected',deployment_drift:'deployment_drift',profile_drift:'profile_drift',revoked:'revoked',needs_review:'needs_review'};
         const state=stateMap[deployment.state]||'needs_review';
-        const drift=state==='deployment_drift'||state==='profile_drift'||state==='needs_review';
-        apps.push({
+              apps.push({
           appId,repository:app.repo,state,reviewState:'none',
           certificationState:revoked?'revoked_reviewed_release':'canonical_reviewed_release',
           revocationId:revoked?.revocationId||null,
           deployment,
-          nextAction:drift
-            ?{id:'intake_observed_release',humanRequired:false,helper:'security/shine-defence/integration-kit/intake-review-v1.mjs',args:['--input','<candidate-intake.json>'],description:'The observed deployment does not match current Defence proof. Prepare that exact release for review if it is intended to remain deployed.'}
-            :state==='revoked'
-              ?{id:'intake_replacement_release',humanRequired:false,helper:'security/shine-defence/integration-kit/intake-review-v1.mjs',args:['--input','<candidate-intake.json>'],description:'The observed deployed release is revoked. Prepare a replacement release for review.'}
-              :{id:'none',humanRequired:false,helper:null,args:[],description:'Observed deployment exactly matches current Defence proof.'}
+          nextAction:state==='deployment_drift'
+            ?{id:'plan_observed_release_review',humanRequired:false,helper:'security/shine-defence/integration-kit/plan-review-intake-v1.mjs',args:['--app',appId,'--json'],description:'Generate a safe candidate-intake draft from the exact observed deployment identity. Review evidence is still required before materialization.'}
+            :state==='profile_drift'
+              ?{id:'refresh_observed_profile_claims',humanRequired:false,helper:null,args:[],description:'The deployed Defence profile changed. Refresh profileVersion and policy claims before candidate intake can be planned safely.'}
+              :state==='needs_review'
+                ?{id:'investigate_deployment_proof',humanRequired:false,helper:null,args:[],description:'Deployment proof could not be verified. Investigate receipt/snapshot/observation integrity before creating review state.'}
+                :state==='revoked'
+                  ?{id:'intake_replacement_release',humanRequired:false,helper:'security/shine-defence/integration-kit/intake-review-v1.mjs',args:['--input','<candidate-intake.json>'],description:'The observed deployed release is revoked. Prepare a replacement release for review.'}
+                  :{id:'none',humanRequired:false,helper:null,args:[],description:'Observed deployment exactly matches current Defence proof.'}
         });
       }else if(revoked){
         apps.push({
@@ -194,7 +197,8 @@ function selfTest(){
     {id:'ready',repo:'owner/ready',reviewCommitSha:'2'.repeat(40),profileBlobSha:'b'.repeat(40)},
     {id:'idle',repo:'owner/idle',reviewCommitSha:'3'.repeat(40),profileBlobSha:'c'.repeat(40)},
     {id:'revoked',repo:'owner/revoked',reviewCommitSha:'4'.repeat(40),profileBlobSha:'d'.repeat(40)},
-    {id:'broken',repo:'owner/broken',reviewCommitSha:'5'.repeat(40),profileBlobSha:'e'.repeat(40)}
+    {id:'broken',repo:'owner/broken',reviewCommitSha:'5'.repeat(40),profileBlobSha:'e'.repeat(40)},
+    {id:'drift',repo:'owner/drift',reviewCommitSha:'6'.repeat(40),profileBlobSha:'f'.repeat(40)}
   ]};
   const candidates={candidates:[
     {appId:'new',repository:'owner/new',status:'pending_review'},
@@ -203,8 +207,8 @@ function selfTest(){
     {appId:'old-only',repository:'owner/old-only',status:'dismissed'}
   ]};
   const revocations={revocations:[{revocationId:'r1',appId:'revoked',reviewCommitSha:'4'.repeat(40),profileBlobSha:'d'.repeat(40)}]};
-  const receipts=new Set(['human','ready','idle','revoked']);
-  const deploymentReport={items:[{appId:'idle',state:'protected'},{appId:'revoked',state:'revoked'},{appId:'ready',state:'deployment_drift'}]};
+  const receipts=new Set(['human','ready','idle','revoked','drift']);
+  const deploymentReport={items:[{appId:'idle',state:'protected'},{appId:'revoked',state:'revoked'},{appId:'ready',state:'deployment_drift'},{appId:'drift',state:'deployment_drift'}]};
   const report=buildOperationsReport({queueReport:q,ledger,candidates,revocations,deploymentReport,receiptExists:id=>receipts.has(id)});
   const byId=new Map(report.items.map(x=>[x.appId,x]));
   if(byId.get('new').nextAction.helper!=='security/shine-defence/integration-kit/generate-review-checklist-v1.mjs')fail('self-test: checklist routing');
@@ -213,9 +217,10 @@ function selfTest(){
   if(byId.get('idle').state!=='protected'||byId.get('idle').nextAction.helper!==null)fail('self-test: protected observed state');
   if(byId.get('revoked').state!=='revoked'||byId.get('revoked').nextAction.helper!=='security/shine-defence/integration-kit/intake-review-v1.mjs')fail('self-test: observed revoked routing');
   if(byId.get('broken').state!=='blocked_canonical_state'||byId.get('broken').nextAction.helper!==null)fail('self-test: missing receipt must fail closed');
+  if(byId.get('drift').nextAction.helper!=='security/shine-defence/integration-kit/plan-review-intake-v1.mjs')fail('self-test: deployment drift must route through intake planner');
   if(byId.get('old-only').state!=='uncertified_idle')fail('self-test: uncertified history');
-  if(report.items.map(x=>x.appId).join(',')!=='broken,human,idle,new,old-only,ready,revoked')fail('self-test: deterministic ordering');
-  console.log('SHINE DEFENCE OPERATIONS CONTROLLER SELF-TEST: PASS review routing, human boundary, deployment observations, revocation and blocked states');
+  if(report.items.map(x=>x.appId).join(',')!=='broken,drift,human,idle,new,old-only,ready,revoked')fail('self-test: deterministic ordering');
+  console.log('SHINE DEFENCE OPERATIONS CONTROLLER SELF-TEST: PASS review routing, human boundary, safe drift planning, revocation and blocked states');
 }
 function main(){const a=parseArgs(process.argv.slice(2));if(a.help){usage();return}if(a.selfTest){selfTest();return}const r=loadLiveOperations();if(a.json)console.log(JSON.stringify(r,null,2));else printHuman(r)}
 main();
