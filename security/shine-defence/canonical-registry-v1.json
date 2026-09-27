@@ -348,14 +348,14 @@
     {
       "id": "human-diff-review",
       "path": "security/shine-defence/human-diff-review-v1.json",
-      "version": "1.3.0",
-      "blobSha": "801d80e810b33a22a7e57577956a0fecd8ffcbca"
+      "version": "1.4.0",
+      "blobSha": "27e26c0284e35aab4d457f00516884db4d7784e4"
     },
     {
       "id": "human-diff-review-helper",
       "path": "security/shine-defence/integration-kit/human-diff-review-v1.mjs",
-      "version": "1.3.0",
-      "blobSha": "850e15b7eb34bdeea3db40d1be9c2753bbdba06c"
+      "version": "1.4.0",
+      "blobSha": "81a28dd01a2a7f3a02ce3922dba63ef644c402ee"
     },
     {
       "id": "candidate-intake-readiness",
@@ -367,7 +367,7 @@
       "id": "candidate-intake-readiness-helper",
       "path": "security/shine-defence/integration-kit/candidate-intake-readiness-v1.mjs",
       "version": "1.0.0",
-      "blobSha": "0daf8ddcf44c80cfd55bbe77c35ea96112991730"
+      "blobSha": "a4219f4081779a988c659fc6e49b5415df3ac420"
     },
     {
       "id": "command-centre",
@@ -415,7 +415,7 @@
       "id": "review-session-summary-helper",
       "path": "security/shine-defence/integration-kit/review-session-summary-v1.mjs",
       "version": "1.1.0",
-      "blobSha": "ad496ea7b78f7bddb23f3c9b238262f70281c1b1"
+      "blobSha": "2b9b434c05bb52210cf48b256b9920cd159aa445"
     },
     {
       "id": "human-review-event-ledger",
@@ -428,6 +428,18 @@
       "path": "security/shine-defence/integration-kit/human-review-event-ledger-v1.mjs",
       "version": "1.0.0",
       "blobSha": "baa86092685d627ae9c001ad84bfb30f0f292353"
+    },
+    {
+      "id": "review-integrity-checkpoint",
+      "path": "security/shine-defence/review-integrity-checkpoint-v1.json",
+      "version": "1.0.0",
+      "blobSha": "02f46e4d0decd22ecb023851eaf93886113e28b3"
+    },
+    {
+      "id": "review-integrity-checkpoint-helper",
+      "path": "security/shine-defence/integration-kit/review-integrity-checkpoint-v1.mjs",
+      "version": "1.0.0",
+      "blobSha": "8736c08dbdb9288a5d52fcd6c9c0000a210454f1"
     }
   ]
 }
