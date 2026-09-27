@@ -6,6 +6,7 @@ import {createGrantRevocationService} from '../../gateway/grant-revocation-v1.mj
 import {createRevocationFeedService} from '../../gateway/revocation-feed-v1.mjs';
 import {createRevocationAckService} from '../../gateway/revocation-ack-v1.mjs';
 import {createRevocationHealthService} from '../../gateway/revocation-health-v1.mjs';
+import {createAppOperationalStatusService} from '../../gateway/app-operational-status-v1.mjs';
 import {createFoundationHttpHandler} from '../../gateway/http-handler-v1.mjs';
 import {createPublicDefenceStatusService} from '../../gateway/defence-status-v1.mjs';
 import {createSupabaseRuntimeAdapters} from '../supabase-runtime-adapters-v1.mjs';
@@ -44,6 +45,7 @@ const grantRevocation=createGrantRevocationService({adapters});
 const revocationFeed=createRevocationFeedService({adapters});
 const revocationAck=createRevocationAckService({adapters});
 const revocationHealth=createRevocationHealthService({adapters});
+const appOperationalStatus=createAppOperationalStatusService({adapters});
 const defenceStatus=createPublicDefenceStatusService({
   ledger:defenceLedger,
   revocations:defenceRevocations
@@ -57,6 +59,7 @@ const handler=createFoundationHttpHandler({
   revocationFeed,
   revocationAck,
   revocationHealth,
+  appOperationalStatus,
   defenceStatus,
   maxBodyBytes:16*1024,
   authenticateApp:async(request:Request)=>{

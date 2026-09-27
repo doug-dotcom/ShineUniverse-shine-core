@@ -340,3 +340,39 @@ test('revocation acknowledgement uses app-only authentication and maps success t
   assert.equal(userAuth,0);
   assert.equal((await res.json()).checkpointSequence,7);
 });
+
+
+test('app operational status uses app-only authentication',async()=>{
+  let appAuth=0,normalAuth=0;
+  const statusHandler=createFoundationHttpHandler({
+    gateway:async()=>({status:'allowed'}),
+    authenticate:async()=>{normalAuth++;return {}},
+    authenticateApp:async request=>{
+      appAuth++;
+      if(request.headers.get('x-shine-app-token')!=='app') throw new Error('missing app');
+      return {appToken:'app'};
+    },
+    appOperationalStatus:async({appId})=>({
+      appOperationalStatusResponse:'shine-foundation/app-operational-status-response-v1',
+      schemaVersion:'1.0.0',status:'ok',appId,
+      operationalStatus:{operationalState:'revocation-pending',operationalHealth:'attention'}
+    })
+  });
+  const res=await statusHandler(new Request(base+'/foundation-gateway/v1/status?appId=shine.ski',{
+    headers:{'x-shine-app-token':'app'}
+  }));
+  assert.equal(res.status,200);
+  assert.equal(appAuth,1);
+  assert.equal(normalAuth,0);
+  assert.equal((await res.json()).operationalStatus.operationalHealth,'attention');
+});
+
+test('app operational status rejects missing app credential',async()=>{
+  const statusHandler=createFoundationHttpHandler({
+    gateway:async()=>({status:'allowed'}),authenticate:async()=>({}),
+    authenticateApp:async()=>{throw new Error('missing')},
+    appOperationalStatus:async()=>({status:'ok'})
+  });
+  const res=await statusHandler(new Request(base+'/v1/status?appId=shine.ski'));
+  assert.equal(res.status,401);
+});

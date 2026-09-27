@@ -540,6 +540,13 @@ export function createSupabaseRuntimeAdapters({sql,defenceGate,fetchImpl=fetch}=
       }:null;
     },
 
+    async getAppOperationalStatus({appId}={}){
+      const rows=await sql`
+        select foundation.get_app_operational_status_v1(${appId}) as status
+      `;
+      return first(rows)?.status??null;
+    },
+
     async getAppManifest({appId}={}){
       const rows=await sql`
         select manifest from foundation.app_registry
