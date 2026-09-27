@@ -119,4 +119,10 @@ A human reviewer may mark requirements `satisfied` or `not_satisfied`, cite cand
 
 First certification and re-certification now read only the canonical checklist at `security/shine-defence/review-checklists/<candidateId>.json`. They no longer accept a command-line authority, decision timestamp or free-form acceptance summary. The accepted decision inherits those fields from the independently validated human approval. A generated or merely pending checklist cannot authorize certification.
 
+### Review workspace
+
+`security/shine-defence/review-workspace-v1.json` defines the reviewer-facing workflow for completing a canonical checklist without hand-editing JSON. `review-workspace-v1.mjs` is read-only by default: it shows the candidate, evidence references, satisfied/not-satisfied/unreviewed counts and the next outstanding requirement.
+
+A reviewer records one requirement at a time through a small JSON action file containing the item id, review state, evidence ids and/or reviewer notes. The workspace validates the proposed mutation against the exact candidate and current canonical registry before writing it. Approval or rejection is a separate explicit action: approval requires literal `APPROVE` confirmation and every item satisfied; rejection requires literal `REJECT` confirmation and at least one `not_satisfied` item. Finalized checklists are locked in workspace v1. Apply mode changes only the canonical checklist file and restores the previous version if checklist verification fails.
+
 An extension policy existing in Core does **not** automatically certify an app. Each app still needs local, testable evidence before claiming that profile.

@@ -1,0 +1,38 @@
+{
+  "contract": "shine-defence/review-workspace-v1",
+  "version": "1.0.0",
+  "purpose": "Reviewer-facing workflow for completing one canonical Shine Defence review checklist without manually editing JSON.",
+  "modes": [
+    {
+      "id": "status",
+      "meaning": "Read-only progress view showing candidate identity, evidence, completed counts, gaps and the next unreviewed requirement."
+    },
+    {
+      "id": "record",
+      "meaning": "Update exactly one checklist requirement to unreviewed, satisfied or not_satisfied with bounded evidence references and reviewer notes."
+    },
+    {
+      "id": "authorize",
+      "meaning": "Record an explicit human approved or rejected attestation after checklist state permits that outcome."
+    }
+  ],
+  "rules": [
+    "Workspace status is read-only and never changes certification state.",
+    "Record mode changes exactly one existing checklist item and is allowed only while humanAuthorization is pending.",
+    "Evidence references must name evidence ids already copied into the canonical checklist.",
+    "A satisfied requirement must retain at least one evidence reference or a non-empty reviewer note.",
+    "Authorization is never inferred from requirement states; it requires a separate explicit authorize action.",
+    "Approved authorization requires every checklist item to be satisfied and requires literal confirmation APPROVE.",
+    "Rejected authorization requires at least one not_satisfied item and requires literal confirmation REJECT.",
+    "Authorization requires a bounded reviewer id, explicit ISO reviewedAt timestamp and bounded human summary.",
+    "Once approved or rejected, workspace v1 treats the checklist as finalized and refuses further edits.",
+    "Every proposed mutation is validated against the exact candidate and current canonical registry before it can be written.",
+    "Apply mode writes only the canonical checklist file and runs the checklist repository verifier; verification failure restores the previous file."
+  ],
+  "nonClaims": [
+    "The workspace does not verify the real-world identity of the reviewer.",
+    "The workspace does not decide whether evidence is true or sufficient.",
+    "Completing requirements does not itself certify a release.",
+    "Only the separate first-certification or re-certification helper may consume an approved checklist to create certification state."
+  ]
+}
