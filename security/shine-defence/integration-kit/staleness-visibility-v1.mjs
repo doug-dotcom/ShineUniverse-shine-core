@@ -2,7 +2,6 @@
 import {existsSync,readFileSync} from 'node:fs';
 import {join} from 'node:path';
 import {fileURLToPath} from 'node:url';
-import {loadLiveCommandCentre} from './command-centre-v1.mjs';
 
 export const SHINE_DEFENCE_STALENESS_VISIBILITY_VERSION='1.0.0';
 const root=fileURLToPath(new URL('../../../',import.meta.url));
@@ -62,12 +61,6 @@ function candidateMatch(decision,candidates,app){
   const c=(candidates.candidates||[]).find(x=>x.candidateId===decision.candidateId);
   return Boolean(c&&c.releaseCommitSha===app.reviewCommitSha&&c.profileBlobSha===app.profileBlobSha);
 }
-export function loadLiveStaleness(asOf=new Date().toISOString()){
-  return buildStaleness({
-    commandCentre:loadLiveCommandCentre(),ledger:readJson(P.ledger),candidates:readJson(P.candidates),decisions:readJson(P.decisions),asOf,
-    readReview:id=>{const p=join(root,P.reviews,id+'.json');return existsSync(p)?JSON.parse(readFileSync(p,'utf8')):null}
-  });
-}
 function selfTest(){
   const cc={items:[
     {appId:'a',repository:'o/a',deployment:{observedAt:'2026-09-27T00:00:00.000Z',releaseCommitSha:'b'.repeat(40)},reviewProgress:{state:'not_started'}},
@@ -86,5 +79,14 @@ function selfTest(){
   let blocked=false;try{ageAt('2026-09-28T00:00:00.000Z','2026-09-27T00:00:00.000Z')}catch{blocked=true}if(!blocked)fail('self-test: future timestamp accepted');
   console.log('SHINE DEFENCE STALENESS VISIBILITY SELF-TEST: PASS current/ageing/stale/unknown/not-applicable semantics and future fail-closed');
 }
-function main(){if(process.argv.includes('--self-test'))return selfTest();const idx=process.argv.indexOf('--as-of');const asOf=idx>=0?process.argv[idx+1]:new Date().toISOString();const r=loadLiveStaleness(asOf);console.log(JSON.stringify(r,null,2))}
+async function main(){
+  if(process.argv.includes('--self-test'))return selfTest();
+  const idx=process.argv.indexOf('--as-of'),asOf=idx>=0?process.argv[idx+1]:new Date().toISOString();
+  const {loadLiveCommandCentre}=await import('./command-centre-v1.mjs');
+  const r=buildStaleness({
+    commandCentre:loadLiveCommandCentre(),ledger:readJson(P.ledger),candidates:readJson(P.candidates),decisions:readJson(P.decisions),asOf,
+    readReview:id=>{const p=join(root,P.reviews,id+'.json');return existsSync(p)?JSON.parse(readFileSync(p,'utf8')):null}
+  });
+  console.log(JSON.stringify(r,null,2));
+}
 main();
