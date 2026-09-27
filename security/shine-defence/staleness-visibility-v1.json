@@ -1,20 +1,35 @@
 {
   "contract": "shine-defence/staleness-visibility-v1",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "purpose": "Read-only age and timestamp visibility for deployment observations, human review activity, pending candidates and certification completion.",
   "bands": [
-    {"id":"current","meaning":"Less than 24 hours old."},
-    {"id":"ageing","meaning":"At least 24 hours but less than 7 days old."},
-    {"id":"stale","meaning":"At least 7 days old."},
-    {"id":"unknown","meaning":"No authoritative timestamp is available."},
-    {"id":"not_applicable","meaning":"The workflow timestamp does not apply to the current app state."}
+    {
+      "id": "current",
+      "meaning": "Less than 24 hours old."
+    },
+    {
+      "id": "ageing",
+      "meaning": "At least 24 hours but less than 7 days old."
+    },
+    {
+      "id": "stale",
+      "meaning": "At least 7 days old."
+    },
+    {
+      "id": "unknown",
+      "meaning": "No authoritative timestamp is available."
+    },
+    {
+      "id": "not_applicable",
+      "meaning": "The workflow timestamp does not apply to the current app state."
+    }
   ],
   "rules": [
     "Age is elapsed time from an explicit UTC timestamp to a supplied report asOf time.",
     "Age bands are operational visibility only and are not security risk scores.",
     "Deployment age uses the latest deployment observation observedAt.",
     "Pending-candidate age uses the pending candidate observedAt.",
-    "Human-review age uses accepted reviewedAt when evidence is accepted; workspace v1 has no per-finding activity timestamps, so in-progress review touch age is unknown rather than inferred from file metadata or Git history.",
+    "Human-review age uses lastActivityAt for an in-progress Human Diff Review v1.2 and accepted reviewedAt when evidence is accepted; reviews not yet started remain unknown.",
     "Certification completion uses the latest accepted review decision decidedAt that matches the app's currently reviewed release when available.",
     "Legacy reviewed apps without an authoritative dated accepted decision report certification age as unknown.",
     "Future timestamps fail closed.",
