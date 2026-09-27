@@ -8,6 +8,7 @@ import {createRevocationAckService} from '../../gateway/revocation-ack-v1.mjs';
 import {createRevocationHealthService} from '../../gateway/revocation-health-v1.mjs';
 import {createAppOperationalStatusService} from '../../gateway/app-operational-status-v1.mjs';
 import {createCapabilityDiscoveryService} from '../../gateway/capability-discovery-v1.mjs';
+import {createIntegrationClientStatusService} from '../../gateway/integration-client-status-v1.mjs';
 import {createFoundationHttpHandler} from '../../gateway/http-handler-v1.mjs';
 import {createPublicDefenceStatusService} from '../../gateway/defence-status-v1.mjs';
 import {createSupabaseRuntimeAdapters} from '../supabase-runtime-adapters-v1.mjs';
@@ -48,6 +49,7 @@ const revocationAck=createRevocationAckService({adapters});
 const revocationHealth=createRevocationHealthService({adapters});
 const appOperationalStatus=createAppOperationalStatusService({adapters});
 const capabilityDiscovery=createCapabilityDiscoveryService({adapters});
+const integrationClientStatus=createIntegrationClientStatusService({adapters});
 const defenceStatus=createPublicDefenceStatusService({
   ledger:defenceLedger,
   revocations:defenceRevocations
@@ -63,8 +65,15 @@ const handler=createFoundationHttpHandler({
   revocationHealth,
   appOperationalStatus,
   capabilityDiscovery,
+  integrationClientStatus,
   defenceStatus,
   maxBodyBytes:16*1024,
+  authenticateIntegrationClient:async(request:Request)=>{
+    const clientToken=request.headers.get('x-shine-client-token')??'';
+    const refreshToken=request.headers.get('x-shine-refresh-token')??'';
+    if(!clientToken) throw new Error('missing integration client credential');
+    return {clientToken,...(refreshToken?{refreshToken}:{})};
+  },
   authenticateApp:async(request:Request)=>{
     const appToken=request.headers.get('x-shine-app-token')??'';
     if(!appToken) throw new Error('missing app credential');
