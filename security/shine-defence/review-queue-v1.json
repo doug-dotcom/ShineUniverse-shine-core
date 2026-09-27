@@ -1,0 +1,74 @@
+{
+  "contract": "shine-defence/review-queue-v1",
+  "version": "1.0.0",
+  "purpose": "Read-only consolidated view of every pending Shine Defence review candidate and the next action needed to move that exact release forward.",
+  "scope": "Only candidates with status pending_review appear in the live review queue. Finalized candidates remain in review-candidates-v1 history but are not active queue items.",
+  "states": [
+    {
+      "id": "needs_checklist",
+      "meaning": "The pending candidate has no canonical structured review checklist yet."
+    },
+    {
+      "id": "review_in_progress",
+      "meaning": "A valid pending checklist exists and at least one requirement is still unreviewed."
+    },
+    {
+      "id": "ready_for_approval",
+      "meaning": "Every checklist requirement is satisfied and explicit human approval is the next decision."
+    },
+    {
+      "id": "ready_for_rejection",
+      "meaning": "No checklist requirements remain unreviewed and at least one requirement is not_satisfied."
+    },
+    {
+      "id": "approved_ready_for_first_certification",
+      "meaning": "Human approval is valid and the app has no existing reviewed-ledger entry."
+    },
+    {
+      "id": "approved_ready_for_recertification",
+      "meaning": "Human approval is valid and the app already has a reviewed-ledger entry."
+    },
+    {
+      "id": "rejected_needs_close",
+      "meaning": "Human rejection is valid but the candidate is still pending_review and needs a final candidate dismissal decision."
+    },
+    {
+      "id": "blocked_invalid_checklist",
+      "meaning": "A checklist exists but no longer validates against the exact candidate and current canonical registry."
+    },
+    {
+      "id": "blocked_invalid_evidence_suggestions",
+      "meaning": "An advisory suggestion artifact exists but fails deterministic validation; it must not be shown as trusted review assistance."
+    }
+  ],
+  "queueItemFields": [
+    "candidateId",
+    "appId",
+    "repository",
+    "releaseCommitSha",
+    "observedAt",
+    "reviewType",
+    "state",
+    "checklist",
+    "evidenceAssistance",
+    "nextAction"
+  ],
+  "rules": [
+    "The queue is read-only and never changes candidate, checklist, review-decision, certification, receipt or revocation state.",
+    "Queue items are sorted deterministically by observedAt then candidateId.",
+    "Checklist counts report total, satisfied, not_satisfied and unreviewed requirements.",
+    "When a checklist is pending and has unreviewed requirements, nextAction identifies the first unreviewed checklist item in canonical checklist order.",
+    "Evidence-assistance state reports missing, valid or invalid independently from checklist authority.",
+    "Evidence gaps are advisory information only and never make a requirement automatically satisfied or not_satisfied.",
+    "An approved checklist routes to first certification when the app is absent from the reviewed ledger and to re-certification when it is already present.",
+    "A rejected checklist does not silently mutate the candidate to dismissed; the queue exposes final candidate closure as the next action.",
+    "Invalid authoritative checklist state blocks readiness. Invalid advisory suggestion state is surfaced distinctly and must not be used by the workspace until repaired.",
+    "The queue can be rendered as human-readable text or deterministic JSON without persisting a new authority artifact."
+  ],
+  "nonClaims": [
+    "Queue readiness is not certification.",
+    "The queue does not decide whether a requirement is satisfied.",
+    "The queue does not approve, reject, dismiss, supersede, certify or revoke releases.",
+    "Evidence-gap counts are workflow assistance, not a security score."
+  ]
+}
