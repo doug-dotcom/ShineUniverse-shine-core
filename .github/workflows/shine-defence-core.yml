@@ -34,6 +34,8 @@ jobs:
       - run: node security/shine-defence/integration-kit/finalize-rejection-v1.mjs --self-test
       - run: node security/shine-defence/integration-kit/verify-review-rejections-v1.mjs --self-test
       - run: node security/shine-defence/integration-kit/review-queue-v1.mjs --json
+      - run: node security/shine-defence/integration-kit/operations-controller-v1.mjs --self-test
+      - run: node security/shine-defence/integration-kit/operations-controller-v1.mjs --json
       - run: node security/shine-defence/integration-kit/verify-review-checklists-v1.mjs
       - run: node security/shine-defence/integration-kit/verify-review-evidence-suggestions-v1.mjs
       - run: node security/shine-defence/integration-kit/verify-review-rejections-v1.mjs
