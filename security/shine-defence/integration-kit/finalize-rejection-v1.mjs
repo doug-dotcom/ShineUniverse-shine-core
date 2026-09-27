@@ -120,8 +120,7 @@ function selfTest(){
     version:'1.0.0',
     requirements:['Control must be present.']
   }));
-  const {createHash}=await import('node:crypto');
-  const blobSha=bytes=>createHash('sha1').update(Buffer.from('blob '+bytes.length+'\0')).update(bytes).digest('hex');
+  const blobSha=gitBlobSha;
   const registry={
     registry:'shine-defence/canonical-registry-v1',
     version:'1.0.0',
@@ -186,10 +185,10 @@ function selfTest(){
   console.log('SHINE DEFENCE REJECTION FINALIZER SELF-TEST: PASS 1 healthy + 5 fail-closed cases');
 }
 
-async function main(){
+function main(){
   const args=parseArgs(process.argv.slice(2));
   if(args.help){usage();return}
-  if(args.selfTest){await selfTest();return}
+  if(args.selfTest){selfTest();return}
   if(!args.candidate)fail('--candidate is required');
 
   const queue=readJson(paths.queue);
