@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 import {existsSync,readFileSync} from 'node:fs';
 import {join} from 'node:path';
-import {fileURLToPath} from 'node:url';
+import {fileURLToPath,pathToFileURL} from 'node:url';
 import {loadLiveQueue} from './review-queue-v1.mjs';
 import {loadLiveDeploymentReport} from './deployment-observations-v1.mjs';
 import {loadLiveReadiness} from './candidate-intake-readiness-v1.mjs';
 
-export const SHINE_DEFENCE_OPERATIONS_CONTROLLER_VERSION='1.3.0';
+export const SHINE_DEFENCE_OPERATIONS_CONTROLLER_VERSION='1.3.1';
 const root=fileURLToPath(new URL('../../../',import.meta.url));
 const P={candidates:'security/shine-defence/review-candidates-v1.json',ledger:'security/shine-defence/ecosystem-profile-ledger-v1.json',revocations:'security/shine-defence/revocations-v1.json',receipts:'security/shine-defence/receipts'};
 const readJson=p=>JSON.parse(readFileSync(join(root,p),'utf8'));
@@ -231,4 +231,4 @@ function selfTest(){
   console.log('SHINE DEFENCE OPERATIONS CONTROLLER SELF-TEST: PASS review routing, human boundary, accepted-evidence readiness, revocation and blocked states');
 }
 function main(){const a=parseArgs(process.argv.slice(2));if(a.help){usage();return}if(a.selfTest){selfTest();return}const r=loadLiveOperations();if(a.json)console.log(JSON.stringify(r,null,2));else printHuman(r)}
-main();
+if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href)main();
