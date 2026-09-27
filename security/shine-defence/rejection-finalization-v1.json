@@ -16,13 +16,16 @@
     "Exactly one dismissed review decision is appended.",
     "The decision authority equals the checklist reviewerId.",
     "The decision decidedAt equals the checklist reviewedAt.",
-    "The decision summary equals the checklist human rejection summary."
+    "The decision summary equals the checklist human rejection summary.",
+    "The dismissed decision pins reviewChecklistBlobSha to the exact rejected checklist Git blob.",
+    "The dismissed decision pins reviewRegistryBlobSha to the rejected checklist registry identity."
   ],
   "atomicity": [
     "Candidate dismissal and the matching review decision are one repository state transition.",
     "The helper is dry-run by default.",
     "Apply mode writes only review-candidates-v1 and review-decisions-v1.",
-    "After writing, Defence validators run and any failure restores both files to their prior bytes."
+    "After writing, Defence validators run and any failure restores both files to their prior bytes.",
+    "Checklist fingerprint fields are derived from the already-validated canonical checklist; they are not supplied by the caller."
   ],
   "boundaries": [
     "Rejection finalization does not add or alter the reviewed ecosystem ledger.",
