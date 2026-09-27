@@ -348,6 +348,102 @@ export function createSupabaseRuntimeAdapters({sql,defenceGate,fetchImpl=fetch}=
       return first(rows)??null;
     },
 
+    async listAppRevocations({appId,afterSequence=0,limit=101}={}){
+      const rows=await sql`
+        select sequence_no,event_payload,created_at
+        from foundation.list_app_revocations_v1(
+          ${appId},
+          ${afterSequence}::bigint,
+          ${limit}::integer
+        )
+      `;
+      return rows.map(row=>({
+        sequenceNo:Number(row.sequence_no),
+        event:row.event_payload,
+        createdAt:toIso(row.created_at)
+      }));
+    },
+
+    async recordAppRevocationDelivery({
+      deliveryId,appId,afterSequence,sequenceNos,occurredAt
+    }={}){
+      const rows=await sql`
+        select delivery_id::text,terminal_sequence,event_count
+        from foundation.record_app_revocation_delivery_v1(
+          ${deliveryId}::uuid,
+          ${appId},
+          ${afterSequence}::bigint,
+          ${sequenceNos}::bigint[],
+          ${occurredAt}::timestamptz
+        )
+      `;
+      const row=first(rows);
+      return row?{
+        deliveryId:String(row.delivery_id),
+        terminalSequence:Number(row.terminal_sequence),
+        eventCount:Number(row.event_count)
+      }:null;
+    },
+
+    async acknowledgeAppRevocations({
+      ackId,requestId,deliveryId,appId,sequenceNo,occurredAt
+    }={}){
+      const rows=await sql`
+        select outcome,reason_code,checkpoint_sequence
+        from foundation.ack_app_revocations_v2(
+          ${ackId}::uuid,
+          ${requestId}::uuid,
+          ${deliveryId}::uuid,
+          ${appId},
+          ${sequenceNo}::bigint,
+          ${occurredAt}::timestamptz
+        )
+      `;
+      const row=first(rows);
+      return row?{
+        outcome:String(row.outcome),
+        reasonCode:String(row.reason_code),
+        checkpointSequence:Number(row.checkpoint_sequence)
+      }:null;
+    },
+
+    async getAppRevocationStatus({appId}={}){
+      const rows=await sql`
+        select checkpoint_sequence,last_ack_at,latest_sequence,pending_count,oldest_pending_at
+        from foundation.get_app_revocation_status_v1(${appId})
+      `;
+      const row=first(rows);
+      return row?{
+        checkpointSequence:Number(row.checkpoint_sequence??0),
+        lastAckAt:toIso(row.last_ack_at),
+        latestSequence:Number(row.latest_sequence??0),
+        pendingCount:Number(row.pending_count??0),
+        oldestPendingAt:toIso(row.oldest_pending_at)
+      }:null;
+    },
+
+    async getAppRevocationHealth({appId}={}){
+      const rows=await sql`
+        select app_id,checkpoint_sequence,latest_sequence,pending_count,
+               oldest_pending_at,pending_age_seconds,max_pending_age_seconds,
+               freshness_state,stale_action,recommended_action
+        from foundation.get_app_revocation_health_v1(${appId})
+      `;
+      const row=first(rows);
+      return row?{
+        appId:String(row.app_id),
+        checkpointSequence:Number(row.checkpoint_sequence??0),
+        latestSequence:Number(row.latest_sequence??0),
+        pendingCount:Number(row.pending_count??0),
+        oldestPendingAt:toIso(row.oldest_pending_at),
+        pendingAgeSeconds:Number(row.pending_age_seconds??0),
+        maxPendingAgeSeconds:Number(row.max_pending_age_seconds??900),
+        freshnessState:String(row.freshness_state),
+        staleAction:String(row.stale_action),
+        recommendedAction:String(row.recommended_action)
+      }:null;
+    },
+
     async getAppManifest({appId}={}){
       const rows=await sql`
         select manifest from foundation.app_registry
