@@ -198,8 +198,32 @@
     {
       "id": "review-workspace-helper",
       "path": "security/shine-defence/integration-kit/review-workspace-v1.mjs",
+      "version": "1.1.0",
+      "blobSha": "3ad495ece913082cb65d2f59b334bee595494012"
+    },
+    {
+      "id": "review-evidence-assistant",
+      "path": "security/shine-defence/review-evidence-assistant-v1.json",
       "version": "1.0.0",
-      "blobSha": "e94485d589a4df58c0ee69d8388890fa06b60007"
+      "blobSha": "cac15406516823c03084f63a1a6a5f8c33d2b09d"
+    },
+    {
+      "id": "review-evidence-assistant-lib",
+      "path": "security/shine-defence/integration-kit/review-evidence-assistant-lib-v1.mjs",
+      "version": "1.0.0",
+      "blobSha": "3a6fc7ca2641f2c261de93367a4723e6938032ee"
+    },
+    {
+      "id": "review-evidence-assistant-helper",
+      "path": "security/shine-defence/integration-kit/review-evidence-assistant-v1.mjs",
+      "version": "1.0.0",
+      "blobSha": "270750f221c1ed4cfe30dbc255dff32b72436d07"
+    },
+    {
+      "id": "review-evidence-suggestion-verifier",
+      "path": "security/shine-defence/integration-kit/verify-review-evidence-suggestions-v1.mjs",
+      "version": "1.0.0",
+      "blobSha": "3c2f4ce34e7b5da937d42a1379f29a8f41feca57"
     }
   ]
 }
