@@ -1,0 +1,33 @@
+{
+  "contract": "shine-defence/audit-export-v1",
+  "version": "1.0.0",
+  "purpose": "Deterministic read-only per-app audit bundle containing bounded Defence identity, deployment, workflow, human-review and integrity evidence.",
+  "sections": [
+    "exportMetadata",
+    "certificationIdentity",
+    "commandCentre",
+    "deploymentObservation",
+    "humanReview",
+    "reviewEventLedger",
+    "reviewSessionSummary",
+    "checkpointIntegrity",
+    "provenance"
+  ],
+  "rules": [
+    "Exports are generated only for canonically reviewed apps.",
+    "The export uses a caller-supplied asOf timestamp so repeated generation over unchanged state is deterministic.",
+    "Certification identity comes from the reviewed ecosystem ledger.",
+    "Current operational state comes from Command Centre at the same asOf timestamp.",
+    "Human review, event ledger and checkpoint data are included only when bound to the current observed release review identity.",
+    "Event-ledger hash chains and checkpoint stores are verified before their verification results are included.",
+    "No raw GitHub patches, source-file contents, environment variables, credentials, tokens, Vault material or arbitrary filesystem files are exported.",
+    "Review notes/summaries are bounded workspace metadata already governed by Human Diff Review secret-like-content checks.",
+    "The bundle contains no executable next-action invocation; next action is descriptive metadata only.",
+    "The exporter mutates nothing and grants no review, candidate, checklist, deployment or certification authority."
+  ],
+  "nonClaims": [
+    "An audit export is a snapshot of recorded Defence state at asOf, not an external attestation.",
+    "Checkpoint verification proves recorded integrity consistency, not correctness of human judgement.",
+    "Absence of human review material means no bound current review material was recorded, not that no human ever examined the code."
+  ]
+}
