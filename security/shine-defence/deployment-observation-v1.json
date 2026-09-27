@@ -1,0 +1,26 @@
+{
+  "contract": "shine-defence/deployment-observation-v1",
+  "version": "1.0.0",
+  "purpose": "Non-authoritative observation of an application's deployed release identity for comparison with canonical Shine Defence certification state.",
+  "requiredFields": ["observationId","appId","repository","releaseCommitSha","profileBlobSha","observedAt","source","reference"],
+  "rules": [
+    "Observations record what an identified source reported as deployed; they do not certify that release.",
+    "releaseCommitSha and profileBlobSha are exact lowercase 40-character Git SHA-1 identities.",
+    "observedAt is an explicit UTC timestamp and observations are append-only historical facts.",
+    "source and reference are bounded non-secret provenance fields.",
+    "The latest observation per app is selected deterministically by observedAt then observationId.",
+    "Observation evaluation reuses release-status-v1 with the app's exact certification receipt, immutable receipt registry snapshot and current revocation ledger.",
+    "A reviewed_release result maps to protected.",
+    "An unreviewed_revision result maps to deployment_drift.",
+    "A profile_drift result maps to profile_drift.",
+    "A revoked_release result maps to revoked.",
+    "receipt_missing or verification_failed maps to needs_review.",
+    "No deployment observation changes candidate, checklist, receipt, reviewed-ledger, decision or revocation state."
+  ],
+  "nonClaims": [
+    "An observation does not prove that every running instance uses the observed release.",
+    "deployment_drift and profile_drift do not by themselves mean the release is unsafe.",
+    "needs_review is a workflow state, not a security verdict.",
+    "Only protected may be treated as an observed deployment matching the current Defence proof."
+  ]
+}

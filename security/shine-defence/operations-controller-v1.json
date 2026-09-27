@@ -1,6 +1,6 @@
 {
   "contract": "shine-defence/operations-controller-v1",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "purpose": "Read-only orchestration view across canonical Shine Defence review and certification state, identifying the exact guarded helper appropriate for the next workflow step without executing it.",
   "scope": [
     "Review workflow state comes from review-queue-v1.",
@@ -14,7 +14,12 @@
     "canonical_reviewed_idle",
     "reviewed_release_revoked",
     "uncertified_idle",
-    "blocked_canonical_state"
+    "blocked_canonical_state",
+    "protected",
+    "deployment_drift",
+    "profile_drift",
+    "revoked",
+    "needs_review"
   ],
   "rules": [
     "Every known app appears exactly once in deterministic app-id order.",
@@ -27,12 +32,16 @@
     "Missing canonical receipt state is blocked rather than automatically repaired.",
     "An app known only through finalized candidate history and absent from the reviewed ledger is uncertified_idle and may begin again through candidate intake.",
     "The controller returns helper paths and arguments as recommendations only; it never invokes a mutating helper.",
-    "JSON output is deterministic and suitable for future dashboards or external orchestration."
+    "JSON output is deterministic and suitable for future dashboards or external orchestration.",
+    "When a valid latest deployment observation exists, observed deployment status takes precedence over idle canonical certification state.",
+    "A canonical revocation on the reviewed release does not label a different observed deployment as revoked; the observed commit/profile is evaluated through release-status-v1.",
+    "Apps without deployment observations remain explicitly unobserved and are routed to the deployment-observation recorder rather than guessed."
   ],
   "nonClaims": [
     "The controller is not certification authority.",
     "canonical_reviewed_idle does not prove that the reviewed commit is the commit currently deployed.",
     "A recommended helper has not been executed merely because it appears in controller output.",
-    "The controller does not replace human checklist decisions."
+    "The controller does not replace human checklist decisions.",
+    "An absent deployment observation is not evidence that the reviewed release is currently deployed."
   ]
 }
