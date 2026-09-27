@@ -403,7 +403,7 @@
       "id": "staleness-visibility-helper",
       "path": "security/shine-defence/integration-kit/staleness-visibility-v1.mjs",
       "version": "1.0.0",
-      "blobSha": "280fb33e1e370cc0a4ecbe6fa57999f7e94f9024"
+      "blobSha": "f9e2aa5255d52d5e8fa461cb235e75424af95784"
     }
   ]
 }
