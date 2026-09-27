@@ -1,0 +1,6 @@
+{
+  "ledger": "shine-defence/deployment-observations-v1",
+  "version": "1.0.0",
+  "meaning": "Append-only observed deployment identities. These observations are operational evidence, not certification authority.",
+  "observations": []
+}
