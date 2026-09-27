@@ -155,5 +155,11 @@ Reviewer id, rejection timestamp and summary come only from the rejected checkli
 
 Pending reviews take workflow precedence and preserve human-required boundaries from Review Queue. Approved reviews route to first-certification or re-certification helpers; rejected reviews route to the rejection finalizer. Reviewed apps with an exact receipt and no matching revocation are reported as canonically reviewed and idle, while exact reviewed-release revocations route toward intake of a replacement release. Missing canonical receipts fail closed with no automatic repair helper. The controller never invokes a mutating helper and never infers which commit is currently deployed; live deployment freshness remains a separate release-status check.
 
+### Deployment observations
+
+`security/shine-defence/deployment-observation-v1.json` defines bounded, non-authoritative observations of an app's deployed commit and Defence-profile blob. Observations are append-only in `deployment-observations-v1.json`; `record-deployment-observation-v1.mjs` adds observations without touching certification authority. `deployment-observations-v1.mjs` selects the latest observation deterministically and reuses the existing receipt-backed `release-status-v1` engine with the receipt's immutable registry snapshot and current revocation ledger.
+
+Observed release status is translated into five estate-level deployment states: `protected`, `deployment_drift`, `profile_drift`, `revoked` and `needs_review`. Operations Controller v1.1 consumes those results. When an observation exists, observed deployment state takes precedence over idle canonical status; a revocation on an older reviewed release therefore does not mislabel a different observed deployment as revoked. Apps without an observation remain explicitly `unobserved` and are routed to the recorder rather than guessed. None of these observation tools certify, deploy, revoke or modify an app.
+
 
 An extension policy existing in Core does **not** automatically certify an app. Each app still needs local, testable evidence before claiming that profile.
