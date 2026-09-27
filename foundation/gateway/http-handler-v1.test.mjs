@@ -273,3 +273,70 @@ test('grant revocation denial maps to HTTP 403',async()=>{
   }));
   assert.equal(res.status,403);
 });
+
+
+test('revocation feed GET uses app-only authentication and query cursors',async()=>{
+  let appAuth=0;
+  const h=createFoundationHttpHandler({
+    gateway:async()=>({status:'allowed'}),
+    authenticate:async()=>{throw new Error('user auth must not run')},
+    authenticateApp:async request=>{
+      appAuth++;
+      if(request.headers.get('x-shine-app-token')!=='app') throw new Error('missing app');
+      return {appToken:'app'};
+    },
+    revocationFeed:async args=>({
+      revocationFeedResponse:'shine-foundation/revocation-feed-response-v1',
+      schemaVersion:'1.0.0',status:'ok',
+      appId:args.appId,afterSequence:args.afterSequence,nextCursor:7,
+      hasMore:false,deliveryId:'11111111-1111-4111-8111-111111111111',events:[]
+    })
+  });
+  const res=await h(new Request(base+'/foundation-gateway/v1/revocations?appId=shine.ski&after=6&limit=25',{
+    headers:{'x-shine-app-token':'app'}
+  }));
+  assert.equal(res.status,200);
+  assert.equal(appAuth,1);
+  const body=await res.json();
+  assert.equal(body.appId,'shine.ski');
+  assert.equal(body.afterSequence,6);
+});
+
+test('revocation status GET uses app-only authentication',async()=>{
+  const h=createFoundationHttpHandler({
+    gateway:async()=>({status:'allowed'}),
+    authenticate:async()=>({}),
+    authenticateApp:async()=>({appToken:'app'}),
+    revocationHealth:async()=>({
+      revocationHealthResponse:'shine-foundation/revocation-health-response-v1',
+      schemaVersion:'1.0.0',status:'ok',appId:'shine.ski',freshnessState:'current'
+    })
+  });
+  const res=await h(new Request(base+'/v1/revocations/status?appId=shine.ski',{
+    headers:{'x-shine-app-token':'app'}
+  }));
+  assert.equal(res.status,200);
+  assert.equal((await res.json()).freshnessState,'current');
+});
+
+test('revocation acknowledgement uses app-only authentication and maps success to 200',async()=>{
+  let userAuth=0;
+  const h=createFoundationHttpHandler({
+    gateway:async()=>({status:'allowed'}),
+    authenticate:async()=>{userAuth++;return {}},
+    authenticateApp:async()=>({appToken:'app'}),
+    revocationAck:async({envelope})=>({
+      revocationAckResponse:'shine-foundation/revocation-ack-response-v1',
+      schemaVersion:'1.0.0',requestId:envelope.requestId,
+      status:'acknowledged',reasonCode:'revocation-checkpoint-advanced',checkpointSequence:7
+    })
+  });
+  const res=await h(new Request(base+'/v1/revocations/ack',{
+    method:'POST',
+    headers:{'x-shine-app-token':'app','content-type':'application/json'},
+    body:JSON.stringify({requestId:'11111111-1111-4111-8111-111111111111'})
+  }));
+  assert.equal(res.status,200);
+  assert.equal(userAuth,0);
+  assert.equal((await res.json()).checkpointSequence,7);
+});
