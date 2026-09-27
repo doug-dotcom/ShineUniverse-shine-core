@@ -35,10 +35,6 @@
     {
       "id": "blocked_invalid_checklist",
       "meaning": "A checklist exists but no longer validates against the exact candidate and current canonical registry."
-    },
-    {
-      "id": "blocked_invalid_evidence_suggestions",
-      "meaning": "An advisory suggestion artifact exists but fails deterministic validation; it must not be shown as trusted review assistance."
     }
   ],
   "queueItemFields": [
