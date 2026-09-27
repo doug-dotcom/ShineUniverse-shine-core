@@ -1,6 +1,6 @@
 {
   "contract": "shine-defence/command-centre-v1",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "purpose": "Read-only estate-wide projection of Shine Defence certification, deployment observation, coverage, review progress, intake readiness and exact next action.",
   "sources": [
     "operations-controller-v1",
@@ -18,7 +18,10 @@
     "Pre-candidate review progress is derived only from the current intake-planner identity plus any durable human diff review bound to that exact identity.",
     "Candidate intake readiness comes from candidate-intake-readiness-v1.",
     "Missing data is reported explicitly as none, unobserved or not_started rather than inferred.",
-    "The report is read-only and never invokes any recommended helper."
+    "The report is read-only and never invokes any recommended helper.",
+    "Each reviewed-app row includes staleness visibility for deployment observation, human review, pending candidate and certification completion.",
+    "Unknown and not_applicable age states remain distinct and are never converted into stale.",
+    "Age bands are operational visibility only and do not change next-action selection or attention priority."
   ],
   "reviewProgressStates": [
     "not_applicable",
@@ -33,6 +36,7 @@
     "The Command Centre is not certification authority.",
     "A next action shown in the report has not been executed.",
     "Review progress is not checklist approval.",
-    "Coverage does not imply a protected deployment."
+    "Coverage does not imply a protected deployment.",
+    "Age or staleness bands are not security risk scores."
   ]
 }
