@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import {existsSync,readFileSync} from 'node:fs';
 import {join} from 'node:path';
-import {fileURLToPath} from 'node:url';
+import {fileURLToPath,pathToFileURL} from 'node:url';
 
 export const SHINE_DEFENCE_STALENESS_VISIBILITY_VERSION='1.0.0';
 const root=fileURLToPath(new URL('../../../',import.meta.url));
@@ -89,4 +89,4 @@ async function main(){
   });
   console.log(JSON.stringify(r,null,2));
 }
-main();
+if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href)main();
