@@ -22,7 +22,11 @@
     }
   ],
   "humanAuthorization": {
-    "statuses": ["pending", "approved", "rejected"],
+    "statuses": [
+      "pending",
+      "approved",
+      "rejected"
+    ],
     "rule": "Only an explicit approved human attestation may authorize first certification or re-certification. Generator output is always pending."
   },
   "rules": [
@@ -30,7 +34,7 @@
     "JSON artefacts with a requirements array produce one checklist item per requirement.",
     "Canonical artefacts without a requirements array produce one artefact-integrity checklist item rather than being silently treated as reviewed.",
     "Candidate evidence is copied as reference material but is not automatically mapped to requirements or treated as sufficient.",
-    "A satisfied item must cite at least one candidate evidence index or contain a non-empty human reviewer note.",
+    "A satisfied item must cite at least one candidate evidence id or contain a non-empty human reviewer note.",
     "Approval requires every checklist item to be satisfied, a bounded reviewer id, an ISO reviewedAt timestamp, and a bounded human summary.",
     "Rejection requires at least one not_satisfied item and explicit human reviewer metadata.",
     "Pending authorization cannot contain a reviewer identity, reviewedAt timestamp or approval/rejection summary.",
