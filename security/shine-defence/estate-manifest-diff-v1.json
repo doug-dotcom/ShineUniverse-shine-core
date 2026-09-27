@@ -1,0 +1,28 @@
+{
+  "contract": "shine-defence/estate-manifest-diff-v1",
+  "version": "1.0.0",
+  "purpose": "Neutral deterministic comparison of two valid Estate Audit Manifests, identifying exactly which reviewed-app identity dimensions changed.",
+  "dimensions": [
+    "repository",
+    "exportSha256",
+    "reviewCommitSha",
+    "observedReleaseCommitSha",
+    "deploymentState",
+    "checkpointIntegrityState"
+  ],
+  "rules": [
+    "Both input manifests must pass their own manifestSha256 verification before comparison.",
+    "Inputs must be Estate Audit Manifest v1 artifacts.",
+    "Apps are classified as added, removed, changed or unchanged.",
+    "Changed apps list each changed dimension with exact before and after values.",
+    "Output ordering is deterministic by appId and dimension name.",
+    "The diff reports before/after asOf and manifest hashes.",
+    "The diff makes no judgement about whether a change is good, bad, expected, risky or safe.",
+    "The diff mutates nothing and grants no workflow authority."
+  ],
+  "nonClaims": [
+    "A changed app is not necessarily less secure.",
+    "An unchanged app is not guaranteed secure.",
+    "The diff explains recorded manifest dimensions only; deeper cause analysis requires the corresponding per-app audit exports and underlying evidence."
+  ]
+}
