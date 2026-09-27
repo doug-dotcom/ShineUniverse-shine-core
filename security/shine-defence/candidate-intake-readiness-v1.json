@@ -1,0 +1,30 @@
+{
+  "contract": "shine-defence/candidate-intake-readiness-v1",
+  "version": "1.0.0",
+  "purpose": "Fail-closed bridge from accepted human diff-review evidence to a fully validated candidate-intake payload without creating pending review state.",
+  "readyState": "candidate_intake_ready",
+  "requirements": [
+    "The app still has a current Review Intake Planner item for the same deployment-drift identity.",
+    "The current GitHub evidence pack exists logically for that exact reviewed-to-observed commit pair.",
+    "A durable human diff review exists for that exact pack and is evidence_accepted.",
+    "The separate accepted evidence record exactly equals the evidence deterministically derived from that accepted human review.",
+    "The accepted evidence checkedAt timestamp is not earlier than the deployment observation.",
+    "The resulting candidate-intake payload passes the canonical candidate-intake validator against current queue, reviewed ledger and canonical registry."
+  ],
+  "output": [
+    "A candidate-intake-v1 JSON payload with the accepted human review evidence attached.",
+    "A deterministic candidate id preview derived by the canonical intake validator.",
+    "The exact command required for the separate candidate-intake apply step."
+  ],
+  "boundaries": [
+    "Readiness does not write review-candidates-v1.",
+    "Readiness does not generate or modify human review findings.",
+    "Readiness does not approve a checklist, update the reviewed ecosystem ledger, issue a receipt or change revocations.",
+    "Only the existing intake-review-v1.mjs --apply action may create pending_review state."
+  ],
+  "nonClaims": [
+    "candidate_intake_ready is not certification.",
+    "A validated intake payload is not a pending candidate until the separate intake apply action succeeds.",
+    "Accepted diff evidence does not imply later checklist approval."
+  ]
+}
