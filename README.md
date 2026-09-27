@@ -177,5 +177,11 @@ The live source registry now covers ten canonically reviewed apps: `shine-daash`
 
 If the deployed profile changed, the planner reports `profile_changed_requires_refresh` rather than inheriting stale profileVersion/policy claims. If a pending candidate already exists, the planner reports `pending_candidate_exists`. Materialization requires explicit bounded review evidence plus a candidate observation timestamp, then re-runs the canonical candidate-intake validator and prints ordinary intake JSON only; it never writes the review-candidate queue. Operations Controller v1.2 routes deployment drift through this planner instead of directly to candidate intake.
 
+### Review evidence packs
+
+`security/shine-defence/review-evidence-pack-v1.json` defines bounded GitHub compare material for a human reviewing one draftable deployment-drift release. `generate-review-evidence-pack-v1.mjs` binds the reviewed commit as compare base and the exact observed deployed commit as head, requires a forward-only `ahead` relationship, and records commit counts plus changed-file paths and numeric additions/deletions. Raw patches and file contents are never copied into Core.
+
+The generator assigns deterministic review-focus labels such as `security_or_auth`, `api_or_server`, `database_or_migration`, `dependency_or_build`, `ci_or_deployment` and `tests` from paths only. These labels and change counts are navigation aids, not risk scores or findings. Every proposed evidence record is stamped `unreviewed` and `UNREVIEWED`; a human must inspect the pack and any underlying code/tests needed for judgement, then separately author the bounded review-evidence record used by the intake planner. Evidence packs never create candidates, satisfy checklist requirements or certify releases.
+
 
 An extension policy existing in Core does **not** automatically certify an app. Each app still needs local, testable evidence before claiming that profile.
