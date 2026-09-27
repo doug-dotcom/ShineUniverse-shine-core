@@ -1,6 +1,6 @@
 {
   "contract": "shine-defence/operations-controller-v1",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "purpose": "Read-only orchestration view across canonical Shine Defence review and certification state, identifying the exact guarded helper appropriate for the next workflow step without executing it.",
   "scope": [
     "Review workflow state comes from review-queue-v1.",
@@ -19,7 +19,8 @@
     "deployment_drift",
     "profile_drift",
     "revoked",
-    "needs_review"
+    "needs_review",
+    "candidate_intake_ready"
   ],
   "rules": [
     "Every known app appears exactly once in deterministic app-id order.",
@@ -38,13 +39,16 @@
     "Apps without deployment observations remain explicitly unobserved and are routed to the deployment-observation recorder rather than guessed.",
     "Observed deployment_drift routes through review-intake-planner-v1 rather than directly into candidate intake.",
     "Observed profile_drift is not auto-drafted because the reviewed profileVersion and policy claims may no longer describe the deployed profile.",
-    "Deployment-proof verification failure is investigated before review state is created."
+    "Deployment-proof verification failure is investigated before review state is created.",
+    "A deployment-drift app becomes candidate_intake_ready only when accepted human diff-review evidence is durably bound to the current deployment identity and the resulting payload passes canonical candidate-intake validation.",
+    "candidate_intake_ready routes to the existing intake-review helper but never invokes --apply automatically."
   ],
   "nonClaims": [
     "The controller is not certification authority.",
     "canonical_reviewed_idle does not prove that the reviewed commit is the commit currently deployed.",
     "A recommended helper has not been executed merely because it appears in controller output.",
     "The controller does not replace human checklist decisions.",
-    "An absent deployment observation is not evidence that the reviewed release is currently deployed."
+    "An absent deployment observation is not evidence that the reviewed release is currently deployed.",
+    "candidate_intake_ready does not mean pending_review exists; the separate guarded intake apply must still succeed."
   ]
 }

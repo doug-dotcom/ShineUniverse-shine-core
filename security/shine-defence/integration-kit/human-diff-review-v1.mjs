@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 import {existsSync,mkdirSync,readFileSync,renameSync,statSync,writeFileSync} from 'node:fs';
 import {isAbsolute,join,resolve} from 'node:path';
-import {fileURLToPath} from 'node:url';
+import {fileURLToPath,pathToFileURL} from 'node:url';
 import {buildLiveEvidencePacks} from './generate-review-evidence-pack-v1.mjs';
 
-export const SHINE_DEFENCE_HUMAN_DIFF_REVIEW_VERSION='1.0.0';
+export const SHINE_DEFENCE_HUMAN_DIFF_REVIEW_VERSION='1.1.0';
 const root=fileURLToPath(new URL('../../../',import.meta.url));
 const reviewDir=join(root,'security/shine-defence/human-diff-reviews');
 const evidenceDir=join(root,'security/shine-defence/review-evidence-records');
@@ -16,9 +16,9 @@ const clone=v=>JSON.parse(JSON.stringify(v));
 const fail=m=>{throw new Error(m)};
 const clean=(v,n)=>typeof v==='string'&&v.trim().length>0&&v.length<=n&&!secretLike.test(v);
 function atomicWrite(path,bytes){const t=path+'.tmp-'+process.pid;writeFileSync(t,bytes);renameSync(t,path)}
-function key(pack){return pack.appId+'-'+pack.observedCommitSha.slice(0,12)}
-function reviewPath(pack){return join(reviewDir,key(pack)+'.json')}
-function evidencePath(pack){return join(evidenceDir,key(pack)+'.json')}
+export function reviewKey(pack){return pack.appId+'-'+pack.observedCommitSha.slice(0,12)}
+export function reviewPath(pack){return join(reviewDir,reviewKey(pack)+'.json')}
+export function evidencePath(pack){return join(evidenceDir,reviewKey(pack)+'.json')}
 
 function orderedFiles(pack){
   const rank={security_or_auth:0,api_or_server:1,database_or_migration:2,dependency_or_build:3,ci_or_deployment:4,tests:5,other:6};
@@ -27,7 +27,7 @@ function orderedFiles(pack){
 export function createReview(pack){
   return {
     artifact:'shine-defence/human-diff-review-v1',version:'1.0.0',
-    reviewId:key(pack),appId:pack.appId,repository:pack.repository,
+    reviewId:reviewKey(pack),appId:pack.appId,repository:pack.repository,
     reviewedCommitSha:pack.reviewedCommitSha,observedCommitSha:pack.observedCommitSha,
     deploymentObservationId:pack.deploymentObservationId,state:'in_progress',
     packSummary:clone(pack.compare),
@@ -128,4 +128,4 @@ function main(){
   if(next.state==='evidence_accepted')atomicWrite(evidencePath(pack),Buffer.from(json(acceptedEvidence({review:next,pack}))));
   console.log('SHINE DEFENCE HUMAN DIFF REVIEW: APPLIED '+next.reviewId);
 }
-main();
+if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href)main();
