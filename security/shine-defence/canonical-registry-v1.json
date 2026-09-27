@@ -270,14 +270,14 @@
     {
       "id": "operations-controller",
       "path": "security/shine-defence/operations-controller-v1.json",
-      "version": "1.1.0",
-      "blobSha": "4d5060b1137200b83cbe66bfe835cf874c8b839c"
+      "version": "1.2.0",
+      "blobSha": "69448233183a0bad6b63426b58a4c8c0673fff72"
     },
     {
       "id": "operations-controller-helper",
       "path": "security/shine-defence/integration-kit/operations-controller-v1.mjs",
-      "version": "1.1.0",
-      "blobSha": "6a21ac727c01712894199b9c0608e92187a348a7"
+      "version": "1.2.0",
+      "blobSha": "652b0dbef0ad8728fa2bd163959352cc30f2194c"
     },
     {
       "id": "deployment-observation",
@@ -320,6 +320,18 @@
       "path": "security/shine-defence/integration-kit/deployment-coverage-v1.mjs",
       "version": "1.0.0",
       "blobSha": "300e5215cf8338e86ee806435c234559125aac4e"
+    },
+    {
+      "id": "review-intake-planner",
+      "path": "security/shine-defence/review-intake-planner-v1.json",
+      "version": "1.0.0",
+      "blobSha": "2b63c0e44af90ab2a6e02822578df1b8c2b655ff"
+    },
+    {
+      "id": "review-intake-planner-helper",
+      "path": "security/shine-defence/integration-kit/plan-review-intake-v1.mjs",
+      "version": "1.0.0",
+      "blobSha": "b72b8a9c77b4115473c8b6aeffa10a1f7dcb252c"
     }
   ]
 }
