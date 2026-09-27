@@ -1,0 +1,31 @@
+{
+  "contract": "shine-defence/timeline-snapshot-planner-v1",
+  "version": "1.0.0",
+  "purpose": "Read-only planning layer that compares the live estate snapshot with the latest persisted timeline entry before any new timeline append.",
+  "states": ["material_change","snapshot_hash_only","no_change"],
+  "materialDimensions": [
+    "repository",
+    "reviewCommitSha",
+    "observedReleaseCommitSha",
+    "deploymentState",
+    "checkpointIntegrityState",
+    "app_added",
+    "app_removed"
+  ],
+  "rules": [
+    "The current Estate Audit Timeline must verify before planning.",
+    "The live candidate manifest must verify and use an asOf strictly later than the latest persisted timeline entry.",
+    "The canonical Estate Manifest Diff is retained in full.",
+    "exportSha256 changes are reported separately as snapshot-hash changes because per-app audit exports bind asOf and therefore naturally change as time advances.",
+    "material_change means at least one added/removed app or at least one changed non-exportSha256 manifest dimension.",
+    "snapshot_hash_only means app membership and all material dimensions are unchanged while one or more exportSha256 values changed.",
+    "no_change means the canonical diff reports no changed dimensions at all.",
+    "The planner never appends a timeline entry and never invokes the timeline apply action.",
+    "A material_change recommendation is descriptive only; explicit timeline --apply remains required."
+  ],
+  "nonClaims": [
+    "snapshot_hash_only does not prove nothing anywhere changed; it means the compact manifest exposes no material identity-dimension change beyond time-sensitive per-app audit hashes.",
+    "material_change is not a severity or risk judgement.",
+    "The planner does not decide whether a historical snapshot should be retained for governance or external recordkeeping."
+  ]
+}
