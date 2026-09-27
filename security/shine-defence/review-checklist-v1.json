@@ -1,0 +1,49 @@
+{
+  "contract": "shine-defence/review-checklist-v1",
+  "version": "1.0.0",
+  "purpose": "Structured, non-authoritative human review worksheet for one exact pending Shine Defence candidate.",
+  "candidateBinding": [
+    "The checklist binds to one exact candidate id, app id, repository, release commit, Defence-profile path/blob/version and policy list.",
+    "The checklist also pins the canonical Defence registry version and Git blob SHA used to derive its policy requirements.",
+    "A checklist never changes candidate status or grants a badge."
+  ],
+  "itemStates": [
+    {
+      "id": "unreviewed",
+      "meaning": "No human conclusion has been recorded for this requirement."
+    },
+    {
+      "id": "satisfied",
+      "meaning": "A human reviewer explicitly concluded the requirement is satisfied for the exact candidate release."
+    },
+    {
+      "id": "not_satisfied",
+      "meaning": "A human reviewer explicitly concluded the requirement is not satisfied for the exact candidate release."
+    }
+  ],
+  "humanAuthorization": {
+    "statuses": [
+      "pending",
+      "approved",
+      "rejected"
+    ],
+    "rule": "Only an explicit approved human attestation may authorize first certification or re-certification. Generator output is always pending."
+  },
+  "rules": [
+    "Checklist requirements are derived from the exact canonical artefacts claimed by the candidate.",
+    "JSON artefacts with a requirements array produce one checklist item per requirement.",
+    "Canonical artefacts without a requirements array produce one artefact-integrity checklist item rather than being silently treated as reviewed.",
+    "Candidate evidence is copied as reference material but is not automatically mapped to requirements or treated as sufficient.",
+    "A satisfied item must cite at least one candidate evidence id or contain a non-empty human reviewer note.",
+    "Approval requires every checklist item to be satisfied, a bounded reviewer id, an ISO reviewedAt timestamp, and a bounded human summary.",
+    "Rejection requires at least one not_satisfied item and explicit human reviewer metadata.",
+    "Pending authorization cannot contain a reviewer identity, reviewedAt timestamp or approval/rejection summary.",
+    "Acceptance helpers must independently validate the approved checklist against the current candidate and canonical registry before they may create an accepted decision."
+  ],
+  "nonClaims": [
+    "A generated checklist is not a security review.",
+    "Checklist approval is a human attestation recorded by the repository; it is not cryptographic proof of real-world identity.",
+    "A satisfied checklist does not prove software is invulnerable.",
+    "The checklist does not replace app-specific tests, code review or release verification."
+  ]
+}

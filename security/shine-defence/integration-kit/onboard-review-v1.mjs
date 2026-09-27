@@ -4,8 +4,9 @@ import {spawnSync} from 'node:child_process';
 import {existsSync,mkdirSync,readFileSync,renameSync,rmSync,writeFileSync} from 'node:fs';
 import {dirname,join} from 'node:path';
 import {fileURLToPath} from 'node:url';
+import {assertApprovedReviewChecklist} from './review-checklist-lib-v1.mjs';
 
-export const SHINE_DEFENCE_ONBOARDER_VERSION='1.0.0';
+export const SHINE_DEFENCE_ONBOARDER_VERSION='2.0.0';
 
 const root=fileURLToPath(new URL('../../../',import.meta.url));
 const paths={
@@ -14,7 +15,8 @@ const paths={
   ledger:'security/shine-defence/ecosystem-profile-ledger-v1.json',
   registry:'security/shine-defence/canonical-registry-v1.json',
   receipts:'security/shine-defence/receipts',
-  snapshots:'security/shine-defence/registry-snapshots'
+  snapshots:'security/shine-defence/registry-snapshots',
+  reviewChecklists:'security/shine-defence/review-checklists'
 };
 
 const ID=/^[a-z0-9][a-z0-9._-]{0,127}$/;
@@ -123,15 +125,15 @@ export function buildFirstCertification({candidateId,decidedAt,authority,summary
 }
 
 function parseArgs(argv){
-  const result={apply:false,authority:'shine-defence-core'};
+  const result={apply:false};
   for(let i=0;i<argv.length;i++){
     const arg=argv[i];
     if(arg==='--apply'){result.apply=true;continue}
     if(arg==='--self-test'){result.selfTest=true;continue}
     if(arg==='--help'||arg==='-h'){result.help=true;continue}
-    if(['--candidate','--decided-at','--authority','--summary'].includes(arg)){
-      if(i+1>=argv.length)fail(arg+' requires a value');
-      result[arg.slice(2).replace(/-([a-z])/g,(_,c)=>c.toUpperCase())]=argv[++i];
+    if(arg==='--candidate'){
+      if(i+1>=argv.length)fail('--candidate requires a value');
+      result.candidate=argv[++i];
       continue;
     }
     fail('unknown argument '+arg);
@@ -144,16 +146,11 @@ function usage(){
 
 Usage:
   node security/shine-defence/integration-kit/onboard-review-v1.mjs \\
-    --candidate <candidateId> \\
-    --summary "<review decision>" \\
-    [--authority shine-defence-core] \\
-    [--decided-at <ISO timestamp|now>] \\
-    [--apply]
+    --candidate <candidateId> [--apply]
 
-The candidate must already exist as pending_review evidence. Without --apply this is a
-dry-run. --apply creates the initial reviewed-ledger entry, certification receipt and
-accepted decision as one guarded state transition and rolls back all touched files if
-any Defence verification gate fails.
+The candidate must already exist as pending_review and its canonical review checklist must
+contain an explicit approved humanAuthorization. Reviewer identity, reviewedAt and decision
+summary are taken only from that validated checklist. Without --apply this is a dry-run.
 `);
 }
 
@@ -164,6 +161,7 @@ function runVerification(){
     'security/shine-defence/integration-kit/verify-certification-receipts-v1.mjs',
     'security/shine-defence/integration-kit/verify-review-candidates-v1.mjs',
     'security/shine-defence/integration-kit/verify-review-decisions-v1.mjs',
+    'security/shine-defence/integration-kit/verify-review-checklists-v1.mjs',
     'security/shine-defence/integration-kit/verify-review-promotions-v1.mjs'
   ];
   for(const script of scripts){
@@ -229,25 +227,38 @@ function main(){
   if(args.help){usage();return}
   if(args.selfTest){selfTest();return}
   if(!args.candidate)fail('--candidate is required');
-  if(!args.summary)fail('--summary is required');
-  const decidedAt=args.decidedAt==='now'||!args.decidedAt?new Date().toISOString():args.decidedAt;
 
   const registryPath=join(root,paths.registry);
   const registryBytes=readFileSync(registryPath);
+  const registry=JSON.parse(registryBytes.toString('utf8'));
   const queue=readJson(paths.queue);
-  const candidate=queue.candidates.find(item=>item.candidateId===args.candidate);
-  if(!candidate)fail('candidate not found');
-  const receiptPath=join(paths.receipts,candidate.appId+'.json');
+  const matches=queue.candidates.filter(item=>item.candidateId===args.candidate);
+  if(matches.length!==1)fail('candidate must exist exactly once');
+  const candidate=matches[0];
+  if(candidate.status!=='pending_review')fail('candidate must be pending_review');
 
+  const checklistRelative=join(paths.reviewChecklists,candidate.candidateId+'.json');
+  const checklistFull=join(root,checklistRelative);
+  if(!existsSync(checklistFull))fail('approved review checklist required: '+checklistRelative);
+  const checklist=JSON.parse(readFileSync(checklistFull,'utf8'));
+  const approval=assertApprovedReviewChecklist({
+    checklist,
+    candidate,
+    registry,
+    registryBytes,
+    readArtefact:path=>readFileSync(join(root,path))
+  });
+
+  const receiptPath=join(paths.receipts,candidate.appId+'.json');
   const built=buildFirstCertification({
     candidateId:args.candidate,
-    decidedAt,
-    authority:args.authority,
-    summary:args.summary,
+    decidedAt:approval.reviewedAt,
+    authority:approval.reviewerId,
+    summary:approval.summary,
     queue,
     decisions:readJson(paths.decisions),
     ledger:readJson(paths.ledger),
-    registry:JSON.parse(registryBytes.toString('utf8')),
+    registry,
     registryBytes,
     receiptExists:existsSync(join(root,receiptPath))
   });
@@ -271,11 +282,14 @@ function main(){
   console.log('candidate: '+built.candidate.candidateId);
   console.log('app: '+built.candidate.appId);
   console.log('release: '+built.candidate.releaseCommitSha);
+  console.log('human reviewer: '+approval.reviewerId);
+  console.log('human reviewedAt: '+approval.reviewedAt);
+  console.log('checklist: '+checklistRelative);
   console.log('registry snapshot: '+built.registryBlobSha+(existsSync(snapshotFull)?' (existing)':' (new)'));
   for(const [relativePath] of planned)console.log('  '+(args.apply?'WRITE ':'WOULD WRITE ')+relativePath);
 
   if(!args.apply){
-    console.log('DRY RUN: no files changed. Re-run with --apply after reviewing this plan.');
+    console.log('DRY RUN: no files changed. Human approval was validated but not applied.');
     return;
   }
 
