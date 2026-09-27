@@ -1,0 +1,58 @@
+{
+  "navigationContract": "shine-universe/data-navigation-v1",
+  "schemaVersion": "1.1.0",
+  "method": "POST",
+  "authentication": {
+    "header": "x-shine-app-token",
+    "note": "Verified against Foundation effective app credentials. verify_jwt is intentionally disabled because the function performs custom Shine app-token authentication."
+  },
+  "request": {
+    "type": "object",
+    "required": [
+      "appId",
+      "query"
+    ],
+    "properties": {
+      "appId": {
+        "type": "string"
+      },
+      "query": {
+        "type": "string",
+        "maxLength": 500
+      }
+    },
+    "additionalProperties": false
+  },
+  "response": {
+    "fields": [
+      "navigatorResponse",
+      "schemaVersion",
+      "requester",
+      "query",
+      "routes",
+      "accessNote"
+    ],
+    "routeFields": [
+      "dataset_key",
+      "display_name",
+      "owner_app_key",
+      "route_mode",
+      "capability_id",
+      "project_ref",
+      "canonical_schema",
+      "canonical_relation",
+      "data_class",
+      "freshness_model",
+      "recommended_use",
+      "route_note",
+      "related_dataset_keys",
+      "score"
+    ]
+  },
+  "safety": {
+    "metadataOnly": true,
+    "crossAppPhysicalDetailsHidden": true,
+    "accessGrantImplied": false,
+    "preferredCrossAppRoute": "foundation_capability"
+  }
+}
