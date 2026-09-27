@@ -26,6 +26,7 @@ jobs:
       - run: node security/shine-defence/integration-kit/promote-review-v1.mjs --self-test
       - run: node security/shine-defence/integration-kit/onboard-review-v1.mjs --self-test
       - run: node security/shine-defence/integration-kit/intake-review-v1.mjs --self-test
+      - run: node security/shine-defence/integration-kit/supersede-candidate-v1.mjs --self-test
       - run: node security/shine-defence/integration-kit/generate-review-checklist-v1.mjs --self-test
       - run: node security/shine-defence/integration-kit/review-evidence-assistant-v1.mjs --self-test
       - run: node security/shine-defence/integration-kit/review-workspace-v1.mjs --self-test
