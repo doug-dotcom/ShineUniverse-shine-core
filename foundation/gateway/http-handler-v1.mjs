@@ -14,14 +14,16 @@ const revocationAckPath=p=>p==='/v1/revocations/ack'||p.endsWith('/foundation-ga
 const revocationStatusPath=p=>p==='/v1/revocations/status'||p.endsWith('/foundation-gateway/v1/revocations/status');
 const appStatusPath=p=>p==='/v1/status'||p.endsWith('/foundation-gateway/v1/status');
 const capabilityDiscoveryPath=p=>p==='/v1/integration/capabilities'||p.endsWith('/foundation-gateway/v1/integration/capabilities');
+const integrationClientStatusPath=p=>p==='/v1/integration/client/status'||p.endsWith('/foundation-gateway/v1/integration/client/status');
 const defenceStatusMatch=p=>p.match(/(?:^|\/foundation-gateway)\/v1\/defence\/status\/([a-z0-9][a-z0-9-]{0,63})$/);
 const SHA=/^[a-f0-9]{40}$/;
 
-/** @param {{gateway:any, authenticate:any, authenticateApp?:any, defenceStatus?:any, identityClaim?:any, authenticateIdentityClaim?:any, grantConsent?:any, grantRevocation?:any, revocationFeed?:any, revocationAck?:any, revocationHealth?:any, appOperationalStatus?:any, capabilityDiscovery?:any, maxBodyBytes?:number}} [options] */
+/** @param {{gateway:any, authenticate:any, authenticateApp?:any, authenticateIntegrationClient?:any, defenceStatus?:any, identityClaim?:any, authenticateIdentityClaim?:any, grantConsent?:any, grantRevocation?:any, revocationFeed?:any, revocationAck?:any, revocationHealth?:any, appOperationalStatus?:any, capabilityDiscovery?:any, integrationClientStatus?:any, maxBodyBytes?:number}} [options] */
 export function createFoundationHttpHandler({
   gateway,
   authenticate,
   authenticateApp,
+  authenticateIntegrationClient,
   defenceStatus,
   identityClaim,
   authenticateIdentityClaim,
@@ -32,11 +34,13 @@ export function createFoundationHttpHandler({
   revocationHealth,
   appOperationalStatus,
   capabilityDiscovery,
+  integrationClientStatus,
   maxBodyBytes=16*1024
 }={}){
   if(typeof gateway!=='function') throw new TypeError('gateway must be a function');
   if(typeof authenticate!=='function') throw new TypeError('authenticate must be a function');
   if(authenticateApp!==undefined&&typeof authenticateApp!=='function') throw new TypeError('authenticateApp must be a function');
+  if(authenticateIntegrationClient!==undefined&&typeof authenticateIntegrationClient!=='function') throw new TypeError('authenticateIntegrationClient must be a function');
   if(defenceStatus!==undefined&&typeof defenceStatus!=='function') throw new TypeError('defenceStatus must be a function');
   if(identityClaim!==undefined&&typeof identityClaim!=='function') throw new TypeError('identityClaim must be a function');
   if(authenticateIdentityClaim!==undefined&&typeof authenticateIdentityClaim!=='function') throw new TypeError('authenticateIdentityClaim must be a function');
@@ -47,6 +51,7 @@ export function createFoundationHttpHandler({
   if(revocationHealth!==undefined&&typeof revocationHealth!=='function') throw new TypeError('revocationHealth must be a function');
   if(appOperationalStatus!==undefined&&typeof appOperationalStatus!=='function') throw new TypeError('appOperationalStatus must be a function');
   if(capabilityDiscovery!==undefined&&typeof capabilityDiscovery!=='function') throw new TypeError('capabilityDiscovery must be a function');
+  if(integrationClientStatus!==undefined&&typeof integrationClientStatus!=='function') throw new TypeError('integrationClientStatus must be a function');
 
   return async function handle(request){
     const url=new URL(request.url);
@@ -59,6 +64,18 @@ export function createFoundationHttpHandler({
       const appId=url.searchParams.get('appId')||null;
       const result=await capabilityDiscovery({appId});
       const status={ok:200,invalid:400,unavailable:503}[result.status]??500;
+      return json(status,result);
+    }
+
+    if(request.method==='GET'&&integrationClientStatusPath(url.pathname)){
+      if(typeof integrationClientStatus!=='function'||typeof authenticateIntegrationClient!=='function'){
+        return json(404,{error:'not-found'});
+      }
+      const clientId=url.searchParams.get('clientId')??'';
+      let authContext;
+      try{authContext=await authenticateIntegrationClient(request)}catch{return json(401,{error:'unauthenticated'})}
+      const result=await integrationClientStatus({clientId,authContext});
+      const status={ok:200,denied:403,invalid:400,unavailable:503}[result.status]??500;
       return json(status,result);
     }
 
