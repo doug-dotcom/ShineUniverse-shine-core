@@ -30,7 +30,7 @@ select * from foundation.issue_access_grant_v1(
 );
 
 do $$
-declare got_outcome text; got_reason text; got_grant uuid; n integer; state text; outbox_n integer;
+declare got_outcome text; got_reason text; got_grant uuid; n integer; state text;
 begin
   select outcome,reason_code,grant_id into got_outcome,got_reason,got_grant
   from foundation.revoke_access_grant_v1(
@@ -53,13 +53,23 @@ begin
   where grant_id='44444444-4444-4444-8444-444444444444';
   if state<>'revoked' then raise exception 'grant remained effective: %',state; end if;
 
+end
+$;
+
+reset role;
+set role service_role;
+do $
+declare outbox_n integer;
+begin
   select count(*) into outbox_n from foundation.revocation_outbox
   where grant_id='44444444-4444-4444-8444-444444444444';
   if outbox_n<>1 then raise exception 'revocation outbox not populated'; end if;
 end
-$$;
+$;
+reset role;
+set role foundation_gateway;
 
-do $$
+do $
 declare got_outcome text; got_reason text; n integer;
 begin
   select outcome,reason_code into got_outcome,got_reason
