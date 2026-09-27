@@ -462,8 +462,20 @@
     {
       "id": "estate-audit-manifest-helper",
       "path": "security/shine-defence/integration-kit/estate-audit-manifest-v1.mjs",
+      "version": "1.0.1",
+      "blobSha": "01b4b7af0ba194ea5d091464422629146473b0e6"
+    },
+    {
+      "id": "estate-manifest-diff",
+      "path": "security/shine-defence/estate-manifest-diff-v1.json",
       "version": "1.0.0",
-      "blobSha": "5553bfeba904e19940049ecf80d6d2a6337ae2f8"
+      "blobSha": "ff9e9865323e64e18359c6e251cbda8d4061239e"
+    },
+    {
+      "id": "estate-manifest-diff-helper",
+      "path": "security/shine-defence/integration-kit/estate-manifest-diff-v1.mjs",
+      "version": "1.0.0",
+      "blobSha": "97d72a94582670b22f9e0dde986aec70c3399560"
     }
   ]
 }
