@@ -1,0 +1,40 @@
+{
+  "contract": "shine-defence/review-evidence-pack-v1",
+  "version": "1.0.0",
+  "purpose": "Bounded, non-authoritative GitHub compare evidence for human review of an observed deployment-drift release.",
+  "packFields": [
+    "appId",
+    "repository",
+    "reviewedCommitSha",
+    "observedCommitSha",
+    "deploymentObservationId",
+    "compare",
+    "reviewFocus",
+    "proposedEvidence"
+  ],
+  "rules": [
+    "Packs are generated only for review-intake-planner items in needs_review_evidence state.",
+    "GitHub compare metadata must bind the exact reviewed commit as base and exact observed deployed commit as head.",
+    "The compare relationship must be ahead with behind_by equal to zero before a normal drift evidence pack is produced.",
+    "Packs contain file paths and numeric change statistics only; raw patches and file contents are excluded.",
+    "Changed files are bounded to 300 entries and total path text is bounded.",
+    "Review-focus categories are deterministic filename/path heuristics and are not security findings.",
+    "proposedEvidence is explicitly unreviewed and cannot be supplied to candidate intake until a human records a review outcome.",
+    "A human-reviewed evidence record must be separately authored after examining the pack and any underlying code/tests needed for judgement."
+  ],
+  "reviewFocusCategories": [
+    "security_or_auth",
+    "api_or_server",
+    "database_or_migration",
+    "dependency_or_build",
+    "ci_or_deployment",
+    "tests",
+    "other"
+  ],
+  "nonClaims": [
+    "A clean-looking file list does not prove a release is secure.",
+    "Change counts are not risk scores.",
+    "The evidence pack is not human review evidence.",
+    "The generator does not approve, reject, intake or certify a release."
+  ]
+}
