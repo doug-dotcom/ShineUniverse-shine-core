@@ -15,12 +15,12 @@ const SHA=/^[a-f0-9]{40}$/;
 
 function focus(filename){
   const f=filename.toLowerCase();
+  if(/(^|\/)(tests?|__tests__)(\/|[._-])/.test(f)||/(\.test\.|\.spec\.)/.test(f))return 'tests';
   if(/(^|\/)(auth|security|middleware|permission|session|token|crypto|secret|vault)(\/|[._-])/.test(f)||/(auth|security|csrf|permission|session|token|credential|secret)/.test(f))return 'security_or_auth';
   if(/(^|\/)(api|server|backend|routes?|functions?)(\/|[._-])/.test(f)||/(route\.|server\.|handler\.)/.test(f))return 'api_or_server';
   if(/(^|\/)(supabase|migrations?|database|db|sql)(\/|[._-])/.test(f)||/\.sql$/.test(f))return 'database_or_migration';
   if(/(^|\/)(package(-lock)?\.json|requirements.*\.txt|pyproject\.toml|deno\.json|cargo\.toml|go\.mod)$/.test(f)||/(package\.json|lock|requirements|pyproject)/.test(f))return 'dependency_or_build';
   if(/(^|\/)(\.github|railway\.toml|dockerfile|docker-compose|vercel\.json)/.test(f)||/(deploy|workflow|ci\.yml|ci\.yaml)/.test(f))return 'ci_or_deployment';
-  if(/(^|\/)(tests?|__tests__)(\/|[._-])/.test(f)||/(\.test\.|\.spec\.)/.test(f))return 'tests';
   return 'other';
 }
 
