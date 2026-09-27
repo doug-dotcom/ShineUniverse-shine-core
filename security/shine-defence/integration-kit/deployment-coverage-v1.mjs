@@ -30,9 +30,9 @@ export function buildCoverage({ledger,sources,observations,exceptions}){
 function selfTest(){
   const r=buildCoverage({
     ledger:{apps:[{id:'a',repo:'o/a'},{id:'b',repo:'o/b'},{id:'c',repo:'o/c'},{id:'d',repo:'o/d'}]},
-    sources:{sources:[{appId:'a'},{appId:'b'}]},
+    sources:{sources:[{appId:'a',repository:'o/a'},{appId:'b',repository:'o/b'}]},
     observations:{observations:[{appId:'a'}]},
-    exceptions:{exceptions:[{appId:'c',state:'partial_service'}]}
+    exceptions:{exceptions:[{appId:'c',state:'partial_service',repository:'o/c'}]}
   });
   const s=new Map(r.items.map(i=>[i.appId,i.state]));
   if(s.get('a')!=='observed'||s.get('b')!=='mapped_unobserved'||s.get('c')!=='partial_service'||s.get('d')!=='unmapped')throw new Error('coverage state mismatch');
