@@ -12,7 +12,7 @@ const SESSION_GAP_MS=60*60*1000;
 const fail=m=>{throw new Error(m)};
 
 function actionList(review){
-  if(review?.artifact!=='shine-defence/human-diff-review-v1'||!['1.2.0','1.3.0'].includes(review.version))fail('review session summary requires Human Diff Review v1.2+');
+  if(review?.artifact!=='shine-defence/human-diff-review-v1'||!['1.2.0','1.3.0','1.4.0'].includes(review.version))fail('review session summary requires Human Diff Review v1.2+');
   const actions=[];
   for(const f of review.findings||[])if(f.state!=='unreviewed'){
     if(!f.reviewedAt||!f.reviewerId)fail('reviewed finding missing explicit activity metadata');
@@ -84,7 +84,7 @@ function loadLive(){
   return buildEstateReviewSessionReport(files.map(f=>JSON.parse(readFileSync(join(reviewDir,f),'utf8'))),ledgers);
 }
 function selfTest(){
-  const review={artifact:'shine-defence/human-diff-review-v1',version:'1.3.0',reviewId:'app-bbbbbbbbbbbb',appId:'app',repository:'owner/app',state:'evidence_accepted',reviewedCommitSha:'a'.repeat(40),observedCommitSha:'b'.repeat(40),findings:[
+  const review={artifact:'shine-defence/human-diff-review-v1',version:'1.4.0',reviewId:'app-bbbbbbbbbbbb',appId:'app',repository:'owner/app',state:'evidence_accepted',reviewedCommitSha:'a'.repeat(40),observedCommitSha:'b'.repeat(40),findings:[
     {filename:'a.ts',reviewFocus:'security_or_auth',state:'reviewed_attention',notes:'Check.',reviewerId:'alice',reviewedAt:'2026-09-27T01:00:00.000Z'},
     {filename:'b.ts',reviewFocus:'tests',state:'reviewed_no_issue',notes:null,reviewerId:'alice',reviewedAt:'2026-09-27T01:20:00.000Z'},
     {filename:'c.sql',reviewFocus:'database_or_migration',state:'reviewed_no_issue',notes:null,reviewerId:'bob',reviewedAt:'2026-09-27T03:00:00.000Z'}
