@@ -13,10 +13,11 @@ const revocationFeedPath=p=>p==='/v1/revocations'||p.endsWith('/foundation-gatew
 const revocationAckPath=p=>p==='/v1/revocations/ack'||p.endsWith('/foundation-gateway/v1/revocations/ack');
 const revocationStatusPath=p=>p==='/v1/revocations/status'||p.endsWith('/foundation-gateway/v1/revocations/status');
 const appStatusPath=p=>p==='/v1/status'||p.endsWith('/foundation-gateway/v1/status');
+const capabilityDiscoveryPath=p=>p==='/v1/integration/capabilities'||p.endsWith('/foundation-gateway/v1/integration/capabilities');
 const defenceStatusMatch=p=>p.match(/(?:^|\/foundation-gateway)\/v1\/defence\/status\/([a-z0-9][a-z0-9-]{0,63})$/);
 const SHA=/^[a-f0-9]{40}$/;
 
-/** @param {{gateway:any, authenticate:any, authenticateApp?:any, defenceStatus?:any, identityClaim?:any, authenticateIdentityClaim?:any, grantConsent?:any, grantRevocation?:any, revocationFeed?:any, revocationAck?:any, revocationHealth?:any, appOperationalStatus?:any, maxBodyBytes?:number}} [options] */
+/** @param {{gateway:any, authenticate:any, authenticateApp?:any, defenceStatus?:any, identityClaim?:any, authenticateIdentityClaim?:any, grantConsent?:any, grantRevocation?:any, revocationFeed?:any, revocationAck?:any, revocationHealth?:any, appOperationalStatus?:any, capabilityDiscovery?:any, maxBodyBytes?:number}} [options] */
 export function createFoundationHttpHandler({
   gateway,
   authenticate,
@@ -30,6 +31,7 @@ export function createFoundationHttpHandler({
   revocationAck,
   revocationHealth,
   appOperationalStatus,
+  capabilityDiscovery,
   maxBodyBytes=16*1024
 }={}){
   if(typeof gateway!=='function') throw new TypeError('gateway must be a function');
@@ -44,11 +46,20 @@ export function createFoundationHttpHandler({
   if(revocationAck!==undefined&&typeof revocationAck!=='function') throw new TypeError('revocationAck must be a function');
   if(revocationHealth!==undefined&&typeof revocationHealth!=='function') throw new TypeError('revocationHealth must be a function');
   if(appOperationalStatus!==undefined&&typeof appOperationalStatus!=='function') throw new TypeError('appOperationalStatus must be a function');
+  if(capabilityDiscovery!==undefined&&typeof capabilityDiscovery!=='function') throw new TypeError('capabilityDiscovery must be a function');
 
   return async function handle(request){
     const url=new URL(request.url);
     if(request.method==='GET'&&healthPath(url.pathname)){
       return json(200,{service:'shine-foundation-gateway',status:'ok',schemaVersion:'1.0.0'});
+    }
+
+    if(request.method==='GET'&&capabilityDiscoveryPath(url.pathname)){
+      if(typeof capabilityDiscovery!=='function') return json(404,{error:'not-found'});
+      const appId=url.searchParams.get('appId')||null;
+      const result=await capabilityDiscovery({appId});
+      const status={ok:200,invalid:400,unavailable:503}[result.status]??500;
+      return json(status,result);
     }
 
     const defenceMatch=defenceStatusMatch(url.pathname);
