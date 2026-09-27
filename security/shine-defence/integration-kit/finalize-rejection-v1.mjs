@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {createHash} from 'node:crypto';
 import {spawnSync} from 'node:child_process';
 import {existsSync,readFileSync,renameSync,writeFileSync} from 'node:fs';
 import {join} from 'node:path';
@@ -17,6 +18,7 @@ const paths={
 
 const json=value=>JSON.stringify(value,null,2)+'\n';
 const clone=value=>JSON.parse(JSON.stringify(value));
+const gitBlobSha=bytes=>createHash('sha1').update(Buffer.from('blob '+bytes.length+'\0')).update(bytes).digest('hex');
 
 function fail(message){throw new Error(message)}
 function readJson(relativePath){return JSON.parse(readFileSync(join(root,relativePath),'utf8'))}
@@ -27,7 +29,7 @@ function atomicWrite(fullPath,bytes){
   renameSync(temp,fullPath);
 }
 
-export function buildRejectionFinalization({candidateId,queue,decisions,checklist,registry,registryBytes,readArtefact}){
+export function buildRejectionFinalization({candidateId,queue,decisions,checklist,checklistBytes,registry,registryBytes,readArtefact}){
   if(queue.ledger!=='shine-defence/review-candidates-v1'||!Array.isArray(queue.candidates))fail('unsupported review candidate queue');
   if(decisions.ledger!=='shine-defence/review-decisions-v1'||!Array.isArray(decisions.decisions))fail('unsupported review decision ledger');
   if(registry.registry!=='shine-defence/canonical-registry-v1'||!Array.isArray(registry.entries))fail('unsupported canonical registry');
@@ -38,6 +40,7 @@ export function buildRejectionFinalization({candidateId,queue,decisions,checklis
   if(candidate.status!=='pending_review')fail('candidate must be pending_review');
   if(decisions.decisions.some(decision=>decision.candidateId===candidateId))fail('candidate already has a review decision');
 
+  if(!Buffer.isBuffer(checklistBytes))fail('checklist bytes are required');
   const failures=validateReviewChecklist({checklist,candidate,registry,registryBytes,readArtefact});
   if(failures.length)fail('review checklist invalid: '+failures.join('; '));
   const auth=checklist.humanAuthorization;
@@ -56,7 +59,9 @@ export function buildRejectionFinalization({candidateId,queue,decisions,checklis
     outcome:'dismissed',
     decidedAt:auth.reviewedAt,
     authority:auth.reviewerId,
-    summary:auth.summary
+    summary:auth.summary,
+    reviewChecklistBlobSha:gitBlobSha(checklistBytes),
+    reviewRegistryBlobSha:checklist.registryBlobSha
   });
 
   return {candidate,nextQueue,nextDecisions,authorization:clone(auth)};
@@ -157,18 +162,19 @@ function selfTest(){
   const decisions={ledger:'shine-defence/review-decisions-v1',version:'1.0.0',decisions:[]};
 
   const built=buildRejectionFinalization({
-    candidateId:candidate.candidateId,queue,decisions,checklist,registry,registryBytes,readArtefact
+    candidateId:candidate.candidateId,queue,decisions,checklist,checklistBytes:Buffer.from(json(checklist)),registry,registryBytes,readArtefact
   });
   const closed=built.nextQueue.candidates[0];
   const decision=built.nextDecisions.decisions[0];
   if(closed.status!=='dismissed'||closed.decisionReason!==checklist.humanAuthorization.summary)fail('self-test: candidate dismissal mismatch');
   if(decision.outcome!=='dismissed'||decision.authority!=='reviewer-1'||decision.decidedAt!==checklist.humanAuthorization.reviewedAt||decision.summary!==checklist.humanAuthorization.summary)fail('self-test: decision binding mismatch');
+  if(decision.reviewChecklistBlobSha!==gitBlobSha(Buffer.from(json(checklist)))||decision.reviewRegistryBlobSha!==checklist.registryBlobSha)fail('self-test: checklist fingerprint mismatch');
 
   const expectFail=(name,mutate)=>{
     const q=clone(queue),d=clone(decisions),c=clone(checklist);
     mutate(q,d,c);
     let failed=false;
-    try{buildRejectionFinalization({candidateId:candidate.candidateId,queue:q,decisions:d,checklist:c,registry,registryBytes,readArtefact})}catch{failed=true}
+    try{buildRejectionFinalization({candidateId:candidate.candidateId,queue:q,decisions:d,checklist:c,checklistBytes:Buffer.from(json(c)),registry,registryBytes,readArtefact})}catch{failed=true}
     if(!failed)fail('self-test expected failure: '+name);
   };
   expectFail('candidate not pending',(q)=>{q.candidates[0].status='dismissed'});
@@ -194,7 +200,8 @@ async function main(){
   const checklistRelative=join(paths.checklists,candidate.candidateId+'.json');
   const checklistFull=join(root,checklistRelative);
   if(!existsSync(checklistFull))fail('canonical rejected checklist required: '+checklistRelative);
-  const checklist=JSON.parse(readFileSync(checklistFull,'utf8'));
+  const checklistBytes=readFileSync(checklistFull);
+  const checklist=JSON.parse(checklistBytes.toString('utf8'));
 
   const registryBytes=readFileSync(join(root,paths.registry));
   const registry=JSON.parse(registryBytes.toString('utf8'));
@@ -203,6 +210,7 @@ async function main(){
     queue,
     decisions:readJson(paths.decisions),
     checklist,
+    checklistBytes,
     registry,
     registryBytes,
     readArtefact:readCanonical
