@@ -308,6 +308,18 @@
       "path": "security/shine-defence/integration-kit/verify-deployment-sources-v1.mjs",
       "version": "1.0.0",
       "blobSha": "54039827dd774c87eb348f60e3206a4ed05fc022"
+    },
+    {
+      "id": "deployment-coverage",
+      "path": "security/shine-defence/deployment-coverage-v1.json",
+      "version": "1.0.0",
+      "blobSha": "d5fe3884e5bacc27a0f4bfef2b32e5e1ac6d213e"
+    },
+    {
+      "id": "deployment-coverage-helper",
+      "path": "security/shine-defence/integration-kit/deployment-coverage-v1.mjs",
+      "version": "1.0.0",
+      "blobSha": "58539d570c68007cf45a023ad222955d6cd80d02"
     }
   ]
 }
