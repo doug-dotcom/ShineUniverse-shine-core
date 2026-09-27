@@ -217,6 +217,12 @@ Command Centre v1.3 exposes checkpoint integrity per reviewed app as `not_applic
 
 The export intentionally excludes raw GitHub patches/source contents, environment variables, credentials/tokens/Vault material and arbitrary files. Review notes/summaries are already bounded workspace metadata governed by Human Diff Review secret-like-content checks. `nextAction` is exported only as descriptive id/human-required/description metadata—helper paths and executable args are stripped. Repeating an export at the same `asOf` over unchanged Defence state is deterministic. The bundle is a recorded-state snapshot, not external attestation, and grants no authority.
 
+### Estate audit manifest
+
+`security/shine-defence/estate-audit-manifest-v1.json` defines one deterministic fingerprint over the entire canonically reviewed Shine estate. `estate-audit-manifest-v1.mjs` generates every reviewed app's audit export at one shared explicit `asOf`, sorts entries by app id, and records each app's audit-export SHA-256 plus reviewed commit, observed release commit/state and checkpoint-integrity state. It then hashes the complete compact manifest body into `manifestSha256`.
+
+The manifest includes every app in the reviewed ecosystem ledger exactly once but does not embed all full audit bundles, keeping it compact and portable. Any per-app audit-export hash change changes the estate manifest hash. Repeating generation at the same `asOf` over unchanged Defence state yields the same manifest. A matching fingerprint means the recorded estate snapshot is unchanged relative to its inputs; it is not an external notarisation or a claim that every app is secure.
+
 ### Candidate intake readiness
 
 `security/shine-defence/candidate-intake-readiness-v1.json` defines the final fail-closed bridge between accepted human diff-review evidence and candidate intake. `candidate-intake-readiness-v1.mjs` requires the accepted review and separate evidence record to bind the current deployment-drift identity exactly, re-derives the evidence record from the durable human review, rejects tampering or stale deployment identity, and then runs the canonical candidate-intake validator over the resulting payload.

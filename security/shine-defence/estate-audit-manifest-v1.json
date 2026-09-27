@@ -1,0 +1,20 @@
+{
+  "contract": "shine-defence/estate-audit-manifest-v1",
+  "version": "1.0.0",
+  "purpose": "One deterministic integrity fingerprint over the complete canonically reviewed Shine estate at a shared audit asOf timestamp.",
+  "rules": [
+    "The manifest includes every app in the canonical reviewed ecosystem ledger exactly once.",
+    "Every per-app audit export is generated at the same explicit asOf timestamp.",
+    "Manifest entries are sorted lexicographically by appId.",
+    "Each entry binds appId, repository, per-app exportSha256, reviewed commit, observed deployment commit/state and checkpoint-integrity state.",
+    "The manifest SHA-256 is computed over the complete manifest body excluding manifestSha256.",
+    "Repeated generation at the same asOf over unchanged Defence state must produce the same manifest and manifestSha256.",
+    "The manifest is compact: it references per-app audit-export hashes rather than embedding all eleven full audit bundles.",
+    "The manifest mutates nothing and grants no review, deployment, candidate, checklist or certification authority."
+  ],
+  "nonClaims": [
+    "The manifest is a deterministic internal integrity fingerprint, not external notarisation.",
+    "A matching manifest proves the recorded estate snapshot is unchanged relative to its inputs; it does not prove every app is secure.",
+    "Different manifest hashes identify a changed recorded snapshot but do not by themselves explain whether the change is good, bad or expected."
+  ]
+}

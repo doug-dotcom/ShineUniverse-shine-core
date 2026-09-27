@@ -2,13 +2,13 @@
 import {createHash} from 'node:crypto';
 import {existsSync,readFileSync} from 'node:fs';
 import {join} from 'node:path';
-import {fileURLToPath} from 'node:url';
+import {fileURLToPath,pathToFileURL} from 'node:url';
 import {loadLiveCommandCentre} from './command-centre-v1.mjs';
 import {buildReviewSessionSummary} from './review-session-summary-v1.mjs';
 import {verifyEventLedger} from './human-review-event-ledger-v1.mjs';
 import {verifyCheckpointStore} from './review-integrity-checkpoint-v1.mjs';
 
-export const SHINE_DEFENCE_AUDIT_EXPORT_VERSION='1.0.0';
+export const SHINE_DEFENCE_AUDIT_EXPORT_VERSION='1.0.1';
 const root=fileURLToPath(new URL('../../../',import.meta.url));
 const P={
   ledger:'security/shine-defence/ecosystem-profile-ledger-v1.json',
@@ -104,4 +104,4 @@ function main(){
   if(ti<0||!args[ti+1])fail('--as-of is required for deterministic audit export');
   console.log(JSON.stringify(loadAuditExport({appId:args[ai+1],asOf:args[ti+1]}),null,2));
 }
-main();
+if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href)main();
