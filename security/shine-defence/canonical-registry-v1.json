@@ -343,7 +343,7 @@
       "id": "review-evidence-pack-generator",
       "path": "security/shine-defence/integration-kit/generate-review-evidence-pack-v1.mjs",
       "version": "1.0.0",
-      "blobSha": "8cc8838f531fe23c02cec407b785b2843c8d7d68"
+      "blobSha": "6a359b9a7957384242a7561f6069745f5bfc6e36"
     }
   ]
 }
