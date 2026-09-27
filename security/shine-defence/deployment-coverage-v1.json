@@ -1,0 +1,24 @@
+{
+  "contract": "shine-defence/deployment-coverage-v1",
+  "version": "1.0.0",
+  "purpose": "Deterministic coverage accounting for which canonically reviewed Shine applications can be observed through registered deployment sources.",
+  "states": [
+    {"id":"observed","meaning":"A reviewed app has a registered full-app deployment source and at least one deployment observation."},
+    {"id":"mapped_unobserved","meaning":"A reviewed app has a registered full-app deployment source but no deployment observation yet."},
+    {"id":"partial_service","meaning":"Railway exposes only a repo-backed subservice that is not sufficient to represent the reviewed application deployment."},
+    {"id":"unmapped","meaning":"No trusted full-app deployment source or documented partial-service exception exists."}
+  ],
+  "rules": [
+    "Coverage is computed only for apps in the canonical reviewed ecosystem ledger.",
+    "A full-app source counts as observed only when at least one standard deployment observation exists for the same app.",
+    "Partial services never count as full deployment coverage.",
+    "Repository equality is required for both full-app sources and partial-service exceptions.",
+    "Coverage state is workflow metadata only and never changes certification, review, revocation or deployment state.",
+    "Coverage output is deterministic by app id."
+  ],
+  "nonClaims": [
+    "Observed coverage does not mean the observed release is protected; deployment status is evaluated separately.",
+    "A partial service does not imply the parent app is undeployed.",
+    "Unmapped does not mean an app is unsafe or offline."
+  ]
+}
