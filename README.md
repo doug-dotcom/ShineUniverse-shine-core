@@ -149,5 +149,11 @@ Each queue item exposes one workflow state and one next action: generate a missi
 
 Reviewer id, rejection timestamp and summary come only from the rejected checklist. The decision pins the exact checklist Git blob and registry identity, so later edits or registry changes cannot silently rewrite the historical rejection. The helper never changes the ecosystem reviewed ledger, certification receipt or revocation state. Apply mode runs candidate, decision, checklist, rejection-binding and queue verification and restores both mutated ledgers if any check fails.
 
+### Defence operations controller
+
+`security/shine-defence/operations-controller-v1.json` defines a read-only orchestration layer over the candidate lifecycle, Review Queue and canonical certification state. `operations-controller-v1.mjs` lists every app known to either the reviewed ecosystem ledger or candidate history exactly once, classifies its current Core workflow state, and identifies the exact guarded helper plus arguments appropriate for the next step when one exists.
+
+Pending reviews take workflow precedence and preserve human-required boundaries from Review Queue. Approved reviews route to first-certification or re-certification helpers; rejected reviews route to the rejection finalizer. Reviewed apps with an exact receipt and no matching revocation are reported as canonically reviewed and idle, while exact reviewed-release revocations route toward intake of a replacement release. Missing canonical receipts fail closed with no automatic repair helper. The controller never invokes a mutating helper and never infers which commit is currently deployed; live deployment freshness remains a separate release-status check.
+
 
 An extension policy existing in Core does **not** automatically certify an app. Each app still needs local, testable evidence before claiming that profile.
