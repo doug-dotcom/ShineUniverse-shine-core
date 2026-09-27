@@ -3,7 +3,7 @@ import {existsSync,readFileSync} from 'node:fs';
 import {join} from 'node:path';
 import {fileURLToPath,pathToFileURL} from 'node:url';
 
-export const SHINE_DEFENCE_STALENESS_VISIBILITY_VERSION='1.0.0';
+export const SHINE_DEFENCE_STALENESS_VISIBILITY_VERSION='1.1.0';
 const root=fileURLToPath(new URL('../../../',import.meta.url));
 const P={ledger:'security/shine-defence/ecosystem-profile-ledger-v1.json',candidates:'security/shine-defence/review-candidates-v1.json',decisions:'security/shine-defence/review-decisions-v1.json',reviews:'security/shine-defence/human-diff-reviews'};
 const readJson=p=>JSON.parse(readFileSync(join(root,p),'utf8'));
@@ -40,7 +40,12 @@ export function buildStaleness({commandCentre,ledger,candidates,decisions,asOf,r
 
     let reviewAge=na();
     if(item.reviewProgress?.state==='not_started')reviewAge=unknown();
-    else if(item.reviewProgress?.state==='in_progress')reviewAge=unknown();
+    else if(item.reviewProgress?.state==='in_progress'){
+      const release=item.deployment?.releaseCommitSha;
+      const id=release?item.appId+'-'+release.slice(0,12):null;
+      const review=id?readReview(id):null;
+      reviewAge=review?.lastActivityAt?ageAt(review.lastActivityAt,asOf):unknown();
+    }
     else if(item.reviewProgress?.state==='evidence_accepted'||item.reviewProgress?.state==='candidate_intake_ready'){
       const release=item.deployment?.releaseCommitSha;
       const id=release?item.appId+'-'+release.slice(0,12):null;
@@ -55,7 +60,7 @@ export function buildStaleness({commandCentre,ledger,candidates,decisions,asOf,r
   }
   const counts={deploymentObservation:{},humanReview:{},pendingCandidate:{},certification:{}};
   for(const i of items)for(const k of Object.keys(counts)){const b=i[k].band;counts[k][b]=(counts[k][b]||0)+1}
-  return {report:'shine-defence/staleness-visibility-v1',version:'1.0.0',asOf,apps:items.length,counts,items};
+  return {report:'shine-defence/staleness-visibility-v1',version:'1.1.0',asOf,apps:items.length,counts,items};
 }
 function candidateMatch(decision,candidates,app){
   const c=(candidates.candidates||[]).find(x=>x.candidateId===decision.candidateId);
@@ -64,7 +69,7 @@ function candidateMatch(decision,candidates,app){
 function selfTest(){
   const cc={items:[
     {appId:'a',repository:'o/a',deployment:{observedAt:'2026-09-27T00:00:00.000Z',releaseCommitSha:'b'.repeat(40)},reviewProgress:{state:'not_started'}},
-    {appId:'b',repository:'o/b',deployment:{observedAt:'2026-09-20T00:00:00.000Z',releaseCommitSha:'d'.repeat(40)},reviewProgress:{state:'not_applicable'}}
+    {appId:'b',repository:'o/b',deployment:{observedAt:'2026-09-20T00:00:00.000Z',releaseCommitSha:'d'.repeat(40)},reviewProgress:{state:'in_progress'}}
   ]};
   const ledger={apps:[{id:'a',reviewCommitSha:'a'.repeat(40),profileBlobSha:'1'.repeat(40)},{id:'b',reviewCommitSha:'c'.repeat(40),profileBlobSha:'2'.repeat(40)}]};
   const candidates={candidates:[
@@ -72,12 +77,12 @@ function selfTest(){
     {candidateId:'b-pending',appId:'b',releaseCommitSha:'e'.repeat(40),profileBlobSha:'2'.repeat(40),status:'pending_review',observedAt:'2026-09-26T12:00:00.000Z'}
   ]};
   const decisions={decisions:[{candidateId:'a-old',appId:'a',outcome:'accepted',decidedAt:'2026-09-26T01:00:00.000Z'}]};
-  const r=buildStaleness({commandCentre:cc,ledger,candidates,decisions,asOf:'2026-09-27T12:00:00.000Z',readReview:()=>null});
+  const r=buildStaleness({commandCentre:cc,ledger,candidates,decisions,asOf:'2026-09-27T12:00:00.000Z',readReview:id=>id.startsWith('b-')?{lastActivityAt:'2026-09-24T12:00:00.000Z'}:null});
   const a=r.items.find(x=>x.appId==='a'),b=r.items.find(x=>x.appId==='b');
   if(a.deploymentObservation.band!=='current'||a.certification.band!=='ageing'||a.humanReview.band!=='unknown')fail('self-test: app a ages');
-  if(b.deploymentObservation.band!=='stale'||b.pendingCandidate.band!=='ageing'||b.certification.band!=='unknown')fail('self-test: app b ages');
+  if(b.deploymentObservation.band!=='stale'||b.pendingCandidate.band!=='ageing'||b.humanReview.band!=='ageing'||b.humanReview.ageDays!==3||b.certification.band!=='unknown')fail('self-test: app b ages');
   let blocked=false;try{ageAt('2026-09-28T00:00:00.000Z','2026-09-27T00:00:00.000Z')}catch{blocked=true}if(!blocked)fail('self-test: future timestamp accepted');
-  console.log('SHINE DEFENCE STALENESS VISIBILITY SELF-TEST: PASS current/ageing/stale/unknown/not-applicable semantics and future fail-closed');
+  console.log('SHINE DEFENCE STALENESS VISIBILITY SELF-TEST: PASS current/ageing/stale/unknown/not-applicable semantics, explicit review activity and future fail-closed');
 }
 async function main(){
   if(process.argv.includes('--self-test'))return selfTest();

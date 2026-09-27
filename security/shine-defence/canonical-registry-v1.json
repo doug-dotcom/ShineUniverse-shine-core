@@ -348,14 +348,14 @@
     {
       "id": "human-diff-review",
       "path": "security/shine-defence/human-diff-review-v1.json",
-      "version": "1.0.0",
-      "blobSha": "97d0af7d0c5f35cc2c373c0dfde2b5a82d62bfc2"
+      "version": "1.2.0",
+      "blobSha": "29356d4f51ee420e07b1d87e2855084c69a2da6b"
     },
     {
       "id": "human-diff-review-helper",
       "path": "security/shine-defence/integration-kit/human-diff-review-v1.mjs",
-      "version": "1.1.0",
-      "blobSha": "da387b4b72758817eb31d7415a8937ed20f272c4"
+      "version": "1.2.0",
+      "blobSha": "0a3b9cb519266b125951be3b7c9006e5ecad5826"
     },
     {
       "id": "candidate-intake-readiness",
@@ -367,19 +367,19 @@
       "id": "candidate-intake-readiness-helper",
       "path": "security/shine-defence/integration-kit/candidate-intake-readiness-v1.mjs",
       "version": "1.0.0",
-      "blobSha": "5df6da0bcd6fc26c3377062d33b5083ea728f308"
+      "blobSha": "4696f97ea5f1acc0c348042a3c8f1caf5d04583a"
     },
     {
       "id": "command-centre",
       "path": "security/shine-defence/command-centre-v1.json",
-      "version": "1.1.0",
-      "blobSha": "4fe0af255c4b9b59cc53ff930f6f989831b64e64"
+      "version": "1.2.0",
+      "blobSha": "89a6e623b4d3349224758c85aa7734154877b3ce"
     },
     {
       "id": "command-centre-helper",
       "path": "security/shine-defence/integration-kit/command-centre-v1.mjs",
-      "version": "1.1.0",
-      "blobSha": "1d42592fed620112fe06c1c7417aa11817a41815"
+      "version": "1.2.0",
+      "blobSha": "1927998923f069eaad361bcb5cab1f2059f2aff0"
     },
     {
       "id": "attention-queue",
@@ -396,14 +396,14 @@
     {
       "id": "staleness-visibility",
       "path": "security/shine-defence/staleness-visibility-v1.json",
-      "version": "1.0.0",
-      "blobSha": "89c0997bde4c233535096ce92f33962005bf23f0"
+      "version": "1.1.0",
+      "blobSha": "b0d0c42b5e3f3ae681479b78814bf4c64841ebcd"
     },
     {
       "id": "staleness-visibility-helper",
       "path": "security/shine-defence/integration-kit/staleness-visibility-v1.mjs",
-      "version": "1.0.0",
-      "blobSha": "c86e77d3cd73e1699f66fa31caee80092c75d058"
+      "version": "1.1.0",
+      "blobSha": "a6e969b042bc9d29690ea1aa0861509cf1fd8f64"
     }
   ]
 }
