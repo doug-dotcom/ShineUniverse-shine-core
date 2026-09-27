@@ -44,7 +44,7 @@ function reviewProgress({appId,operation,planItem,readyItem}){
   return {state:'not_applicable',detail:null};
 }
 
-function checkpointIntegrity({appId,reviewProgress,deployment}){
+export function checkpointIntegrity({appId,reviewProgress,deployment}){
   if(reviewProgress?.state!=='evidence_accepted'&&reviewProgress?.state!=='candidate_intake_ready')return {state:'not_applicable',checkpointCount:0,latestCheckpointAt:null};
   const release=deployment?.releaseCommitSha;
   if(!release)return {state:'invalid',checkpointCount:0,latestCheckpointAt:null,reason:'Accepted review has no observed release identity.'};
@@ -136,7 +136,13 @@ function printHuman(report){
     console.log('  next: '+i.nextAction.id);
   }
 }
+function checkpointSelfTest(){
+  const na=checkpointIntegrity({appId:'x',reviewProgress:{state:'not_started'},deployment:{releaseCommitSha:'a'.repeat(40)}});
+  const pending=checkpointIntegrity({appId:'definitely-missing-checkpoint-fixture',reviewProgress:{state:'evidence_accepted'},deployment:{releaseCommitSha:'b'.repeat(40)}});
+  if(na.state!=='not_applicable'||pending.state!=='pending')throw new Error('checkpoint integrity basic state mismatch');
+}
 function selfTest(){
+  checkpointSelfTest();
   const operations={items:[
     {appId:'a',repository:'o/a',state:'protected',reviewState:'none',certificationState:'canonical_reviewed_release',deployment:{state:'protected',observedReleaseCommitSha:'a'.repeat(40)},nextAction:{id:'none'}},
     {appId:'b',repository:'o/b',state:'deployment_drift',reviewState:'none',certificationState:'canonical_reviewed_release',deployment:{state:'deployment_drift',observedReleaseCommitSha:'b'.repeat(40)},nextAction:{id:'plan_observed_release_review'}},
@@ -152,7 +158,7 @@ function selfTest(){
   if(report.items.map(i=>i.appId).join(',')!=='a,b,c,d')throw new Error('command centre ordering mismatch');
   if(report.counts.intakeReady!==1||report.counts.deployment.deployment_drift!==3)throw new Error('command centre counts mismatch');
   if(report.items.find(i=>i.appId==='d').reviewProgress.state!=='pending_candidate')throw new Error('pending candidate progress mismatch');
-  console.log('SHINE DEFENCE COMMAND CENTRE SELF-TEST: PASS estate join, reviewed-only scope, deterministic ordering and readiness/progress counts');
+  console.log('SHINE DEFENCE COMMAND CENTRE SELF-TEST: PASS estate join, reviewed-only scope, deterministic ordering, readiness/progress counts and checkpoint not-applicable/pending states');
 }
 function main(){if(process.argv.includes('--self-test'))return selfTest();const r=loadLiveCommandCentre();if(process.argv.includes('--json'))console.log(JSON.stringify(r,null,2));else printHuman(r)}
 if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href)main();
