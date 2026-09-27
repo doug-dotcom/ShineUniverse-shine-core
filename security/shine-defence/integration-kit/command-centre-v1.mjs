@@ -1,0 +1,128 @@
+#!/usr/bin/env node
+import {existsSync,readFileSync} from 'node:fs';
+import {join} from 'node:path';
+import {fileURLToPath} from 'node:url';
+import {loadLiveOperations} from './operations-controller-v1.mjs';
+import {buildCoverage} from './deployment-coverage-v1.mjs';
+import {buildIntakePlan} from './plan-review-intake-v1.mjs';
+import {loadLiveDeploymentReport} from './deployment-observations-v1.mjs';
+import {loadLiveReadiness} from './candidate-intake-readiness-v1.mjs';
+
+export const SHINE_DEFENCE_COMMAND_CENTRE_VERSION='1.0.0';
+const root=fileURLToPath(new URL('../../../',import.meta.url));
+const P={
+  ledger:'security/shine-defence/ecosystem-profile-ledger-v1.json',
+  candidates:'security/shine-defence/review-candidates-v1.json',
+  sources:'security/shine-defence/deployment-sources-v1.json',
+  observations:'security/shine-defence/deployment-observations-v1.json',
+  exceptions:'security/shine-defence/deployment-source-exceptions-v1.json',
+  reviews:'security/shine-defence/human-diff-reviews'
+};
+const readJson=p=>JSON.parse(readFileSync(join(root,p),'utf8'));
+
+function reviewProgress({appId,operation,planItem,readyItem}){
+  if(operation.reviewState&&operation.reviewState!=='none')return {state:'pending_candidate',detail:operation.reviewState};
+  if(readyItem?.state==='candidate_intake_ready')return {state:'candidate_intake_ready',detail:readyItem.candidateId};
+  if(planItem?.state==='profile_changed_requires_refresh')return {state:'profile_refresh_required',detail:planItem.reason};
+  if(planItem?.state==='needs_review_evidence'){
+    const id=appId+'-'+planItem.intakeDraft.releaseCommitSha.slice(0,12);
+    const path=join(root,P.reviews,id+'.json');
+    if(!existsSync(path))return {state:'not_started',detail:'Human diff review has not been started.'};
+    try{
+      const review=JSON.parse(readFileSync(path,'utf8'));
+      const total=Array.isArray(review.findings)?review.findings.length:0;
+      const reviewed=Array.isArray(review.findings)?review.findings.filter(f=>f.state!=='unreviewed').length:0;
+      const blockers=Array.isArray(review.findings)?review.findings.filter(f=>f.state==='reviewed_blocker').length:0;
+      return {state:review.state==='evidence_accepted'?'evidence_accepted':'in_progress',reviewedFiles:reviewed,totalFiles:total,blockers,reviewerId:review.humanAcceptance?.reviewerId||null};
+    }catch{return {state:'in_progress',detail:'Human diff review artifact is unreadable; existing Defence validators should investigate.'}}
+  }
+  return {state:'not_applicable',detail:null};
+}
+
+export function buildCommandCentre({operations,coverage,plan,readiness,reviewProgressFn=reviewProgress}){
+  const cov=new Map((coverage.items||[]).map(i=>[i.appId,i]));
+  const plans=new Map((plan.items||[]).map(i=>[i.appId,i]));
+  const ready=new Map((readiness.items||[]).map(i=>[i.appId,i]));
+  const items=[];
+  for(const op of (operations.items||[]).filter(i=>i.certificationState!=='uncertified').sort((a,b)=>a.appId.localeCompare(b.appId))){
+    const deployment=op.deployment||{state:'unobserved'};
+    const coverageItem=cov.get(op.appId);
+    const readyItem=ready.get(op.appId);
+    items.push({
+      appId:op.appId,
+      repository:op.repository,
+      estateState:op.state,
+      certification:op.certificationState,
+      coverage:coverageItem?.state||'unmapped',
+      deployment:{
+        state:deployment.state||'unobserved',
+        observationId:deployment.observationId||null,
+        observedAt:deployment.observedAt||null,
+        releaseCommitSha:deployment.observedReleaseCommitSha||null,
+        profileBlobSha:deployment.observedProfileBlobSha||null
+      },
+      reviewProgress:reviewProgressFn({appId:op.appId,operation:op,planItem:plans.get(op.appId),readyItem}),
+      intakeReadiness:readyItem?.state||'not_ready',
+      candidateId:readyItem?.candidateId||null,
+      nextAction:op.nextAction
+    });
+  }
+  const counts={estate:{},coverage:{},deployment:{},reviewProgress:{},intakeReady:0};
+  for(const i of items){
+    counts.estate[i.estateState]=(counts.estate[i.estateState]||0)+1;
+    counts.coverage[i.coverage]=(counts.coverage[i.coverage]||0)+1;
+    counts.deployment[i.deployment.state]=(counts.deployment[i.deployment.state]||0)+1;
+    counts.reviewProgress[i.reviewProgress.state]=(counts.reviewProgress[i.reviewProgress.state]||0)+1;
+    if(i.intakeReadiness==='candidate_intake_ready')counts.intakeReady++;
+  }
+  return {report:'shine-defence/command-centre-v1',version:'1.0.0',reviewedApps:items.length,counts,items};
+}
+
+export function loadLiveCommandCentre(){
+  const ledger=readJson(P.ledger),candidates=readJson(P.candidates),deployment=loadLiveDeploymentReport();
+  return buildCommandCentre({
+    operations:loadLiveOperations(),
+    coverage:buildCoverage({ledger,sources:readJson(P.sources),observations:readJson(P.observations),exceptions:readJson(P.exceptions)}),
+    plan:buildIntakePlan({deploymentReport:deployment,ledger,candidates}),
+    readiness:loadLiveReadiness()
+  });
+}
+function printHuman(report){
+  console.log('SHINE DEFENCE COMMAND CENTRE');
+  console.log('reviewed apps: '+report.reviewedApps);
+  console.log('intake ready: '+report.counts.intakeReady);
+  console.log('coverage: '+JSON.stringify(report.counts.coverage));
+  console.log('deployment: '+JSON.stringify(report.counts.deployment));
+  console.log('review progress: '+JSON.stringify(report.counts.reviewProgress));
+  for(const i of report.items){
+    console.log('');
+    console.log(i.appId+' / '+i.repository);
+    console.log('  estate: '+i.estateState);
+    console.log('  certification: '+i.certification);
+    console.log('  coverage: '+i.coverage);
+    console.log('  deployment: '+i.deployment.state+(i.deployment.releaseCommitSha?' '+i.deployment.releaseCommitSha.slice(0,12):''));
+    console.log('  review: '+i.reviewProgress.state+(i.reviewProgress.totalFiles!==undefined?' '+i.reviewProgress.reviewedFiles+'/'+i.reviewProgress.totalFiles:''));
+    console.log('  intake: '+i.intakeReadiness+(i.candidateId?' '+i.candidateId:''));
+    console.log('  next: '+i.nextAction.id);
+  }
+}
+function selfTest(){
+  const operations={items:[
+    {appId:'a',repository:'o/a',state:'protected',reviewState:'none',certificationState:'canonical_reviewed_release',deployment:{state:'protected',observedReleaseCommitSha:'a'.repeat(40)},nextAction:{id:'none'}},
+    {appId:'b',repository:'o/b',state:'deployment_drift',reviewState:'none',certificationState:'canonical_reviewed_release',deployment:{state:'deployment_drift',observedReleaseCommitSha:'b'.repeat(40)},nextAction:{id:'plan_observed_release_review'}},
+    {appId:'c',repository:'o/c',state:'candidate_intake_ready',reviewState:'none',certificationState:'canonical_reviewed_release',deployment:{state:'deployment_drift',observedReleaseCommitSha:'c'.repeat(40)},nextAction:{id:'apply_candidate_intake'}},
+    {appId:'d',repository:'o/d',state:'human_review_required',reviewState:'review_in_progress',certificationState:'reviewed_with_pending_candidate',deployment:{state:'deployment_drift'},nextAction:{id:'review_requirement',humanRequired:true}},
+    {appId:'x',repository:'o/x',state:'uncertified_idle',reviewState:'none',certificationState:'uncertified',deployment:{state:'unobserved'},nextAction:{id:'intake_candidate'}}
+  ]};
+  const coverage={items:[{appId:'a',state:'observed'},{appId:'b',state:'observed'},{appId:'c',state:'observed'},{appId:'d',state:'observed'}]};
+  const plan={items:[{appId:'b',state:'needs_review_evidence',intakeDraft:{releaseCommitSha:'b'.repeat(40)}},{appId:'c',state:'needs_review_evidence',intakeDraft:{releaseCommitSha:'c'.repeat(40)}}]};
+  const readiness={items:[{appId:'c',state:'candidate_intake_ready',candidateId:'c-cccccccccccc'}]};
+  const report=buildCommandCentre({operations,coverage,plan,readiness,reviewProgressFn:({appId,operation,readyItem})=>operation.reviewState!=='none'?{state:'pending_candidate'}:readyItem?{state:'candidate_intake_ready'}:appId==='b'?{state:'not_started'}:{state:'not_applicable'}});
+  if(report.reviewedApps!==4)throw new Error('uncertified app leaked into command centre');
+  if(report.items.map(i=>i.appId).join(',')!=='a,b,c,d')throw new Error('command centre ordering mismatch');
+  if(report.counts.intakeReady!==1||report.counts.deployment.deployment_drift!==3)throw new Error('command centre counts mismatch');
+  if(report.items.find(i=>i.appId==='d').reviewProgress.state!=='pending_candidate')throw new Error('pending candidate progress mismatch');
+  console.log('SHINE DEFENCE COMMAND CENTRE SELF-TEST: PASS estate join, reviewed-only scope, deterministic ordering and readiness/progress counts');
+}
+function main(){if(process.argv.includes('--self-test'))return selfTest();const r=loadLiveCommandCentre();if(process.argv.includes('--json'))console.log(JSON.stringify(r,null,2));else printHuman(r)}
+main();
