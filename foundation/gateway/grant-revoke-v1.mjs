@@ -23,6 +23,7 @@ const requireFunction=(adapters,name)=>{
   if(typeof adapters?.[name]!=='function') throw new TypeError('missing grant revoke adapter: '+name);
 };
 
+/** @param {{adapters:any, clock?:()=>string, idFactory?:()=>string}} [options] */
 export function createGrantRevokeService({
   adapters,
   clock=()=>new Date().toISOString(),
