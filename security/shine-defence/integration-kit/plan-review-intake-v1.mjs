@@ -5,7 +5,7 @@ import {fileURLToPath,pathToFileURL} from 'node:url';
 import {loadLiveDeploymentReport} from './deployment-observations-v1.mjs';
 import {buildCandidateIntake} from './intake-review-v1.mjs';
 
-export const SHINE_DEFENCE_REVIEW_INTAKE_PLANNER_VERSION='1.0.0';
+export const SHINE_DEFENCE_REVIEW_INTAKE_PLANNER_VERSION='1.1.0';
 const root=fileURLToPath(new URL('../../../',import.meta.url));
 const P={
   ledger:'security/shine-defence/ecosystem-profile-ledger-v1.json',
