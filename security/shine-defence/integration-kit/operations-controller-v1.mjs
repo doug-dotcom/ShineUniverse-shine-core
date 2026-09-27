@@ -83,25 +83,28 @@ export function buildOperationsReport({queueReport,ledger,candidates,revocations
           deployment:deployment||{state:'unobserved'},
           nextAction:{id:'repair_canonical_receipt_state',humanRequired:false,helper:null,args:[],description:'Canonical reviewed state is missing its exact receipt. Investigate and repair deliberately; no automatic repair helper is authorized.'}
         });
-      }else if(revoked){
-        apps.push({
-          appId,repository:app.repo,state:'reviewed_release_revoked',reviewState:'none',
-          certificationState:'revoked_reviewed_release',
-          revocationId:revoked.revocationId,
-          deployment:deployment||{state:'unobserved'},
-          nextAction:{id:'intake_replacement_release',humanRequired:false,helper:'security/shine-defence/integration-kit/intake-review-v1.mjs',args:['--input','<candidate-intake.json>'],description:'Prepare a new release candidate; badge restoration requires a newly reviewed release.'}
-        });
       }else if(deployment){
         const stateMap={protected:'protected',deployment_drift:'deployment_drift',profile_drift:'profile_drift',revoked:'revoked',needs_review:'needs_review'};
         const state=stateMap[deployment.state]||'needs_review';
         const drift=state==='deployment_drift'||state==='profile_drift'||state==='needs_review';
         apps.push({
           appId,repository:app.repo,state,reviewState:'none',
-          certificationState:'canonical_reviewed_release',
+          certificationState:revoked?'revoked_reviewed_release':'canonical_reviewed_release',
+          revocationId:revoked?.revocationId||null,
           deployment,
           nextAction:drift
             ?{id:'intake_observed_release',humanRequired:false,helper:'security/shine-defence/integration-kit/intake-review-v1.mjs',args:['--input','<candidate-intake.json>'],description:'The observed deployment does not match current Defence proof. Prepare that exact release for review if it is intended to remain deployed.'}
-            :{id:'none',humanRequired:false,helper:null,args:[],description:state==='protected'?'Observed deployment exactly matches current Defence proof.':'Observed deployment is revoked; a replacement release must be reviewed before badge restoration.'}
+            :state==='revoked'
+              ?{id:'intake_replacement_release',humanRequired:false,helper:'security/shine-defence/integration-kit/intake-review-v1.mjs',args:['--input','<candidate-intake.json>'],description:'The observed deployed release is revoked. Prepare a replacement release for review.'}
+              :{id:'none',humanRequired:false,helper:null,args:[],description:'Observed deployment exactly matches current Defence proof.'}
+        });
+      }else if(revoked){
+        apps.push({
+          appId,repository:app.repo,state:'reviewed_release_revoked',reviewState:'none',
+          certificationState:'revoked_reviewed_release',
+          revocationId:revoked.revocationId,
+          deployment:{state:'unobserved'},
+          nextAction:{id:'record_deployment_observation',humanRequired:false,helper:'security/shine-defence/integration-kit/record-deployment-observation-v1.mjs',args:['--input','<deployment-observation.json>'],description:'The canonical reviewed release is revoked, but no current deployment identity is observed. Record deployment identity before drawing a deployment-status conclusion.'}
         });
       }else{
         apps.push({
@@ -208,7 +211,7 @@ function selfTest(){
   if(byId.get('human').state!=='human_review_required'||!byId.get('human').nextAction.humanRequired)fail('self-test: human boundary');
   if(byId.get('ready').nextAction.helper!=='security/shine-defence/integration-kit/promote-review-v1.mjs')fail('self-test: recert routing');
   if(byId.get('idle').state!=='protected'||byId.get('idle').nextAction.helper!==null)fail('self-test: protected observed state');
-  if(byId.get('revoked').state!=='reviewed_release_revoked'||byId.get('revoked').nextAction.helper!=='security/shine-defence/integration-kit/intake-review-v1.mjs')fail('self-test: revoked routing');
+  if(byId.get('revoked').state!=='revoked'||byId.get('revoked').nextAction.helper!=='security/shine-defence/integration-kit/intake-review-v1.mjs')fail('self-test: observed revoked routing');
   if(byId.get('broken').state!=='blocked_canonical_state'||byId.get('broken').nextAction.helper!==null)fail('self-test: missing receipt must fail closed');
   if(byId.get('old-only').state!=='uncertified_idle')fail('self-test: uncertified history');
   if(report.items.map(x=>x.appId).join(',')!=='broken,human,idle,new,old-only,ready,revoked')fail('self-test: deterministic ordering');
