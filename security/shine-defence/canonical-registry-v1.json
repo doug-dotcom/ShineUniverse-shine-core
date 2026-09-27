@@ -234,8 +234,8 @@
     {
       "id": "review-queue-helper",
       "path": "security/shine-defence/integration-kit/review-queue-v1.mjs",
-      "version": "1.1.0",
-      "blobSha": "2352ea4bc1699ca15ff80bac8e532f342690b990"
+      "version": "1.2.0",
+      "blobSha": "129559044e3b2ec8f3ca62efcd91593cb3ec986b"
     },
     {
       "id": "rejection-finalization",
@@ -266,6 +266,18 @@
       "path": "security/shine-defence/integration-kit/supersede-candidate-v1.mjs",
       "version": "1.0.0",
       "blobSha": "fd255586f1a4fde1e4101a1207f26c2d1ec40fd3"
+    },
+    {
+      "id": "operations-controller",
+      "path": "security/shine-defence/operations-controller-v1.json",
+      "version": "1.0.0",
+      "blobSha": "0dde9989602300032f0fc9286eac6b77a5428672"
+    },
+    {
+      "id": "operations-controller-helper",
+      "path": "security/shine-defence/integration-kit/operations-controller-v1.mjs",
+      "version": "1.0.0",
+      "blobSha": "102c9071d104ef3378b0f327758537f383d00135"
     }
   ]
 }
