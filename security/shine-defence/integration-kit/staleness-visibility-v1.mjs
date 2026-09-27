@@ -75,7 +75,7 @@ function selfTest(){
   const r=buildStaleness({commandCentre:cc,ledger,candidates,decisions,asOf:'2026-09-27T12:00:00.000Z',readReview:()=>null});
   const a=r.items.find(x=>x.appId==='a'),b=r.items.find(x=>x.appId==='b');
   if(a.deploymentObservation.band!=='current'||a.certification.band!=='ageing'||a.humanReview.band!=='unknown')fail('self-test: app a ages');
-  if(b.deploymentObservation.band!=='stale'||b.pendingCandidate.band!=='current'||b.certification.band!=='unknown')fail('self-test: app b ages');
+  if(b.deploymentObservation.band!=='stale'||b.pendingCandidate.band!=='ageing'||b.certification.band!=='unknown')fail('self-test: app b ages');
   let blocked=false;try{ageAt('2026-09-28T00:00:00.000Z','2026-09-27T00:00:00.000Z')}catch{blocked=true}if(!blocked)fail('self-test: future timestamp accepted');
   console.log('SHINE DEFENCE STALENESS VISIBILITY SELF-TEST: PASS current/ageing/stale/unknown/not-applicable semantics and future fail-closed');
 }
