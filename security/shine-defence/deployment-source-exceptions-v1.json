@@ -1,0 +1,18 @@
+{
+  "registry": "shine-defence/deployment-source-exceptions-v1",
+  "version": "1.0.0",
+  "exceptions": [
+    {
+      "appId": "shine-music",
+      "state": "partial_service",
+      "repository": "doug-dotcom/shine-music",
+      "provider": "railway",
+      "projectId": "3dba2137-071a-4fcd-8b8d-b83b1a4615ca",
+      "environmentId": "287d1d11-6b96-46c1-8869-1b70a8e30952",
+      "serviceId": "e2326472-e4e2-4c4f-8487-ad1195d9057a",
+      "serviceName": "rivers-malware-scanner",
+      "rootDirectory": "/services/rivers-malware-scanner",
+      "reason": "Railway deploys only the malware-scanner subservice from the reviewed Shine Music repository; this service is not treated as the whole app deployment."
+    }
+  ]
+}

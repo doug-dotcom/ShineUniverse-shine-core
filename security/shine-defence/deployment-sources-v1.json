@@ -38,6 +38,60 @@
       "serviceId": "14f11970-0e22-4f18-a4e0-9fb4b84bbf01",
       "repository": "doug-dotcom/shine-my-money-",
       "profilePath": "security/shine-defence/profile.json"
+    },
+    {
+      "appId": "shine-travel",
+      "provider": "railway",
+      "projectId": "72648456-7ccf-4c6b-ac73-b63aaf7caffa",
+      "environmentId": "0bcb521a-69c0-448a-8066-442ba0a01ba1",
+      "serviceId": "d47224cf-e8db-4aea-8de7-d3ccb588cf5b",
+      "repository": "doug-dotcom/shine-travel",
+      "profilePath": "security/shine-defence/profile.json"
+    },
+    {
+      "appId": "punt-49",
+      "provider": "railway",
+      "projectId": "72648456-7ccf-4c6b-ac73-b63aaf7caffa",
+      "environmentId": "0bcb521a-69c0-448a-8066-442ba0a01ba1",
+      "serviceId": "af90b122-ef51-402c-8de3-5239926da9ae",
+      "repository": "doug-dotcom/Punt-49",
+      "profilePath": "security/shine-defence/profile.json"
+    },
+    {
+      "appId": "fiona-finance",
+      "provider": "railway",
+      "projectId": "72648456-7ccf-4c6b-ac73-b63aaf7caffa",
+      "environmentId": "0bcb521a-69c0-448a-8066-442ba0a01ba1",
+      "serviceId": "60f991cd-0a34-47ee-998b-4df9b64fbe18",
+      "repository": "doug-dotcom/Fiona-Finance",
+      "profilePath": "security/shine-defence/profile.json"
+    },
+    {
+      "appId": "project-l",
+      "provider": "railway",
+      "projectId": "72648456-7ccf-4c6b-ac73-b63aaf7caffa",
+      "environmentId": "0bcb521a-69c0-448a-8066-442ba0a01ba1",
+      "serviceId": "0edbbc64-5cb5-46b5-b818-2f938196c2a1",
+      "repository": "doug-dotcom/Project-L-Modular",
+      "profilePath": "security/shine-defence/profile.json"
+    },
+    {
+      "appId": "shine-ai",
+      "provider": "railway",
+      "projectId": "72648456-7ccf-4c6b-ac73-b63aaf7caffa",
+      "environmentId": "0bcb521a-69c0-448a-8066-442ba0a01ba1",
+      "serviceId": "18cd334c-5e66-4221-915e-f7c2cfdb7ef7",
+      "repository": "doug-dotcom/Shine-Ai",
+      "profilePath": "security/shine-defence/profile.json"
+    },
+    {
+      "appId": "project-rc",
+      "provider": "railway",
+      "projectId": "6b2a1fdf-6908-4b6a-a18a-3f1f50724497",
+      "environmentId": "822c00e0-0969-4dc2-8c88-2c893c2549b9",
+      "serviceId": "1cd8f81c-6f65-4b71-91cb-de2df70eb41f",
+      "repository": "doug-dotcom/Project-RC",
+      "profilePath": "security/shine-defence/profile.json"
     }
   ]
 }

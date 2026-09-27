@@ -42,6 +42,66 @@
       "observedAt": "2026-09-27T02:47:55.514Z",
       "source": "railway",
       "reference": "deployment:4037ed1b-f11c-4dd9-b399-aa448c224031"
+    },
+    {
+      "observationId": "railway-a484b255-78c0-4746-88d5-1fd5e27335f9",
+      "appId": "shine-travel",
+      "repository": "doug-dotcom/shine-travel",
+      "releaseCommitSha": "42a0411667d9974ab36141fb506e0d22aa583b6c",
+      "profileBlobSha": "ba66ee8079a4d22de8f80d7ba30608a9d78bfe00",
+      "observedAt": "2026-09-27T02:24:45.909Z",
+      "source": "railway",
+      "reference": "deployment:a484b255-78c0-4746-88d5-1fd5e27335f9"
+    },
+    {
+      "observationId": "railway-418acd80-5d99-4bcd-ab3b-1599e7931bdd",
+      "appId": "punt-49",
+      "repository": "doug-dotcom/Punt-49",
+      "releaseCommitSha": "1f0b9cb5f0ca87d9fe95046014ada76ac305efb0",
+      "profileBlobSha": "013f5919b3994da1a5d864fc4da32c33212438b8",
+      "observedAt": "2026-09-27T04:38:32.531Z",
+      "source": "railway",
+      "reference": "deployment:418acd80-5d99-4bcd-ab3b-1599e7931bdd"
+    },
+    {
+      "observationId": "railway-154c72d0-ee03-4e00-8408-55a8eb9c0cf0",
+      "appId": "fiona-finance",
+      "repository": "doug-dotcom/Fiona-Finance",
+      "releaseCommitSha": "28d58aedc62e77ed1275cdb1cf09c0da39a2d0aa",
+      "profileBlobSha": "92ce5122054564ddc9faa55f129d6e216aecdd83",
+      "observedAt": "2026-09-26T13:08:34.801Z",
+      "source": "railway",
+      "reference": "deployment:154c72d0-ee03-4e00-8408-55a8eb9c0cf0"
+    },
+    {
+      "observationId": "railway-b709ef29-c873-491b-87f0-be38949ceabd",
+      "appId": "project-l",
+      "repository": "doug-dotcom/Project-L-Modular",
+      "releaseCommitSha": "1e3a5543c9e65ec5bd15a9081babde20000bf5d9",
+      "profileBlobSha": "5e8badd4a4d9ace61f9c8d411dcd4b51e989f210",
+      "observedAt": "2026-09-26T12:29:01.679Z",
+      "source": "railway",
+      "reference": "deployment:b709ef29-c873-491b-87f0-be38949ceabd"
+    },
+    {
+      "observationId": "railway-a2c1ab30-7ad0-41f5-a760-2e6332a39314",
+      "appId": "shine-ai",
+      "repository": "doug-dotcom/Shine-Ai",
+      "releaseCommitSha": "42d7dfca63327fcf5769e38f5405fd605fb295c2",
+      "profileBlobSha": "490daea1e0c06640adeefe650dbc32ad5ca963ae",
+      "observedAt": "2026-09-27T04:39:56.097Z",
+      "source": "railway",
+      "reference": "deployment:a2c1ab30-7ad0-41f5-a760-2e6332a39314"
+    },
+    {
+      "observationId": "railway-d65ca9f2-1772-472d-b911-1d7babfb9c98",
+      "appId": "project-rc",
+      "repository": "doug-dotcom/Project-RC",
+      "releaseCommitSha": "d519a2d8054758ac25ab0c0ff6eabf5a7a3759a1",
+      "profileBlobSha": "0d0b222c823d33cabde9df2dd57651a27055d92a",
+      "observedAt": "2026-09-27T02:27:30.333Z",
+      "source": "railway",
+      "reference": "deployment:d65ca9f2-1772-472d-b911-1d7babfb9c98"
     }
   ]
 }

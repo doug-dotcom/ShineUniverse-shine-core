@@ -167,7 +167,9 @@ Observed release status is translated into five estate-level deployment states: 
 
 `collect-deployment-observations-v1.mjs` queries Railway for the latest successful deployment in each registered scope, takes Railway's exact deployment `commitHash`, and asks GitHub for the Defence-profile Git blob at that same commit. It converts those two independently sourced identities into the standard deployment-observation shape, deduplicates by Railway deployment id, and appends only new evidence. Railway/GitHub credentials remain runner-owned and are never stored in Core. The observation ledger is deliberately **not** pinned in the canonical code registry because it is append-only operational evidence; its schema and collector/evaluator code remain pinned and CI validates the ledger on every change.
 
-The initial live source registry covers `shine-daash`, `shine-ski`, `shine-translate` and `shine-my-money`. The first observations were collected from Railway deployment metadata and GitHub commit-specific profile blobs rather than inferred from branch heads.
+The live source registry now covers ten canonically reviewed apps: `shine-daash`, `shine-ski`, `shine-translate`, `shine-my-money`, `shine-travel`, `punt-49`, `fiona-finance`, `project-l`, `shine-ai` and `project-rc`. Their observations were collected from Railway deployment metadata and GitHub commit-specific profile blobs rather than inferred from branch heads.
+
+`security/shine-defence/deployment-coverage-v1.json` defines coverage accounting across the entire reviewed estate. `deployment-coverage-v1.mjs` reports `observed`, `mapped_unobserved`, `partial_service` and `unmapped` states. `shine-music` is explicitly recorded as `partial_service`: Railway currently exposes the `rivers-malware-scanner` subservice from the same repository, but that subservice is not treated as the full reviewed app deployment. Partial services do not count as full observation coverage.
 
 
 An extension policy existing in Core does **not** automatically certify an app. Each app still needs local, testable evidence before claiming that profile.
