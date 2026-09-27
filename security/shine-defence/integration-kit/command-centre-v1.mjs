@@ -9,7 +9,7 @@ import {loadLiveDeploymentReport} from './deployment-observations-v1.mjs';
 import {loadLiveReadiness} from './candidate-intake-readiness-v1.mjs';
 import {buildStaleness} from './staleness-visibility-v1.mjs';
 
-export const SHINE_DEFENCE_COMMAND_CENTRE_VERSION='1.1.0';
+export const SHINE_DEFENCE_COMMAND_CENTRE_VERSION='1.2.0';
 const root=fileURLToPath(new URL('../../../',import.meta.url));
 const P={
   ledger:'security/shine-defence/ecosystem-profile-ledger-v1.json',
@@ -35,7 +35,7 @@ function reviewProgress({appId,operation,planItem,readyItem}){
       const total=Array.isArray(review.findings)?review.findings.length:0;
       const reviewed=Array.isArray(review.findings)?review.findings.filter(f=>f.state!=='unreviewed').length:0;
       const blockers=Array.isArray(review.findings)?review.findings.filter(f=>f.state==='reviewed_blocker').length:0;
-      return {state:review.state==='evidence_accepted'?'evidence_accepted':'in_progress',reviewedFiles:reviewed,totalFiles:total,blockers,reviewerId:review.humanAcceptance?.reviewerId||null};
+      return {state:review.state==='evidence_accepted'?'evidence_accepted':'in_progress',reviewedFiles:reviewed,totalFiles:total,blockers,lastActivityAt:review.lastActivityAt||null,reviewerId:review.humanAcceptance?.reviewerId||null};
     }catch{return {state:'in_progress',detail:'Human diff review artifact is unreadable; existing Defence validators should investigate.'}}
   }
   return {state:'not_applicable',detail:null};
@@ -93,7 +93,7 @@ export function loadLiveCommandCentre(asOf=new Date().toISOString()){
     readReview:id=>{const p=join(root,P.reviews,id+'.json');return existsSync(p)?JSON.parse(readFileSync(p,'utf8')):null}
   });
   const ages=new Map(stale.items.map(i=>[i.appId,i]));
-  return {...report,version:'1.1.0',asOf,stalenessCounts:stale.counts,items:report.items.map(i=>({...i,staleness:ages.get(i.appId)}))};
+  return {...report,version:'1.2.0',asOf,stalenessCounts:stale.counts,items:report.items.map(i=>({...i,staleness:ages.get(i.appId)}))};
 }
 function printHuman(report){
   console.log('SHINE DEFENCE COMMAND CENTRE');
