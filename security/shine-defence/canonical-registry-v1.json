@@ -404,6 +404,18 @@
       "path": "security/shine-defence/integration-kit/staleness-visibility-v1.mjs",
       "version": "1.1.0",
       "blobSha": "a6e969b042bc9d29690ea1aa0861509cf1fd8f64"
+    },
+    {
+      "id": "review-session-summary",
+      "path": "security/shine-defence/review-session-summary-v1.json",
+      "version": "1.0.0",
+      "blobSha": "efe53e01ab665a2443a749b1d413b0f0ff185a64"
+    },
+    {
+      "id": "review-session-summary-helper",
+      "path": "security/shine-defence/integration-kit/review-session-summary-v1.mjs",
+      "version": "1.0.0",
+      "blobSha": "6c8fb1bec8317ae5a332573bd2d63fb9a0ec95f6"
     }
   ]
 }
