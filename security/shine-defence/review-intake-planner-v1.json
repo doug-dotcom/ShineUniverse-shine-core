@@ -1,0 +1,38 @@
+{
+  "contract": "shine-defence/review-intake-planner-v1",
+  "version": "1.0.0",
+  "purpose": "Read-only planning of candidate-intake drafts from observed deployment drift without creating pending review candidates.",
+  "eligibleState": "deployment_drift",
+  "draftRule": [
+    "The observed release commit must differ from the currently reviewed commit.",
+    "The observed Defence-profile blob must exactly equal the reviewed profile blob before reviewed profileVersion and policies may be reused.",
+    "The app must not already have a pending_review candidate.",
+    "The draft intake payload contains evidence as an empty array and is never valid candidate-intake-v1 input until bounded review evidence is added.",
+    "Deployment observations are provenance for the draft identity, not review evidence."
+  ],
+  "draftStates": [
+    {
+      "id": "needs_review_evidence",
+      "meaning": "Release/profile identity is safely prefilled but at least one bounded review-evidence record is still required."
+    },
+    {
+      "id": "profile_changed_requires_refresh",
+      "meaning": "The observed profile blob differs from the reviewed profile, so policies/profileVersion cannot be inherited automatically."
+    },
+    {
+      "id": "pending_candidate_exists",
+      "meaning": "The app already has an active review candidate; no second intake draft is actionable."
+    }
+  ],
+  "materialization": [
+    "A planner draft may be materialized only after review evidence has been explicitly supplied.",
+    "Materialization produces an ordinary candidate-intake-v1 JSON payload and reuses the canonical candidate-intake validator.",
+    "The planner itself never writes review-candidates-v1."
+  ],
+  "nonClaims": [
+    "Deployment drift is not evidence that a release is unsafe.",
+    "A generated draft is not a review candidate.",
+    "Deployment observation metadata is not a substitute for code/security review evidence.",
+    "Profile-drift releases require refreshed profile claims before intake can be planned automatically."
+  ]
+}
