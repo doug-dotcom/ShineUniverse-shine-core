@@ -1,0 +1,124 @@
+{
+  "ledger": "shine-defence/estate-audit-timeline-v1",
+  "version": "1.0.0",
+  "entries": [
+    {
+      "sequence": 1,
+      "recordedAt": "2026-09-27T08:00:00.000Z",
+      "previousManifestSha256": null,
+      "manifest": {
+        "artifact": "shine-defence/estate-audit-manifest-v1",
+        "version": "1.0.0",
+        "asOf": "2026-09-27T08:00:00.000Z",
+        "reviewedApps": 11,
+        "entries": [
+          {
+            "appId": "fiona-finance",
+            "repository": "doug-dotcom/Fiona-Finance",
+            "exportSha256": "6b86ab3113fcc01b86fbc7b2c53735f59da0bee118ea82e7fe89c75b435c5a58",
+            "reviewCommitSha": "89c13f27a2a449e4b3de18b9e636008d4f722783",
+            "observedReleaseCommitSha": "28d58aedc62e77ed1275cdb1cf09c0da39a2d0aa",
+            "deploymentState": "deployment_drift",
+            "checkpointIntegrityState": "not_applicable"
+          },
+          {
+            "appId": "project-l",
+            "repository": "doug-dotcom/Project-L-Modular",
+            "exportSha256": "4ff2f59d6e14ec1ab9c15fe147ff17002bd81af4b8358e76430b9fb2d449e118",
+            "reviewCommitSha": "ec2dcd877d362a601682fb910bbc9c497d568c59",
+            "observedReleaseCommitSha": "1e3a5543c9e65ec5bd15a9081babde20000bf5d9",
+            "deploymentState": "deployment_drift",
+            "checkpointIntegrityState": "not_applicable"
+          },
+          {
+            "appId": "project-rc",
+            "repository": "doug-dotcom/Project-RC",
+            "exportSha256": "a4ffcdc62fef2e1955679d2fd26fcbf8e36120807350dd8cba66408bc510ed8b",
+            "reviewCommitSha": "a2d19d002ea7fa588146cd51be6e9b3fa9a0a8f0",
+            "observedReleaseCommitSha": "d519a2d8054758ac25ab0c0ff6eabf5a7a3759a1",
+            "deploymentState": "deployment_drift",
+            "checkpointIntegrityState": "not_applicable"
+          },
+          {
+            "appId": "punt-49",
+            "repository": "doug-dotcom/Punt-49",
+            "exportSha256": "7a7f5ea48576caf7ec445f6099dae5c5c1044e149f7e67b6c089eb0b34e1ad1a",
+            "reviewCommitSha": "193ec97f5369dcfaeeb4c0ed2603ce3bcfe73d72",
+            "observedReleaseCommitSha": "1f0b9cb5f0ca87d9fe95046014ada76ac305efb0",
+            "deploymentState": "deployment_drift",
+            "checkpointIntegrityState": "not_applicable"
+          },
+          {
+            "appId": "shine-ai",
+            "repository": "doug-dotcom/Shine-Ai",
+            "exportSha256": "a97b2a38aa552666c889186c1fa0aef374397c39a467bc60a029e957b8088813",
+            "reviewCommitSha": "e2e51ab6a7bbfc36734a49386f97aa1eb24a2fb1",
+            "observedReleaseCommitSha": "42d7dfca63327fcf5769e38f5405fd605fb295c2",
+            "deploymentState": "deployment_drift",
+            "checkpointIntegrityState": "not_applicable"
+          },
+          {
+            "appId": "shine-daash",
+            "repository": "doug-dotcom/Shine-DaAsh",
+            "exportSha256": "f3e6dbf731307a319ef2102851d998e8a950bf1628ee176067ca404bd6d4b75f",
+            "reviewCommitSha": "bae29a40aca190298b665b0e9f0de76fc8b06d3f",
+            "observedReleaseCommitSha": "cb46e92f1fcbc8b5997048af286e112eaef256ae",
+            "deploymentState": "deployment_drift",
+            "checkpointIntegrityState": "not_applicable"
+          },
+          {
+            "appId": "shine-music",
+            "repository": "doug-dotcom/shine-music",
+            "exportSha256": "f9fdd24e94ef020c24d77c2e4e1c587c48a8ce65ce0ea6bff8dda147361d09d2",
+            "reviewCommitSha": "74601fbe9d83d15113ceb5f92c15013fb5958baa",
+            "observedReleaseCommitSha": null,
+            "deploymentState": "unobserved",
+            "checkpointIntegrityState": "not_applicable"
+          },
+          {
+            "appId": "shine-my-money",
+            "repository": "doug-dotcom/shine-my-money-",
+            "exportSha256": "7ebb318e41df5d0bf1c217bde617a39b20c8cf6238e3eef2146b05c410eb3a33",
+            "reviewCommitSha": "ffe987f4d04a1a98de9e5a3c7cb08fdbcd6fb75d",
+            "observedReleaseCommitSha": "bb41e1c914d9278f6129e8bb617e481a7671941e",
+            "deploymentState": "deployment_drift",
+            "checkpointIntegrityState": "not_applicable"
+          },
+          {
+            "appId": "shine-ski",
+            "repository": "doug-dotcom/Shine-Ski",
+            "exportSha256": "964d413f74ed8dd0ebdf7a5c316f1d4f3168540abe9005d4a40e12634a19b27c",
+            "reviewCommitSha": "47c6a488cb4d14dbee3d5853bfb759d5cb2bd00c",
+            "observedReleaseCommitSha": "9593d689cc68201a804ed1c8420d47bc96b1ea68",
+            "deploymentState": "deployment_drift",
+            "checkpointIntegrityState": "not_applicable"
+          },
+          {
+            "appId": "shine-translate",
+            "repository": "doug-dotcom/shine-translate",
+            "exportSha256": "da512695c07c06efca9f2bd87bb9994a2a901d051c3296da59922dfd260b7be0",
+            "reviewCommitSha": "1ac47373c4ba049cd24a7d2ea6c438e0b1baf5fa",
+            "observedReleaseCommitSha": "1ac47373c4ba049cd24a7d2ea6c438e0b1baf5fa",
+            "deploymentState": "protected",
+            "checkpointIntegrityState": "not_applicable"
+          },
+          {
+            "appId": "shine-travel",
+            "repository": "doug-dotcom/shine-travel",
+            "exportSha256": "c6d70d0d4aa8dd7cc188983765149c72fe5778a8a507f06042895b11f123aac5",
+            "reviewCommitSha": "f058b38bed6c30e745d9b815c087a7563a3f631f",
+            "observedReleaseCommitSha": "42a0411667d9974ab36141fb506e0d22aa583b6c",
+            "deploymentState": "deployment_drift",
+            "checkpointIntegrityState": "not_applicable"
+          }
+        ],
+        "provenance": {
+          "reviewedLedger": "security/shine-defence/ecosystem-profile-ledger-v1.json",
+          "auditExportContract": "security/shine-defence/audit-export-v1.json"
+        },
+        "manifestSha256": "4950dd04d1d7ccf4ff1eb49411a9a67e7188fb63af100a367cc4c0209a650bc2"
+      },
+      "transition": null
+    }
+  ]
+}
