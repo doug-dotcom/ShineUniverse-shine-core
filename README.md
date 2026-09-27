@@ -235,6 +235,12 @@ The per-app audit hash provides deeper change sensitivity even when the headline
 
 The helper can report the first **recorded** timeline entry where an app or specific manifest dimension changed. That is intentionally not described as the exact real-world change time: it is the first later snapshot in which Defence recorded the difference. An unchanged estate may still produce a different manifest hash at a later `asOf` because `asOf` is part of the deterministic snapshot; its transition diff will correctly show all app dimensions unchanged. Timeline mutation is explicit via `--apply`; default execution is a dry run. The timeline is audit history only and grants no workflow authority.
 
+### Timeline snapshot planner
+
+`security/shine-defence/timeline-snapshot-planner-v1.json` defines a read-only pre-append planning layer over the latest persistent timeline entry and a new live candidate manifest. `timeline-snapshot-planner-v1.mjs` verifies the timeline and candidate manifest, retains the complete canonical Manifest Diff, then separates material identity changes from expected time-sensitive per-app audit-hash churn.
+
+Because each per-app Audit Export binds its explicit `asOf`, `exportSha256` naturally changes when time advances even if repository/reviewed commit/deployed commit/deployment state/checkpoint integrity do not. The planner therefore reports those hash changes separately. `material_change` requires an app add/remove or a change to repository, reviewed commit, observed release commit, deployment state or checkpoint-integrity state. `snapshot_hash_only` means only per-app export hashes changed; `no_change` means no manifest dimensions changed. Only `material_change` exposes a descriptive append action, and actual timeline mutation still requires the separate explicit Timeline `--apply`. This is noise control, not a claim that hash-only snapshots contain no deeper change.
+
 ### Candidate intake readiness
 
 `security/shine-defence/candidate-intake-readiness-v1.json` defines the final fail-closed bridge between accepted human diff-review evidence and candidate intake. `candidate-intake-readiness-v1.mjs` requires the accepted review and separate evidence record to bind the current deployment-drift identity exactly, re-derives the evidence record from the durable human review, rejects tampering or stale deployment identity, and then runs the canonical candidate-intake validator over the resulting payload.

@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 import {existsSync,readFileSync,renameSync,writeFileSync} from 'node:fs';
 import {join} from 'node:path';
-import {fileURLToPath} from 'node:url';
+import {fileURLToPath,pathToFileURL} from 'node:url';
 import {loadEstateAuditManifest} from './estate-audit-manifest-v1.mjs';
 import {diffEstateManifests,verifyManifest} from './estate-manifest-diff-v1.mjs';
 
-export const SHINE_DEFENCE_ESTATE_AUDIT_TIMELINE_VERSION='1.0.0';
+export const SHINE_DEFENCE_ESTATE_AUDIT_TIMELINE_VERSION='1.0.1';
 const root=fileURLToPath(new URL('../../../',import.meta.url));
 const timelinePath=join(root,'security/shine-defence/estate-audit-timeline.json');
 const clone=v=>JSON.parse(JSON.stringify(v));
@@ -92,4 +92,4 @@ async function main(){
   if(args.includes('--apply')){atomicWrite(timelinePath,Buffer.from(json(next)));console.log('SHINE DEFENCE ESTATE AUDIT TIMELINE: APPLIED entry '+next.entries.at(-1).sequence);return}
   console.log(JSON.stringify(next,null,2));console.log('DRY RUN: timeline not changed. Use --apply to append.');
 }
-main();
+if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href)main();

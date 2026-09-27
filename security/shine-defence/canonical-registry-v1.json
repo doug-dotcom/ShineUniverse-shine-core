@@ -486,8 +486,20 @@
     {
       "id": "estate-audit-timeline-helper",
       "path": "security/shine-defence/integration-kit/estate-audit-timeline-v1.mjs",
+      "version": "1.0.1",
+      "blobSha": "08ad7c9c415d40c7ee3271f295c4561a3e90e0fc"
+    },
+    {
+      "id": "timeline-snapshot-planner",
+      "path": "security/shine-defence/timeline-snapshot-planner-v1.json",
       "version": "1.0.0",
-      "blobSha": "71d5471ffdb88406a14fa332168740c91a459e1c"
+      "blobSha": "48d11eb76d635bd25769c84d8aecf92bc699de79"
+    },
+    {
+      "id": "timeline-snapshot-planner-helper",
+      "path": "security/shine-defence/integration-kit/timeline-snapshot-planner-v1.mjs",
+      "version": "1.0.0",
+      "blobSha": "068e2684e470fe81bdf8e24506f506105dc2810c"
     }
   ]
 }
