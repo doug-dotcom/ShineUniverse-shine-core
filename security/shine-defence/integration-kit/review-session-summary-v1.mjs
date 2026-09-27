@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import {existsSync,readdirSync,readFileSync} from 'node:fs';
-import {verifyEventLedger} from './human-review-event-ledger-v1.mjs';
+import {appendActionEvent,createEventLedger,replayEventLedger,verifyEventLedger} from './human-review-event-ledger-v1.mjs';
 import {join} from 'node:path';
 import {fileURLToPath} from 'node:url';
 
@@ -94,7 +94,13 @@ function selfTest(){
   if(r.reviewers.length!==2||r.reviewers.find(x=>x.reviewerId==='alice').fileActions!==2)fail('reviewer summary mismatch');
   if(r.attentionFindings!==1||r.blockerFindings!==0||r.sessions[1].acceptanceActions!==1)fail('finding/acceptance summary mismatch');
   if(r.sessions[0].spanMinutes!==20||r.sessions[1].spanMinutes!==15)fail('session span mismatch');
-  console.log('SHINE DEFENCE REVIEW SESSION SUMMARY SELF-TEST: PASS reviewer activity, 60-minute session boundary, inactivity gaps and acceptance audit');
+  const pack={appId:'event-app',repository:'owner/event-app',reviewedCommitSha:'d'.repeat(40),observedCommitSha:'e'.repeat(40),deploymentObservationId:'obs',deploymentObservedAt:'2026-09-27T04:00:00.000Z',compare:{totalCommits:1,changedFiles:1,additions:1,deletions:0},reviewFocus:{files:[{filename:'x.ts',reviewFocus:'api_or_server'}]}};
+  let ledger=createEventLedger(pack);
+  ledger=appendActionEvent({ledger,action:{action:'record_finding',filename:'x.ts',state:'reviewed_attention',notes:'First pass.',reviewerId:'alice',reviewedAt:'2026-09-27T04:10:00.000Z'}});
+  ledger=appendActionEvent({ledger,action:{action:'record_finding',filename:'x.ts',state:'reviewed_no_issue',notes:'Resolved.',reviewerId:'alice',reviewedAt:'2026-09-27T04:20:00.000Z'}});
+  const eventReview=replayEventLedger(ledger).review,eventSummary=buildReviewSessionSummary(eventReview,ledger);
+  if(eventSummary.explicitActions!==2||eventSummary.sessions[0].fileActions!==2||eventSummary.historySource!=='event_ledger')fail('event-ledger superseded finding history missing');
+  console.log('SHINE DEFENCE REVIEW SESSION SUMMARY SELF-TEST: PASS reviewer activity, 60-minute session boundary, inactivity gaps, acceptance audit and superseded event history');
 }
 function main(){if(process.argv.includes('--self-test'))return selfTest();console.log(JSON.stringify(loadLive(),null,2))}
 main();
