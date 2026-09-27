@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 import {readFileSync,statSync} from 'node:fs';
 import {isAbsolute,resolve} from 'node:path';
+import {pathToFileURL} from 'node:url';
 import {estateManifestSha} from './estate-audit-manifest-v1.mjs';
 
-export const SHINE_DEFENCE_ESTATE_MANIFEST_DIFF_VERSION='1.0.0';
+export const SHINE_DEFENCE_ESTATE_MANIFEST_DIFF_VERSION='1.0.1';
 const DIMENSIONS=['repository','exportSha256','reviewCommitSha','observedReleaseCommitSha','deploymentState','checkpointIntegrityState'];
 const fail=m=>{throw new Error(m)};
 const clone=v=>JSON.parse(JSON.stringify(v));
@@ -69,4 +70,4 @@ function main(){
   if(bi<0||!args[bi+1]||ai<0||!args[ai+1])fail('--before and --after manifest paths are required');
   console.log(JSON.stringify(diffEstateManifests({before:readManifest(args[bi+1],'before'),after:readManifest(args[ai+1],'after')}),null,2));
 }
-main();
+if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href)main();
