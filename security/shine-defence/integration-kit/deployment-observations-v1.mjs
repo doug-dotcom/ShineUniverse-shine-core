@@ -2,7 +2,7 @@
 import {createHash} from 'node:crypto';
 import {existsSync,readFileSync} from 'node:fs';
 import {join} from 'node:path';
-import {fileURLToPath} from 'node:url';
+import {fileURLToPath,pathToFileURL} from 'node:url';
 import {evaluateReleaseStatus} from './evaluate-release-status-v1.mjs';
 
 export const SHINE_DEFENCE_DEPLOYMENT_OBSERVATIONS_VERSION='1.0.0';
@@ -113,4 +113,4 @@ function selfTest(){
 }
 
 function main(){const a=process.argv.slice(2);if(a.includes('--self-test'))return selfTest();const r=loadLiveDeploymentReport();console.log(a.includes('--json')?JSON.stringify(r,null,2):JSON.stringify(r,null,2))}
-main();
+if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href)main();
