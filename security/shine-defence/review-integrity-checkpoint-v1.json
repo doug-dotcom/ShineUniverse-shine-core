@@ -1,0 +1,21 @@
+{
+  "contract": "shine-defence/review-integrity-checkpoint-v1",
+  "version": "1.0.0",
+  "purpose": "Compact append-only integrity anchors binding a Human Review Event Ledger state to its exact derived Human Diff Review projection at meaningful milestones.",
+  "milestones": ["evidence_accepted","manual"],
+  "rules": [
+    "A checkpoint is created only after event-ledger verification and exact projection replay verification succeed.",
+    "Each checkpoint binds reviewId, milestone, checkpointAt, eventCount, ledgerTipHash, fullLedgerSha256, projectionSha256 and combinedIntegritySha256.",
+    "combinedIntegritySha256 is SHA-256 over canonical checkpoint binding fields and therefore changes if either ledger or projection digest changes.",
+    "Evidence acceptance automatically appends an evidence_accepted checkpoint after the accepted event has been replayed successfully.",
+    "Checkpoint sequence numbers are contiguous and checkpoint records are append-only.",
+    "An existing checkpoint may be re-verified against historical ledger prefixes and the projection derived from that prefix.",
+    "Checkpoint storage is operational audit evidence and is not canonical-registry pinned; its contract/verifier code are pinned.",
+    "Checkpoints never create review, candidate, checklist or certification authority."
+  ],
+  "nonClaims": [
+    "A checkpoint is repository-level integrity evidence, not external notarisation.",
+    "A valid checkpoint proves consistency of the recorded ledger/projection pair, not correctness of the human judgement.",
+    "Checkpoint age is not a security risk score."
+  ]
+}

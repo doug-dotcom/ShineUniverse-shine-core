@@ -4,11 +4,12 @@ import {isAbsolute,join,resolve} from 'node:path';
 import {fileURLToPath,pathToFileURL} from 'node:url';
 import {buildLiveEvidencePacks} from './generate-review-evidence-pack-v1.mjs';
 
-export const SHINE_DEFENCE_HUMAN_DIFF_REVIEW_VERSION='1.3.0';
+export const SHINE_DEFENCE_HUMAN_DIFF_REVIEW_VERSION='1.4.0';
 const root=fileURLToPath(new URL('../../../',import.meta.url));
 const reviewDir=join(root,'security/shine-defence/human-diff-reviews');
 const evidenceDir=join(root,'security/shine-defence/review-evidence-records');
 const eventDir=join(root,'security/shine-defence/human-review-events');
+const checkpointDir=join(root,'security/shine-defence/human-review-checkpoints');
 const secretLike=/(?:bearer\s+[a-z0-9._-]{12,}|sk-[a-z0-9_-]{12,}|-----BEGIN [A-Z ]*PRIVATE KEY-----|(?:token|secret|password)\s*[=:]\s*[^\s]{8,})/i;
 const ISO=/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?Z$/;
 const ID=/^[a-z0-9][a-z0-9._-]{0,127}$/;
@@ -27,7 +28,7 @@ function orderedFiles(pack){
 }
 export function createReview(pack){
   return {
-    artifact:'shine-defence/human-diff-review-v1',version:'1.3.0',
+    artifact:'shine-defence/human-diff-review-v1',version:'1.4.0',
     reviewId:reviewKey(pack),appId:pack.appId,repository:pack.repository,
     reviewedCommitSha:pack.reviewedCommitSha,observedCommitSha:pack.observedCommitSha,
     deploymentObservationId:pack.deploymentObservationId,deploymentObservedAt:pack.deploymentObservedAt||null,state:'in_progress',
@@ -39,7 +40,7 @@ export function createReview(pack){
 }
 export function validateReview({review,pack}){
   const failures=[];
-  if(review?.artifact!=='shine-defence/human-diff-review-v1'||review.version!=='1.3.0')return ['unsupported human diff review'];
+  if(review?.artifact!=='shine-defence/human-diff-review-v1'||review.version!=='1.4.0')return ['unsupported human diff review'];
   for(const [k,v] of Object.entries({appId:pack.appId,repository:pack.repository,reviewedCommitSha:pack.reviewedCommitSha,observedCommitSha:pack.observedCommitSha,deploymentObservationId:pack.deploymentObservationId}))if(review[k]!==v)failures.push(k+' binding mismatch');
   const expected=orderedFiles(pack);
   if(!Array.isArray(review.findings)||review.findings.length!==expected.length)failures.push('finding count mismatch');
@@ -131,7 +132,7 @@ function selfTest(){
   const e=acceptedEvidence({review:r,pack});if(e.kind!=='security_diff_review'||!e.summary.includes('reviewer-1')||r.lastActivityAt!=='2026-09-27T06:30:00.000Z')fail('accepted evidence/activity mismatch');
   let backwards=false;let t=createReview(pack);t=applyAction({review:t,pack,action:{action:'record_finding',filename:'app/api/auth/route.ts',state:'reviewed_no_issue',reviewerId:'reviewer-1',reviewedAt:'2026-09-27T06:20:00.000Z'}});try{applyAction({review:t,pack,action:{action:'record_finding',filename:'tests/a.test.ts',state:'reviewed_no_issue',reviewerId:'reviewer-1',reviewedAt:'2026-09-27T06:19:00.000Z'}})}catch{backwards=true}if(!backwards)fail('backwards finding activity accepted');
   let blocked=false;const b=createReview(pack);try{applyAction({review:b,pack,action:{action:'accept_evidence',confirmation:'ACCEPT EVIDENCE',reviewerId:'reviewer-1',reviewedAt:'2026-09-27T06:30:00.000Z',summary:'Too early.'}})}catch{blocked=true}if(!blocked)fail('unreviewed files accepted');
-  console.log('SHINE DEFENCE HUMAN DIFF REVIEW v1.3 SELF-TEST: PASS sensitive-first ordering, timestamped durable findings, monotonic activity, explicit acceptance and incomplete-review fail-closed');
+  console.log('SHINE DEFENCE HUMAN DIFF REVIEW v1.4 SELF-TEST: PASS sensitive-first ordering, timestamped durable findings, monotonic activity, explicit acceptance and incomplete-review fail-closed');
 }
 function parse(argv){const r={apply:false};for(let i=0;i<argv.length;i++){const a=argv[i];if(a==='--self-test'){r.selfTest=true;continue}if(a==='--apply'){r.apply=true;continue}if(a==='--app'){r.app=argv[++i];continue}if(a==='--action'){r.action=argv[++i];continue}fail('unknown argument '+a)}return r}
 async function main(){
@@ -142,7 +143,7 @@ async function main(){
   show(next,pack);
   if(!a.apply){console.log('DRY RUN: no files changed.');return}
   const events=await import('./human-review-event-ledger-v1.mjs');
-  mkdirSync(reviewDir,{recursive:true});mkdirSync(evidenceDir,{recursive:true});mkdirSync(eventDir,{recursive:true});
+  mkdirSync(reviewDir,{recursive:true});mkdirSync(evidenceDir,{recursive:true});mkdirSync(eventDir,{recursive:true});mkdirSync(checkpointDir,{recursive:true});
   const eventPath=join(eventDir,reviewKey(pack)+'.json');
   let ledger;
   if(existsSync(eventPath)){
@@ -158,9 +159,24 @@ async function main(){
   const nextLedger=events.appendActionEvent({ledger,action});
   const replayed=events.replayEventLedger(nextLedger).review;
   if(JSON.stringify(replayed)!==JSON.stringify(next))fail('event replay projection differs from canonical action reducer');
+  let nextCheckpointStore=null,checkpointPath=null;
+  if(next.state==='evidence_accepted'){
+    const checkpoints=await import('./review-integrity-checkpoint-v1.mjs');
+    checkpointPath=join(checkpointDir,reviewKey(pack)+'.json');
+    const currentStore=existsSync(checkpointPath)?JSON.parse(readFileSync(checkpointPath,'utf8')):null;
+    if(currentStore){
+      const checkpointFailures=checkpoints.verifyCheckpointStore({store:currentStore,ledger:nextLedger});
+      if(checkpointFailures.length)fail(checkpointFailures.join('; '));
+    }
+    const checkpoint=checkpoints.createCheckpoint({ledger:nextLedger,review:next,milestone:'evidence_accepted',checkpointAt:action.reviewedAt});
+    nextCheckpointStore=checkpoints.appendCheckpoint({store:currentStore,checkpoint});
+  }
   atomicWrite(eventPath,Buffer.from(json(nextLedger)));
   atomicWrite(reviewPath(pack),Buffer.from(json(next)));
-  if(next.state==='evidence_accepted')atomicWrite(evidencePath(pack),Buffer.from(json(acceptedEvidence({review:next,pack}))));
-  console.log('SHINE DEFENCE HUMAN DIFF REVIEW: APPLIED '+next.reviewId+' event '+nextLedger.events.at(-1).sequence);
+  if(next.state==='evidence_accepted'){
+    atomicWrite(evidencePath(pack),Buffer.from(json(acceptedEvidence({review:next,pack}))));
+    atomicWrite(checkpointPath,Buffer.from(json(nextCheckpointStore)));
+  }
+  console.log('SHINE DEFENCE HUMAN DIFF REVIEW: APPLIED '+next.reviewId+' event '+nextLedger.events.at(-1).sequence+(nextCheckpointStore?' checkpoint '+nextCheckpointStore.checkpoints.at(-1).sequence:''));
 }
 if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href)main();
