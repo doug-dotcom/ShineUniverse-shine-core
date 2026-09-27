@@ -61,6 +61,99 @@ export function createSupabaseRuntimeAdapters({sql,defenceGate,fetchImpl=fetch}=
   if(typeof fetchImpl!=='function') throw new TypeError('fetchImpl is required');
 
   return {
+    async verifyIntegrationIdentity({authContext}={}){
+      const jwt=authContext?.jwt;
+      if(typeof jwt!=='string'||!jwt) return null;
+
+      const untrusted=decodeJwtPayload(jwt);
+      if(!untrusted?.iss) return null;
+
+      const providers=await sql`
+        select p.provider_id,p.project_url,p.publishable_key
+        from foundation.identity_providers p
+        join foundation.integration_identity_providers i
+          on i.provider_id=p.provider_id
+        where p.kind='supabase-auth'
+          and p.issuer=${String(untrusted.iss)}
+          and p.status='active'
+          and i.status='active'
+        limit 1
+      `;
+      const provider=first(providers);
+      if(!provider) return null;
+
+      const verification=await fetchImpl(String(provider.project_url).replace(/\/$/,'')+'/auth/v1/user',{
+        method:'GET',
+        headers:{
+          apikey:String(provider.publishable_key),
+          Authorization:'Bearer '+jwt
+        },
+        signal:AbortSignal.timeout(10000)
+      });
+      if(!verification.ok) return null;
+
+      let user;
+      try{user=await verification.json()}catch{return null}
+      if(!user?.id) return null;
+
+      const rows=await sql`
+        select b.shine_id::text as shine_id
+        from foundation.identity_bindings b
+        join foundation.shine_identities s on s.shine_id=b.shine_id
+        where b.provider=${String(provider.provider_id)}
+          and b.provider_subject=${String(user.id)}
+          and b.verified_at is not null
+          and s.account_state='active'
+        limit 1
+      `;
+      const row=first(rows);
+      return row?{
+        shineId:String(row.shine_id),
+        authSubject:String(user.id),
+        providerId:String(provider.provider_id)
+      }:null;
+    },
+
+    async verifyIntegrationDelegation({authContext,claimedClientId}={}){
+      const token=authContext?.delegationToken;
+      if(typeof token!=='string'||!token||!claimedClientId) return null;
+      const tokenHash=await sha256Hex(token);
+      const rows=await sql`
+        select session_id::text,owner_shine_id::text,client_id,expires_at
+        from foundation.effective_integration_delegation_sessions
+        where token_hash=${tokenHash}
+          and client_id=${claimedClientId}
+          and effective_status='active'
+        limit 1
+      `;
+      const row=first(rows);
+      return row?{
+        sessionId:String(row.session_id),
+        shineId:String(row.owner_shine_id),
+        clientId:String(row.client_id),
+        expiresAt:toIso(row.expires_at)
+      }:null;
+    },
+
+    async verifyIntegrationClient({authContext,claimedClientId}={}){
+      const token=authContext?.clientToken;
+      if(!token||!claimedClientId) return null;
+      const tokenHash=await sha256Hex(token);
+      const rows=await sql`
+        select credential_id::text,client_id,client_kind
+        from foundation.effective_integration_client_credentials
+        where token_hash=${tokenHash}
+          and effective_status='active'
+        limit 1
+      `;
+      const row=first(rows);
+      return row?{
+        clientId:String(row.client_id),
+        credentialId:String(row.credential_id),
+        clientKind:String(row.client_kind)
+      }:null;
+    },
+
     async verifyAppCaller({authContext,claimedAppId}={}){
       const token=authContext?.appToken;
       if(!token||!claimedAppId) return null;
@@ -328,6 +421,726 @@ export function createSupabaseRuntimeAdapters({sql,defenceGate,fetchImpl=fetch}=
         )
       `;
       return first(rows)??null;
+    },
+
+    async revokeAccessGrant({
+      eventId,revocationId,requestId,grantId,ownerShineId,appId,occurredAt
+    }={}){
+      const rows=await sql`
+        select outcome,reason_code,revocation_id::text
+        from foundation.revoke_access_grant_v1(
+          ${eventId}::uuid,
+          ${revocationId}::uuid,
+          ${requestId}::uuid,
+          ${grantId}::uuid,
+          ${ownerShineId}::uuid,
+          ${appId},
+          ${occurredAt}::timestamptz
+        )
+      `;
+      return first(rows)??null;
+    },
+
+    async listAppRevocations({appId,afterSequence=0,limit=101}={}){
+      const rows=await sql`
+        select sequence_no,event_payload,created_at
+        from foundation.list_app_revocations_v1(
+          ${appId},
+          ${afterSequence}::bigint,
+          ${limit}::integer
+        )
+      `;
+      return rows.map(row=>({
+        sequenceNo:Number(row.sequence_no),
+        event:row.event_payload,
+        createdAt:toIso(row.created_at)
+      }));
+    },
+
+    async recordAppRevocationDelivery({
+      deliveryId,appId,afterSequence,sequenceNos,occurredAt
+    }={}){
+      const rows=await sql`
+        select delivery_id::text,terminal_sequence,event_count
+        from foundation.record_app_revocation_delivery_v1(
+          ${deliveryId}::uuid,
+          ${appId},
+          ${afterSequence}::bigint,
+          ${sequenceNos}::bigint[],
+          ${occurredAt}::timestamptz
+        )
+      `;
+      const row=first(rows);
+      return row?{
+        deliveryId:String(row.delivery_id),
+        terminalSequence:Number(row.terminal_sequence),
+        eventCount:Number(row.event_count)
+      }:null;
+    },
+
+    async acknowledgeAppRevocations({
+      ackId,requestId,deliveryId,appId,sequenceNo,occurredAt
+    }={}){
+      const rows=await sql`
+        select outcome,reason_code,checkpoint_sequence
+        from foundation.ack_app_revocations_v2(
+          ${ackId}::uuid,
+          ${requestId}::uuid,
+          ${deliveryId}::uuid,
+          ${appId},
+          ${sequenceNo}::bigint,
+          ${occurredAt}::timestamptz
+        )
+      `;
+      const row=first(rows);
+      return row?{
+        outcome:String(row.outcome),
+        reasonCode:String(row.reason_code),
+        checkpointSequence:Number(row.checkpoint_sequence)
+      }:null;
+    },
+
+    async getAppRevocationStatus({appId}={}){
+      const rows=await sql`
+        select checkpoint_sequence,last_ack_at,latest_sequence,pending_count,oldest_pending_at
+        from foundation.get_app_revocation_status_v1(${appId})
+      `;
+      const row=first(rows);
+      return row?{
+        checkpointSequence:Number(row.checkpoint_sequence??0),
+        lastAckAt:toIso(row.last_ack_at),
+        latestSequence:Number(row.latest_sequence??0),
+        pendingCount:Number(row.pending_count??0),
+        oldestPendingAt:toIso(row.oldest_pending_at)
+      }:null;
+    },
+
+    async getAppRevocationHealth({appId}={}){
+      const rows=await sql`
+        select app_id,checkpoint_sequence,latest_sequence,pending_count,
+               oldest_pending_at,pending_age_seconds,max_pending_age_seconds,
+               freshness_state,stale_action,recommended_action
+        from foundation.get_app_revocation_health_v1(${appId})
+      `;
+      const row=first(rows);
+      return row?{
+        appId:String(row.app_id),
+        checkpointSequence:Number(row.checkpoint_sequence??0),
+        latestSequence:Number(row.latest_sequence??0),
+        pendingCount:Number(row.pending_count??0),
+        oldestPendingAt:toIso(row.oldest_pending_at),
+        pendingAgeSeconds:Number(row.pending_age_seconds??0),
+        maxPendingAgeSeconds:Number(row.max_pending_age_seconds??900),
+        freshnessState:String(row.freshness_state),
+        staleAction:String(row.stale_action),
+        recommendedAction:String(row.recommended_action)
+      }:null;
+    },
+
+    async linkIntegrationClient({
+      eventId,linkId,requestId,ownerShineId,clientId,expiresAt,occurredAt
+    }={}){
+      const rows=await sql`
+        select outcome,reason_code,link_id::text
+        from foundation.link_integration_client_v1(
+          ${eventId}::uuid,
+          ${linkId}::uuid,
+          ${requestId}::uuid,
+          ${ownerShineId}::uuid,
+          ${clientId},
+          ${expiresAt??null}::timestamptz,
+          ${occurredAt}::timestamptz
+        )
+      `;
+      const row=first(rows);
+      return row?{
+        outcome:String(row.outcome),
+        reasonCode:String(row.reason_code),
+        linkId:row.link_id?String(row.link_id):null
+      }:null;
+    },
+
+    async grantIntegrationClientCapability({
+      eventId,grantId,requestId,ownerShineId,clientId,capabilityId,purpose,expiresAt,occurredAt
+    }={}){
+      const rows=await sql`
+        select outcome,reason_code,grant_id::text
+        from foundation.grant_integration_client_capability_v1(
+          ${eventId}::uuid,
+          ${grantId}::uuid,
+          ${requestId}::uuid,
+          ${ownerShineId}::uuid,
+          ${clientId},
+          ${capabilityId},
+          ${purpose},
+          ${expiresAt??null}::timestamptz,
+          ${occurredAt}::timestamptz
+        )
+      `;
+      const row=first(rows);
+      return row?{
+        outcome:String(row.outcome),
+        reasonCode:String(row.reason_code),
+        grantId:row.grant_id?String(row.grant_id):null
+      }:null;
+    },
+
+    async listIntegrationClientGrants({ownerShineId,clientId}={}){
+      const rows=await sql`
+        select foundation.list_integration_client_grants_v1(
+          ${ownerShineId}::uuid,${clientId}
+        ) as grants
+      `;
+      return first(rows)?.grants??[];
+    },
+
+    async revokeIntegrationClientGrant({
+      eventId,revocationId,requestId,ownerShineId,clientId,grantId,occurredAt
+    }={}){
+      const rows=await sql`
+        select outcome,reason_code,grant_id::text
+        from foundation.revoke_integration_client_grant_v1(
+          ${eventId}::uuid,
+          ${revocationId}::uuid,
+          ${requestId}::uuid,
+          ${ownerShineId}::uuid,
+          ${clientId},
+          ${grantId}::uuid,
+          ${occurredAt}::timestamptz
+        )
+      `;
+      const row=first(rows);
+      return row?{
+        outcome:String(row.outcome),
+        reasonCode:String(row.reason_code),
+        grantId:row.grant_id?String(row.grant_id):null
+      }:null;
+    },
+
+    async revokeIntegrationClientLink({
+      eventId,revocationId,requestId,ownerShineId,clientId,linkId,occurredAt
+    }={}){
+      const rows=await sql`
+        select outcome,reason_code,link_id::text
+        from foundation.revoke_integration_client_link_v1(
+          ${eventId}::uuid,
+          ${revocationId}::uuid,
+          ${requestId}::uuid,
+          ${ownerShineId}::uuid,
+          ${clientId},
+          ${linkId}::uuid,
+          ${occurredAt}::timestamptz
+        )
+      `;
+      const row=first(rows);
+      return row?{
+        outcome:String(row.outcome),
+        reasonCode:String(row.reason_code),
+        linkId:row.link_id?String(row.link_id):null
+      }:null;
+    },
+
+    async listUserConciergeJobs({ownerShineId,limit=50,before=null}={}){
+      const rows=await sql`
+        select foundation.list_user_concierge_jobs_v3(
+          ${ownerShineId}::uuid,${limit}::integer,${before??null}::timestamptz
+        ) as jobs
+      `;
+      return first(rows)?.jobs??{items:[]};
+    },
+
+    async cancelConciergeRequest({eventId,requestId,ownerShineId,clientId,reasonCode,occurredAt}={}){
+      const rows=await sql`
+        select foundation.cancel_concierge_request_v1(
+          ${eventId}::uuid,${requestId}::uuid,${ownerShineId}::uuid,
+          ${clientId},${reasonCode},${occurredAt}::timestamptz
+        ) as cancellation
+      `;
+      return first(rows)?.cancellation??null;
+    },
+
+    async explainCapabilityAccess({ownerShineId,ticketId}={}){
+      const rows=await sql`
+        select foundation.explain_capability_access_v1(
+          ${ownerShineId}::uuid,${ticketId}::uuid
+        ) as explanation
+      `;
+      return first(rows)?.explanation??null;
+    },
+
+    async listUserAccessHistory({ownerShineId,limit=50,before=null}={}){
+      const rows=await sql`
+        select foundation.list_user_access_history_v1(
+          ${ownerShineId}::uuid,
+          ${limit}::integer,
+          ${before??null}::timestamptz
+        ) as history
+      `;
+      return first(rows)?.history??{items:[]};
+    },
+
+    async listConnectedIntegrations({ownerShineId}={}){
+      const rows=await sql`
+        select foundation.list_connected_integrations_v1(
+          ${ownerShineId}::uuid
+        ) as integrations
+      `;
+      return first(rows)?.integrations??[];
+    },
+
+    async createIntegrationLinkRequest({
+      requestId,clientId,purpose,requestedCapabilities,userCodeHash,
+      exchangeSecretHash,requestedAt,expiresAt
+    }={}){
+      const rows=await sql`
+        select foundation.create_integration_link_request_v1(
+          ${requestId}::uuid,
+          ${clientId},
+          ${purpose},
+          ${requestedCapabilities}::text[],
+          ${userCodeHash},
+          ${exchangeSecretHash},
+          ${requestedAt}::timestamptz,
+          ${expiresAt}::timestamptz
+        ) as request
+      `;
+      return first(rows)?.request??null;
+    },
+
+    async getIntegrationLinkRequestStatus({requestId,clientId}={}){
+      const rows=await sql`
+        select foundation.get_integration_link_request_status_v1(
+          ${requestId}::uuid,${clientId}
+        ) as status
+      `;
+      return first(rows)?.status??null;
+    },
+
+    async resolveIntegrationLinkApproval({userCodeHash}={}){
+      const rows=await sql`
+        select foundation.resolve_integration_link_approval_v1(
+          ${userCodeHash}
+        ) as descriptor
+      `;
+      return first(rows)?.descriptor??null;
+    },
+
+    async approveIntegrationLinkRequest({
+      eventId,linkId,requestId,ownerShineId,userCodeHash,
+      approvedCapabilities,occurredAt
+    }={}){
+      const rows=await sql`
+        select foundation.approve_integration_link_request_v1(
+          ${eventId}::uuid,
+          ${linkId}::uuid,
+          ${requestId}::uuid,
+          ${ownerShineId}::uuid,
+          ${userCodeHash},
+          ${approvedCapabilities}::text[],
+          ${occurredAt}::timestamptz
+        ) as status
+      `;
+      return first(rows)?.status??null;
+    },
+
+    async exchangeIntegrationLinkRequest({
+      eventId,sessionId,refreshId,requestId,clientId,exchangeSecretHash,
+      delegationTokenHash,refreshTokenHash,sessionExpiresAt,refreshExpiresAt,occurredAt
+    }={}){
+      const rows=await sql`
+        select foundation.exchange_integration_link_request_v2(
+          ${eventId}::uuid,
+          ${sessionId}::uuid,
+          ${refreshId}::uuid,
+          ${requestId}::uuid,
+          ${clientId},
+          ${exchangeSecretHash},
+          ${delegationTokenHash},
+          ${refreshTokenHash},
+          ${sessionExpiresAt}::timestamptz,
+          ${refreshExpiresAt}::timestamptz,
+          ${occurredAt}::timestamptz
+        ) as session
+      `;
+      return first(rows)?.session??null;
+    },
+
+    async rotateIntegrationDelegation({
+      eventId,oldRefreshTokenHash,clientId,newRefreshId,newRefreshTokenHash,
+      newSessionId,newDelegationHash,occurredAt,delegationExpiresAt,refreshExpiresAt
+    }={}){
+      const rows=await sql`
+        select foundation.rotate_delegation_refresh_v1(
+          ${eventId}::uuid,
+          ${oldRefreshTokenHash},
+          ${clientId},
+          ${newRefreshId}::uuid,
+          ${newRefreshTokenHash},
+          ${newSessionId}::uuid,
+          ${newDelegationHash},
+          ${occurredAt}::timestamptz,
+          ${delegationExpiresAt}::timestamptz,
+          ${refreshExpiresAt}::timestamptz
+        ) as rotation
+      `;
+      return first(rows)?.rotation??null;
+    },
+
+    async rotateIntegrationDelegationV2({
+      requestId,eventId,oldRefreshTokenHash,clientId,newRefreshId,newRefreshTokenHash,
+      newSessionId,newDelegationHash,occurredAt,delegationExpiresAt,refreshExpiresAt
+    }={}){
+      const rows=await sql`
+        select foundation.rotate_delegation_refresh_v2(
+          ${requestId}::uuid,
+          ${eventId}::uuid,
+          ${oldRefreshTokenHash},
+          ${clientId},
+          ${newRefreshId}::uuid,
+          ${newRefreshTokenHash},
+          ${newSessionId}::uuid,
+          ${newDelegationHash},
+          ${occurredAt}::timestamptz,
+          ${delegationExpiresAt}::timestamptz,
+          ${refreshExpiresAt}::timestamptz
+        ) as rotation
+      `;
+      return first(rows)?.rotation??null;
+    },
+
+    async explainConciergeDenial({ownerShineId,requestId}={}){
+      const rows=await sql`
+        select foundation.explain_concierge_denial_v1(
+          ${ownerShineId}::uuid,${requestId}::uuid
+        ) as explanation
+      `;
+      return first(rows)?.explanation??null;
+    },
+
+    async planConciergeRequest({
+      requestId,ownerShineId,clientId,purpose,capabilityIds,occurredAt
+    }={}){
+      const rows=await sql`
+        select foundation.plan_concierge_request_v1(
+          ${requestId}::uuid,
+          ${ownerShineId}::uuid,
+          ${clientId},
+          ${purpose},
+          ${capabilityIds}::text[],
+          ${occurredAt}::timestamptz
+        ) as plan
+      `;
+      return first(rows)?.plan??null;
+    },
+
+    async getConciergePlan({requestId}={}){
+      const rows=await sql`
+        select foundation.get_concierge_plan_v1(${requestId}::uuid) as plan
+      `;
+      return first(rows)?.plan??null;
+    },
+
+    async gateConciergeExecution({
+      eventId,requestId,ownerShineId,clientId,occurredAt
+    }={}){
+      const rows=await sql`
+        select foundation.gate_concierge_execution_v1(
+          ${eventId}::uuid,
+          ${requestId}::uuid,
+          ${ownerShineId}::uuid,
+          ${clientId},
+          ${occurredAt}::timestamptz
+        ) as result
+      `;
+      return first(rows)?.result??null;
+    },
+
+    async recordConciergeExecutionEvent({
+      eventId,requestId,ownerShineId,clientId,eventType,reasonCode,occurredAt
+    }={}){
+      await sql`
+        select foundation.record_concierge_execution_event_v1(
+          ${eventId}::uuid,
+          ${requestId}::uuid,
+          ${ownerShineId}::uuid,
+          ${clientId},
+          ${eventType},
+          ${reasonCode},
+          ${occurredAt}::timestamptz
+        )
+      `;
+      return {recorded:true};
+    },
+
+    async claimDueConciergeRetry({eventId,claimToken,clientId,occurredAt}={}){
+      const rows=await sql`
+        select foundation.claim_due_concierge_retry_v1(
+          ${eventId}::uuid,${claimToken}::uuid,${clientId},${occurredAt}::timestamptz
+        ) as retry
+      `;
+      return first(rows)?.retry??null;
+    },
+
+    async finishConciergeRetry({eventId,retryJobId,claimToken,outcome,reasonCode,retryAfter=null,occurredAt}={}){
+      const rows=await sql`
+        select foundation.finish_concierge_retry_v1(
+          ${eventId}::uuid,${retryJobId}::uuid,${claimToken}::uuid,
+          ${outcome},${reasonCode},${retryAfter??null}::timestamptz,${occurredAt}::timestamptz
+        ) as retry
+      `;
+      return first(rows)?.retry??null;
+    },
+
+    async queueConciergeRetry({retryJobId,eventId,requestId,ownerShineId,clientId,capabilityIds,notBefore,expiresAt,reasonCode,occurredAt}={}){
+      const rows=await sql`
+        select foundation.queue_concierge_retry_v1(
+          ${retryJobId}::uuid,${eventId}::uuid,${requestId}::uuid,${ownerShineId}::uuid,
+          ${clientId},${capabilityIds}::text[],${notBefore}::timestamptz,
+          ${expiresAt}::timestamptz,${reasonCode},${occurredAt}::timestamptz
+        ) as retry
+      `;
+      return first(rows)?.retry??null;
+    },
+
+    async getConciergeResumeState({requestId,ownerShineId,clientId}={}){
+      const rows=await sql`
+        select foundation.get_concierge_resume_state_v1(
+          ${requestId}::uuid,${ownerShineId}::uuid,${clientId}
+        ) as state
+      `;
+      return first(rows)?.state??null;
+    },
+
+    async recordConciergeStepCheckpoint({checkpointId,requestId,stepId,capabilityId,result,completedAt}={}){
+      await sql`
+        select foundation.record_concierge_step_checkpoint_v1(
+          ${checkpointId}::uuid,${requestId}::uuid,${stepId}::uuid,
+          ${capabilityId},${result}::jsonb,${completedAt}::timestamptz
+        )
+      `;
+      return {recorded:true};
+    },
+
+    async issueCapabilityInvocationTicket({
+      conciergeRequestId,stepId,ownerShineId,clientId,occurredAt
+    }={}){
+      const ticketId=crypto.randomUUID();
+      const expiresAt=new Date(Date.parse(occurredAt)+60*1000).toISOString();
+      const rows=await sql`
+        select foundation.issue_capability_invocation_ticket_v2(
+          ${ticketId}::uuid,
+          ${conciergeRequestId}::uuid,
+          ${stepId}::uuid,
+          ${ownerShineId}::uuid,
+          ${clientId},
+          ${expiresAt}::timestamptz,
+          ${occurredAt}::timestamptz
+        ) as ticket
+      `;
+      return first(rows)?.ticket??null;
+    },
+
+    async getCapabilityAdapterHealth({capabilityId}={}){
+      const rows=await sql`
+        select capability_id,health_status,retry_after,last_outcome,failures_in_last_3
+        from foundation.capability_adapter_health
+        where capability_id=${capabilityId}
+        limit 1
+      `;
+      return first(rows)??{
+        capability_id:capabilityId,
+        health_status:'available',
+        retry_after:null,
+        last_outcome:'unknown',
+        failures_in_last_3:0
+      };
+    },
+
+    async recordCapabilityAdapterHealth({
+      eventId,capabilityId,outcome,reasonCode,latencyMs=null,occurredAt
+    }={}){
+      await sql`
+        select foundation.record_capability_adapter_health_v1(
+          ${eventId}::uuid,${capabilityId},${outcome},${reasonCode},
+          ${latencyMs}::integer,${occurredAt}::timestamptz
+        )
+      `;
+      return {recorded:true};
+    },
+
+    async invokeCapability({
+      capabilityId,requestId,input,context
+    }={}){
+      const rows=await sql`
+        select
+          a.endpoint_url,
+          a.adapter_protocol,
+          a.auth_mode,
+          a.timeout_ms,
+          a.status,
+          a.effective_status,
+          a.attested_consent_revision,
+          a.current_consent_revision,
+          a.attested_consent_contract_fingerprint,
+          a.current_consent_contract_fingerprint,
+          c.invocation_state,
+          c.capability_mode
+        from foundation.effective_capability_invocation_adapters a
+        join foundation.app_capabilities c on c.capability_id=a.capability_id
+        where a.capability_id=${capabilityId}
+        limit 1
+      `;
+
+      const adapter=first(rows);
+
+      if(!adapter||adapter.status!=='active'||adapter.invocation_state!=='live'){
+        return {status:'failed',reasonCode:'capability-adapter-not-live'};
+      }
+
+      if(adapter.effective_status!=='active'){
+        return {
+          status:'failed',
+          reasonCode:'capability-adapter-attestation-mismatch',
+          adapterStatus:adapter.effective_status
+        };
+      }
+
+      const health=await this.getCapabilityAdapterHealth({capabilityId});
+      if(health?.health_status==='quarantined'){
+        return {
+          status:'failed',
+          reasonCode:'capability-adapter-quarantined',
+          retryAfter:health.retry_after??null
+        };
+      }
+
+      if(!['read','advisory'].includes(String(adapter.capability_mode))){
+        return {status:'failed',reasonCode:'capability-mode-not-supported'};
+      }
+
+      if(adapter.adapter_protocol!=='shine-capability/v1'||
+         adapter.auth_mode!=='one-time-foundation-ticket'){
+        return {status:'failed',reasonCode:'capability-adapter-unsupported'};
+      }
+
+      const conciergeRequestId=String(context?.conciergeRequestId??'');
+      const ownerShineId=String(context?.ownerShineId??'');
+      const clientId=String(context?.clientId??'');
+
+      if(!conciergeRequestId||!ownerShineId||!clientId){
+        return {status:'failed',reasonCode:'capability-invocation-context-missing'};
+      }
+
+      let ticket;
+      try{
+        ticket=await this.issueCapabilityInvocationTicket({
+          conciergeRequestId,
+          stepId:requestId,
+          ownerShineId,
+          clientId,
+          occurredAt:new Date().toISOString()
+        });
+      }catch{
+        return {status:'failed',reasonCode:'capability-ticket-issue-failed'};
+      }
+
+      if(!ticket?.ticketId){
+        return {status:'failed',reasonCode:'capability-ticket-issue-failed'};
+      }
+
+      let response;
+      const startedAt=Date.now();
+      try{
+        response=await fetchImpl(String(adapter.endpoint_url),{
+          method:'POST',
+          headers:{'content-type':'application/json'},
+          body:JSON.stringify({
+            protocol:'shine-capability/v1',
+            schemaVersion:'1.0.0',
+            requestId,
+            capabilityId,
+            input:input&&typeof input==='object'&&!Array.isArray(input)?input:{},
+            context:{
+              ticketId:String(ticket.ticketId),
+              stepId:requestId,
+              conciergeRequestId,
+              purpose:String(context?.purpose??'')
+            }
+          }),
+          signal:AbortSignal.timeout(Number(adapter.timeout_ms)||15000)
+        });
+      }catch{
+        try{await this.recordCapabilityAdapterHealth({
+          eventId:crypto.randomUUID(),capabilityId,outcome:'failure',
+          reasonCode:'capability-endpoint-unavailable',
+          latencyMs:Math.max(0,Date.now()-startedAt),occurredAt:new Date().toISOString()
+        })}catch{}
+        return {status:'failed',reasonCode:'capability-endpoint-unavailable'};
+      }
+
+      let payload;
+      try{payload=await response.json()}catch{
+        try{await this.recordCapabilityAdapterHealth({
+          eventId:crypto.randomUUID(),capabilityId,outcome:'failure',
+          reasonCode:'capability-response-invalid',
+          latencyMs:Math.max(0,Date.now()-startedAt),occurredAt:new Date().toISOString()
+        })}catch{}
+        return {status:'failed',reasonCode:'capability-response-invalid'};
+      }
+
+      if(!response.ok){
+        try{await this.recordCapabilityAdapterHealth({
+          eventId:crypto.randomUUID(),capabilityId,outcome:'failure',
+          reasonCode:'capability-endpoint-rejected',
+          latencyMs:Math.max(0,Date.now()-startedAt),occurredAt:new Date().toISOString()
+        })}catch{}
+        return {
+          status:'failed',
+          reasonCode:'capability-endpoint-rejected',
+          httpStatus:response.status,
+          error:payload?.error??null
+        };
+      }
+
+      if(payload?.protocol!=='shine-capability-result/v1'||
+         payload?.schemaVersion!=='1.0.0'||
+         payload?.requestId!==requestId||
+         payload?.capabilityId!==capabilityId||
+         payload?.status!=='completed'||
+         !payload?.result||typeof payload.result!=='object'||Array.isArray(payload.result)){
+        try{await this.recordCapabilityAdapterHealth({
+          eventId:crypto.randomUUID(),capabilityId,outcome:'failure',
+          reasonCode:'capability-response-invalid',
+          latencyMs:Math.max(0,Date.now()-startedAt),occurredAt:new Date().toISOString()
+        })}catch{}
+        return {status:'failed',reasonCode:'capability-response-invalid'};
+      }
+
+      try{await this.recordCapabilityAdapterHealth({
+        eventId:crypto.randomUUID(),capabilityId,outcome:'success',
+        reasonCode:'capability-completed',
+        latencyMs:Math.max(0,Date.now()-startedAt),occurredAt:new Date().toISOString()
+      })}catch{}
+
+      return {
+        status:'completed',
+        reasonCode:'capability-completed',
+        result:payload.result
+      };
+    },
+
+    async listDiscoverableCapabilities({appId=null}={}){
+      const rows=await sql`
+        select foundation.list_discoverable_capabilities_v1(${appId}) as capabilities
+      `;
+      return first(rows)?.capabilities??[];
+    },
+
+    async getAppOperationalStatus({appId}={}){
+      const rows=await sql`
+        select foundation.get_app_operational_status_v1(${appId}) as status
+      `;
+      return first(rows)?.status??null;
     },
 
     async getAppManifest({appId}={}){
