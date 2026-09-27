@@ -61,6 +61,25 @@ export function createSupabaseRuntimeAdapters({sql,defenceGate,fetchImpl=fetch}=
   if(typeof fetchImpl!=='function') throw new TypeError('fetchImpl is required');
 
   return {
+    async verifyIntegrationClient({authContext,claimedClientId}={}){
+      const token=authContext?.clientToken;
+      if(!token||!claimedClientId) return null;
+      const tokenHash=await sha256Hex(token);
+      const rows=await sql`
+        select credential_id::text,client_id,client_kind
+        from foundation.effective_integration_client_credentials
+        where token_hash=${tokenHash}
+          and effective_status='active'
+        limit 1
+      `;
+      const row=first(rows);
+      return row?{
+        clientId:String(row.client_id),
+        credentialId:String(row.credential_id),
+        clientKind:String(row.client_kind)
+      }:null;
+    },
+
     async verifyAppCaller({authContext,claimedAppId}={}){
       const token=authContext?.appToken;
       if(!token||!claimedAppId) return null;
