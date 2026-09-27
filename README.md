@@ -97,18 +97,26 @@ Once an app has review-candidate history, Core CI requires its current reviewed 
 
 `security/shine-defence/integration-kit/promote-review-v1.mjs` prepares an existing app's re-certification as one controlled operation. It promotes exactly one `pending_review` candidate, advances the canonical reviewed ledger, replaces that app's current certification receipt, appends the independent accepted decision, and creates the immutable current-registry snapshot when needed.
 
-The helper is dry-run by default. `--apply` performs atomic per-file replacement, runs the Defence registry/ledger/receipt/candidate/decision/promotion gates, and restores every touched file if verification fails. It handles re-certification only; first-time certification uses the separate onboarding helper below.
+The helper is dry-run by default. It requires the candidate's canonical structured review checklist to contain explicit human approval before it can proceed. `--apply` performs atomic per-file replacement, runs the Defence registry/ledger/receipt/candidate/decision/checklist/promotion gates, and restores every touched file if verification fails. It handles re-certification only; first-time certification uses the separate onboarding helper below.
 
 ### First certification onboarding
 
 `security/shine-defence/first-certification-v1.json` defines the bootstrap rules for a brand-new app. Before first certification, the app may exist in the review queue as pending, dismissed or superseded history while remaining absent from the reviewed ledger, receipts and accepted decisions. That staged state never grants the Defence badge.
 
-`security/shine-defence/integration-kit/onboard-review-v1.mjs` accepts exactly one existing `pending_review` candidate for an app with no prior reviewed-ledger entry, receipt or accepted decision. It creates the initial reviewed-ledger entry, exact certification receipt, accepted decision and immutable current-registry snapshot as one guarded operation. The command is dry-run by default; `--apply` verifies the complete Defence state and restores every touched file if any gate fails.
+`security/shine-defence/integration-kit/onboard-review-v1.mjs` accepts exactly one existing `pending_review` candidate for an app with no prior reviewed-ledger entry, receipt or accepted decision, but only after its canonical structured review checklist contains explicit human approval. It creates the initial reviewed-ledger entry, exact certification receipt, accepted decision and immutable current-registry snapshot as one guarded operation. Reviewer identity, reviewed timestamp and decision summary come from the approved checklist. The command is dry-run by default; `--apply` verifies the complete Defence state and restores every touched file if any gate fails.
 
 ### Candidate intake
 
 `security/shine-defence/candidate-intake-v1.json` defines the front-door rules for constructing a `pending_review` candidate from an exact app release, Defence-profile identity, canonical policy claims and bounded evidence. Candidate ids are deterministic (`appId` plus the first 12 characters of the release SHA), duplicate or conflicting queue state fails closed, and intake never mutates the reviewed ledger, receipts, decisions or revocations.
 
 `security/shine-defence/integration-kit/intake-review-v1.mjs` consumes one reviewable JSON input file and is dry-run by default. `--apply` writes only the candidate queue, then runs the registry, candidate and promotion-state verifiers; the queue file is restored if any gate fails. Evidence acceptance validates structure and queue consistency, not the truth of external claims.
+
+### Structured human review
+
+`security/shine-defence/review-checklist-v1.json` defines a non-authoritative review worksheet bound to one exact candidate and one exact canonical-registry snapshot. `generate-review-checklist-v1.mjs` derives checklist items directly from every claimed canonical policy requirement, copies the candidate evidence as reference material, and always generates `humanAuthorization.status = pending`. Canonical artefacts without a `requirements` array receive an explicit artefact-integrity review item rather than being treated as automatically satisfied.
+
+A human reviewer may mark requirements `satisfied` or `not_satisfied`, cite candidate evidence ids and add bounded reviewer notes. Approval is valid only when every item is satisfied and the checklist contains an explicit reviewer id, reviewed timestamp and review summary. `verify-review-checklists-v1.mjs` re-derives the canonical requirements and rejects candidate, policy, registry, requirement or evidence drift.
+
+First certification and re-certification now read only the canonical checklist at `security/shine-defence/review-checklists/<candidateId>.json`. They no longer accept a command-line authority, decision timestamp or free-form acceptance summary. The accepted decision inherits those fields from the independently validated human approval. A generated or merely pending checklist cannot authorize certification.
 
 An extension policy existing in Core does **not** automatically certify an app. Each app still needs local, testable evidence before claiming that profile.
