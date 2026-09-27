@@ -348,14 +348,14 @@
     {
       "id": "human-diff-review",
       "path": "security/shine-defence/human-diff-review-v1.json",
-      "version": "1.2.0",
-      "blobSha": "29356d4f51ee420e07b1d87e2855084c69a2da6b"
+      "version": "1.3.0",
+      "blobSha": "801d80e810b33a22a7e57577956a0fecd8ffcbca"
     },
     {
       "id": "human-diff-review-helper",
       "path": "security/shine-defence/integration-kit/human-diff-review-v1.mjs",
-      "version": "1.2.0",
-      "blobSha": "0a3b9cb519266b125951be3b7c9006e5ecad5826"
+      "version": "1.3.0",
+      "blobSha": "850e15b7eb34bdeea3db40d1be9c2753bbdba06c"
     },
     {
       "id": "candidate-intake-readiness",
@@ -367,7 +367,7 @@
       "id": "candidate-intake-readiness-helper",
       "path": "security/shine-defence/integration-kit/candidate-intake-readiness-v1.mjs",
       "version": "1.0.0",
-      "blobSha": "4696f97ea5f1acc0c348042a3c8f1caf5d04583a"
+      "blobSha": "0daf8ddcf44c80cfd55bbe77c35ea96112991730"
     },
     {
       "id": "command-centre",
@@ -408,14 +408,26 @@
     {
       "id": "review-session-summary",
       "path": "security/shine-defence/review-session-summary-v1.json",
-      "version": "1.0.0",
-      "blobSha": "efe53e01ab665a2443a749b1d413b0f0ff185a64"
+      "version": "1.1.0",
+      "blobSha": "b39af5ebb1f4eedcb5e9cf33e37702f532c457be"
     },
     {
       "id": "review-session-summary-helper",
       "path": "security/shine-defence/integration-kit/review-session-summary-v1.mjs",
+      "version": "1.1.0",
+      "blobSha": "ad496ea7b78f7bddb23f3c9b238262f70281c1b1"
+    },
+    {
+      "id": "human-review-event-ledger",
+      "path": "security/shine-defence/human-review-event-ledger-v1.json",
       "version": "1.0.0",
-      "blobSha": "6c8fb1bec8317ae5a332573bd2d63fb9a0ec95f6"
+      "blobSha": "75fe8c09b5f2488219d0a1b40e3dce43f39aa36f"
+    },
+    {
+      "id": "human-review-event-ledger-helper",
+      "path": "security/shine-defence/integration-kit/human-review-event-ledger-v1.mjs",
+      "version": "1.0.0",
+      "blobSha": "baa86092685d627ae9c001ad84bfb30f0f292353"
     }
   ]
 }
