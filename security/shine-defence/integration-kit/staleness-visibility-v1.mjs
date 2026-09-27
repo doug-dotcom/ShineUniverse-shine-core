@@ -53,7 +53,7 @@ export function buildStaleness({commandCentre,ledger,candidates,decisions,asOf,r
 
     items.push({appId:item.appId,repository:item.repository,deploymentObservation:deployment,humanReview:reviewAge,pendingCandidate:candidateAge,certification});
   }
-  const counts={deployment:{},humanReview:{},pendingCandidate:{},certification:{}};
+  const counts={deploymentObservation:{},humanReview:{},pendingCandidate:{},certification:{}};
   for(const i of items)for(const k of Object.keys(counts)){const b=i[k].band;counts[k][b]=(counts[k][b]||0)+1}
   return {report:'shine-defence/staleness-visibility-v1',version:'1.0.0',asOf,apps:items.length,counts,items};
 }
