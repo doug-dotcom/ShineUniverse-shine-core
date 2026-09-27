@@ -1,0 +1,24 @@
+{
+  "contract": "shine-defence/human-review-event-ledger-v1",
+  "version": "1.0.0",
+  "purpose": "Append-only, hash-chained event history for Human Diff Review actions with the current review artifact treated as a derived projection.",
+  "eventTypes": ["review_started","finding_recorded","evidence_accepted"],
+  "rules": [
+    "Each review identity has its own event ledger bound to app, repository, reviewed commit, observed commit and deployment observation id.",
+    "Events have contiguous sequence numbers beginning at 1.",
+    "Each event records previousEventHash and eventHash; eventHash is SHA-256 over the canonical JSON event body excluding eventHash.",
+    "The first event is review_started and has previousEventHash null.",
+    "finding_recorded events contain the complete accepted record_finding action payload.",
+    "evidence_accepted contains the complete accepted ACCEPT EVIDENCE action payload.",
+    "Event timestamps must be monotonic and follow Human Diff Review chronology rules.",
+    "The current Human Diff Review artifact is deterministically rebuilt by replaying events through the canonical workspace action reducer.",
+    "Stored review projection must exactly equal the replayed projection after every applied action.",
+    "Accepted reviews remain immutable because the canonical reducer rejects actions after evidence acceptance.",
+    "The event ledger is operational audit evidence and is intentionally mutable only by append; its contract and verifier code are canonical-registry pinned."
+  ],
+  "nonClaims": [
+    "The hash chain is tamper-evident within repository history; it is not an external notarisation service.",
+    "Event timestamps record explicit workspace actions, not unobserved review work.",
+    "The event ledger does not add review, checklist or certification authority."
+  ]
+}

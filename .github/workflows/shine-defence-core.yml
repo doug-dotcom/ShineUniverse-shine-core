@@ -42,6 +42,8 @@ jobs:
       - run: node security/shine-defence/integration-kit/plan-review-intake-v1.mjs --self-test
       - run: node security/shine-defence/integration-kit/generate-review-evidence-pack-v1.mjs --self-test
       - run: node security/shine-defence/integration-kit/human-diff-review-v1.mjs --self-test
+      - run: node security/shine-defence/integration-kit/human-review-event-ledger-v1.mjs --self-test
+      - run: node security/shine-defence/integration-kit/human-review-event-ledger-v1.mjs
       - run: node security/shine-defence/integration-kit/review-session-summary-v1.mjs --self-test
       - run: node security/shine-defence/integration-kit/review-session-summary-v1.mjs
       - run: node security/shine-defence/integration-kit/candidate-intake-readiness-v1.mjs --self-test
