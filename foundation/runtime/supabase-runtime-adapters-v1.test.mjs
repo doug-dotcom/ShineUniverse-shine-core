@@ -13,6 +13,13 @@ const makeSql=()=> {
   const audit=[];
   const sql=async(strings,...values)=>{
     const q=strings.join('?').replace(/\s+/g,' ').trim().toLowerCase();
+    if(q.includes('from foundation.effective_integration_client_credentials')){
+      return [{
+        credential_id:'99999999-9999-4999-8999-999999999999',
+        client_id:'shine.companion',
+        client_kind:'first-party-companion'
+      }];
+    }
     if(q.includes('from foundation.effective_app_credentials')){
       return values[0]==='4c0ffa9a073e5e47ee51e8352cee4b05d0c21f75b501e314e2ffae28fd635909'
         ? [{credential_id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',app_id:'shine.travel'}] : [];
@@ -117,6 +124,29 @@ const makeAdapters=({fetchImpl}={})=>{
 test('hashes app credentials without retaining raw token',async()=>{
   assert.equal(await sha256Hex('travel-test-secret'),
     '4c0ffa9a073e5e47ee51e8352cee4b05d0c21f75b501e314e2ffae28fd635909');
+});
+
+test('verifies registered integration client against active hashed credential',async()=>{
+  const {adapters}=makeAdapters();
+  const result=await adapters.verifyIntegrationClient({
+    authContext:{clientToken:'integration-test-secret'},
+    claimedClientId:'shine.companion'
+  });
+  assert.deepEqual(result,{
+    clientId:'shine.companion',
+    credentialId:'99999999-9999-4999-8999-999999999999',
+    clientKind:'first-party-companion'
+  });
+});
+
+test('integration client verification requires both token and claimed client id',async()=>{
+  const {adapters}=makeAdapters();
+  assert.equal(await adapters.verifyIntegrationClient({
+    authContext:{},claimedClientId:'shine.companion'
+  }),null);
+  assert.equal(await adapters.verifyIntegrationClient({
+    authContext:{clientToken:'integration-test-secret'},claimedClientId:''
+  }),null);
 });
 
 test('verifies app caller against active hashed credential',async()=>{
