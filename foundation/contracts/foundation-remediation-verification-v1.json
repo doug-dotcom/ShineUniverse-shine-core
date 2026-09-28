@@ -1,0 +1,36 @@
+{
+  "contract": "shine-foundation/foundation-remediation-verification-v1",
+  "version": "1.0.0",
+  "layer": 42,
+  "purpose": "Independently observe post-remediation release-projection truth and permit incident recovery only when the fresh observation proves the invariant is restored.",
+  "verifierRole": "foundation_remediation_verifier",
+  "verifierRoleProperties": {
+    "login": false,
+    "inheritedByServiceRole": false,
+    "inheritedByApproverRole": false,
+    "inheritedByAdmissionExecutorRole": false,
+    "inheritedByMutatorRole": false,
+    "directVerificationLedgerInsert": false
+  },
+  "verifier": "foundation.verify_scoped_remediation_v1",
+  "verificationLedger": "foundation.remediation_verification_events",
+  "independentEvidence": "foundation.record_foundation_release_projection_observation_v1",
+  "closureMechanism": "foundation.transition_foundation_control_plane_incident_v1",
+  "outcomes": {
+    "verified": "Fresh projection is aligned/degraded; existing incident lifecycle records recovered.",
+    "unresolved": "Fresh projection remains fail/unknown; incident is not closed.",
+    "denied": "Execution was not successful or no longer owns the relevant incident evidence."
+  },
+  "invariants": {
+    "executionSuccessAloneNeverClosesIncident": true,
+    "freshProjectionObservationRequired": true,
+    "verifierCannotMutateCanonicalTruth": true,
+    "mutatorCannotVerify": true,
+    "verifierCannotInsertLedgerDirectly": true,
+    "changedIncidentCannotBeClosedByOlderExecution": true,
+    "unresolvedVerificationDoesNotCloseIncident": true,
+    "failedExecutionCannotVerify": true,
+    "recoveryUsesExistingIncidentLifecycle": true,
+    "verificationEvidenceHasSha256Integrity": true
+  }
+}
