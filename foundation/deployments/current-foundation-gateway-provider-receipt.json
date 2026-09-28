@@ -1,0 +1,13 @@
+{
+  "contract": "shine-foundation/deployment-receipt-publish-v1",
+  "schemaVersion": "1.0.0",
+  "receipt": {
+    "runtimeVersion": "85",
+    "artifactSha256": "a596c895d31e272d2358d69e500eb708a43462de69df32e7e8a87d540907b83f",
+    "runtimeState": "active",
+    "sourceCommit": "b7c5331f93eff28a781f0794c89ccf50e90a4045",
+    "providerEvidenceRef": "supabase:management-api:foundation-gateway:v85:a596c895d31e272d2358d69e500eb708a43462de69df32e7e8a87d540907b83f",
+    "providerObservedAt": "2026-09-28T06:21:43.844933Z",
+    "rollback": false
+  }
+}
