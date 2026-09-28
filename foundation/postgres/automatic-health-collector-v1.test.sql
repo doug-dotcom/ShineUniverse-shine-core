@@ -1,5 +1,38 @@
 begin;
 
+insert into foundation.service_registry(
+  service_id,display_name,owner_component,service_kind,required_for_core,lifecycle
+) values (
+  'test.collector.layer23',
+  'Layer 23 Collector Test',
+  'shine-core',
+  'internal-service',
+  false,
+  'active'
+);
+
+insert into foundation.service_health_probe_targets(
+  service_id,environment,target_version,target_url,
+  expected_service,expected_status,expected_schema_version,
+  timeout_milliseconds,enabled,evidence_ref
+) values (
+  'test.collector.layer23','production','1.0.0',
+  'https://example.com/health',
+  'test-service','ok','1.0.0',
+  10000,true,'test:collector-target:v1'
+);
+
+insert into foundation.service_health_policies(
+  service_id,environment,policy_version,evaluation_window_seconds,max_evidence_age_seconds,
+  min_request_count,warning_5xx_rate,critical_5xx_rate,warning_p95_ms,critical_p95_ms,
+  warning_runtime_error_count,critical_runtime_error_count,evidence_ref
+) values (
+  'test.collector.layer23','production','1.0.0',
+  3600,600,
+  3,0.10,0.50,5000,10000,
+  99,100,'test:collector-health-policy:v1'
+);
+
 do $$
 declare
   v_target uuid;
@@ -9,17 +42,17 @@ declare
 begin
   select target_id into v_target
   from foundation.current_service_health_probe_target
-  where service_id='foundation.gateway'
+  where service_id='test.collector.layer23'
     and environment='production';
 
   if v_target is null then
-    raise exception 'expected Foundation Gateway probe target';
+    raise exception 'expected isolated collector probe target';
   end if;
 
   for i in 1..3 loop
     v_req := foundation.record_service_health_probe_request_v1(
-      'foundation.gateway','production',v_target,900000+i,
-      'https://sjpxqeyewahraxvidvcc.supabase.co/functions/v1/foundation-gateway/health',
+      'test.collector.layer23','production',v_target,990000+i,
+      'https://example.com/health',
       now()-make_interval(mins=>4-i),
       'test:collector-request:healthy:'||i,
       jsonb_build_object('test',true)
@@ -35,10 +68,10 @@ begin
   end loop;
 
   perform foundation.refresh_service_health_from_probes_v1(
-    'foundation.gateway','production',now()
+    'test.collector.layer23','production',clock_timestamp()
   );
 
-  select foundation.get_service_health_v1('foundation.gateway','production') into v_health;
+  select foundation.get_service_health_v1('test.collector.layer23','production') into v_health;
   if v_health->>'healthState' <> 'healthy' then
     raise exception 'three successful fresh probes should be healthy: %',v_health;
   end if;
@@ -53,32 +86,35 @@ declare
 begin
   select target_id into v_target
   from foundation.current_service_health_probe_target
-  where service_id='foundation.gateway'
+  where service_id='test.collector.layer23'
     and environment='production';
 
   v_req := foundation.record_service_health_probe_request_v1(
-    'foundation.gateway','production',v_target,900010,
-    'https://sjpxqeyewahraxvidvcc.supabase.co/functions/v1/foundation-gateway/health',
-    now()+interval '1 second',
+    'test.collector.layer23','production',v_target,990010,
+    'https://example.com/health',
+    clock_timestamp(),
     'test:collector-request:degraded',
     '{}'::jsonb
   );
 
   perform foundation.record_service_health_probe_result_v1(
     v_req,500,false,null,false,
-    now()+interval '2 seconds',
+    clock_timestamp()+interval '1 second',
     150,null,
     'test:collector-result:degraded',
     '{}'::jsonb
   );
 
   perform foundation.refresh_service_health_from_probes_v1(
-    'foundation.gateway','production',now()+interval '3 seconds'
+    'test.collector.layer23','production',clock_timestamp()+interval '2 seconds'
   );
 
-  select foundation.get_service_health_v1('foundation.gateway','production') into v_health;
+  select foundation.get_service_health_v1('test.collector.layer23','production') into v_health;
   if v_health->>'healthState' <> 'degraded' then
     raise exception 'one failing probe among four should degrade: %',v_health;
+  end if;
+  if not (v_health->'reasonCodes' ? 'elevated-5xx-rate') then
+    raise exception 'degraded probe failure rate should be explicit: %',v_health;
   end if;
 end;
 $$;
@@ -92,21 +128,21 @@ declare
 begin
   select target_id into v_target
   from foundation.current_service_health_probe_target
-  where service_id='foundation.gateway'
+  where service_id='test.collector.layer23'
     and environment='production';
 
   for i in 1..2 loop
     v_req := foundation.record_service_health_probe_request_v1(
-      'foundation.gateway','production',v_target,900010+i,
-      'https://sjpxqeyewahraxvidvcc.supabase.co/functions/v1/foundation-gateway/health',
-      now()+make_interval(secs=>3+i),
+      'test.collector.layer23','production',v_target,990010+i,
+      'https://example.com/health',
+      clock_timestamp()+make_interval(secs=>i),
       'test:collector-request:unhealthy:'||i,
       '{}'::jsonb
     );
 
     perform foundation.record_service_health_probe_result_v1(
       v_req,500,false,null,false,
-      now()+make_interval(secs=>5+i),
+      clock_timestamp()+make_interval(secs=>2+i),
       160,null,
       'test:collector-result:unhealthy:'||i,
       '{}'::jsonb
@@ -114,15 +150,15 @@ begin
   end loop;
 
   perform foundation.refresh_service_health_from_probes_v1(
-    'foundation.gateway','production',now()+interval '8 seconds'
+    'test.collector.layer23','production',clock_timestamp()+interval '5 seconds'
   );
 
-  select foundation.get_service_health_v1('foundation.gateway','production') into v_health;
+  select foundation.get_service_health_v1('test.collector.layer23','production') into v_health;
   if v_health->>'healthState' <> 'unhealthy' then
     raise exception 'three failing probes among six should be unhealthy: %',v_health;
   end if;
   if not (v_health->'reasonCodes' ? 'critical-5xx-rate') then
-    raise exception 'critical probe failures should be explained: %',v_health;
+    raise exception 'critical probe failure rate should be explicit: %',v_health;
   end if;
 end;
 $$;
@@ -135,21 +171,21 @@ declare
 begin
   select target_id into v_target
   from foundation.current_service_health_probe_target
-  where service_id='foundation.gateway'
+  where service_id='test.collector.layer23'
     and environment='production';
 
   v_req := foundation.record_service_health_probe_request_v1(
-    'foundation.gateway','production',v_target,900099,
-    'https://sjpxqeyewahraxvidvcc.supabase.co/functions/v1/foundation-gateway/health',
-    now(),
+    'test.collector.layer23','production',v_target,990099,
+    'https://example.com/health',
+    clock_timestamp(),
     'test:collector-request:idempotent',
     '{}'::jsonb
   );
 
   if foundation.record_service_health_probe_request_v1(
-    'foundation.gateway','production',v_target,900099,
-    'https://sjpxqeyewahraxvidvcc.supabase.co/functions/v1/foundation-gateway/health',
-    now(),
+    'test.collector.layer23','production',v_target,990099,
+    'https://example.com/health',
+    clock_timestamp(),
     'test:collector-request:idempotent',
     '{}'::jsonb
   ) <> v_req then
@@ -157,12 +193,12 @@ begin
   end if;
 
   v_seq := foundation.record_service_health_probe_result_v1(
-    v_req,200,false,null,true,now(),100,null,
+    v_req,200,false,null,true,clock_timestamp(),100,null,
     'test:collector-result:idempotent','{}'::jsonb
   );
 
   if foundation.record_service_health_probe_result_v1(
-    v_req,200,false,null,true,now(),100,null,
+    v_req,200,false,null,true,clock_timestamp(),100,null,
     'test:collector-result:idempotent','{}'::jsonb
   ) <> v_seq then
     raise exception 'result replay must return the existing sequence';
