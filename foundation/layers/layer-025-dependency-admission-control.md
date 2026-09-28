@@ -138,3 +138,66 @@ Layer 25 is complete when:
 Layer 25 closes the loop:
 
 **observe → understand → enforce**.
+
+## Production rollout and recovery
+
+Layer 25 was exercised against the live Gateway rather than closed from database-only tests.
+
+The first rollout, Gateway **v73**, exposed a repository/runtime parity defect: the repository copy of `supabase-runtime-adapters-v1.mjs` was behind the already deployed v72 integration/Concierge surface. Replacing the live runtime adapter with that stale repository file caused v73 to fail during service construction with:
+
+`missing integration consent adapter: verifyIntegrationIdentity`
+
+The automatic health collector detected the regression immediately:
+
+- Gateway health returned HTTP 500;
+- Concierge retry returned HTTP 500;
+- the failed probes were written to immutable health history;
+- Gateway health degraded/unhealthy according to the existing policy;
+- dependency admission failed safe rather than treating the service as healthy.
+
+The failed v73 evidence was **not removed or rewritten**.
+
+The runtime adapter surface was then reconstructed against the live Gateway service contracts and Foundation database functions. A permanent runtime-surface test now asserts the complete Gateway adapter interface so the repository cannot silently fall behind the deployed service composition again.
+
+Gateway **v74** was deployed from the complete live bundle with the repaired runtime and Layer-25 Gateway core.
+
+Post-recovery verification:
+
+- Gateway health: HTTP 200;
+- Concierge retry: HTTP 200;
+- v74 runtime error log: no error events observed;
+- deployment truth: **aligned** to v74;
+- artefact SHA-256: `73b751265954fe05ad02a9830e22027490434aef0d20ab9e6fbc34a1c4564513`.
+
+The health collector was also tightened during recovery. Health windows are now bounded by the **current deployment observation time**. This preserves v73's failed evidence as historical incident data while preventing failures from a superseded runtime from being falsely attributed to v74.
+
+v74 then earned a fresh current-deployment health window:
+
+- probes: 3;
+- 4xx: 0;
+- 5xx: 0;
+- runtime/probe errors: 0;
+- average round-trip: approximately 6.9 ms;
+- p95 round-trip: approximately 8.3 ms;
+- health: **healthy**.
+
+At closure the current Shine Defence posture is `pass`, so the live protected admission result is:
+
+- admission state: **admit**;
+- reason: `dependency-admission-clear`;
+- Gateway own state: **operational**;
+- dependency effective state: **operational**;
+- safe mode: **normal**.
+
+Supabase security and performance advisors reported no Layer-25-specific finding.
+
+## Closure invariant
+
+A future Gateway deployment is not allowed to inherit the health verdict of the runtime it replaced, and a Gateway build is not considered safe merely because its Edge Function status is `ACTIVE`.
+
+Layer 25 therefore closes with all three independently true:
+
+1. deployment truth matches the current artefact;
+2. the current deployment has earned fresh health evidence;
+3. dependency admission is evaluated from current service/dependency state before protected execution.
+
