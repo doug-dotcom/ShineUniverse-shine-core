@@ -1,0 +1,196 @@
+{
+  "atlasFeedContract": "shine-universe/atlas-feed-event-v1",
+  "schemaVersion": "1.0.0",
+  "purpose": "Define the canonical permission-aware event envelope shared by future Atlas Feed publishers, persistence and consumers.",
+  "status": "contract-only",
+  "requiredTopLevelFields": [
+    "atlasFeedEvent",
+    "schemaVersion",
+    "eventId",
+    "topic",
+    "source",
+    "subject",
+    "timing",
+    "audience",
+    "provenance",
+    "payloadContract",
+    "payload"
+  ],
+  "event": {
+    "atlasFeedEvent": {
+      "const": "shine-universe/atlas-feed-event"
+    },
+    "schemaVersion": {
+      "const": "1.0.0"
+    },
+    "eventId": {
+      "format": "uuid"
+    },
+    "topic": {
+      "type": "namespaced-string",
+      "example": "dive.site.condition"
+    },
+    "source": {
+      "required": [
+        "appId",
+        "capabilityId",
+        "releaseRef"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "appId": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "capabilityId": {
+          "type": "string",
+          "maxLength": 160
+        },
+        "releaseRef": {
+          "type": "string",
+          "maxLength": 200
+        }
+      }
+    },
+    "subject": {
+      "required": [
+        "kind",
+        "key"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "key": {
+          "type": "string",
+          "maxLength": 200
+        }
+      }
+    },
+    "timing": {
+      "required": [
+        "occurredAt",
+        "publishedAt",
+        "freshForSeconds"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "occurredAt": {
+          "format": "date-time"
+        },
+        "publishedAt": {
+          "format": "date-time",
+          "constraint": "publishedAt >= occurredAt"
+        },
+        "freshForSeconds": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 604800
+        },
+        "expiresAt": {
+          "format": "date-time",
+          "constraint": "expiresAt > publishedAt when present"
+        }
+      }
+    },
+    "audience": {
+      "required": [
+        "mode",
+        "dataClass"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "mode": {
+          "enum": [
+            "owner",
+            "grant",
+            "internal"
+          ]
+        },
+        "grantId": {
+          "type": "string",
+          "maxLength": 160,
+          "constraint": "required only when mode=grant"
+        },
+        "dataClass": {
+          "enum": [
+            "general",
+            "personal",
+            "sensitive"
+          ]
+        }
+      }
+    },
+    "provenance": {
+      "required": [
+        "mode",
+        "sourceObservedAt",
+        "evidenceRefs"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "mode": {
+          "enum": [
+            "first_party",
+            "external",
+            "derived",
+            "mixed"
+          ]
+        },
+        "sourceObservedAt": {
+          "format": "date-time"
+        },
+        "evidenceRefs": {
+          "type": "array",
+          "maxItems": 12,
+          "items": {
+            "type": "string",
+            "maxLength": 240
+          },
+          "constraint": "at least one evidenceRef is required for external, derived and mixed provenance"
+        }
+      }
+    },
+    "payloadContract": {
+      "required": [
+        "schemaRef",
+        "schemaVersion"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "schemaRef": {
+          "type": "namespaced-string"
+        },
+        "schemaVersion": {
+          "type": "semver"
+        }
+      }
+    },
+    "payload": {
+      "type": "object",
+      "maximumUtf8Bytes": 65536,
+      "maximumDepth": 8
+    }
+  },
+  "safety": {
+    "additionalTopLevelProperties": "reject",
+    "implicitConsumerAccess": false,
+    "canonicalDomainOwnershipTransferred": false,
+    "credentialsAllowedInPayload": false,
+    "forbiddenPayloadKeysCaseInsensitive": [
+      "password",
+      "secret",
+      "token",
+      "api_key",
+      "apikey",
+      "authorization",
+      "cookie",
+      "set-cookie"
+    ],
+    "transportDefined": false,
+    "persistenceDefined": false,
+    "subscriptionDefined": false
+  }
+}

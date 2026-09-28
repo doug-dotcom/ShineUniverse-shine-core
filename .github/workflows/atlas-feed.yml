@@ -1,0 +1,27 @@
+name: Atlas Feed
+
+on:
+  pull_request:
+    paths:
+      - "atlas-feed/**"
+      - ".github/workflows/atlas-feed.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "atlas-feed/**"
+      - ".github/workflows/atlas-feed.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Run Atlas Feed Layer 1 acceptance tests
+        run: node --test atlas-feed/runtime/validate-feed-event-v1.test.mjs
