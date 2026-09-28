@@ -389,6 +389,17 @@
       "controlRef": "foundation.gate_concierge_execution_v1"
     },
     {
+      "routeSymbol": "conciergeSupersedePath",
+      "method": "POST",
+      "path": "/v1/concierge/supersede",
+      "operationKey": "concierge.cancel",
+      "riskClass": "control-write",
+      "effectClass": "write",
+      "authClass": "user+client",
+      "controlMode": "service-guard",
+      "controlRef": "foundation.cancel_concierge_request_v1"
+    },
+    {
       "routeSymbol": "conciergeRetryClaimPath",
       "method": "POST",
       "path": "/v1/concierge/retry/claim",
