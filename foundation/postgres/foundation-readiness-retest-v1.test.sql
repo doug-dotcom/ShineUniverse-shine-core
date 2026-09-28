@@ -63,4 +63,27 @@ begin
 end;
 $proof$;
 
+-- Reconciliation rejects cycles without a lifecycle transition and never mutates old evidence.
+insert into foundation.foundation_readiness_retest_cycles(
+ cycle_id,environment,readiness_drift_observation_id,raw_evidence_fingerprint,
+ condition_fingerprint,readiness_state,transition_type,cycle,occurred_at
+)
+select '46000000-0000-4000-8000-000000000301'::uuid,'production',observation_id,
+ evidence_fingerprint,condition_fingerprint,current_readiness_state,'none',
+ '{"persistenceSeconds":0}'::jsonb,now()
+from foundation.foundation_readiness_drift_observations
+where observation_id='46000000-0000-4000-8000-000000000102'::uuid;
+
+do $reconcile_none$
+declare v jsonb;
+begin
+ v:=foundation.reconcile_foundation_readiness_retest_cycle_v1(
+  '46000000-0000-4000-8000-000000000301'::uuid,now()
+ );
+ if v->>'reconciled'<>'false' or v->>'reasonCode'<>'readiness-retest-cycle-has-no-transition' then
+  raise exception 'No-transition cycle must not reconcile: %',v;
+ end if;
+end;
+$reconcile_none$;
+
 rollback;
