@@ -30,6 +30,7 @@ jobs:
       - run: deno check foundation/runtime/defence-provider-ingest/index.ts
       - run: deno check foundation/runtime/defence-reattest/index.ts
       - run: deno check security/shine-defence/runtime-receipts/supabase-v1/index.ts
+      - run: deno check foundation/runtime/defence-railway-events/index.ts
 
   persistence:
     runs-on: ubuntu-latest
@@ -193,6 +194,12 @@ jobs:
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-supabase-runtime-receipt-sentinel-v1.sql
       - name: Run Shine Defence Supabase runtime receipt acceptance tests
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-supabase-runtime-receipts-v1.test.sql
+      - name: Apply Shine Defence Railway transition intelligence
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-railway-transition-intelligence-v1.sql
+      - name: Apply Shine Defence Railway transition Sentinel
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-railway-transition-sentinel-v1.sql
+      - name: Run Shine Defence Railway transition acceptance tests
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-railway-transition-intelligence-v1.test.sql
       - name: Apply Shine Defence artefact re-attestation
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-artifact-reattestation-v1.sql
       - name: Run Shine Defence artefact re-attestation acceptance tests
