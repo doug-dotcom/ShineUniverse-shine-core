@@ -82,19 +82,28 @@ const makeSql=()=> {
     if(q.includes('foundation.get_app_operational_status_v1')){
       return [{status:{appId:'shine.travel',operationalState:'revocation-pending',operationalHealth:'attention'}}];
     }
-    if(q.includes('foundation.evaluate_service_admission_v1')){
-      return [{admission:{
-        serviceId:'foundation.gateway',
+    if(q.includes('foundation.evaluate_gateway_operation_policy_v1')){
+      return [{policy:{
+        gatewayOperationPolicyResponse:'shine-foundation/gateway-operation-policy-response-v1',
+        schemaVersion:'1.0.0',
+        operationKey:'access.evaluate',
         environment:'production',
-        operation:'access.evaluate',
-        impactScope:'protected-operations',
-        admissionState:'admit',
+        policyState:'admit',
         reasonCode:'dependency-admission-clear',
-        ownState:'operational',
-        effectiveState:'operational',
-        safeMode:'normal',
-        bindingEvidenceRef:'foundation:admission-binding:gateway:access-evaluate:v1',
-        dependencyEvidence:[]
+        policyEvidenceRef:'foundation:operation-policy:gateway:access-evaluate:v1',
+        admission:{
+          serviceId:'foundation.gateway',
+          environment:'production',
+          operation:'access.evaluate',
+          impactScope:'protected-operations',
+          admissionState:'admit',
+          reasonCode:'dependency-admission-clear',
+          ownState:'operational',
+          effectiveState:'operational',
+          safeMode:'normal',
+          bindingEvidenceRef:'foundation:admission-binding:gateway:access-evaluate:v1',
+          dependencyEvidence:[]
+        }
       }}];
     }
     if(q.includes('from foundation.app_registry')){
