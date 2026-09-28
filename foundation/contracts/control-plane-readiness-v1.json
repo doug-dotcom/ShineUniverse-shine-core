@@ -1,14 +1,14 @@
 {
   "controlPlaneReadiness": "shine-foundation/control-plane-readiness-v1",
-  "schemaVersion": "1.0.0",
+  "schemaVersion": "1.1.0",
   "serviceId": "foundation.gateway",
-  "purpose": "Synthesize Foundation registry, exact deployment truth, deployment-bounded health, dependency safety, Gateway route/policy coverage and privileged-operation audit integrity into one conservative operational-readiness decision.",
+  "purpose": "Synthesize Foundation registry, exact deployment truth, trusted publication provenance, deployment-bounded health, dependency safety, Gateway route/policy coverage and privileged-operation audit integrity into one conservative operational-readiness decision.",
   "states": {
     "ready": {
       "safeMode": "normal",
       "privilegedOperationsMode": "normal",
       "workerOperationsMode": "normal",
-      "meaning": "All required control-plane evidence is current and passing; guarded dependencies are operational."
+      "meaning": "All required control-plane evidence is current and passing, including fresh trusted publication provenance for the exact current deployment."
     },
     "restricted": {
       "safeMode": "guarded",
@@ -20,7 +20,13 @@
       "safeMode": "degraded",
       "privilegedOperationsMode": "degraded",
       "workerOperationsMode": "degraded",
-      "meaning": "Foundation can continue operating while one or more non-critical health, dependency or audit signals require remediation."
+      "meaning": "Foundation can continue operating while one or more non-critical health, dependency, audit or deployment-publication assurance signals require remediation.",
+      "provenanceOnlyModes": {
+        "safeMode": "normal",
+        "privilegedOperationsMode": "normal",
+        "workerOperationsMode": "normal",
+        "meaning": "If degradation is caused only by publication assurance quality/staleness, runtime operation remains normal while readiness is degraded."
+      }
     },
     "not-ready": {
       "safeMode": "blocked",
@@ -32,12 +38,14 @@
       "safeMode": "unknown",
       "privilegedOperationsMode": "unknown",
       "workerOperationsMode": "unknown",
-      "meaning": "Required evidence is absent, stale, version-mismatched or not yet proven for the current deployment."
+      "meaning": "Required evidence is absent, stale, version-mismatched, publication-unattested or not yet proven for the current deployment."
     }
   },
   "checks": [
     "required core service registry",
     "exact deployment truth",
+    "fresh deployment receipt publication attestation",
+    "publication runtime/source/artefact matches canonical deployment truth",
     "deployment-bounded runtime health",
     "health/runtime-version consistency",
     "dependency graph integrity",
@@ -49,16 +57,21 @@
     "Shine Defence posture"
   ],
   "precedence": [
-    "hard invariant failure -> not-ready",
-    "missing/current-runtime evidence gap -> unknown",
+    "hard invariant failure or trusted publication/deployment mismatch -> not-ready",
+    "missing/current-runtime evidence gap or missing publication attestation -> unknown",
     "guard dependency fail-closed -> restricted",
-    "non-critical degradation -> degraded",
+    "publication-assurance-only degradation -> degraded readiness with normal operation modes",
+    "non-critical runtime/dependency/audit degradation -> degraded",
     "otherwise -> ready"
   ],
   "deploymentSpecificProof": {
     "healthRuntimeMustMatchExpectedDeployment": true,
     "currentRuntimeCompleteAuditTraceRequired": true,
-    "newDeploymentCannotInheritPreviousRuntimeReadiness": true
+    "newDeploymentCannotInheritPreviousRuntimeReadiness": true,
+    "freshTrustedPublicationAttestationRequiredForReady": true,
+    "publicationRuntimeMustMatchExpectedDeployment": true,
+    "publicationSourceMustMatchExpectedDeployment": true,
+    "publicationArtifactMustMatchExpectedDeployment": true
   },
   "observationLedger": {
     "table": "foundation.foundation_readiness_observations",
@@ -102,5 +115,13 @@
     "foundationGatewayDirectWrite": false,
     "foundationRuntimeEvaluate": true,
     "foundationRuntimeRecord": false
+  },
+  "publicationAssurance": {
+    "reader": "foundation.get_deployment_receipt_publication_health_v1(text,text,integer)",
+    "freshnessSeconds": 86400,
+    "pass": "fresh GitHub OIDC publication attestation for the current receipt",
+    "degraded": "stale or non-OIDC publication attestation for the matching current deployment",
+    "unknown": "current deployment receipt has no publication attestation",
+    "mismatch": "fresh/valid publication attestation refers to a different runtime, source commit or artefact than canonical deployment truth; readiness becomes not-ready"
   }
 }
