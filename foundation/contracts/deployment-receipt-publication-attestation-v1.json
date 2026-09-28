@@ -1,0 +1,51 @@
+{
+  "deploymentReceiptPublicationAttestation": "shine-foundation/deployment-receipt-publication-attestation-v1",
+  "schemaVersion": "1.0.0",
+  "purpose": "Record every accepted deployment receipt publication/re-attestation separately from the immutable deployment receipt identity, preserving transport provenance for idempotent replays.",
+  "immutableReceipt": "foundation.service_deployment_receipts",
+  "publicationLedger": "foundation.service_deployment_receipt_publications",
+  "currentView": "foundation.current_service_deployment_receipt_publication",
+  "healthReader": "foundation.get_deployment_receipt_publication_health_v1",
+  "rules": {
+    "receiptIdentityIsNotMutated": true,
+    "eachDistinctGithubOidcRunAttemptMayCreateAttestation": true,
+    "sameGithubOidcRunAttemptIsIdempotent": true,
+    "replayedReceiptCanCreateNewPublicationAttestation": true,
+    "publicationLedgerAppendOnly": true,
+    "gatewayDirectInsertDenied": true,
+    "publicReadDenied": true,
+    "foundationRuntimeReadOnly": true
+  },
+  "assurance": {
+    "pass": {
+      "transport": "github-oidc",
+      "submittedBy": "github-actions-oidc",
+      "repository": "doug-dotcom/ShineUniverse-shine-core",
+      "ref": "refs/heads/main"
+    },
+    "degraded": [
+      "publication attestation stale",
+      "latest attestation is manual or non-OIDC"
+    ],
+    "unknown": [
+      "deployment receipt missing",
+      "publication attestation missing"
+    ]
+  },
+  "productionProof": {
+    "runtimeVersion": "85",
+    "receiptId": "bac106fe-57c4-4b38-b8bb-0acb5de11086",
+    "publicationId": "2649330b-6117-44a0-9614-aae8f6fb8478",
+    "publicationOutcome": "replayed-existing",
+    "transport": "github-oidc",
+    "githubRunId": "36395350182",
+    "githubRunAttempt": "1",
+    "githubEvent": "push",
+    "githubRepository": "doug-dotcom/ShineUniverse-shine-core",
+    "githubRef": "refs/heads/main",
+    "githubWorkflowRef": "doug-dotcom/ShineUniverse-shine-core/.github/workflows/publish-foundation-deployment-receipt.yml@refs/heads/main",
+    "githubWorkflowSha": "81a3888fdc743100b07f7c710373e0cabaee2ed9",
+    "publicationHealth": "pass",
+    "reasonCode": "publication-attested-by-github-oidc"
+  }
+}
