@@ -431,3 +431,48 @@ where not exists (
     and environment='production'
     and policy_version='1.1.0'
 );
+
+
+-- Layer 23 deterministic tie-breaker for batched health evidence.
+-- Probe windows can share window_ended_at/recorded_at inside one transaction;
+-- prefer the highest monotonic probe result sequence before UUID ordering.
+create or replace view foundation.current_service_health_evidence
+with (security_invoker=true)
+as
+select distinct on (service_id,environment)
+  health_evidence_id,
+  service_id,
+  environment,
+  runtime_version,
+  window_started_at,
+  window_ended_at,
+  request_count,
+  response_4xx_count,
+  response_5xx_count,
+  avg_latency_ms,
+  p95_latency_ms,
+  runtime_error_count,
+  evidence_source,
+  evidence_ref,
+  evidence_note,
+  metadata,
+  observed_at,
+  recorded_at
+from foundation.service_health_evidence
+order by
+  service_id,
+  environment,
+  window_ended_at desc,
+  case
+    when evidence_source='healthcheck'
+     and coalesce(metadata->>'latestProbeResultSequence','') ~ '^[0-9]+$'
+    then (metadata->>'latestProbeResultSequence')::bigint
+    else 0
+  end desc,
+  observed_at desc,
+  recorded_at desc,
+  health_evidence_id desc;
+
+revoke all on foundation.current_service_health_evidence from public,anon,authenticated;
+grant select on foundation.current_service_health_evidence to foundation_runtime;
+
