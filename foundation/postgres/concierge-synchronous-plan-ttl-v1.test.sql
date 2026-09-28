@@ -91,8 +91,7 @@ begin
 end;
 $$;
 
-
-do $
+do $$
 declare
   owner_id uuid;
   app_id text;
@@ -169,6 +168,6 @@ begin
     raise exception 'cron retirement is not using actor-bound TTL helper';
   end if;
 end;
-$;
+$$;
 
 rollback;
