@@ -111,9 +111,23 @@
     "anonRecorderExecute": false
   },
   "production": {
-    "gatewayVersion": 81,
-    "edgeSourceCommit": "60837a74d766742dbd4b88ca1cd0da0e14ec2d55",
-    "artifactSha256": "6aebc29aac7e2eab77695549995f50a0c5e4ee5ab9b184ea4b25983bf8aa522d",
+    "gatewayVersion": 82,
+    "edgeSourceCommit": "a6c6d8af0da0d8e723e5bf56a1e0c664033d19bf",
+    "artifactSha256": "6e2368d9d183c0bc6ee93426a8cf095c0f1510b8fb97f3959ea5b67270e78b02",
+    "exactBundleFilesVerified": 27,
+    "auditHealth": "pass",
+    "currentAuditProof": {
+      "runtimeVersion": 82,
+      "attemptsObserved": 2,
+      "policyEvents": 2,
+      "outcomeEvents": 2,
+      "brokenLinks": 0
+    },
+    "initialLayer29VerifiedRuntime": {
+      "gatewayVersion": 81,
+      "edgeSourceCommit": "60837a74d766742dbd4b88ca1cd0da0e14ec2d55",
+      "artifactSha256": "6aebc29aac7e2eab77695549995f50a0c5e4ee5ab9b184ea4b25983bf8aa522d"
+    },
     "finalFoundationCiCommit": "0116ff801284a45b0d9bb0cc63175976f46e510c",
     "finalFoundationCiRun": 36378138630
   }
