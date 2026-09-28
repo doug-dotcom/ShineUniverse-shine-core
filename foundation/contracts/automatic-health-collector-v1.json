@@ -1,0 +1,61 @@
+{
+  "collectorContract": "shine-foundation/automatic-health-collector-v1",
+  "schemaVersion": "1.0.0",
+  "purpose": "Continuously produce fresh, evidence-backed health observations for Foundation services without requiring a human to sample runtime telemetry.",
+  "productionCadence": {
+    "probe": "*/5 * * * *",
+    "harvest": "* * * * *",
+    "probeIntervalMinutes": 5,
+    "harvestIntervalMinutes": 1
+  },
+  "probe": {
+    "transport": "pg_net",
+    "method": "GET",
+    "authentication": "none",
+    "reason": "The Foundation Gateway health endpoint is intentionally public and returns no private data.",
+    "timeoutMilliseconds": 10000,
+    "expectedResponse": {
+      "service": "shine-foundation-gateway",
+      "status": "ok",
+      "schemaVersion": "1.0.0"
+    }
+  },
+  "scheduler": {
+    "engine": "pg_cron",
+    "probeJob": "shine-foundation-health-probe-5m",
+    "harvestJob": "shine-foundation-health-harvest-1m"
+  },
+  "evidenceFlow": [
+    "load-current-probe-target",
+    "queue-async-http-probe",
+    "record-immutable-request",
+    "harvest-pg-net-response",
+    "validate-http-and-response-contract",
+    "record-immutable-result",
+    "aggregate-current-health-window",
+    "append-service-health-evidence",
+    "evaluate-service-and-foundation-state"
+  ],
+  "safety": {
+    "secretsStored": false,
+    "publicEndpointOnly": true,
+    "probeTargetsAppendOnly": true,
+    "probeRequestsAppendOnly": true,
+    "probeResultsAppendOnly": true,
+    "missingOrInsufficientEvidenceFailsToUnknown": true,
+    "collectorCannotGrantUserAccess": true,
+    "collectorCannotReadVaultResources": true
+  },
+  "probeHealthPolicy": {
+    "policyVersion": "1.1.0",
+    "evaluationWindowSeconds": 3600,
+    "maxEvidenceAgeSeconds": 600,
+    "minimumProbeResults": 3,
+    "warningFailureRate": 0.1,
+    "criticalFailureRate": 0.5,
+    "warningP95Milliseconds": 5000,
+    "criticalP95Milliseconds": 10000,
+    "warningRuntimeErrors": 1,
+    "criticalRuntimeErrors": 2
+  }
+}
