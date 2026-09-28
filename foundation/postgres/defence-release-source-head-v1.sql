@@ -417,6 +417,7 @@ declare
   v_reason text;
   v_event_type text;
   v_incident_key text;
+  v_deployment_relevant boolean := true;
   v_created integer := 0;
   v_active integer := 0;
 begin
@@ -438,6 +439,11 @@ begin
       and h.observed_at<=p_observed_at
     order by h.observed_at desc,h.recorded_at desc,h.observation_id desc
     limit 1;
+
+    v_deployment_relevant := coalesce(
+      (v_head.metadata->>'deploymentRelevant')::boolean,
+      true
+    );
 
     select rp.* into v_provenance
     from foundation.defence_runtime_provenance_observations rp
@@ -470,6 +476,7 @@ begin
       v_reason := 'release-source-watch-stale';
     elsif v_head.observation_id is not null
       and v_head.valid_until>p_observed_at
+      and v_deployment_relevant
       and v_provenance.observation_id is not null
       and v_head.head_sha<>v_provenance.commit_sha
       and v_head.head_committed_at<=p_observed_at-interval '30 minutes'
