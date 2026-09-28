@@ -8,6 +8,7 @@ declare
   q foundation.concierge_requests%rowtype;
   replacement foundation.concierge_requests%rowtype;
   existing foundation.concierge_cancellation_events%rowtype;
+  retired foundation.concierge_retirement_events%rowtype;
   effective_reason text:=coalesce(nullif(p_reason_code,''),'user-cancelled');
   v_total integer:=0;
   v_completed integer:=0;
@@ -32,10 +33,17 @@ begin
     raise exception 'concierge-request-client-mismatch' using errcode='22023';
   end if;
   if foundation.concierge_request_is_retired_v1(p_request_id) then
+    select * into retired
+    from foundation.concierge_retirement_events r
+    where r.request_id=p_request_id;
+
     return jsonb_build_object(
       'status','retired',
       'requestId',p_request_id,
-      'reasonCode','unused-plan-expired'
+      'reasonCode',retired.reason_code,
+      'retiredAt',retired.retired_at,
+      'receipt',retired.receipt,
+      'receiptSha256',retired.receipt_sha256
     );
   end if;
   if p_superseded_by_request_id=p_request_id then
