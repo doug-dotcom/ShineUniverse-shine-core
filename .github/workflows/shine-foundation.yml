@@ -230,6 +230,8 @@ jobs:
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-rollback-readiness-v1.sql
       - name: Run Shine Defence rollback readiness acceptance tests
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-rollback-readiness-v1.test.sql
+      - name: Integrate Shine Defence rollback readiness into full estate
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-rollback-readiness-integration-v1.sql
       - name: Apply Shine Defence release admission canonical bootstrap
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-release-admission-bootstrap-v1.sql
       - name: Run Shine Defence release admission canonical bootstrap acceptance tests
