@@ -1,0 +1,16 @@
+{
+  "deploymentSourceManifest": "shine-foundation/gateway-deployment-source-v1",
+  "schemaVersion": "1.0.0",
+  "layer": 28,
+  "runtimeVersion": 77,
+  "artifactSha256": "1d81b65a21c9e8c4576df40f6153a7a572e7c58d09eb3a02c4038b59e7b36de0",
+  "sourceCommit": "f4421209d45d64ce4d2778bce73e4703a7c871ca",
+  "sourceRef": "github://doug-dotcom/ShineUniverse-shine-core/commit/f4421209d45d64ce4d2778bce73e4703a7c871ca",
+  "baseExactSourceCommit": "989f5284333999742d7c7404c1d07347e33859b5",
+  "changedBundlePaths": [
+    "foundation/gateway/http-handler-v1.mjs",
+    "foundation/runtime/supabase-runtime-adapters-v1.mjs",
+    "foundation/runtime/edge-function/index.ts"
+  ],
+  "sourceRule": "v77 is the exact v76 source tree plus only the three Layer 28 front-door policy-enforcement files above."
+}
