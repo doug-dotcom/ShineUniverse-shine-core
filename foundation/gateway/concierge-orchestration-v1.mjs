@@ -424,8 +424,10 @@ export function createConciergeSupersedeService({adapters,clock=()=>new Date().t
         supersededRequestId:envelope.requestId,
         supersededByRequestId:envelope.supersededByRequestId,
         cancelledAt:result.cancelledAt??null,
-        cancellationReceipt:result.receipt??null,
-        receiptSha256:result.receiptSha256??null
+        retiredAt:result.retiredAt??null,
+        ...(result.status==='retired'
+          ?{retirementReceipt:result.receipt??null,receiptSha256:result.receiptSha256??null}
+          :{cancellationReceipt:result.receipt??null,receiptSha256:result.receiptSha256??null})
       });
     }catch(error){
       const message=String(error?.message??'');
