@@ -1,8 +1,6 @@
-name: Shine Defence Release Source Head
+name: Shine Defence Release Source Registry
 
 on:
-  schedule:
-    - cron: '*/5 * * * *'
   workflow_dispatch:
   push:
     branches: [main]
@@ -15,92 +13,33 @@ on:
 
 permissions:
   contents: read
-  id-token: write
-
-concurrency:
-  group: shine-defence-release-head
-  cancel-in-progress: true
 
 jobs:
-  watch:
+  validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 3
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-
-      - name: Collect release source heads
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
+      - name: Validate distributed release source registry
         run: |
           node <<'NODE'
-          (async()=>{
           const fs=require('fs');
           const config=JSON.parse(fs.readFileSync('security/shine-defence/release-source-watch-v1.json','utf8'));
           if(config.contract!=='shine-defence/release-source-watch-v1'||config.schemaVersion!=='1.0.0'||!Array.isArray(config.sources)){
             throw new Error('invalid release source watch config');
           }
-          const observations=[];
+          if(config.sources.length!==14) throw new Error('expected 14 release source targets');
+          const targets=new Set();
+          const repos=new Set();
           for(const source of config.sources){
-            const endpoint='https://api.github.com/repos/'+source.repository+'/commits/'+encodeURIComponent(source.branch);
-            const response=await fetch(endpoint,{
-              headers:{
-                'Accept':'application/vnd.github+json',
-                'Authorization':'Bearer '+process.env.GITHUB_TOKEN,
-                'User-Agent':'Shine-Defence-Release-Head/1.0',
-                'X-GitHub-Api-Version':'2022-11-28'
-              }
-            });
-            if(!response.ok){
-              throw new Error('GitHub head lookup failed '+response.status+' for '+source.repository+' '+source.branch);
-            }
-            const body=await response.json();
-            const headSha=String(body.sha??'').toLowerCase();
-            const headCommittedAt=body.commit?.committer?.date??body.commit?.author?.date;
-            if(!/^[a-f0-9]{40}$/.test(headSha)||!headCommittedAt||Number.isNaN(Date.parse(headCommittedAt))){
-              throw new Error('invalid GitHub head response for '+source.targetId);
-            }
-            observations.push({
-              targetId:source.targetId,
-              repository:source.repository,
-              branch:source.branch,
-              headSha,
-              headCommittedAt:new Date(headCommittedAt).toISOString()
-            });
+            if(!/^railway:[a-z0-9][a-z0-9-]*$/.test(source.targetId)) throw new Error('invalid targetId');
+            if(!/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(source.repository)) throw new Error('invalid repository');
+            if(typeof source.branch!=='string'||!source.branch||/[\r\n]/.test(source.branch)) throw new Error('invalid branch');
+            if(targets.has(source.targetId)) throw new Error('duplicate targetId');
+            if(repos.has(source.repository.toLowerCase())) throw new Error('duplicate repository');
+            targets.add(source.targetId);
+            repos.add(source.repository.toLowerCase());
           }
-          if(observations.length!==14) throw new Error('expected 14 release source heads');
-          fs.writeFileSync('/tmp/release-head-snapshot.json',JSON.stringify({
-            contract:'shine-defence/release-head-snapshot-v1',
-            schemaVersion:'1.0.0',
-            observations
-          }));
-          console.log('Collected release source heads:',observations.length);
-          })().catch(error=>{ console.error(error); process.exit(1); });
+          console.log('Distributed release source registry: PASS',config.sources.length,'targets');
           NODE
-
-      - name: Acquire GitHub OIDC token
-        run: |
-          OIDC_JSON="$(curl -fsSL             -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN"             "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=shine-defence-release-head")"
-          OIDC_TOKEN="$(printf '%s' "$OIDC_JSON" | python3 -c 'import json,sys; print(json.load(sys.stdin)["value"])')"
-          echo "::add-mask::$OIDC_TOKEN"
-          printf '%s' "$OIDC_TOKEN" > /tmp/shine-defence-release-head-oidc
-
-      - name: Submit release source heads
-        run: |
-          OIDC_TOKEN="$(cat /tmp/shine-defence-release-head-oidc)"
-          HTTP_STATUS="$(curl -sS             -o /tmp/release-head-response.json             -w '%{http_code}'             -X POST             -H "Authorization: Bearer $OIDC_TOKEN"             -H "Content-Type: application/json"             --data-binary @/tmp/release-head-snapshot.json             https://sjpxqeyewahraxvidvcc.supabase.co/functions/v1/defence-release-head-ingest)"
-          if [ "$HTTP_STATUS" != "200" ]; then
-            cat /tmp/release-head-response.json
-            exit 1
-          fi
-          node -e "
-            const fs=require('fs');
-            const r=JSON.parse(fs.readFileSync('/tmp/release-head-response.json','utf8'));
-            if(r.status!=='accepted'||r.accepted!==14){
-              throw new Error('release source-head ingest acceptance mismatch');
-            }
-            console.log('Release source-head ingest accepted:',r.accepted);
-          "
