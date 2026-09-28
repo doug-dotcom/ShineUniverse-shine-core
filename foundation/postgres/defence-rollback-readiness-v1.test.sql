@@ -181,6 +181,72 @@ end;
 $rollback$;
 
 do $rollback$
+declare
+  v jsonb;
+begin
+  insert into foundation.defence_estate_targets(
+    target_id,display_name,provider,provider_project_ref,environment_ref,service_ref,
+    target_role,required_for_estate,allowed_runtime_states,lifecycle,metadata
+  ) values (
+    'railway:test-rollback-carry',
+    'Rollback Carry Forward Test',
+    'railway',
+    '12121212-1212-4212-8212-121212121212',
+    '13131313-1313-4313-8313-131313131313',
+    '14141414-1414-4414-8414-141414141414',
+    'primary_service',true,array['active']::text[],'active',
+    '{"sourceRepository":"doug-dotcom/test-rollback-carry","sourceBranch":"main"}'::jsonb
+  );
+
+  insert into foundation.defence_release_admission_events(
+    target_id,admission_state,reason_code,
+    serving_deployment_id,serving_commit_sha,
+    canonical_deployment_id,canonical_commit_sha,
+    rollback_deployment_id,rollback_commit_sha,
+    observed_at,evidence,evidence_ref
+  ) values (
+    'railway:test-rollback-carry','admitted','candidate-evidence-clear',
+    '15151515-1515-4515-8515-151515151515',repeat('1',40),
+    '15151515-1515-4515-8515-151515151515',repeat('1',40),
+    '16161616-1616-4616-8616-161616161616',repeat('2',40),
+    now(),'{}'::jsonb,'test:rollback-carry:admission'
+  );
+
+  insert into foundation.defence_rollback_source_attestations(
+    target_id,repository,rollback_commit_sha,canonical_commit_sha,
+    source_available,observed_at,valid_until,evidence_ref,metadata
+  ) values (
+    'railway:test-rollback-carry',
+    'doug-dotcom/test-rollback-carry',
+    repeat('3',40),
+    repeat('2',40),
+    true,
+    now()-interval '5 minutes',
+    now()+interval '90 minutes',
+    'test:rollback-carry:prior-canonical-proof',
+    '{"test":true}'::jsonb
+  );
+
+  select foundation.get_defence_rollback_readiness_summary_v1() into v;
+
+  if not exists (
+    select 1
+    from jsonb_array_elements(v->'targets') x
+    where x->>'targetId'='railway:test-rollback-carry'
+      and x->>'state'='source-ready'
+      and x->>'sourceProofMode'='prior-canonical-carry-forward'
+  ) then
+    raise exception 'fresh prior canonical proof should carry into rollback readiness: %',v;
+  end if;
+
+  if (v->>'carriedForwardPriorCanonicalProofTargets')::integer<1 then
+    raise exception 'carried-forward proof count missing: %',v;
+  end if;
+end;
+$rollback$;
+
+
+do $rollback$
 begin
   if has_table_privilege(
        'anon','foundation.defence_rollback_source_attestations','SELECT'
