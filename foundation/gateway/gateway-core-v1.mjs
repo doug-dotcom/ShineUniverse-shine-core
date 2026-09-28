@@ -33,7 +33,7 @@ const isEnvelopeValid=envelope=>{
   return Boolean(p.resourceId||p.resourceCategory);
 };
 
-const toAuditEvent=({envelope,decision,defenceEvidenceRef,occurredAt,shineId})=>({
+const toAuditEvent=({envelope,decision,defenceEvidenceRef,occurredAt,shineId,requestContext})=>({
   event:'shine-foundation/access-audit-event-v1',
   schemaVersion:'1.0.0',
   eventId:envelope.traceId,
@@ -48,14 +48,15 @@ const toAuditEvent=({envelope,decision,defenceEvidenceRef,occurredAt,shineId})=>
   reasonCode:decision.reasonCode,
   ...(decision.grantId?{grantId:decision.grantId}:{}),
   occurredAt,
-  ...(defenceEvidenceRef?{defenceEvidenceRef}:{})
+  ...(defenceEvidenceRef?{defenceEvidenceRef}:{}),
+  ...(requestContext&&Object.keys(requestContext).length?{requestContext}:{})
 });
 
 /** @param {{adapters:any, clock?:()=>string}} [options] */
 export function createFoundationGateway({adapters,clock=()=>new Date().toISOString()}={}){
   for(const name of [
     'verifyAppCaller','verifyIdentity','getAppManifest','getVaultResource',
-    'getEffectiveGrants','evaluateDefence','writeAuditEvent'
+    'getEffectiveGrants','evaluateDependencyAdmission','evaluateDefence','writeAuditEvent'
   ]) requireFunction(adapters,name);
 
   return async function handleFoundationRequest({envelope,authContext}={}){
@@ -65,11 +66,22 @@ export function createFoundationGateway({adapters,clock=()=>new Date().toISOStri
     const v=requestVersion(envelope);
     const now=clock();
 
-    const persistAndRespond=async(decision,defenceEvidenceRef,shineId=permission.shineId??null)=>{
+    const persistAndRespond=async(
+      decision,
+      defenceEvidenceRef,
+      shineId=permission.shineId??null,
+      requestContext={},
+      externalStatus=null
+    )=>{
       try{
-        await adapters.writeAuditEvent(toAuditEvent({envelope,decision,defenceEvidenceRef,occurredAt:now,shineId}));
+        await adapters.writeAuditEvent(toAuditEvent({
+          envelope,decision,defenceEvidenceRef,occurredAt:now,shineId,requestContext
+        }));
       }catch{
         return response(envelope,'unavailable','audit-write-failed');
+      }
+      if(externalStatus==='unavailable'){
+        return response(envelope,'unavailable',decision.reasonCode);
       }
       return response(
         envelope,
@@ -128,6 +140,74 @@ export function createFoundationGateway({adapters,clock=()=>new Date().toISOStri
       return persistAndRespond(decision,undefined,verified.shineId);
     }
 
+    let dependencyAdmission;
+    try{
+      dependencyAdmission=await adapters.evaluateDependencyAdmission({
+        serviceId:'foundation.gateway',
+        environment:'production',
+        operation:envelope.operation,
+        asOf:now
+      });
+    }catch{
+      return response(envelope,'unavailable','dependency-admission-unavailable');
+    }
+
+    const admissionContext={
+      dependencyAdmission:{
+        admissionState:dependencyAdmission?.admissionState??'unavailable',
+        reasonCode:dependencyAdmission?.reasonCode??'dependency-admission-invalid',
+        serviceId:dependencyAdmission?.serviceId??'foundation.gateway',
+        environment:dependencyAdmission?.environment??'production',
+        operation:dependencyAdmission?.operation??envelope.operation,
+        impactScope:dependencyAdmission?.impactScope??null,
+        ownState:dependencyAdmission?.ownState??null,
+        effectiveState:dependencyAdmission?.effectiveState??null,
+        safeMode:dependencyAdmission?.safeMode??null,
+        bindingEvidenceRef:dependencyAdmission?.bindingEvidenceRef??null,
+        dependencyEvidence:Array.isArray(dependencyAdmission?.dependencyEvidence)
+          ?dependencyAdmission.dependencyEvidence:[]
+      }
+    };
+
+    if(!dependencyAdmission?.admissionState){
+      return persistAndRespond(
+        {decision:'deny',reasonCode:'dependency-admission-invalid'},
+        undefined,
+        verified.shineId,
+        admissionContext,
+        'unavailable'
+      );
+    }
+
+    if(dependencyAdmission.admissionState==='deny'){
+      return persistAndRespond(
+        {decision:'deny',reasonCode:dependencyAdmission.reasonCode??'dependency-guarded'},
+        undefined,
+        verified.shineId,
+        admissionContext
+      );
+    }
+
+    if(dependencyAdmission.admissionState==='unavailable'){
+      return persistAndRespond(
+        {decision:'deny',reasonCode:dependencyAdmission.reasonCode??'dependency-admission-unavailable'},
+        undefined,
+        verified.shineId,
+        admissionContext,
+        'unavailable'
+      );
+    }
+
+    if(!['admit','admit-degraded'].includes(dependencyAdmission.admissionState)){
+      return persistAndRespond(
+        {decision:'deny',reasonCode:'dependency-admission-invalid'},
+        undefined,
+        verified.shineId,
+        admissionContext,
+        'unavailable'
+      );
+    }
+
     let resource,grants;
     try{
       [resource,grants]=await Promise.all([
@@ -170,6 +250,11 @@ export function createFoundationGateway({adapters,clock=()=>new Date().toISOStri
       defenceDecision:defence?.decision??'not-evaluated'
     });
 
-    return persistAndRespond(decision,defence?.evidenceRef,verified.shineId);
+    return persistAndRespond(
+      decision,
+      defence?.evidenceRef,
+      verified.shineId,
+      admissionContext
+    );
   };
 }
