@@ -54,6 +54,19 @@ const makeAdapters=overrides=>{
     getAppManifest:async()=>manifest,
     getVaultResource:async()=>resource,
     getEffectiveGrants:async()=>[grant],
+    evaluateDependencyAdmission:async()=>({
+      serviceId:'foundation.gateway',
+      environment:'production',
+      operation:'access.evaluate',
+      impactScope:'protected-operations',
+      admissionState:'admit',
+      reasonCode:'dependency-admission-clear',
+      ownState:'operational',
+      effectiveState:'operational',
+      safeMode:'normal',
+      bindingEvidenceRef:'foundation:admission-binding:gateway:access-evaluate:v1',
+      dependencyEvidence:[]
+    }),
     evaluateDefence:async()=>({decision:'allow',evidenceRef:'defence://ok'}),
     writeAuditEvent:async event=>{audit.push(event)},
     ...overrides
@@ -137,6 +150,95 @@ test('Defence can veto otherwise valid access',async()=>{
   const result=await gateway({envelope:v2,authContext:{}});
   assert.equal(result.reasonCode,'defence-denied');
   assert.equal(audit[0].defenceEvidenceRef,'defence://veto');
+});
+
+test('dependency guard denies before Vault grants or Defence and remains auditable',async()=>{
+  let vaultCalls=0,grantCalls=0,defenceCalls=0;
+  const {gateway,audit}=create({
+    evaluateDependencyAdmission:async()=>({
+      serviceId:'foundation.gateway',
+      environment:'production',
+      operation:'access.evaluate',
+      impactScope:'protected-operations',
+      admissionState:'deny',
+      reasonCode:'dependency-guarded',
+      ownState:'operational',
+      effectiveState:'guarded',
+      safeMode:'guarded',
+      bindingEvidenceRef:'foundation:admission-binding:gateway:access-evaluate:v1',
+      dependencyEvidence:[{
+        serviceId:'foundation.defence',
+        dependencyType:'guard',
+        impact:'guarded',
+        impactScope:'protected-operations',
+        sourceEvidenceRef:'sentinel:test',
+        nativeState:'unhealthy'
+      }]
+    }),
+    getVaultResource:async()=>{vaultCalls++;return resource},
+    getEffectiveGrants:async()=>{grantCalls++;return [grant]},
+    evaluateDefence:async()=>{defenceCalls++;return {decision:'allow',evidenceRef:'defence://ok'}}
+  });
+  const result=await gateway({envelope:v2,authContext:{}});
+  assert.equal(result.status,'denied');
+  assert.equal(result.reasonCode,'dependency-guarded');
+  assert.equal(vaultCalls,0);
+  assert.equal(grantCalls,0);
+  assert.equal(defenceCalls,0);
+  assert.equal(audit.length,1);
+  assert.equal(audit[0].requestContext.dependencyAdmission.effectiveState,'guarded');
+  assert.equal(audit[0].requestContext.dependencyAdmission.dependencyEvidence[0].serviceId,'foundation.defence');
+});
+
+test('degraded dependency admission continues and is attached to final access audit',async()=>{
+  const {gateway,audit}=create({
+    evaluateDependencyAdmission:async()=>({
+      serviceId:'foundation.gateway',
+      environment:'production',
+      operation:'access.evaluate',
+      impactScope:'protected-operations',
+      admissionState:'admit-degraded',
+      reasonCode:'dependency-degraded',
+      ownState:'operational',
+      effectiveState:'degraded',
+      safeMode:'degraded',
+      bindingEvidenceRef:'foundation:admission-binding:gateway:access-evaluate:v1',
+      dependencyEvidence:[{
+        serviceId:'foundation.defence',
+        dependencyType:'guard',
+        impact:'degraded',
+        impactScope:'protected-operations',
+        sourceEvidenceRef:'sentinel:warning',
+        nativeState:'degraded'
+      }]
+    })
+  });
+  const result=await gateway({envelope:v2,authContext:{}});
+  assert.equal(result.status,'allowed');
+  assert.equal(audit[0].decision,'allow');
+  assert.equal(audit[0].requestContext.dependencyAdmission.admissionState,'admit-degraded');
+  assert.equal(audit[0].requestContext.dependencyAdmission.reasonCode,'dependency-degraded');
+});
+
+test('unavailable admission fails safe before protected resource access and is audited',async()=>{
+  let vaultCalls=0;
+  const {gateway,audit}=create({
+    evaluateDependencyAdmission:async()=>({
+      serviceId:'foundation.gateway',
+      environment:'production',
+      operation:'access.evaluate',
+      impactScope:'protected-operations',
+      admissionState:'unavailable',
+      reasonCode:'dependency-graph-invalid'
+    }),
+    getVaultResource:async()=>{vaultCalls++;return resource}
+  });
+  const result=await gateway({envelope:v2,authContext:{}});
+  assert.equal(result.status,'unavailable');
+  assert.equal(result.reasonCode,'dependency-graph-invalid');
+  assert.equal(vaultCalls,0);
+  assert.equal(audit.length,1);
+  assert.equal(audit[0].decision,'deny');
 });
 
 test('invalid envelope is rejected before adapters are called',async()=>{
