@@ -984,11 +984,11 @@ export function createSupabaseRuntimeAdapters({sql,defenceGate,fetchImpl=fetch}=
       return first(rows)?.explanation??null;
     },
 
-    async cancelConciergeRequest({eventId,requestId,ownerShineId,clientId,reasonCode,occurredAt}={}){
+    async cancelConciergeRequest({eventId,requestId,ownerShineId,clientId,reasonCode,occurredAt,supersededByRequestId=null}={}){
       const rows=await sql`
-        select foundation.cancel_concierge_request_v1(
+        select foundation.cancel_concierge_request_v2(
           ${eventId}::uuid,${requestId}::uuid,${ownerShineId}::uuid,${clientId},
-          ${reasonCode},${occurredAt}::timestamptz
+          ${reasonCode},${occurredAt}::timestamptz,${supersededByRequestId??null}::uuid
         ) as result
       `;
       return first(rows)?.result??null;
@@ -996,7 +996,7 @@ export function createSupabaseRuntimeAdapters({sql,defenceGate,fetchImpl=fetch}=
 
     async listUserConciergeJobs({ownerShineId,limit=50,before=null}={}){
       const rows=await sql`
-        select foundation.list_user_concierge_jobs_v3(
+        select foundation.list_user_concierge_jobs_v4(
           ${ownerShineId}::uuid,${limit}::integer,${before??null}::timestamptz
         ) as jobs
       `;
