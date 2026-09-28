@@ -2,44 +2,17 @@ name: Publish Foundation Deployment Receipt
 
 on:
   workflow_dispatch:
-    inputs:
-      runtime_version:
-        description: Supabase Edge Function runtime version
-        required: true
-        type: string
-      artifact_sha256:
-        description: Provider-reported deployed artefact SHA-256
-        required: true
-        type: string
-      source_commit:
-        description: Exact 40-character Git commit used for the deployed bundle
-        required: true
-        type: string
-      provider_evidence_ref:
-        description: Non-secret provider evidence reference
-        required: true
-        type: string
-      provider_observed_at:
-        description: Provider observation time in ISO-8601
-        required: true
-        type: string
-      runtime_state:
-        description: Provider runtime state
-        required: true
-        default: active
-        type: choice
-        options:
-          - active
-          - inactive
-          - failed
-      rollback:
-        description: Explicitly mark a lower-version receipt as an authorised rollback
-        required: true
-        default: false
-        type: boolean
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/publish-foundation-deployment-receipt.yml'
+      - 'foundation/deployments/current-foundation-gateway-provider-receipt.json'
+      - 'foundation/runtime/deployment-receipt-ingest/index.ts'
+      - 'foundation/contracts/deployment-receipt-publisher-v1.json'
 
 permissions:
   contents: read
+  id-token: write
 
 concurrency:
   group: foundation-deployment-receipt
@@ -49,63 +22,68 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     timeout-minutes: 5
-    environment: foundation-production
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-
-      - name: Validate source commit exists in this repository
-        env:
-          SOURCE_COMMIT: ${{ inputs.source_commit }}
+      - name: Validate deployment receipt manifest
         run: |
-          git cat-file -e "${SOURCE_COMMIT}^{commit}"
-          test "$(git rev-parse "${SOURCE_COMMIT}^{commit}")" = "${SOURCE_COMMIT}"
+          node <<'NODE'
+          const fs=require('fs');
+          const body=JSON.parse(fs.readFileSync('foundation/deployments/current-foundation-gateway-provider-receipt.json','utf8'));
+          if(body.contract!=='shine-foundation/deployment-receipt-publish-v1'||body.schemaVersion!=='1.0.0'){
+            throw new Error('invalid deployment receipt contract');
+          }
+          const r=body.receipt||{};
+          if(!/^\d+$/.test(String(r.runtimeVersion||''))) throw new Error('invalid runtimeVersion');
+          if(!/^[a-f0-9]{64}$/i.test(String(r.artifactSha256||''))) throw new Error('invalid artifactSha256');
+          if(!/^[a-f0-9]{40}$/i.test(String(r.sourceCommit||''))) throw new Error('invalid sourceCommit');
+          if(!['active','inactive','failed'].includes(r.runtimeState)) throw new Error('invalid runtimeState');
+          if(typeof r.providerEvidenceRef!=='string'||!r.providerEvidenceRef) throw new Error('missing providerEvidenceRef');
+          if(Number.isNaN(Date.parse(r.providerObservedAt))) throw new Error('invalid providerObservedAt');
+          if(typeof r.rollback!=='boolean') throw new Error('invalid rollback');
+          require('child_process').execFileSync('git',['cat-file','-e',r.sourceCommit+'^{commit}']);
+          const exact=require('child_process').execFileSync('git',['rev-parse',r.sourceCommit+'^{commit}'],{encoding:'utf8'}).trim();
+          if(exact!==r.sourceCommit) throw new Error('sourceCommit is not exact');
+          console.log(JSON.stringify({
+            runtimeVersion:r.runtimeVersion,
+            artifactSha256:r.artifactSha256,
+            sourceCommit:r.sourceCommit,
+            providerEvidenceRef:r.providerEvidenceRef,
+            providerObservedAt:r.providerObservedAt,
+            rollback:r.rollback
+          },null,2));
+          NODE
 
-      - name: Build canonical deployment receipt payload
-        env:
-          FOUNDATION_RUNTIME_VERSION: ${{ inputs.runtime_version }}
-          FOUNDATION_ARTIFACT_SHA256: ${{ inputs.artifact_sha256 }}
-          FOUNDATION_SOURCE_COMMIT: ${{ inputs.source_commit }}
-          FOUNDATION_PROVIDER_EVIDENCE_REF: ${{ inputs.provider_evidence_ref }}
-          FOUNDATION_PROVIDER_OBSERVED_AT: ${{ inputs.provider_observed_at }}
-          FOUNDATION_RUNTIME_STATE: ${{ inputs.runtime_state }}
-          FOUNDATION_ROLLBACK: ${{ inputs.rollback }}
-          FOUNDATION_SUBMITTED_BY: github-actions-deployment-receipt
+      - name: Acquire GitHub OIDC token
         run: |
-          node foundation/integration-kit/build-deployment-receipt-payload-v1.mjs > "$RUNNER_TEMP/foundation-deployment-receipt.json"
-          node -e "const p=require(process.argv[1]); console.log(JSON.stringify({serviceId:p.p_service_id,runtimeVersion:p.p_runtime_version,artifactSha256:p.p_artifact_sha256,sourceRef:p.p_source_ref,providerEvidenceRef:p.p_provider_evidence_ref,rollback:p.p_metadata.rollback},null,2))" "$RUNNER_TEMP/foundation-deployment-receipt.json"
+          OIDC_JSON="$(curl -fsSL             -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN"             "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=shine-foundation-deployment-receipt")"
+          OIDC_TOKEN="$(printf '%s' "$OIDC_JSON" | python3 -c 'import json,sys; print(json.load(sys.stdin)["value"])')"
+          echo "::add-mask::$OIDC_TOKEN"
+          printf '%s' "$OIDC_TOKEN" > "$RUNNER_TEMP/foundation-deployment-receipt-oidc"
 
-      - name: Submit receipt to Foundation
-        env:
-          SUPABASE_URL: ${{ secrets.FOUNDATION_SUPABASE_URL }}
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.FOUNDATION_SUPABASE_SERVICE_ROLE_KEY }}
+      - name: Publish deployment receipt
         run: |
-          test -n "$SUPABASE_URL"
-          test -n "$SUPABASE_SERVICE_ROLE_KEY"
-          curl --fail-with-body --silent --show-error \
-            --request POST \
-            --url "$SUPABASE_URL/rest/v1/rpc/submit_service_deployment_receipt_v1" \
-            --header "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
-            --header "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
-            --header "Content-Type: application/json" \
-            --data-binary @"$RUNNER_TEMP/foundation-deployment-receipt.json" \
-            > "$RUNNER_TEMP/foundation-deployment-receipt-response.json"
-          node -e "const r=require(process.argv[1]); if(!['reconciled','replayed'].includes(r.status)) throw new Error('unexpected receipt status: '+JSON.stringify(r)); console.log(JSON.stringify({status:r.status,receiptId:r.receiptId,runtimeVersion:r.runtimeVersion,truthState:r.deploymentTruth?.truthState,readinessState:r.readiness?.readinessState},null,2))" "$RUNNER_TEMP/foundation-deployment-receipt-response.json"
+          OIDC_TOKEN="$(cat "$RUNNER_TEMP/foundation-deployment-receipt-oidc")"
+          curl --fail-with-body --silent --show-error             --request POST             --url "https://sjpxqeyewahraxvidvcc.supabase.co/functions/v1/foundation-deployment-receipt-ingest"             --header "Authorization: Bearer $OIDC_TOKEN"             --header "Content-Type: application/json"             --data-binary @foundation/deployments/current-foundation-gateway-provider-receipt.json             > "$RUNNER_TEMP/foundation-deployment-receipt-response.json"
 
-      - name: Read reconciliation status
-        env:
-          SUPABASE_URL: ${{ secrets.FOUNDATION_SUPABASE_URL }}
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.FOUNDATION_SUPABASE_SERVICE_ROLE_KEY }}
-        run: |
-          curl --fail-with-body --silent --show-error \
-            --request POST \
-            --url "$SUPABASE_URL/rest/v1/rpc/get_deployment_reconciliation_status_v1" \
-            --header "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
-            --header "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
-            --header "Content-Type: application/json" \
-            --data '{"p_service_id":"foundation.gateway","p_environment":"production"}' \
-            > "$RUNNER_TEMP/foundation-deployment-reconciliation-status.json"
-          node -e "const r=require(process.argv[1]); if(r.state==='drift'||r.state==='unknown') throw new Error('deployment reconciliation failed: '+JSON.stringify(r)); console.log(JSON.stringify({state:r.state,reasonCode:r.reasonCode,runtimeVersion:r.receipt?.runtimeVersion,readinessState:r.readiness?.readinessState},null,2))" "$RUNNER_TEMP/foundation-deployment-reconciliation-status.json"
+          node <<'NODE'
+          const fs=require('fs');
+          const r=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP+'/foundation-deployment-receipt-response.json','utf8'));
+          if(r.status!=='accepted') throw new Error('receipt ingest rejected: '+JSON.stringify(r));
+          const receiptStatus=r.receipt?.status;
+          if(!['reconciled','replayed'].includes(receiptStatus)){
+            throw new Error('unexpected receipt status: '+JSON.stringify(r));
+          }
+          const state=r.reconciliation?.state;
+          if(['unknown','drift'].includes(state)){
+            throw new Error('deployment reconciliation unsafe: '+JSON.stringify(r.reconciliation));
+          }
+          console.log(JSON.stringify({
+            ingestStatus:r.status,
+            receiptStatus,
+            receiptId:r.receipt?.receiptId??null,
+            runtimeVersion:r.receipt?.runtimeVersion??null,
+            reconciliationState:state??null,
+            readinessState:r.reconciliation?.readiness?.readinessState??null
+          },null,2));
+          NODE
