@@ -82,6 +82,21 @@ const makeSql=()=> {
     if(q.includes('foundation.get_app_operational_status_v1')){
       return [{status:{appId:'shine.travel',operationalState:'revocation-pending',operationalHealth:'attention'}}];
     }
+    if(q.includes('foundation.evaluate_service_admission_v1')){
+      return [{admission:{
+        serviceId:'foundation.gateway',
+        environment:'production',
+        operation:'access.evaluate',
+        impactScope:'protected-operations',
+        admissionState:'admit',
+        reasonCode:'dependency-admission-clear',
+        ownState:'operational',
+        effectiveState:'operational',
+        safeMode:'normal',
+        bindingEvidenceRef:'foundation:admission-binding:gateway:access-evaluate:v1',
+        dependencyEvidence:[]
+      }}];
+    }
     if(q.includes('from foundation.app_registry')){
       return [{manifest:{appId:'shine.travel',foundation:{requestedScopes:[]}}}];
     }
@@ -427,4 +442,17 @@ test('app operational status delegates to the hosted database function',async()=
   const {adapters}=makeAdapters();
   const result=await adapters.getAppOperationalStatus({appId:'shine.travel'});
   assert.deepEqual(result,{appId:'shine.travel',operationalState:'revocation-pending',operationalHealth:'attention'});
+});
+
+test('dependency admission delegates to the hosted database function',async()=>{
+  const {adapters}=makeAdapters();
+  const result=await adapters.evaluateDependencyAdmission({
+    serviceId:'foundation.gateway',
+    environment:'production',
+    operation:'access.evaluate',
+    asOf:'2026-09-28T01:55:00Z'
+  });
+  assert.equal(result.admissionState,'admit');
+  assert.equal(result.impactScope,'protected-operations');
+  assert.equal(result.reasonCode,'dependency-admission-clear');
 });
