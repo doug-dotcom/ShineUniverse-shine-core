@@ -24,6 +24,18 @@ select
   now() recorded_at,
   repeat('9',32)::text condition_fingerprint;
 
+insert into foundation.foundation_readiness_incident_events(
+ event_id,incident_key,environment,event_type,readiness_state,drift_state,severity,
+ reason_codes,degraded_scopes,guarded_scopes,blocked_scopes,readiness_drift_observation_id,
+ evidence_fingerprint,detection_started_at,persistence_threshold_seconds,persistence_seconds,
+ snapshot,occurred_at,condition_fingerprint
+) values(
+ '47000000-0000-4000-8000-000000000001','production:readiness','production','opened',
+ 'degraded','stable','warning','["dependency-degraded"]','["protected-operations"]','[]','[]',
+ null,repeat('2',32),now()-interval '10 minutes',300,600,
+ '{"current":{"privilegedOperationsMode":"degraded","workerOperationsMode":"degraded"}}',now(),repeat('9',32)
+);
+
 do $p$
 declare v jsonb;s jsonb;
 begin
