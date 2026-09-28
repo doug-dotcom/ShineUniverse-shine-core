@@ -202,7 +202,48 @@ end;
 $$;
 
 
-do $$
+do $
+declare
+  v jsonb;
+begin
+  perform foundation.record_defence_release_source_head_v1(
+    'railway:test-source-head',
+    'doug-dotcom/test-source-head',
+    'main',
+    repeat('d',40),
+    now()-interval '40 minutes',
+    now()+interval '6 seconds',
+    now()+interval '90 minutes',
+    'test:source-head:non-deployment',
+    '{"test":true,"deploymentRelevant":false,"changedFileCount":1}'::jsonb
+  );
+
+  select foundation.get_defence_release_source_head_summary_v1() into v;
+
+  if exists (
+    select 1
+    from jsonb_array_elements(v->'attention') x
+    where x->>'targetId'='railway:test-source-head'
+  ) then
+    raise exception 'non-deployment source head must not become release attention: %',v;
+  end if;
+
+  select foundation.run_defence_release_source_head_sentinel_v1(
+    now()+interval '7 seconds'
+  ) into v;
+
+  if exists (
+    select 1
+    from foundation.current_defence_estate_incidents
+    where incident_key='railway:test-source-head:release-source-head'
+  ) then
+    raise exception 'non-deployment source head must not open an incident: %',v;
+  end if;
+end;
+$;
+
+
+do $
 begin
   if has_table_privilege(
        'anon','foundation.defence_release_source_head_observations','SELECT'
