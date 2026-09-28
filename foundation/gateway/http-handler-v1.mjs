@@ -297,6 +297,9 @@ export function createFoundationHttpHandler({
           cancellationBlocksNewSpecialistTickets:true,
           cancellationBlocksTicketRedemption:true,
           cancellationAbandonsPendingRetries:true,
+          cancellationReceipts:true,
+          cancellationReceiptIncludesSpecialistOutputs:false,
+          cancellationReceiptTamperEvidentSha256:true,
           capabilityChangesAudited:true,
           purposeBoundCapabilityGrants:true,
           accessHistoryStoresConversationContent:false
