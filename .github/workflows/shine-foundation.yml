@@ -165,6 +165,10 @@ jobs:
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/gateway-operation-audit-v1.sql
       - name: Run privileged operation audit acceptance tests
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/gateway-operation-audit-v1.test.sql
+      - name: Apply Foundation control-plane readiness gate
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-readiness-v1.sql
+      - name: Run Foundation control-plane readiness acceptance tests
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-readiness-v1.test.sql
       - name: Apply Shine Defence Sentinel
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-sentinel-v1.sql
       - name: Run Shine Defence Sentinel acceptance tests
