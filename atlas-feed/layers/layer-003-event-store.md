@@ -37,7 +37,7 @@ Both event and receipt tables:
 - revoke that function from `PUBLIC`, `anon` and `authenticated`;
 - reject `UPDATE` and `DELETE` through the shared append-only trigger.
 
-The store is in the private `foundation` schema and is **not** added to Realtime publication.
+The store is in the private `foundation` schema and is **not** added to Realtime publication. Explicit restrictive deny policies cover `anon` and `authenticated`, and all composite foreign keys have covering indexes.
 
 ## Stored evidence
 
