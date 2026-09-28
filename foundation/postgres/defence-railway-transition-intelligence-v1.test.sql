@@ -424,10 +424,10 @@ begin
     raise exception 'superseded successful release must not open transition incident: %',v;
   end if;
 end;
-$;
+$supersede$;
 
 
-do $
+do $$
 begin
   if has_table_privilege(
        'anon','foundation.defence_railway_transition_events','SELECT'
