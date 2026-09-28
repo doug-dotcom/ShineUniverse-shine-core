@@ -439,7 +439,7 @@ insert into foundation.defence_health_observations(
   'test:admission:bootstrap:new:health','{}'
 );
 
-do $
+do $bootstrap$
 declare
   v jsonb;
 begin
@@ -457,10 +457,10 @@ begin
     raise exception 'young candidate should bootstrap the prior stable release as canonical: %',v;
   end if;
 end;
-$;
+$bootstrap$;
 
 
-do $
+do $$
 begin
   if has_table_privilege('anon','foundation.defence_release_admission_events','SELECT')
      or has_table_privilege('authenticated','foundation.current_defence_release_admission','SELECT') then
