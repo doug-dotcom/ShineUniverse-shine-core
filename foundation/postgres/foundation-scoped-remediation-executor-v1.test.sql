@@ -52,7 +52,7 @@ values (
   repeat('a',64),
   'active',
   'github://doug-dotcom/ShineUniverse-shine-core/commit/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-  now()-interval '20 seconds',
+  now()+interval '1 second',
   'test:layer41:deployment-expectation:a',
   'Layer 41 initial deployment fixture.'
 );
@@ -68,7 +68,7 @@ values (
   'layer41-a',
   repeat('a',64),
   'active','healthy',
-  now()-interval '20 seconds',
+  now()+interval '1 second',
   'manual-verified',
   'test:layer41:deployment-observation:a',
   'Layer 41 initial deployment fixture.',
@@ -83,13 +83,13 @@ insert into foundation.service_health_evidence(
 values (
   'foundation.gateway','production','layer41-a',
   now()-interval '5 minutes',
-  now()-interval '15 seconds',
+  now()+interval '2 seconds',
   100,0,0,20,25,
   0,'manual-verified',
   'test:layer41:health:a',
   'Healthy Layer 41 initial fixture.',
   '{"test":true}'::jsonb,
-  now()-interval '15 seconds'
+  now()+interval '2 seconds'
 );
 
 insert into foundation.defence_posture_observations(
@@ -99,11 +99,11 @@ insert into foundation.defence_posture_observations(
 values (
   '41000000-0000-4000-8000-000000000001'::uuid,
   '1.0.0','production','pass',
-  now()-interval '15 seconds',
+  now()+interval '3 seconds',
   now()+interval '2 hours',
   '{"test":true}'::jsonb,
   'test:layer41:defence:pass',
-  now()-interval '15 seconds'
+  now()+interval '3 seconds'
 );
 
 insert into foundation.service_deployment_receipts(
@@ -120,10 +120,10 @@ values (
   'active',
   'github://doug-dotcom/ShineUniverse-shine-core/commit/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
   'test:layer41:provider:a',
-  now()-interval '18 seconds',
+  now()+interval '2 seconds',
   'layer41-test',
   '{"test":true}'::jsonb,
-  now()-interval '18 seconds'
+  now()+interval '2 seconds'
 );
 
 insert into foundation.service_deployment_receipt_publications(
@@ -147,7 +147,7 @@ values (
   'doug-dotcom/ShineUniverse-shine-core','refs/heads/main',
   'doug-dotcom/ShineUniverse-shine-core/.github/workflows/publish-foundation-deployment-receipt.yml@refs/heads/main',
   repeat('1',40),false,'{"test":true}'::jsonb,
-  now()-interval '12 seconds'
+  now()+interval '4 seconds'
 );
 
 do $layer41_initial_audit$
@@ -156,7 +156,7 @@ declare
   v_audit uuid := '41000000-0000-4000-8000-000000000110'::uuid;
 begin
   select foundation.evaluate_gateway_route_policy_v1(
-    'POST','/v1/grants/consent','production',now()-interval '10 seconds'
+    'POST','/v1/grants/consent','production',now()+interval '5 seconds'
   ) into v_policy;
 
   if v_policy->>'policyState'<>'admit' then
@@ -165,15 +165,31 @@ begin
 
   perform foundation.record_gateway_operation_audit_event_v1(
     v_audit,'policy','POST','/v1/grants/consent','production',
-    v_policy,null,null,null,now()-interval '10 seconds'
+    v_policy,null,null,null,now()+interval '5 seconds'
   );
 
   perform foundation.record_gateway_operation_audit_event_v1(
     v_audit,'outcome','POST','/v1/grants/consent','production',
-    null,401,'unauthenticated',null,now()-interval '9 seconds'
+    null,401,'unauthenticated',null,now()+interval '6 seconds'
   );
 end;
 $layer41_initial_audit$;
+
+do $layer41_initial_readiness$
+declare
+  v jsonb;
+begin
+  select foundation.evaluate_foundation_readiness_v1(
+    'production',now()
+  ) into v;
+
+  if coalesce(v->>'readinessState','unknown')
+       not in ('ready','restricted','degraded') then
+    raise exception 'Layer 41 initial fixture must be bindable before executor tests: %',v;
+  end if;
+end;
+$layer41_initial_readiness$;
+
 
 do $layer41_initial_binding$
 declare
