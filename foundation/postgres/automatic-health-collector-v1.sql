@@ -171,9 +171,14 @@ begin
     p_service_id,p_environment,p_target_id,p_external_request_id,p_target_url,
     p_queued_at,p_evidence_ref,coalesce(p_metadata,'{}'::jsonb)
   )
-  on conflict (evidence_ref) do update
-    set evidence_ref=excluded.evidence_ref
+  on conflict (evidence_ref) do nothing
   returning probe_request_id into v_id;
+
+  if v_id is null then
+    select probe_request_id into v_id
+    from foundation.service_health_probe_requests
+    where evidence_ref=p_evidence_ref;
+  end if;
 
   return v_id;
 end;
@@ -225,9 +230,14 @@ begin
     p_response_at,p_roundtrip_ms,p_response_sha256,p_evidence_ref,
     coalesce(p_metadata,'{}'::jsonb)
   )
-  on conflict (probe_request_id) do update
-    set probe_request_id=excluded.probe_request_id
+  on conflict (probe_request_id) do nothing
   returning result_sequence into v_sequence;
+
+  if v_sequence is null then
+    select result_sequence into v_sequence
+    from foundation.service_health_probe_results
+    where probe_request_id=p_probe_request_id;
+  end if;
 
   return v_sequence;
 end;
