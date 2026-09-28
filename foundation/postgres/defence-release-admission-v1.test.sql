@@ -336,7 +336,131 @@ end;
 $$;
 
 
-do $$
+-- Bootstrap safety: if Defence comes online while a brand-new candidate is
+-- already serving, the most recent older stable release becomes canonical.
+insert into foundation.defence_estate_targets(
+  target_id,display_name,provider,provider_project_ref,environment_ref,service_ref,
+  target_role,required_for_estate,allowed_runtime_states,lifecycle,metadata
+) values (
+  'railway:test-admission-bootstrap',
+  'Release Admission Bootstrap Test',
+  'railway',
+  '21111111-1111-4111-8111-111111111111',
+  '22222222-2222-4222-8222-222222222223',
+  '23333333-3333-4333-8333-333333333333',
+  'primary_service',
+  true,
+  array['active']::text[],
+  'active',
+  jsonb_build_object(
+    'sourceRepository','doug-dotcom/test-admission-bootstrap',
+    'sourceBranch','main'
+  )
+);
+
+insert into foundation.defence_health_probe_targets(
+  target_version,target_id,target_url,response_mode,expected_json,expected_text,
+  timeout_milliseconds,evaluation_window_seconds,max_evidence_age_seconds,
+  min_samples,degraded_failure_count,unhealthy_failure_count,startup_grace_seconds,
+  enabled,effective_at,evidence_ref,evidence_note,probe_mode
+) values (
+  'test-v1','railway:test-admission-bootstrap','https://example.invalid/health',
+  'json_contains','{"status":"ok"}'::jsonb,null,
+  10000,1200,600,3,1,2,1200,true,now()-interval '1 hour',
+  'test:admission:bootstrap:health-target',
+  'Transaction-only bootstrap fixture.',
+  'continuous'
+);
+
+insert into foundation.defence_health_probe_requests(
+  probe_request_id,target_id,target_version,target_url,queued_at,evidence_ref,metadata
+) values
+  ('20000001-0000-4000-8000-000000000001','railway:test-admission-bootstrap','test-v1','https://example.invalid/health',now()-interval '41 minutes','test:admission:bootstrap:old:req1','{}'),
+  ('20000001-0000-4000-8000-000000000002','railway:test-admission-bootstrap','test-v1','https://example.invalid/health',now()-interval '31 minutes','test:admission:bootstrap:old:req2','{}'),
+  ('20000001-0000-4000-8000-000000000003','railway:test-admission-bootstrap','test-v1','https://example.invalid/health',now()-interval '21 minutes','test:admission:bootstrap:old:req3','{}'),
+  ('20000002-0000-4000-8000-000000000001','railway:test-admission-bootstrap','test-v1','https://example.invalid/health',now()-interval '5 minutes','test:admission:bootstrap:new:req1','{}');
+
+insert into foundation.defence_health_probe_results(
+  probe_request_id,target_id,http_status,timed_out,contract_ok,response_at,
+  roundtrip_ms,evidence_ref,metadata
+) values
+  ('20000001-0000-4000-8000-000000000001','railway:test-admission-bootstrap',200,false,true,now()-interval '40 minutes',100,'test:admission:bootstrap:old:res1','{}'),
+  ('20000001-0000-4000-8000-000000000002','railway:test-admission-bootstrap',200,false,true,now()-interval '30 minutes',100,'test:admission:bootstrap:old:res2','{}'),
+  ('20000001-0000-4000-8000-000000000003','railway:test-admission-bootstrap',200,false,true,now()-interval '20 minutes',100,'test:admission:bootstrap:old:res3','{}'),
+  ('20000002-0000-4000-8000-000000000001','railway:test-admission-bootstrap',200,false,true,now()-interval '4 minutes',100,'test:admission:bootstrap:new:res1','{}');
+
+insert into foundation.defence_runtime_provenance_observations(
+  target_id,provider,repository,commit_sha,branch,deployment_id,
+  service_name,environment_name,health_probe_result_sequence,
+  observed_at,valid_until,evidence_ref,metadata
+) values
+  (
+    'railway:test-admission-bootstrap','railway','doug-dotcom/test-admission-bootstrap',
+    repeat('e',40),'main','eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee',
+    'test-admission-bootstrap','production',
+    (select result_sequence from foundation.defence_health_probe_results where evidence_ref='test:admission:bootstrap:old:res1'),
+    now()-interval '40 minutes',now()+interval '1 hour',
+    'test:admission:bootstrap:old:prov1','{}'
+  ),
+  (
+    'railway:test-admission-bootstrap','railway','doug-dotcom/test-admission-bootstrap',
+    repeat('e',40),'main','eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee',
+    'test-admission-bootstrap','production',
+    (select result_sequence from foundation.defence_health_probe_results where evidence_ref='test:admission:bootstrap:old:res3'),
+    now()-interval '20 minutes',now()+interval '1 hour',
+    'test:admission:bootstrap:old:prov2','{}'
+  ),
+  (
+    'railway:test-admission-bootstrap','railway','doug-dotcom/test-admission-bootstrap',
+    repeat('f',40),'main','ffffffff-ffff-4fff-8fff-ffffffffffff',
+    'test-admission-bootstrap','production',
+    (select result_sequence from foundation.defence_health_probe_results where evidence_ref='test:admission:bootstrap:new:res1'),
+    now()-interval '4 minutes',now()+interval '1 hour',
+    'test:admission:bootstrap:new:prov','{}'
+  );
+
+insert into foundation.defence_release_source_head_observations(
+  target_id,repository,branch,head_sha,head_committed_at,observed_at,valid_until,evidence_ref,metadata
+) values (
+  'railway:test-admission-bootstrap','doug-dotcom/test-admission-bootstrap','main',
+  repeat('f',40),now()-interval '5 minutes',now()-interval '4 minutes',
+  now()+interval '1 hour','test:admission:bootstrap:new:source',
+  '{"deploymentRelevant":true}'::jsonb
+);
+
+insert into foundation.defence_health_observations(
+  target_id,health_state,sample_count,failure_count,
+  window_started_at,window_ended_at,avg_roundtrip_ms,p95_roundtrip_ms,
+  observed_at,valid_until,evidence_ref,metadata
+) values (
+  'railway:test-admission-bootstrap','healthy',1,0,
+  now()-interval '4 minutes',now()-interval '4 minutes',100,100,
+  now()-interval '4 minutes',now()+interval '1 hour',
+  'test:admission:bootstrap:new:health','{}'
+);
+
+do $
+declare
+  v jsonb;
+begin
+  select foundation.reconcile_defence_release_admission_v1(now()) into v;
+
+  if not exists (
+    select 1
+    from foundation.current_defence_release_admission
+    where target_id='railway:test-admission-bootstrap'
+      and admission_state='soaking'
+      and serving_commit_sha=repeat('f',40)
+      and canonical_commit_sha=repeat('e',40)
+      and canonical_deployment_id='eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee'
+  ) then
+    raise exception 'young candidate should bootstrap the prior stable release as canonical: %',v;
+  end if;
+end;
+$;
+
+
+do $
 begin
   if has_table_privilege('anon','foundation.defence_release_admission_events','SELECT')
      or has_table_privilege('authenticated','foundation.current_defence_release_admission','SELECT') then
