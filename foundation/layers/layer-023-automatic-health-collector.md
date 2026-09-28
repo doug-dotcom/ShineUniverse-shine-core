@@ -165,3 +165,25 @@ Layer 23 is complete when:
 - Supabase advisors show no new Layer-23-specific regression.
 
 Layer 23 is the point where Foundation starts **watching itself** rather than merely answering health questions when a human asks.
+
+## Closure verification
+
+Production closure verification observed the collector running without manual invocation:
+
+- `shine-foundation-health-probe-5m` succeeded at 2026-09-28 00:45 UTC;
+- request `pg-net:health-probe-request:foundation.gateway:production:4` was queued by that cron execution;
+- the Gateway returned HTTP 200 with a valid health contract in approximately 8.6 ms;
+- `shine-foundation-health-harvest-1m` succeeded at 2026-09-28 00:46 UTC;
+- automatic evidence advanced to `health-probe-window:foundation.gateway:production:26`;
+- the current automatic window contains 4 successful probes, 0 4xx, 0 5xx and 0 runtime/probe errors;
+- service health is **healthy** and combined service state is **operational**.
+
+Supabase security advisors reported no Layer-23-specific finding.
+
+The performance advisor initially identified two Layer-23 foreign keys without covering indexes on `service_health_probe_requests`. Both were corrected before closure with:
+
+- `service_health_probe_requests_service_idx`;
+- `service_health_probe_requests_target_idx`.
+
+After remediation, no Layer-23 unindexed-foreign-key finding remains.
+
