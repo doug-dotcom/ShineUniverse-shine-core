@@ -57,5 +57,10 @@
     "criticalP95Milliseconds": 10000,
     "warningRuntimeErrors": 1,
     "criticalRuntimeErrors": 2
+  },
+  "healthWindow": {
+    "deploymentBounded": true,
+    "rule": "The active health window starts no earlier than the current deployment observation, so failures from a superseded runtime remain historical evidence without being attributed to the replacement deployment.",
+    "evidenceRefIncludesRuntimeVersion": true
   }
 }
