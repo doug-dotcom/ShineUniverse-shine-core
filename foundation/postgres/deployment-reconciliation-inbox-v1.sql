@@ -332,7 +332,7 @@ begin
   elsif coalesce(v_truth->>'truthState','unknown')<>'aligned' then
     v_state := 'drift';
     v_reason := 'deployment-truth-not-aligned';
-  elsif coalesce(v_health->>'runtimeVersion','')<>v_receipt.runtime_version then
+  elsif coalesce(v_health#>>'{metrics,runtimeVersion}','')<>v_receipt.runtime_version then
     v_state := 'awaiting-proof';
     v_reason := 'current-runtime-health-pending';
   elsif p_service_id='foundation.gateway'
