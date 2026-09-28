@@ -308,6 +308,9 @@ export function createFoundationHttpHandler({
           conciergePlanTtlSynchronousAdmission:true,
           conciergePlanTtlRetiresUnusedPlan:true,
           conciergePlanTtlStartedExecutionExempt:true,
+          taskCentrePlanTtlCountdown:true,
+          taskCentrePlanTtlServerAuthoritative:true,
+          taskCentrePlanTtlExpiryDueReadOnly:true,
           capabilityChangesAudited:true,
           purposeBoundCapabilityGrants:true,
           accessHistoryStoresConversationContent:false
