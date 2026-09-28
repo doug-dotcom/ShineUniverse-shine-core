@@ -13,6 +13,9 @@ create table if not exists foundation.concierge_retirement_events (
 create index if not exists concierge_retirement_owner_time_idx
   on foundation.concierge_retirement_events(owner_shine_id,retired_at desc);
 
+create index if not exists concierge_retirement_client_idx
+  on foundation.concierge_retirement_events(client_id);
+
 CREATE OR REPLACE FUNCTION foundation.concierge_request_is_retired_v1(p_request_id uuid)
  RETURNS boolean
  LANGUAGE sql
