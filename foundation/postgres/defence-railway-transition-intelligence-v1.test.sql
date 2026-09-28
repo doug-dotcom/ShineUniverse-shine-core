@@ -455,6 +455,6 @@ begin
       null;
   end;
 end;
-$supersede$;
+$$;
 
 rollback;
