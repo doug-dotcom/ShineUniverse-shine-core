@@ -1,5 +1,27 @@
 begin;
 
+-- Layer 24 depends on Layer 22 health semantics. Seed a fresh healthy Gateway
+-- window explicitly so this test proves dependency roll-up behaviour rather
+-- than accidentally testing the missing-health-evidence state.
+insert into foundation.service_health_evidence(
+  service_id,environment,runtime_version,
+  window_started_at,window_ended_at,
+  request_count,response_4xx_count,response_5xx_count,
+  avg_latency_ms,p95_latency_ms,runtime_error_count,
+  evidence_source,evidence_ref,evidence_note,metadata,observed_at
+)
+values (
+  'foundation.gateway','production','71',
+  now()-interval '3 minutes',now(),
+  3,0,0,
+  100,150,0,
+  'manual-verified',
+  'test:layer24:gateway-healthy',
+  'Synthetic fresh healthy Gateway evidence for dependency roll-up acceptance.',
+  '{"test":true}'::jsonb,
+  now()
+);
+
 do $$
 declare
   v jsonb;
