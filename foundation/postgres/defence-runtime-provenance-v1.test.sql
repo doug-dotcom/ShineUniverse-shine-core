@@ -199,23 +199,60 @@ end;
 $$;
 
 
--- Make one otherwise-healthy continuous target past rollout grace without
--- provenance and prove Sentinel names that exact condition.
-update foundation.defence_estate_targets
-set metadata=jsonb_set(
-  metadata,
-  '{runtimeProvenanceEffectiveAt}',
-  to_jsonb((now()-interval '1 hour')::text),
-  true
-)
-where target_id='railway:fish';
+-- Use a transaction-only target so existing live provenance can never
+-- invalidate the missing-provenance acceptance case.
+insert into foundation.defence_estate_targets(
+  target_id,display_name,provider,provider_project_ref,environment_ref,service_ref,
+  target_role,required_for_estate,allowed_runtime_states,lifecycle,metadata,
+  registered_at,updated_at
+) values (
+  'railway:test-provenance-gap',
+  'Runtime Provenance Gap Test',
+  'railway',
+  '11111111-1111-4111-8111-111111111111',
+  '22222222-2222-4222-8222-222222222222',
+  '33333333-3333-4333-8333-333333333333',
+  'primary_service',
+  true,
+  array['active']::text[],
+  'active',
+  jsonb_build_object(
+    'runtimeProvenanceContract','shine-defence/runtime-provenance-v1',
+    'runtimeProvenanceRequired',true,
+    'runtimeProvenanceEffectiveAt',(now()-interval '1 hour')::text,
+    'sourceRepository','doug-dotcom/test-provenance-gap',
+    'sourceBranch','main'
+  ),
+  now()-interval '1 hour',
+  now()-interval '1 hour'
+);
+
+insert into foundation.defence_health_probe_targets(
+  target_version,target_id,target_url,response_mode,expected_json,expected_text,
+  timeout_milliseconds,evaluation_window_seconds,max_evidence_age_seconds,
+  min_samples,degraded_failure_count,unhealthy_failure_count,startup_grace_seconds,
+  enabled,effective_at,evidence_ref,evidence_note,probe_mode
+) values (
+  'test-v1',
+  'railway:test-provenance-gap',
+  'https://example.invalid/health',
+  'json_contains',
+  '{"status":"ok"}'::jsonb,
+  null,
+  10000,1200,600,1,1,1,1200,
+  true,
+  now()-interval '1 hour',
+  'test:runtime-provenance:gap-health-target',
+  'Transaction-only provenance gap fixture.',
+  'continuous'
+);
 
 insert into foundation.defence_estate_observations(
   target_id,runtime_state,health_state,observed_at,valid_until,
   evidence_kind,evidence_ref,metadata
 ) values (
-  'railway:fish','active','unknown',now(),now()+interval '2 hours',
-  'manual-verified','test:runtime-provenance:fish-provider','{}'::jsonb
+  'railway:test-provenance-gap','active','unknown',now(),now()+interval '2 hours',
+  'manual-verified','test:runtime-provenance:gap-provider','{}'::jsonb
 );
 
 insert into foundation.defence_health_observations(
@@ -223,9 +260,9 @@ insert into foundation.defence_health_observations(
   window_started_at,window_ended_at,avg_roundtrip_ms,p95_roundtrip_ms,
   observed_at,valid_until,evidence_ref,metadata
 ) values (
-  'railway:fish','healthy',3,0,now()-interval '5 minutes',now(),
-  100,150,now(),now()+interval '1 hour',
-  'test:runtime-provenance:fish-health','{}'::jsonb
+  'railway:test-provenance-gap','healthy',1,0,now()-interval '5 minutes',now(),
+  100,100,now(),now()+interval '1 hour',
+  'test:runtime-provenance:gap-health','{}'::jsonb
 );
 
 do $$
@@ -237,7 +274,7 @@ begin
   if not exists (
     select 1
     from foundation.current_defence_estate_incidents
-    where target_id='railway:fish'
+    where target_id='railway:test-provenance-gap'
       and state='warning'
       and reason_code='runtime-provenance-missing'
   ) then
