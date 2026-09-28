@@ -15,7 +15,7 @@ values (
   repeat('c',64),
   'active',
   'github://doug-dotcom/ShineUniverse-shine-core/commit/cccccccccccccccccccccccccccccccccccccccc',
-  now()-interval '3 seconds',
+  now()+interval '1 second',
   'test:layer35:deployment-expectation:c',
   'Layer 35 immutable release identity fixture.'
 );
@@ -31,7 +31,7 @@ values (
   'layer35-c',
   repeat('c',64),
   'active','healthy',
-  now()-interval '3 seconds',
+  now()+interval '1 second',
   'manual-verified',
   'test:layer35:deployment-observation:c',
   'Layer 35 immutable release identity fixture.',
@@ -46,13 +46,13 @@ insert into foundation.service_health_evidence(
 values (
   'foundation.gateway','production','layer35-c',
   now()-interval '5 minutes',
-  now()-interval '2 seconds',
+  now()+interval '2 seconds',
   100,0,0,20,25,
   0,'manual-verified',
   'test:layer35:health:c',
   'Healthy Layer 35 fixture.',
   '{"test":true}'::jsonb,
-  now()-interval '2 seconds'
+  now()+interval '2 seconds'
 );
 
 insert into foundation.defence_posture_observations(
@@ -62,11 +62,11 @@ insert into foundation.defence_posture_observations(
 values (
   '35000000-0000-4000-8000-000000000001'::uuid,
   '1.0.0','production','pass',
-  now()-interval '1 second',
+  now()+interval '3 seconds',
   now()+interval '2 hours',
   '{"test":true}'::jsonb,
   'test:layer35:defence:pass',
-  now()-interval '1 second'
+  now()+interval '3 seconds'
 );
 
 insert into foundation.service_deployment_receipts(
@@ -83,10 +83,10 @@ values (
   'active',
   'github://doug-dotcom/ShineUniverse-shine-core/commit/cccccccccccccccccccccccccccccccccccccccc',
   'test:layer35:provider:c',
-  now()-interval '2 seconds',
+  now()+interval '2 seconds',
   'layer35-test',
   '{"test":true}'::jsonb,
-  now()-interval '2 seconds'
+  now()+interval '2 seconds'
 );
 
 insert into foundation.service_deployment_receipt_publications(
@@ -115,7 +115,7 @@ values (
   repeat('3',40),
   false,
   '{"test":true}'::jsonb,
-  now()-interval '1 second'
+  now()+interval '4 seconds'
 );
 
 do $layer35_audit$
@@ -124,7 +124,7 @@ declare
   v_audit uuid := '35000000-0000-4000-8000-000000000200'::uuid;
 begin
   select foundation.evaluate_gateway_route_policy_v1(
-    'POST','/v1/grants/consent','production',now()
+    'POST','/v1/grants/consent','production',now()+interval '5 seconds'
   ) into v_policy;
 
   if v_policy->>'policyState' <> 'admit' then
@@ -133,15 +133,30 @@ begin
 
   perform foundation.record_gateway_operation_audit_event_v1(
     v_audit,'policy','POST','/v1/grants/consent','production',
-    v_policy,null,null,null,now()
+    v_policy,null,null,null,now()+interval '5 seconds'
   );
 
   perform foundation.record_gateway_operation_audit_event_v1(
     v_audit,'outcome','POST','/v1/grants/consent','production',
-    null,401,'unauthenticated',null,now()
+    null,401,'unauthenticated',null,now()+interval '6 seconds'
   );
 end;
 $layer35_audit$;
+
+
+do $layer35_fixture_readiness$
+declare
+  v jsonb;
+begin
+  select foundation.evaluate_foundation_readiness_v1(
+    'production',now()
+  ) into v;
+
+  if coalesce(v->>'readinessState','unknown') not in ('ready','restricted','degraded') then
+    raise exception 'Layer 35 fixture must be bindable before binder test: %',v;
+  end if;
+end;
+$layer35_fixture_readiness$;
 
 
 do $layer35_bind$
@@ -254,7 +269,7 @@ values (
   repeat('d',64),
   'active',
   'github://doug-dotcom/ShineUniverse-shine-core/commit/dddddddddddddddddddddddddddddddddddddddd',
-  now()+interval '1 second',
+  now()+interval '20 seconds',
   'test:layer35:deployment-expectation:d',
   'Intentional Layer 35 drift fixture.'
 );
@@ -270,7 +285,7 @@ values (
   'layer35-d',
   repeat('d',64),
   'active','healthy',
-  now()+interval '1 second',
+  now()+interval '20 seconds',
   'manual-verified',
   'test:layer35:deployment-observation:d',
   'Intentional Layer 35 drift fixture.',
