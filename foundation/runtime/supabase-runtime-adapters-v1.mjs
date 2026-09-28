@@ -619,6 +619,36 @@ export function createSupabaseRuntimeAdapters({sql,defenceGate,fetchImpl=fetch}=
       return first(rows)?.policy??null;
     },
 
+    async recordGatewayOperationAuditEvent({
+      operationAuditId,
+      phase,
+      method='POST',
+      path,
+      environment='production',
+      policy=null,
+      httpStatus=null,
+      responseReasonCode=null,
+      domainRequestId=null,
+      occurredAt=new Date().toISOString()
+    }={}){
+      if(!operationAuditId||!phase||!path) throw new TypeError('operation audit event is incomplete');
+      const rows=await sql`
+        select foundation.record_gateway_operation_audit_event_v1(
+          ${operationAuditId}::uuid,
+          ${phase},
+          ${method},
+          ${path},
+          ${environment},
+          ${policy?JSON.stringify(policy):null}::jsonb,
+          ${httpStatus}::integer,
+          ${responseReasonCode},
+          ${domainRequestId},
+          ${occurredAt}::timestamptz
+        ) as audit
+      `;
+      return first(rows)?.audit??null;
+    },
+
 
     async verifyIntegrationIdentity({authContext}={}){
       const jwt=authContext?.jwt;
