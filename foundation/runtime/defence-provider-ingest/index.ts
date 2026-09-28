@@ -161,18 +161,10 @@ Deno.serve(async(req:Request)=>{
     let accepted=0;
 
     await rawSql.begin(async(tx:any)=>{
-      await tx.unsafe('set local role shine_defence_runtime');
-
       for(const observation of observations){
-        const targetRows=await tx`
-          select provider
-          from foundation.defence_estate_targets
-          where target_id=${observation.targetId}
-            and lifecycle='active'
-        `;
-        const target=targetRows[0];
-        if(!target) throw new Error('unknown provider target: '+observation.targetId);
-        if(target.provider!==observation.provider) throw new Error('provider mismatch for '+observation.targetId);
+        if(!observation.targetId.startsWith(observation.provider+':')){
+          throw new Error('provider mismatch for '+observation.targetId);
+        }
 
         const evidenceKind=observation.provider==='railway'?'railway-api':'supabase-management-api';
         await tx`
