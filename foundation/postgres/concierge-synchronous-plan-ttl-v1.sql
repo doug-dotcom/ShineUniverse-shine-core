@@ -1,5 +1,3 @@
-drop function if exists foundation.retire_concierge_request_if_expired_v1(uuid,timestamptz,interval);
-
 CREATE OR REPLACE FUNCTION foundation.retire_concierge_request_if_expired_v1(p_request_id uuid, p_owner_shine_id uuid, p_client_id text, p_as_of timestamp with time zone DEFAULT clock_timestamp(), p_min_age interval DEFAULT '01:00:00'::interval)
  RETURNS jsonb
  LANGUAGE plpgsql
@@ -123,7 +121,8 @@ begin
     'receiptSha256',v_hash
   );
 end;
-$function$;
+$function$
+
 
 CREATE OR REPLACE FUNCTION foundation.gate_concierge_execution_v1(p_event_id uuid, p_request_id uuid, p_owner_shine_id uuid, p_client_id text, p_occurred_at timestamp with time zone)
  RETURNS jsonb
@@ -210,7 +209,8 @@ begin
     'plan',foundation.get_concierge_plan_v1(p_request_id)
   );
 end;
-$function$;
+$function$
+
 
 CREATE OR REPLACE FUNCTION foundation.issue_capability_invocation_ticket_v2(p_ticket_id uuid, p_concierge_request_id uuid, p_step_id uuid, p_owner_shine_id uuid, p_client_id text, p_expires_at timestamp with time zone, p_occurred_at timestamp with time zone)
  RETURNS jsonb
@@ -291,7 +291,8 @@ begin
     'expiresAt',p_expires_at
   );
 end;
-$function$;
+$function$
+
 
 CREATE OR REPLACE FUNCTION foundation.record_concierge_step_checkpoint_v1(p_checkpoint_id uuid, p_request_id uuid, p_step_id uuid, p_capability_id text, p_result jsonb, p_completed_at timestamp with time zone)
  RETURNS jsonb
@@ -350,63 +351,5 @@ begin
     'expiresAt',p_completed_at+interval '24 hours'
   );
 end;
-$function$;
+$function$
 
-
-create or replace function foundation.retire_stale_concierge_requests_v1(
-  p_as_of timestamptz default clock_timestamp(),
-  p_min_age interval default interval '1 hour',
-  p_limit integer default 100
-)
-returns jsonb
-language plpgsql
-security definer
-set search_path to 'pg_catalog','foundation'
-as $function$
-declare
-  r record;
-  retired jsonb;
-  v_retired integer:=0;
-  v_ids uuid[]:=array[]::uuid[];
-begin
-  if p_as_of is null
-     or p_min_age < interval '30 minutes'
-     or p_min_age > interval '24 hours'
-     or p_limit < 1 or p_limit > 500 then
-    raise exception 'invalid-concierge-retirement-request' using errcode='22023';
-  end if;
-
-  for r in
-    select q.request_id,q.owner_shine_id,q.client_id
-    from foundation.concierge_requests q
-    where q.requested_at <= p_as_of-p_min_age
-      and not exists (
-        select 1 from foundation.concierge_retirement_events x
-        where x.request_id=q.request_id
-      )
-      and not exists (
-        select 1 from foundation.concierge_cancellation_events c
-        where c.request_id=q.request_id
-      )
-    order by q.requested_at
-    for update skip locked
-    limit p_limit
-  loop
-    retired:=foundation.retire_concierge_request_if_expired_v1(
-      r.request_id,r.owner_shine_id,r.client_id,p_as_of,p_min_age
-    );
-    if retired->>'status'='retired' then
-      v_retired:=v_retired+1;
-      v_ids:=array_append(v_ids,r.request_id);
-    end if;
-  end loop;
-
-  return jsonb_build_object(
-    'status','ok',
-    'retiredCount',v_retired,
-    'requestIds',to_jsonb(v_ids),
-    'asOf',p_as_of,
-    'minimumAgeSeconds',extract(epoch from p_min_age)::integer
-  );
-end;
-$function$;
