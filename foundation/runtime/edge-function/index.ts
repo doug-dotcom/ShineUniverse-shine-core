@@ -10,7 +10,7 @@ import {createAppOperationalStatusService} from '../../gateway/app-operational-s
 import {createCapabilityDiscoveryService} from '../../gateway/capability-discovery-v1.mjs';
 import {createIntegrationClientStatusService} from '../../gateway/integration-client-status-v1.mjs';
 import {createIntegrationLinkConsentService,createIntegrationCapabilityConsentService,createIntegrationGrantRevocationService,createIntegrationLinkRevocationService,createIntegrationGrantListService} from '../../gateway/integration-user-consent-v1.mjs';
-import {createConciergePlanService,createConciergeExecuteService} from '../../gateway/concierge-orchestration-v1.mjs';
+import {createConciergePlanService,createConciergeExecuteService,createConciergeSupersedeService} from '../../gateway/concierge-orchestration-v1.mjs';
 import {createIntegrationLinkRequestService,createIntegrationLinkApprovalService,createIntegrationLinkStatusService,createIntegrationLinkExchangeService,createIntegrationLinkPreviewService} from '../../gateway/integration-device-link-v1.mjs';
 import {createCapabilityTicketRedeemService} from '../../gateway/capability-ticket-redeem-v2.mjs';
 import {createIntegrationDelegationRefreshService} from '../../gateway/integration-delegation-refresh-v1.mjs';
@@ -66,6 +66,7 @@ const integrationLinkRevocation=createIntegrationLinkRevocationService({adapters
 const integrationGrantList=createIntegrationGrantListService({adapters} as any);
 const conciergePlan=createConciergePlanService({adapters} as any);
 const conciergeExecute=createConciergeExecuteService({adapters} as any);
+const conciergeSupersede=createConciergeSupersedeService({adapters} as any);
 const integrationLinkRequest=createIntegrationLinkRequestService({adapters} as any);
 const integrationLinkApproval=createIntegrationLinkApprovalService({adapters} as any);
 const integrationLinkStatus=createIntegrationLinkStatusService({adapters} as any);
@@ -106,6 +107,7 @@ const handler=createFoundationHttpHandler({
   integrationGrantList,
   conciergePlan,
   conciergeExecute,
+  conciergeSupersede,
   integrationLinkRequest,
   integrationLinkApproval,
   integrationLinkStatus,
