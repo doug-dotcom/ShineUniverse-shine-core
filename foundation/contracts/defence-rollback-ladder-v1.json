@@ -1,0 +1,27 @@
+{
+  "rollbackLadderContract": "shine-defence/rollback-ladder-v1",
+  "schemaVersion": "1.0.0",
+  "scope": "railway-qualified-canonical-history",
+  "authority": {
+    "currentAdmission": "foundation.current_defence_release_admission",
+    "admissionHistory": "foundation.defence_release_admission_events",
+    "sourceProofHistory": "foundation.defence_rollback_source_attestations"
+  },
+  "depth": 3,
+  "principles": [
+    "the currently serving release is never a recovery candidate",
+    "during candidate soak or hold, the preserved canonical release is recovery rank 1",
+    "after admission, prior distinct qualified canonical releases form the recovery ladder newest-first",
+    "a candidate is source-ready only when a fresh repo-local OIDC source proof still covers that exact commit",
+    "the safest recovery candidate is the lowest-numbered rank with fresh sourceAvailable proof",
+    "history-building targets with no prior qualified canonical release are not failures",
+    "Railway-native image retention is not inferred from Git source availability",
+    "Defence recommends recovery candidates but never performs rollback automatically"
+  ],
+  "states": [
+    "primary-ready",
+    "degraded-fallback-ready",
+    "source-proof-gap",
+    "history-building"
+  ]
+}
