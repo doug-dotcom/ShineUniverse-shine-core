@@ -164,7 +164,12 @@ export function createUserConciergeCancellationService({adapters,clock=()=>new D
       });
       if(!result?.status) return response(kind,'unavailable','concierge-cancellation-write-failed');
       return response(kind,result.status,result.reasonCode??'user-cancelled',{
-        requestId:envelope.requestId,cancelledAt:result.cancelledAt??null
+        requestId:envelope.requestId,
+        cancelledAt:result.cancelledAt??null,
+        retiredAt:result.retiredAt??null,
+        ...(result.status==='retired'
+          ?{retirementReceipt:result.receipt??null,receiptSha256:result.receiptSha256??null}
+          :{cancellationReceipt:result.receipt??null,receiptSha256:result.receiptSha256??null})
       });
     }catch(error){
       const message=String(error?.message??'');
