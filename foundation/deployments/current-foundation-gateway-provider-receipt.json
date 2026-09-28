@@ -9,5 +9,6 @@
     "providerEvidenceRef": "supabase:management-api:foundation-gateway:v85:a596c895d31e272d2358d69e500eb708a43462de69df32e7e8a87d540907b83f",
     "providerObservedAt": "2026-09-28T06:21:43.844933Z",
     "rollback": false
-  }
+  },
+  "attestationRevision": "layer33-publication-ledger-v1"
 }
