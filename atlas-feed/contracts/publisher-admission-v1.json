@@ -1,0 +1,64 @@
+{
+  "publisherAdmissionContract": "shine-universe/atlas-feed-publisher-admission-v1",
+  "schemaVersion": "1.0.0",
+  "route": {
+    "method": "POST",
+    "path": "/v1/atlas-feed/publish/admit"
+  },
+  "purpose": "Authenticate the publishing Shine app, validate the Layer-1 feed event, require a live source capability and prove any private owner/grant context before a later layer may persist the event.",
+  "request": {
+    "required": [
+      "atlasFeedPublishAdmissionRequest",
+      "schemaVersion",
+      "requestId",
+      "requestedAt",
+      "event"
+    ],
+    "optional": [
+      "permissionContext"
+    ],
+    "permissionContext": {
+      "allowedFields": [
+        "ownerShineId",
+        "requiredScope",
+        "purpose",
+        "resourceId",
+        "resourceCategory"
+      ]
+    }
+  },
+  "admissionOrder": [
+    "validate-request-envelope",
+    "validate-layer-1-event",
+    "verify-publishing-app-credential",
+    "verify-source-capability-live",
+    "verify-private-owner-session-when-required",
+    "verify-referenced-grant-when-required",
+    "emit-admission-decision"
+  ],
+  "rules": {
+    "generalDataRequiresUserSession": false,
+    "personalOrSensitiveOwnerPublicationRequiresUserSession": true,
+    "personalOrSensitiveInternalAudienceAllowed": false,
+    "grantAudienceRequiresActiveFoundationGrant": true,
+    "grantAudienceRequiresExactScopeAndPurpose": true,
+    "privateGrantAudienceRequiresGrantOwnerMatch": true,
+    "sourceCapabilityStateRequired": "live",
+    "publicationCreatesConsumerGrant": false,
+    "publicationPersistsEvent": false
+  },
+  "responses": {
+    "statusValues": [
+      "admitted",
+      "denied",
+      "invalid",
+      "unavailable"
+    ],
+    "http": {
+      "admitted": 200,
+      "denied": 403,
+      "invalid": 400,
+      "unavailable": 503
+    }
+  }
+}
