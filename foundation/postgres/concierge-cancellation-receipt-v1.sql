@@ -15,6 +15,10 @@ alter table foundation.concierge_cancellation_events
   add constraint concierge_cancellation_receipt_sha256
     check (receipt_sha256 is null or receipt_sha256 ~ '^[a-f0-9]{64}$');
 
+alter table foundation.concierge_cancellation_events
+  alter column receipt set not null,
+  alter column receipt_sha256 set not null;
+
 create index if not exists concierge_cancellation_superseded_by_idx
   on foundation.concierge_cancellation_events(superseded_by_request_id)
   where superseded_by_request_id is not null;
