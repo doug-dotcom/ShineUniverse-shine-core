@@ -1,0 +1,43 @@
+{
+  "contract": "shine-foundation/foundation-control-plane-incident-escalation-v1",
+  "version": "1.0.0",
+  "layer": 37,
+  "purpose": "Escalate persistent Foundation release-projection FAIL/UNKNOWN states into structured append-only control-plane incidents.",
+  "source": "foundation.get_foundation_release_projection_health_v1",
+  "observer": "foundation.record_foundation_release_projection_observation_v1",
+  "incidentLedger": "foundation.foundation_control_plane_incident_events",
+  "currentStateView": "foundation.current_foundation_control_plane_incident_state",
+  "activeIncidentsView": "foundation.current_foundation_control_plane_incidents",
+  "watchesView": "foundation.current_foundation_control_plane_watches",
+  "sentinel": "foundation.run_foundation_control_plane_incident_sentinel_v1",
+  "summary": "foundation.get_foundation_control_plane_incident_summary_v1",
+  "persistenceThresholdSeconds": 300,
+  "lifecycle": [
+    "detected",
+    "opened",
+    "changed",
+    "recovered"
+  ],
+  "severityMapping": {
+    "fail": "critical",
+    "unknown": "warning",
+    "aligned": "non-incident",
+    "degraded": "non-incident"
+  },
+  "rules": {
+    "firstBadSampleCreatesWatch": true,
+    "persistenceRequiredBeforeOpen": true,
+    "thresholdSeconds": 300,
+    "changedUnhealthyEvidenceAppendsChangedEvent": true,
+    "alignedOrDegradedRecoversWatchOrIncident": true,
+    "unchangedEvidenceDoesNotAppendIncidentEvent": true,
+    "directIncidentInsertDenied": true,
+    "transitionHelperOwnerPrivate": true,
+    "automaticRepair": false
+  },
+  "hostedObserver": {
+    "engine": "pg_cron",
+    "jobName": "shine-foundation-control-plane-incident-5m",
+    "cadence": "2,7,12,17,22,27,32,37,42,47,52,57 * * * *"
+  }
+}
