@@ -125,6 +125,10 @@ jobs:
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/service-health-evidence-v1.sql
       - name: Run service health evidence acceptance tests
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/service-health-evidence-v1.test.sql
+      - name: Apply automatic health collector core
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/automatic-health-collector-v1.sql
+      - name: Run automatic health collector acceptance tests
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/automatic-health-collector-v1.test.sql
       - name: Apply Shine Defence operational posture
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-operational-posture-v1.sql
       - name: Run Shine Defence operational posture acceptance tests
