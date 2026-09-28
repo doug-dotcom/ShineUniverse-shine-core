@@ -661,7 +661,7 @@ with (security_invoker=true)
 as
 select distinct on (incident_key)
   event_id,incident_key,target_id,event_type,state,reason_code,
-  observation_id,health_observation_id,occurred_at,evidence_ref,recorded_at
+  observation_id,occurred_at,evidence_ref,recorded_at,health_observation_id
 from foundation.defence_estate_incident_events
 order by incident_key,occurred_at desc,recorded_at desc,event_id desc;
 
