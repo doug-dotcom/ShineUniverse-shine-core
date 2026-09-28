@@ -311,6 +311,11 @@ export function createFoundationHttpHandler({
           taskCentrePlanTtlCountdown:true,
           taskCentrePlanTtlServerAuthoritative:true,
           taskCentrePlanTtlExpiryDueReadOnly:true,
+          taskCentreTtlUrgency:true,
+          taskCentreTtlUrgencyWarningSeconds:900,
+          taskCentreTtlUrgencyAffectsOrdering:true,
+          taskCentreTtlUrgencyChangesExecution:false,
+          taskCentreTtlUrgencyAutoStartsWork:false,
           capabilityChangesAudited:true,
           purposeBoundCapabilityGrants:true,
           accessHistoryStoresConversationContent:false
