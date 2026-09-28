@@ -1,0 +1,36 @@
+{
+  "releaseAdmissionContract": "shine-defence/release-admission-v1",
+  "schemaVersion": "1.0.0",
+  "scope": "railway-serving-releases",
+  "authority": {
+    "servingRuntime": "foundation.current_defence_runtime_provenance",
+    "healthEvidence": "foundation.defence_health_probe_results",
+    "sourceWatch": "foundation.current_defence_release_source_heads",
+    "transitionEvidence": "foundation.defence_railway_transition_events",
+    "canonicalHistory": "foundation.defence_release_admission_events"
+  },
+  "principles": [
+    "provider SUCCESS alone never makes a release canonical",
+    "the last admitted release remains the rollback anchor while a new serving release soaks",
+    "only health evidence recorded after the candidate first served counts toward admission",
+    "source-watch identity must be fresh but may legitimately be ahead of the serving commit",
+    "a newer successful serving proof supersedes older candidate transition failures",
+    "rollback intelligence recommends a target but never triggers provider rollback automatically"
+  ],
+  "admission": {
+    "continuousMinimumPassingSamples": 3,
+    "onDemandMinimumPassingSamples": 1,
+    "requireZeroFailuresWithinAdmissionSampleWindow": true,
+    "requireFreshServingProvenance": true,
+    "requireFreshSourceWatch": true,
+    "requireRegisteredRepositoryAndBranchMatch": true
+  },
+  "states": [
+    "canonical",
+    "soaking",
+    "hold",
+    "admitted",
+    "rollback-recommended",
+    "rollback-observed"
+  ]
+}
