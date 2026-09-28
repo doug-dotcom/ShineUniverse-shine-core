@@ -1,0 +1,42 @@
+{
+  "contract": "shine-foundation/foundation-control-plane-incident-response-policy-v1",
+  "version": "1.0.0",
+  "layer": 38,
+  "purpose": "Define which response actions are relevant, permitted, approval-gated or prohibited for each Foundation control-plane incident state without granting the incident engine repair authority.",
+  "incidentSource": "foundation.get_foundation_control_plane_incident_summary_v1",
+  "actionCatalogue": "foundation.control_plane_incident_response_actions",
+  "policyLedger": "foundation.control_plane_incident_response_policies",
+  "currentPolicyView": "foundation.current_control_plane_incident_response_policies",
+  "evaluator": "foundation.evaluate_control_plane_incident_response_v1",
+  "policyHealth": "foundation.get_control_plane_incident_response_policy_health_v1",
+  "responsePlan": "foundation.get_control_plane_incident_response_plan_v1",
+  "incidentStates": [
+    "normal",
+    "watching",
+    "warning",
+    "critical"
+  ],
+  "decisions": [
+    "admit",
+    "approval-required",
+    "deny",
+    "not-applicable"
+  ],
+  "invariants": {
+    "incidentSeverityNeverExpandsAuthority": true,
+    "noAuthoritativeMutationIsDirectlyAdmitted": true,
+    "authoritativeMutationRequiresExternalApprovalWhenRelevant": true,
+    "automaticAuthoritativeRepairAlwaysDenied": true,
+    "incidentHistorySuppressionAlwaysDenied": true,
+    "incidentHistoryDeletionAlwaysDenied": true,
+    "unknownActionFailsClosed": true,
+    "layerDoesNotExecuteRepair": true
+  },
+  "actionClasses": {
+    "observe": "read-only inspection",
+    "evidence": "non-mutating evidence refresh or re-attestation request",
+    "proposal": "prepare a repair proposal only",
+    "authoritativeMutation": "changes registry, release ledger or immutable binding",
+    "historyMutation": "suppresses or deletes incident history"
+  }
+}
