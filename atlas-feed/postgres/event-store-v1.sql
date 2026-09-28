@@ -141,7 +141,14 @@ begin
      or jsonb_typeof(p_event)<>'object'
      or jsonb_typeof(p_admission)<>'object'
      or jsonb_typeof(p_receipt)<>'object'
-     or p_event_sha256 !~ '^[a-f0-9]{64}    raise exception 'invalid-atlas-feed-persistence-request' using errcode='22023';
+     or p_event_sha256 !~ '^[a-f0-9]{64}$'
+     or p_payload_sha256 !~ '^[a-f0-9]{64}$'
+     or p_payload_size_bytes is null
+     or p_payload_size_bytes<2
+     or p_payload_size_bytes>65536
+     or p_receipt_sha256 !~ '^[a-f0-9]{64}$'
+     or p_persisted_at is null then
+    raise exception 'invalid-atlas-feed-persistence-request' using errcode='22023';
   end if;
 
   v_event_id := (p_event->>'eventId')::uuid;
