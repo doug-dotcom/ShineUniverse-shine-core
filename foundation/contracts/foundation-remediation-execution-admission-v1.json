@@ -1,0 +1,56 @@
+{
+  "contract": "shine-foundation/foundation-remediation-execution-admission-v1",
+  "version": "1.0.0",
+  "layer": 40,
+  "purpose": "Independently revalidate a consumed Layer-39 approval against live incident, policy and release-projection evidence before issuing a short-lived admission for one narrowly registered remediation operation.",
+  "executorRole": "foundation_remediation_executor",
+  "executorRoleProperties": {
+    "login": false,
+    "inheritedByServiceRole": false,
+    "inheritedByApproverRole": false,
+    "mayIssueAdmission": true,
+    "executesRepair": false
+  },
+  "operationRegistry": "foundation.remediation_execution_operations",
+  "registeredOperations": [
+    "apply-registry-repair",
+    "apply-release-ledger-repair",
+    "rebind-release-identity"
+  ],
+  "admissionLedger": "foundation.remediation_execution_admissions",
+  "admissionEventLedger": "foundation.remediation_execution_admission_events",
+  "gate": "foundation.issue_remediation_execution_admission_v1",
+  "statusReader": "foundation.get_remediation_execution_admission_status_v1",
+  "controlHealth": "foundation.get_remediation_execution_admission_control_health_v1",
+  "maximumAdmissionSeconds": 60,
+  "revalidation": [
+    "approval receipt integrity",
+    "approval has been consumed",
+    "approval remains unexpired",
+    "exact action",
+    "exact incident event",
+    "exact remediation proposal SHA-256",
+    "registered remediation operation",
+    "incident remains current and active",
+    "incident evidence fingerprint",
+    "live Layer-36 release-projection state remains FAIL/UNKNOWN",
+    "live Layer-36 evidence fingerprint",
+    "live Foundation release ref",
+    "Layer-38 policy remains approval-required under same policy version",
+    "Layer-39 consumption event scope matches approval receipt"
+  ],
+  "invariants": {
+    "noGenericSqlExecution": true,
+    "autoRepairNotRegistered": true,
+    "oneAdmissionPerConsumedApproval": true,
+    "deniedAttemptDoesNotIssueAdmission": true,
+    "expiredApprovalCannotProduceAdmission": true,
+    "changedIncidentInvalidatesAdmission": true,
+    "serviceRoleCannotIssueAdmission": true,
+    "approverRoleCannotIssueAdmission": true,
+    "executorRoleCannotMintApproval": true,
+    "admissionMayPermitAttempt": true,
+    "admissionExecutesAction": false,
+    "actualRemediationExecutorAbsentFromLayer40": true
+  }
+}
