@@ -1,0 +1,63 @@
+{
+  "dependencyContract": "shine-foundation/service-dependency-rollup-v1",
+  "schemaVersion": "1.0.0",
+  "purpose": "Model service dependencies, safe failure modes, dependency-aware operational state and transitive blast radius without treating every dependency failure as a total outage.",
+  "dependencyTypes": {
+    "hard": {
+      "failureMode": "block",
+      "meaning": "The dependent cannot safely perform the declared scope when the dependency is unavailable."
+    },
+    "guard": {
+      "failureMode": "fail-closed",
+      "meaning": "The dependent remains available for unrelated work but the guarded scope is denied when the dependency is unsafe or unknown."
+    },
+    "soft": {
+      "failureMode": "degrade",
+      "meaning": "The dependent continues with reduced capability when the dependency is impaired."
+    },
+    "optional": {
+      "failureMode": "continue",
+      "meaning": "Dependency state is reported but does not change the dependent service state."
+    }
+  },
+  "stateSources": [
+    "standard-health",
+    "defence-posture"
+  ],
+  "effectiveStates": [
+    "operational",
+    "degraded",
+    "guarded",
+    "blocked",
+    "unknown"
+  ],
+  "readers": {
+    "nativeState": "foundation.get_service_native_state_v1(text,text,timestamptz)",
+    "serviceRollup": "foundation.get_service_dependency_rollup_v1(text,text,timestamptz)",
+    "blastRadius": "foundation.get_service_blast_radius_v1(text,text)",
+    "graphHealth": "foundation.get_dependency_graph_health_v1(text)",
+    "foundationRollup": "foundation.get_foundation_dependency_rollup_v1(text,timestamptz)"
+  },
+  "productionGraph": {
+    "foundation.gateway": {
+      "dependsOn": [
+        {
+          "service": "foundation.defence",
+          "type": "guard",
+          "scope": "protected-operations",
+          "failureMode": "fail-closed"
+        }
+      ]
+    }
+  },
+  "principles": {
+    "dependencyGraphIsAppendOnlyVersioned": true,
+    "stateSourcesAreExplicit": true,
+    "unknownGuardFailsClosed": true,
+    "optionalDependencyDoesNotCauseOutage": true,
+    "cyclesAreReported": true,
+    "blastRadiusIsTransitive": true,
+    "noPublicDatabaseAccess": true,
+    "noInventedHealthForLogicalComponents": true
+  }
+}
