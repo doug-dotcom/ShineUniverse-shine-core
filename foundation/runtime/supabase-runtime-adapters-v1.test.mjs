@@ -719,6 +719,7 @@ test('Atlas Feed persistence delegates the exact event, admission and receipt to
     admission:{appId:'shine.dive'},
     eventSha256:'b'.repeat(64),
     payloadSha256:'c'.repeat(64),
+    payloadSizeBytes:17,
     receipt:{receiptId:'44444444-4444-4444-8444-444444444444'},
     receiptSha256:'d'.repeat(64),
     persistedAt:'2026-09-28T10:00:00Z'
