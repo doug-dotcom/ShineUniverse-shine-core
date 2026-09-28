@@ -311,6 +311,43 @@ begin
      or p_proposal->>'releaseRef' is distinct from v_admission.release_ref
      or jsonb_typeof(p_proposal->'operation') is distinct from 'object' then
     v_reason := 'remediation-execution-proposal-scope-mismatch';
+  elsif exists (
+    select 1
+    from jsonb_object_keys(p_proposal) k
+    where k not in (
+      'remediationProposal','schemaVersion','environment','actionKey',
+      'incidentEventId','evidenceFingerprint','releaseRef','operation'
+    )
+  ) then
+    v_reason := 'remediation-execution-proposal-fields-invalid';
+  elsif (
+    v_admission.action_key='apply-registry-repair'
+    and exists (
+      select 1
+      from jsonb_object_keys(p_proposal->'operation') k
+      where k not in ('expectedRegistry','evidenceNote')
+    )
+  ) or (
+    v_admission.action_key='apply-release-ledger-repair'
+    and exists (
+      select 1
+      from jsonb_object_keys(p_proposal->'operation') k
+      where k not in (
+        'releaseLabel','sourceCommitRef','evidenceRef','evidenceNote'
+      )
+    )
+  ) or (
+    v_admission.action_key='rebind-release-identity'
+    and exists (
+      select 1
+      from jsonb_object_keys(p_proposal->'operation') k
+      where k not in (
+        'foundationLayer','expectedBindingId',
+        'expectedBindingReleaseRef','evidenceNote'
+      )
+    )
+  ) then
+    v_reason := 'remediation-execution-operation-fields-invalid';
   elsif v_current_incident.event_id is distinct from v_admission.incident_event_id
      or v_current_incident.event_type not in ('opened','changed') then
     v_reason := 'remediation-execution-incident-no-longer-current';
