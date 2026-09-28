@@ -91,7 +91,7 @@ export function createAtlasFeedPublishService({
       return response(envelope,'unavailable','persistence-runtime-invalid');
     }
 
-    let eventSha256,payloadSha256,receiptSha256;
+    let eventSha256,payloadSha256,receiptSha256,payloadSizeBytes;
     const receiptBase={
       atlasFeedPersistenceReceipt:'shine-universe/atlas-feed-persistence-receipt-v1',
       schemaVersion:'1.0.0',
@@ -100,10 +100,13 @@ export function createAtlasFeedPublishService({
       eventId:envelope.event.eventId,
       publisherAppId:admissionSnapshot.appId,
       capabilityId:admissionSnapshot.capabilityId,
+      capabilityVersion:admissionSnapshot.capabilityVersion,
       persistedAt
     };
 
     try{
+      const payloadCanonical=canonicalJson(envelope.event.payload);
+      payloadSizeBytes=new TextEncoder().encode(payloadCanonical).byteLength;
       [eventSha256,payloadSha256]=await Promise.all([
         sha256CanonicalJson(envelope.event),
         sha256CanonicalJson(envelope.event.payload)
@@ -123,6 +126,7 @@ export function createAtlasFeedPublishService({
         admission:admissionSnapshot,
         eventSha256,
         payloadSha256,
+        payloadSizeBytes,
         receipt:receiptBase,
         receiptSha256,
         persistedAt
