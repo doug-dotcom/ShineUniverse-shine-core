@@ -483,3 +483,119 @@ test('app operational status rejects missing app credential',async()=>{
   const res=await statusHandler(new Request(base+'/v1/status?appId=shine.ski'));
   assert.equal(res.status,401);
 });
+
+test('required operation policy denies privileged POST before authentication or service execution',async()=>{
+  let auth=0,service=0,policyCalls=0;
+  const h=createFoundationHttpHandler({
+    gateway:async()=>({status:'allowed'}),
+    authenticate:async()=>{auth++;return {}},
+    grantConsent:async()=>{service++;return {status:'granted'}},
+    evaluateOperationPolicy:async({method,path})=>{
+      policyCalls++;
+      assert.equal(method,'POST');
+      assert.equal(path,'/v1/grants/consent');
+      return {policyState:'deny',reasonCode:'dependency-guarded'};
+    },
+    operationPolicyRequired:true
+  });
+
+  const res=await h(new Request(base+'/v1/grants/consent',{
+    method:'POST',
+    headers:{'content-type':'application/json'},
+    body:'{}'
+  }));
+
+  assert.equal(res.status,403);
+  assert.equal(policyCalls,1);
+  assert.equal(auth,0);
+  assert.equal(service,0);
+  assert.equal((await res.json()).reasonCode,'dependency-guarded');
+});
+
+test('required operation policy unavailable fails privileged POST closed',async()=>{
+  const h=createFoundationHttpHandler({
+    gateway:async()=>({status:'allowed'}),
+    authenticate:async()=>({}),
+    grantRevocation:async()=>({status:'revoked'}),
+    evaluateOperationPolicy:async()=>({
+      policyState:'unavailable',
+      reasonCode:'dependency-graph-invalid'
+    }),
+    operationPolicyRequired:true
+  });
+
+  const res=await h(new Request(base+'/v1/grants/revoke',{
+    method:'POST',
+    headers:{'content-type':'application/json'},
+    body:'{}'
+  }));
+
+  assert.equal(res.status,503);
+  assert.equal((await res.json()).reasonCode,'dependency-graph-invalid');
+});
+
+test('worker-only operation policy continues to worker route authentication',async()=>{
+  let clientAuth=0,claimCalls=0;
+  const h=createFoundationHttpHandler({
+    gateway:async()=>({status:'allowed'}),
+    authenticate:async()=>({}),
+    authenticateIntegrationClient:async()=>{
+      clientAuth++;
+      return {clientToken:'worker'};
+    },
+    conciergeRetry:{
+      claim:async()=>{
+        claimCalls++;
+        return {status:'ok',reasonCode:'no-retry-due',retry:null};
+      },
+      finish:async()=>({status:'ok'})
+    },
+    evaluateOperationPolicy:async()=>({
+      policyState:'worker-only',
+      reasonCode:'worker-auth-required'
+    }),
+    operationPolicyRequired:true
+  });
+
+  const res=await h(new Request(base+'/v1/concierge/retry/claim',{
+    method:'POST',
+    headers:{'content-type':'application/json','x-shine-client-token':'worker'},
+    body:JSON.stringify({
+      conciergeRetryClaim:'shine-concierge/retry-claim-v1',
+      schemaVersion:'1.0.0',
+      clientId:'shine.companion'
+    })
+  }));
+
+  assert.equal(res.status,200);
+  assert.equal(clientAuth,1);
+  assert.equal(claimCalls,1);
+});
+
+test('unregistered POST route still falls through to normal 404',async()=>{
+  const h=createFoundationHttpHandler({
+    gateway:async()=>({status:'allowed'}),
+    authenticate:async()=>({}),
+    evaluateOperationPolicy:async()=>({
+      policyState:'not-registered',
+      reasonCode:'operation-not-registered'
+    }),
+    operationPolicyRequired:true
+  });
+
+  const res=await h(new Request(base+'/v1/no-such-route',{
+    method:'POST',
+    headers:{'content-type':'application/json'},
+    body:'{}'
+  }));
+  assert.equal(res.status,404);
+});
+
+test('production policy mode cannot be enabled without a broker',()=>{
+  assert.throws(()=>createFoundationHttpHandler({
+    gateway:async()=>({status:'allowed'}),
+    authenticate:async()=>({}),
+    operationPolicyRequired:true
+  }),/operation policy broker is required/);
+});
+
