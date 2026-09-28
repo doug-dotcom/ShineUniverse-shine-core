@@ -37,8 +37,11 @@ begin
   if policy->>'executionGuardRef' <> 'atlas-feed.publisher-admission-v1' then
     raise exception 'Atlas publisher policy lost its execution guard: %',policy;
   end if;
-  if policy->>'policyState' not in ('admit','admit-degraded','deny') then
+  if policy->>'policyState' not in ('admit','admit-degraded','deny','unavailable') then
     raise exception 'Atlas publisher policy must resolve through dependency admission: %',policy;
+  end if;
+  if policy->>'policyState'='unavailable' and policy->>'reasonCode' is null then
+    raise exception 'unavailable Atlas publisher policy must preserve its fail-closed reason: %',policy;
   end if;
 end;
 $$;
