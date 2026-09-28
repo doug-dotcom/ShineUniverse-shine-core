@@ -80,35 +80,13 @@ create index atlas_feed_receipts_app_time_idx
 alter table foundation.atlas_feed_events enable row level security;
 alter table foundation.atlas_feed_persistence_receipts enable row level security;
 
-revoke all on foundation.atlas_feed_events from public,anon,authenticated;
-revoke all on foundation.atlas_feed_persistence_receipts from public,anon,authenticated;
+revoke all on foundation.atlas_feed_events
+from public,anon,authenticated,foundation_runtime,foundation_gateway;
+revoke all on foundation.atlas_feed_persistence_receipts
+from public,anon,authenticated,foundation_runtime,foundation_gateway;
 
-grant select,insert on foundation.atlas_feed_events to foundation_gateway,service_role;
-grant select,insert on foundation.atlas_feed_persistence_receipts to foundation_gateway,service_role;
-
-create policy foundation_gateway_atlas_feed_events_select
-on foundation.atlas_feed_events
-for select
-to foundation_gateway
-using (true);
-
-create policy foundation_gateway_atlas_feed_events_insert
-on foundation.atlas_feed_events
-for insert
-to foundation_gateway
-with check (true);
-
-create policy foundation_gateway_atlas_feed_receipts_select
-on foundation.atlas_feed_persistence_receipts
-for select
-to foundation_gateway
-using (true);
-
-create policy foundation_gateway_atlas_feed_receipts_insert
-on foundation.atlas_feed_persistence_receipts
-for insert
-to foundation_gateway
-with check (true);
+grant select,insert on foundation.atlas_feed_events to service_role;
+grant select,insert on foundation.atlas_feed_persistence_receipts to service_role;
 
 create trigger atlas_feed_events_append_only
 before update or delete on foundation.atlas_feed_events
@@ -131,7 +109,7 @@ create or replace function foundation.persist_atlas_feed_event_v1(
 )
 returns jsonb
 language plpgsql
-security invoker
+security definer
 set search_path = pg_catalog, foundation
 as $atlas_feed$
 declare
