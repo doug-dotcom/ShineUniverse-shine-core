@@ -206,3 +206,18 @@ Instead, it now has a safe standard way for a trusted observer to say:
 > **“This exact artefact from this exact source commit is now what the provider says is deployed.”**
 
 and automatically starts the new runtime's health/audit/readiness proof cycle.
+
+## CI verification
+
+The first shared Shine Foundation workflow containing Layer 31 was run **36387283101**.
+
+Layer-31-specific steps passed:
+
+- `Apply deployment reconciliation inbox` — **SUCCESS**;
+- `Run deployment reconciliation acceptance tests` — **SUCCESS**;
+- `foundation-contracts` job — **SUCCESS**.
+
+The overall shared persistence job later failed in concurrently moving Shine Defence/Concierge integration tests. That unrelated failure is not represented as a Layer-31 pass/fail signal.
+
+Layer 31 is therefore closed from its own successful CI gates plus live production verification, without claiming the entire shared workflow was green.
+
