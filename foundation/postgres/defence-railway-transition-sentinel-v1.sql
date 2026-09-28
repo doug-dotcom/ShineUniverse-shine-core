@@ -149,9 +149,3 @@ revoke all on function foundation.run_defence_railway_transition_sentinel_v1(tim
 grant execute on function foundation.run_defence_railway_transition_sentinel_v1(timestamptz)
   to shine_defence_runtime,service_role;
 
-
-select cron.schedule(
-  'shine-defence-railway-transition-sentinel-5m',
-  '1,6,11,16,21,26,31,36,41,46,51,56 * * * *',
-  $$select foundation.run_defence_railway_transition_sentinel_v1(now());$$
-);
