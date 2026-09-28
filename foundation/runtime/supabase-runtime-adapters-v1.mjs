@@ -149,7 +149,7 @@ export function createSupabaseRuntimeAdapters({sql,defenceGate,fetchImpl=fetch}=
     },
 
     async persistAtlasFeedEvent({
-      requestId,event,admission,eventSha256,payloadSha256,
+      requestId,event,admission,eventSha256,payloadSha256,payloadSizeBytes,
       receipt,receiptSha256,persistedAt
     }={}){
       const rows=await sql`
