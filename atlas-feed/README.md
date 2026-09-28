@@ -20,5 +20,6 @@ Atlas Feed does **not** own an app's canonical domain data. The source app remai
 
 - **Layer 1 — Feed event contract:** canonical envelope, deterministic validator and CI gate.
 - **Layer 2 — Publisher admission:** Foundation-authenticated app/capability/owner/grant admission before persistence.
+- **Layer 3 — Append-only event store:** admitted events persist exactly once with stable SHA-256-bound receipts.
 
-Persistence, querying/subscription, delivery, replay and consumer-read authorisation are intentionally deferred to later layers.
+Querying/subscription, delivery and consumer-read authorisation are intentionally deferred to later layers.

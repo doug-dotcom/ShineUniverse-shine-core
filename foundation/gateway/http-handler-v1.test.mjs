@@ -921,3 +921,75 @@ test('Atlas Feed admission requires app plus user authentication for private sig
   assert.equal(userAppAuth,1);
   assert.equal(serviceCalls,1);
 });
+
+
+test('Atlas Feed final publish route uses app auth for general events and maps persistence to 201',async()=>{
+  let appAuth=0,userAppAuth=0,publishCalls=0;
+  const h=createFoundationHttpHandler({
+    gateway:async()=>({status:'allowed'}),
+    authenticate:async()=>{userAppAuth++;return {appToken:'app',jwt:'user'}},
+    authenticateApp:async request=>{
+      appAuth++;
+      assert.equal(request.headers.get('x-shine-app-token'),'app');
+      return {appToken:'app'};
+    },
+    atlasFeedPublish:async({envelope,authContext})=>{
+      publishCalls++;
+      assert.equal(envelope.atlasFeedPublishRequest,'shine-universe/atlas-feed-publish-v1');
+      assert.equal(authContext.appToken,'app');
+      return {
+        atlasFeedPublishResponse:'shine-universe/atlas-feed-publish-response-v1',
+        schemaVersion:'1.0.0',
+        requestId:envelope.requestId,
+        status:'persisted',
+        reasonCode:'atlas-feed-event-persisted',
+        eventId:'22222222-2222-4222-8222-222222222222',
+        receipt:{receiptId:'44444444-4444-4444-8444-444444444444'},
+        receiptSha256:'d'.repeat(64)
+      };
+    }
+  });
+
+  const res=await h(new Request(base+'/v1/atlas-feed/publish',{
+    method:'POST',
+    headers:{'content-type':'application/json','x-shine-app-token':'app'},
+    body:JSON.stringify({
+      atlasFeedPublishRequest:'shine-universe/atlas-feed-publish-v1',
+      schemaVersion:'1.0.0',
+      requestId:'11111111-1111-4111-8111-111111111111',
+      requestedAt:'2026-09-28T09:59:30Z',
+      event:{audience:{dataClass:'general'}}
+    })
+  }));
+  assert.equal(res.status,201);
+  assert.equal(appAuth,1);
+  assert.equal(userAppAuth,0);
+  assert.equal(publishCalls,1);
+});
+
+test('Atlas Feed publish conflict maps to HTTP 409',async()=>{
+  const h=createFoundationHttpHandler({
+    gateway:async()=>({status:'allowed'}),
+    authenticate:async()=>({appToken:'app',jwt:'user'}),
+    authenticateApp:async()=>({appToken:'app'}),
+    atlasFeedPublish:async({envelope})=>({
+      atlasFeedPublishResponse:'shine-universe/atlas-feed-publish-response-v1',
+      schemaVersion:'1.0.0',
+      requestId:envelope.requestId,
+      status:'conflict',
+      reasonCode:'atlas-feed-event-id-conflict'
+    })
+  });
+  const res=await h(new Request(base+'/v1/atlas-feed/publish',{
+    method:'POST',
+    headers:{'content-type':'application/json','x-shine-app-token':'app'},
+    body:JSON.stringify({
+      atlasFeedPublishRequest:'shine-universe/atlas-feed-publish-v1',
+      schemaVersion:'1.0.0',
+      requestId:'11111111-1111-4111-8111-111111111111',
+      requestedAt:'2026-09-28T09:59:30Z',
+      event:{audience:{dataClass:'general'}}
+    })
+  }));
+  assert.equal(res.status,409);
+});

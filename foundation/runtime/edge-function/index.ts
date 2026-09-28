@@ -21,6 +21,7 @@ import {createFoundationHttpHandler} from '../../gateway/http-handler-v1.mjs';
 import {createPublicDefenceStatusService} from '../../gateway/defence-status-v1.mjs';
 import {createIntegrationContextPublishService} from '../../gateway/integration-context-publish-v1.mjs';
 import {createAtlasFeedPublisherAdmissionService} from '../../../atlas-feed/gateway/publisher-admission-v1.mjs';
+import {createAtlasFeedPublishService} from '../../../atlas-feed/gateway/publish-v1.mjs';
 import {createSupabaseRuntimeAdapters} from '../supabase-runtime-adapters-v1.mjs';
 import {createFoundationRuntimeDefenceGateV1} from '../runtime-defence-gate-v1.mjs';
 import defenceLedger from '../../../security/shine-defence/ecosystem-profile-ledger-v1.json' with {type:'json'};
@@ -86,6 +87,7 @@ const conciergeRetry=createConciergeRetryService({adapters} as any);
 const conciergeFleetStatus=createConciergeFleetStatusService({adapters} as any);
 const integrationContextPublish=createIntegrationContextPublishService({adapters} as any);
 const atlasFeedPublisherAdmission=createAtlasFeedPublisherAdmissionService({adapters} as any);
+const atlasFeedPublish=createAtlasFeedPublishService({publisherAdmission:atlasFeedPublisherAdmission,adapters} as any);
 const defenceStatus=createPublicDefenceStatusService({
   ledger:defenceLedger,
   revocations:defenceRevocations
@@ -128,6 +130,7 @@ const handler=createFoundationHttpHandler({
   conciergeFleetStatus,
   integrationContextPublish,
   atlasFeedPublisherAdmission,
+  atlasFeedPublish,
   defenceStatus,
   evaluateOperationPolicy:adapters.evaluateGatewayRoutePolicy,
   operationPolicyRequired:true,

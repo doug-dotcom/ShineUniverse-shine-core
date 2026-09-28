@@ -1,0 +1,74 @@
+{
+  "atlasFeedEventStore": "shine-universe/atlas-feed-event-store-v1",
+  "schemaVersion": "1.0.0",
+  "route": {
+    "method": "POST",
+    "path": "/v1/atlas-feed/publish"
+  },
+  "purpose": "Persist an Atlas Feed event exactly once after Layer-2 publisher admission and return a stable persistence receipt.",
+  "request": {
+    "required": [
+      "atlasFeedPublishRequest",
+      "schemaVersion",
+      "requestId",
+      "requestedAt",
+      "event"
+    ],
+    "optional": [
+      "permissionContext"
+    ],
+    "eventContract": "shine-universe/atlas-feed-event-v1",
+    "publisherAdmissionContract": "shine-universe/atlas-feed-publisher-admission-v1"
+  },
+  "persistence": {
+    "eventStore": "foundation.atlas_feed_events",
+    "receiptStore": "foundation.atlas_feed_persistence_receipts",
+    "appendOnly": true,
+    "canonicalDomainOwnershipTransferred": false,
+    "mandatoryAdmissionBeforeWrite": true,
+    "eventIdUnique": true,
+    "firstRequestIdUnique": true,
+    "oneStableReceiptPerEvent": true,
+    "eventHash": "sha256-canonical-json",
+    "payloadHash": "sha256-canonical-json",
+    "receiptHash": "sha256-canonical-json"
+  },
+  "idempotency": {
+    "sameRequestSameEvent": "return-existing-receipt",
+    "newRequestSameEventSameHash": "return-existing-receipt",
+    "sameRequestDifferentEvent": "conflict",
+    "sameEventIdDifferentHash": "conflict",
+    "duplicateEventRows": false
+  },
+  "storageBoundary": {
+    "schema": "foundation",
+    "rlsEnabled": true,
+    "anonAccess": false,
+    "authenticatedAccess": false,
+    "updateAllowed": false,
+    "deleteAllowed": false,
+    "realtimePublished": false,
+    "consumerReadApiDefined": false,
+    "gatewayDirectTableAccess": false,
+    "gatewayWriteAuthority": "foundation.persist_atlas_feed_event_v1",
+    "gatewayFunctionExecuteOnly": true
+  },
+  "responses": {
+    "statusValues": [
+      "persisted",
+      "already-persisted",
+      "conflict",
+      "denied",
+      "invalid",
+      "unavailable"
+    ],
+    "http": {
+      "persisted": 201,
+      "already-persisted": 200,
+      "conflict": 409,
+      "denied": 403,
+      "invalid": 400,
+      "unavailable": 503
+    }
+  }
+}

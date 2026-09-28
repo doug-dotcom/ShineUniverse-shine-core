@@ -4,10 +4,10 @@
   "serviceId": "foundation.gateway",
   "purpose": "Provide canonical, append-only, reconstructable audit truth for every privileged Gateway POST attempt without copying request bodies, tokens, conversation content or context payloads.",
   "scope": {
-    "registeredGatewayRoutes": 40,
-    "privilegedRouteContracts": 24,
-    "distinctPrivilegedOperations": 23,
-    "dependencyAdmissionPolicies": 21,
+    "registeredGatewayRoutes": 42,
+    "privilegedRouteContracts": 26,
+    "distinctPrivilegedOperations": 25,
+    "dependencyAdmissionPolicies": 23,
     "workerOnlyPolicies": 2
   },
   "eventModel": {

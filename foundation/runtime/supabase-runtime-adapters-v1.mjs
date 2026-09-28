@@ -148,6 +148,25 @@ export function createSupabaseRuntimeAdapters({sql,defenceGate,fetchImpl=fetch}=
       }:null;
     },
 
+    async persistAtlasFeedEvent({
+      requestId,event,admission,eventSha256,payloadSha256,payloadSizeBytes,
+      receipt,receiptSha256,persistedAt
+    }={}){
+      const rows=await sql`
+        select foundation.persist_atlas_feed_event_v1(
+          ${requestId}::uuid,
+          ${JSON.stringify(event??{})}::jsonb,
+          ${JSON.stringify(admission??{})}::jsonb,
+          ${eventSha256},
+          ${payloadSha256},
+          ${JSON.stringify(receipt??{})}::jsonb,
+          ${receiptSha256},
+          ${persistedAt}::timestamptz
+        ) as result
+      `;
+      return normalizeJsonObject(first(rows)?.result);
+    },
+
     async verifyIdentity({authContext,claimedAppId}={}){
       if(!claimedAppId) return null;
 

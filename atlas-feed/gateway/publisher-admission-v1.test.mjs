@@ -194,3 +194,19 @@ test('stale admission requests are rejected',async()=>{
   assert.equal(result.status,'invalid');
   assert.equal(result.reasonCode,'invalid-publisher-admission-request');
 });
+
+
+test('general grant publication preserves the grant owner in the admission snapshot',async()=>{
+  const e=baseEvent();
+  e.audience={mode:'grant',dataClass:'general',grantId:grant};
+  const result=await service()({
+    envelope:request(e,{
+      requiredScope:'atlas.dive.read',
+      purpose:'companion.dive-context',
+      resourceId:resource
+    }),
+    authContext:{appToken:'good'}
+  });
+  assert.equal(result.status,'admitted');
+  assert.equal(result.admission.ownerShineId,owner);
+});
