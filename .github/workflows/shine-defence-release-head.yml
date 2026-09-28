@@ -37,6 +37,7 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
           node <<'NODE'
+          (async()=>{
           const fs=require('fs');
           const config=JSON.parse(fs.readFileSync('security/shine-defence/release-source-watch-v1.json','utf8'));
           if(config.contract!=='shine-defence/release-source-watch-v1'||config.schemaVersion!=='1.0.0'||!Array.isArray(config.sources)){
@@ -77,6 +78,7 @@ jobs:
             observations
           }));
           console.log('Collected release source heads:',observations.length);
+          })().catch(error=>{ console.error(error); process.exit(1); });
           NODE
 
       - name: Acquire GitHub OIDC token
