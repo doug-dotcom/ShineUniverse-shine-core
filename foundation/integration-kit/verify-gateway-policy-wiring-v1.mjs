@@ -35,7 +35,7 @@ if(!index.includes('operationPolicyRequired:true')){
 }
 
 const privileged=registry.routes.filter(route=>route.effectClass!=='read');
-if(privileged.length!==23){
+if(privileged.length!==24){
   fail('unexpected privileged route count: '+privileged.length);
 }
 const workerOnly=privileged.filter(route=>route.controlMode==='internal-worker');
