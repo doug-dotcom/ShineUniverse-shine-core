@@ -599,3 +599,185 @@ test('production policy mode cannot be enabled without a broker',()=>{
   }),/operation policy broker is required/);
 });
 
+test('privileged operation audit records policy before auth/service and outcome after response',async()=>{
+  const order=[];
+  const auditEvents=[];
+  const requestId='29111111-1111-4111-8111-111111111111';
+  const h=createFoundationHttpHandler({
+    gateway:async()=>({status:'allowed'}),
+    authenticate:async()=>{order.push('authenticate');return {}},
+    grantConsent:async()=>{
+      order.push('service');
+      return {status:'granted',reasonCode:'grant-consent-recorded',requestId};
+    },
+    evaluateOperationPolicy:async()=>{
+      order.push('policy-evaluate');
+      return {
+        operationKey:'grant.consent',
+        policyState:'admit',
+        reasonCode:'dependency-admission-clear',
+        policy:{
+          policyState:'admit',
+          reasonCode:'dependency-admission-clear',
+          policyEvidenceRef:'foundation:operation-policy:gateway:grant-consent:v1',
+          impactScope:'permission-operations',
+          executionGuardRef:'foundation.issue_access_grant_v1',
+          admission:{dependencyEvidence:[]}
+        }
+      };
+    },
+    operationPolicyRequired:true,
+    recordOperationAudit:async event=>{
+      auditEvents.push(event);
+      order.push('audit-'+event.phase);
+      return {status:'recorded'};
+    },
+    operationAuditRequired:true,
+    operationAuditIdFactory:()=> '29000000-0000-4000-8000-000000009001'
+  });
+
+  const res=await h(new Request(base+'/v1/grants/consent',{
+    method:'POST',
+    headers:{'content-type':'application/json'},
+    body:'{}'
+  }));
+
+  assert.equal(res.status,200);
+  assert.deepEqual(order,[
+    'policy-evaluate','audit-policy','authenticate','service','audit-outcome'
+  ]);
+  assert.equal(auditEvents.length,2);
+  assert.equal(auditEvents[0].operationAuditId,'29000000-0000-4000-8000-000000009001');
+  assert.equal(auditEvents[0].phase,'policy');
+  assert.equal(auditEvents[1].phase,'outcome');
+  assert.equal(auditEvents[1].httpStatus,200);
+  assert.equal(auditEvents[1].responseReasonCode,'grant-consent-recorded');
+  assert.equal(auditEvents[1].domainRequestId,requestId);
+});
+
+test('policy denial is audited before route execution and receives an outcome event',async()=>{
+  let authCalls=0,serviceCalls=0;
+  const auditEvents=[];
+  const h=createFoundationHttpHandler({
+    gateway:async()=>({status:'allowed'}),
+    authenticate:async()=>{authCalls++;return {}},
+    grantConsent:async()=>{serviceCalls++;return {status:'granted'}},
+    evaluateOperationPolicy:async()=>({
+      operationKey:'grant.consent',
+      policyState:'deny',
+      reasonCode:'dependency-guarded',
+      policy:{
+        policyState:'deny',
+        reasonCode:'dependency-guarded',
+        policyEvidenceRef:'foundation:operation-policy:gateway:grant-consent:v1',
+        impactScope:'permission-operations',
+        executionGuardRef:'foundation.issue_access_grant_v1',
+        admission:{dependencyEvidence:[{serviceId:'foundation.defence',impact:'guarded'}]}
+      }
+    }),
+    operationPolicyRequired:true,
+    recordOperationAudit:async event=>{auditEvents.push(event);return {status:'recorded'}},
+    operationAuditRequired:true,
+    operationAuditIdFactory:()=> '29000000-0000-4000-8000-000000009002'
+  });
+
+  const res=await h(new Request(base+'/v1/grants/consent',{
+    method:'POST',headers:{'content-type':'application/json'},body:'{}'
+  }));
+
+  assert.equal(res.status,403);
+  assert.equal(authCalls,0);
+  assert.equal(serviceCalls,0);
+  assert.deepEqual(auditEvents.map(e=>e.phase),['policy','outcome']);
+  assert.equal(auditEvents[1].responseReasonCode,'dependency-guarded');
+});
+
+test('required pre-execution audit failure fails privileged route closed',async()=>{
+  let authCalls=0,serviceCalls=0;
+  const h=createFoundationHttpHandler({
+    gateway:async()=>({status:'allowed'}),
+    authenticate:async()=>{authCalls++;return {}},
+    grantRevocation:async()=>{serviceCalls++;return {status:'revoked'}},
+    evaluateOperationPolicy:async()=>({
+      operationKey:'grant.revoke',
+      policyState:'admit',
+      reasonCode:'dependency-admission-clear',
+      policy:{
+        policyState:'admit',
+        reasonCode:'dependency-admission-clear',
+        policyEvidenceRef:'foundation:operation-policy:gateway:grant-revoke:v1',
+        impactScope:'permission-operations',
+        executionGuardRef:'foundation.revoke_access_grant_v1',
+        admission:{dependencyEvidence:[]}
+      }
+    }),
+    operationPolicyRequired:true,
+    recordOperationAudit:async()=>{throw new Error('audit down')},
+    operationAuditRequired:true
+  });
+
+  const res=await h(new Request(base+'/v1/grants/revoke',{
+    method:'POST',headers:{'content-type':'application/json'},body:'{}'
+  }));
+
+  assert.equal(res.status,503);
+  assert.equal(authCalls,0);
+  assert.equal(serviceCalls,0);
+  assert.equal((await res.json()).error,'operation-audit-unavailable');
+});
+
+test('post-execution audit failure does not rewrite a completed domain response',async()=>{
+  let auditCalls=0;
+  const originalError=console.error;
+  console.error=()=>{};
+  try{
+    const h=createFoundationHttpHandler({
+      gateway:async()=>({status:'allowed'}),
+      authenticate:async()=>({}),
+      grantConsent:async()=>({
+        status:'granted',
+        reasonCode:'grant-consent-recorded',
+        requestId:'29222222-2222-4222-8222-222222222222'
+      }),
+      evaluateOperationPolicy:async()=>({
+        operationKey:'grant.consent',
+        policyState:'admit',
+        reasonCode:'dependency-admission-clear',
+        policy:{
+          policyState:'admit',
+          reasonCode:'dependency-admission-clear',
+          policyEvidenceRef:'foundation:operation-policy:gateway:grant-consent:v1',
+          impactScope:'permission-operations',
+          executionGuardRef:'foundation.issue_access_grant_v1',
+          admission:{dependencyEvidence:[]}
+        }
+      }),
+      operationPolicyRequired:true,
+      recordOperationAudit:async event=>{
+        auditCalls++;
+        if(event.phase==='outcome') throw new Error('outcome audit down');
+        return {status:'recorded'};
+      },
+      operationAuditRequired:true
+    });
+
+    const res=await h(new Request(base+'/v1/grants/consent',{
+      method:'POST',headers:{'content-type':'application/json'},body:'{}'
+    }));
+
+    assert.equal(res.status,200);
+    assert.equal(auditCalls,2);
+    assert.equal((await res.json()).status,'granted');
+  } finally {
+    console.error=originalError;
+  }
+});
+
+test('production audit mode cannot be enabled without an audit recorder',()=>{
+  assert.throws(()=>createFoundationHttpHandler({
+    gateway:async()=>({status:'allowed'}),
+    authenticate:async()=>({}),
+    operationAuditRequired:true
+  }),/operation audit recorder is required/);
+});
+
