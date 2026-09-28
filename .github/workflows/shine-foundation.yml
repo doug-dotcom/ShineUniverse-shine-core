@@ -230,6 +230,10 @@ jobs:
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-remediation-verification-v1.sql
       - name: Run Foundation remediation verification tests
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-remediation-verification-v1.test.sql
+      - name: Apply Foundation readiness drift attribution
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-readiness-drift-v1.sql
+      - name: Run Foundation readiness drift attribution tests
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-readiness-drift-v1.test.sql
       - name: Apply Shine Defence Sentinel
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-sentinel-v1.sql
       - name: Run Shine Defence Sentinel acceptance tests
