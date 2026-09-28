@@ -156,3 +156,32 @@ No synthetic production health was created for Shine ID or Vault simply because 
 `foundation/contracts/service-dependency-rollup-v1.json`
 
 Layer 24 is where Foundation stops asking only **“is this service healthy?”** and starts answering **“what does its health mean for everything that depends on it?”**
+
+## Closure verification
+
+Production closure verification confirmed:
+
+- active production dependency edges: 1;
+- dependency graph health: **pass**;
+- dependency cycles: 0;
+- Foundation Gateway native state: **operational**;
+- Shine Defence posture source: **operational** from current `pass` posture;
+- Gateway dependency impact: **none** while Defence passes;
+- Gateway effective state: **operational**;
+- Gateway safe mode: **normal**;
+- Foundation dependency roll-up: **operational**.
+
+The live reverse blast-radius query for `foundation.defence` reports one currently affected service if Defence were to fail:
+
+- `foundation.gateway`;
+- path depth: 1;
+- dependency type: `guard`;
+- scope: `protected-operations`;
+- potential impact: `guarded`.
+
+This is intentionally narrower than declaring the whole Gateway unavailable.
+
+The acceptance suite also verified warning, failure, hard-dependency, transitive-soft-dependency and cycle scenarios inside a rollback transaction.
+
+Supabase security advisors reported no Layer-24-specific finding. Performance advisors reported no Layer-24 unindexed foreign key; the only Layer-24-related INFO was that a newly created dependency index had not yet accumulated usage statistics.
+
