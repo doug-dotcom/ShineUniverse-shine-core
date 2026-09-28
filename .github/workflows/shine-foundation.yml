@@ -222,6 +222,10 @@ jobs:
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-remediation-execution-admission-v1.sql
       - name: Run Foundation remediation execution admission tests
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-remediation-execution-admission-v1.test.sql
+      - name: Apply Foundation scoped remediation executor
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-scoped-remediation-executor-v1.sql
+      - name: Run Foundation scoped remediation executor tests
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-scoped-remediation-executor-v1.test.sql
       - name: Apply Shine Defence Sentinel
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-sentinel-v1.sql
       - name: Run Shine Defence Sentinel acceptance tests
