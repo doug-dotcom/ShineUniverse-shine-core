@@ -290,6 +290,7 @@ Current production state:
 
 Healthy production currently has:
 
+- approval receipts: **0**
 - execution admissions: **0**
 - remediation execution events: **0**
 
@@ -334,6 +335,7 @@ It proves:
 
 - initial release-ledger projection can be repaired through approval → consumption → admission → mutation;
 - tampering with the approved proposal is denied without consuming the admission;
+- an exact-hash proposal containing unknown fields is rejected by the closed schema without consuming the admission;
 - an exact approved release-ledger proposal executes successfully;
 - execution admission becomes consumed after success;
 - registry mismatch remains a separate incident after release-ledger repair;
@@ -349,11 +351,11 @@ It proves:
 - mutation authority remains isolated to the dedicated mutator role;
 - the mutator role has no direct table mutation grants.
 
-Foundation CI run:
+Final hardened Foundation CI run:
 
-`36413060917`
+`36413283153`
 
-passed end-to-end with the formal Layer-41 contract.
+passed end-to-end with the formal Layer-41 contract and closed-schema acceptance coverage.
 
 ## Advisor hardening
 
@@ -369,6 +371,16 @@ Current Layer-41 advisor result:
 - **no Layer-41 security findings**
 - **no unindexed Layer-41 foreign keys**
 - remaining performance notices are only unused-index INFO entries because production has no remediation execution rows
+
+## Universe ledger
+
+Layer 41 is recorded in the append-only Universe layer ledger as event:
+
+**39**
+
+Evidence commit:
+
+`7ef4867076f7b47a9ee99ae972bd1aebcd332857`
 
 ## Closure invariant
 
