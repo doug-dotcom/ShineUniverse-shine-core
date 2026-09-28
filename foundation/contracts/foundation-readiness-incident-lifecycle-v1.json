@@ -1,0 +1,30 @@
+{
+  "contract": "shine-foundation/foundation-readiness-incident-lifecycle-v1",
+  "version": "1.0.0",
+  "layer": 44,
+  "purpose": "Debounce, escalate, change and recover persistent Foundation readiness degradation independently of release-projection incidents.",
+  "incidentKey": "<environment>:readiness",
+  "persistenceThresholdSeconds": 300,
+  "lifecycle": [
+    "detected",
+    "opened",
+    "changed",
+    "recovered"
+  ],
+  "severity": {
+    "restricted": "warning",
+    "degraded": "warning",
+    "not-ready": "critical",
+    "unknown": "critical",
+    "blockedScopes": "critical"
+  },
+  "invariants": {
+    "firstUnhealthySampleOnlyWatches": true,
+    "subthresholdDoesNotOpen": true,
+    "persistentUnhealthyOpens": true,
+    "materialChangeAppendsChanged": true,
+    "healthyReadinessAppendsRecovered": true,
+    "releaseIdentityIncidentLifecycleRemainsSeparate": true,
+    "lifecycleAppendOnly": true
+  }
+}
