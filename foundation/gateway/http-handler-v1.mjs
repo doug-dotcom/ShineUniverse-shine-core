@@ -304,6 +304,10 @@ export function createFoundationHttpHandler({
           stalePlanRetirementMinimumAgeSeconds:3600,
           stalePlanRetirementCronMinutes:15,
           stalePlanRetirementExecutesSpecialists:false,
+          conciergePlanTtlSeconds:3600,
+          conciergePlanTtlSynchronousAdmission:true,
+          conciergePlanTtlRetiresUnusedPlan:true,
+          conciergePlanTtlStartedExecutionExempt:true,
           capabilityChangesAudited:true,
           purposeBoundCapabilityGrants:true,
           accessHistoryStoresConversationContent:false
