@@ -1,0 +1,58 @@
+{
+  "contract": "shine-foundation/foundation-scoped-remediation-executor-v1",
+  "version": "1.0.0",
+  "layer": 41,
+  "purpose": "Atomically consume a valid Layer-40 execution admission and apply only the exact approved remediation proposal through one of three hard-coded mutation shapes.",
+  "mutatorRole": "foundation_remediation_mutator",
+  "mutatorRoleProperties": {
+    "login": false,
+    "inheritedByServiceRole": false,
+    "inheritedByApproverRole": false,
+    "inheritedByAdmissionExecutorRole": false,
+    "directRegistryUpdate": false,
+    "directReleaseLedgerInsert": false,
+    "directExecutionEventInsert": false
+  },
+  "proposal": {
+    "contract": "shine-foundation/remediation-proposal-v1",
+    "canonicalHash": "SHA-256 of jsonb text representation",
+    "maxBytes": 32768,
+    "unknownFieldsRejected": true,
+    "exactAdmissionHashMatchRequired": true
+  },
+  "executor": "foundation.execute_scoped_remediation_v1",
+  "proposalHasher": "foundation.get_remediation_proposal_sha256_v1",
+  "executionLedger": "foundation.remediation_execution_events",
+  "operations": {
+    "apply-registry-repair": {
+      "mutationShape": "scoped-registry-correction",
+      "rule": "Compare-and-set Foundation registry from an exact approved before-state to the current immutable binding only."
+    },
+    "apply-release-ledger-repair": {
+      "mutationShape": "scoped-release-ledger-correction",
+      "rule": "Insert-only creation of the missing current-binding readiness release; existing rows are never overwritten."
+    },
+    "rebind-release-identity": {
+      "mutationShape": "append-only-release-rebind",
+      "rule": "Append a new immutable binding only when deployment mismatch is independently proven and the current registry scope matches the approved prior binding."
+    }
+  },
+  "invariants": {
+    "arbitrarySqlExecution": false,
+    "autoRepairRegistered": false,
+    "admissionMustBeActive": true,
+    "admissionSingleUse": true,
+    "failedMutationConsumesAdmission": true,
+    "deniedPreMutationAttemptDoesNotConsumeAdmission": true,
+    "proposalHashMustMatch": true,
+    "currentIncidentMustMatch": true,
+    "liveEvidenceFingerprintMustMatch": true,
+    "liveReleaseMustMatch": true,
+    "responsePolicyMustRemainApprovalRequired": true,
+    "approvalConsumptionMustMatch": true,
+    "mutationsAreHardCoded": true,
+    "releaseLedgerRepairIsInsertOnly": true,
+    "releaseRebindDoesNotSilentlyRepairUniverseProjection": true,
+    "executionAuditAppendOnly": true
+  }
+}
