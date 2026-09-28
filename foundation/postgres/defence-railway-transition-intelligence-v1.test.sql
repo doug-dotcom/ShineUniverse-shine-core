@@ -73,75 +73,6 @@ do $$
 declare
   v jsonb;
 begin
-  select foundation.run_defence_railway_transition_sentinel_v1(
-    now()+interval '3 seconds'
-  ) into v;
-
-  if not exists (
-    select 1
-    from foundation.current_defence_estate_incidents
-    where incident_key='railway:test-transition:railway-transition'
-      and state='fail'
-      and reason_code='serving-deployment-crashed'
-  ) then
-    raise exception 'serving crash should open fail incident: %',v;
-  end if;
-
-  if not exists (
-    select 1
-    from foundation.current_defence_estate_incidents
-    where incident_key='railway:test-transition-stuck:railway-transition'
-      and state='warning'
-      and reason_code='release-transition-stuck'
-  ) then
-    raise exception 'stuck transition should open warning incident: %',v;
-  end if;
-end;
-$$;
-
-do $$
-declare
-  v jsonb;
-begin
-  perform foundation.record_defence_railway_transition_v1(
-    '11111111-1111-4111-8111-111111111111',
-    '22222222-2222-4222-8222-222222222222',
-    '33333333-3333-4333-8333-333333333333',
-    '44444444-4444-4444-8444-444444444444',
-    'Deployment.success',
-    'success',
-    'INFO',
-    'GitHub',
-    'main',
-    repeat('a',40),
-    now()+interval '4 seconds',
-    repeat('5',64),
-    'test:transition:serving-recovered',
-    '{"test":true}'::jsonb
-  );
-
-  select foundation.run_defence_railway_transition_sentinel_v1(
-    now()+interval '5 seconds'
-  ) into v;
-
-  if not exists (
-    select 1
-    from foundation.current_defence_estate_incident_state
-    where incident_key='railway:test-transition:railway-transition'
-      and event_type='recovered'
-      and state='pass'
-      and reason_code='healthy'
-  ) then
-    raise exception 'serving recovery should close transition incident: %',v;
-  end if;
-end;
-$$;
-
-
-do $$
-declare
-  v jsonb;
-begin
   select foundation.record_defence_railway_transition_v1(
     '11111111-1111-4111-8111-111111111111',
     '22222222-2222-4222-8222-222222222222',
@@ -288,6 +219,75 @@ begin
   if v->>'state'<>'fail'
      or (v->>'crashedServingDeployments')::integer<1 then
     raise exception 'crashed serving deployment must fail transition summary: %',v;
+  end if;
+end;
+$$;
+
+
+do $$
+declare
+  v jsonb;
+begin
+  select foundation.run_defence_railway_transition_sentinel_v1(
+    now()+interval '3 seconds'
+  ) into v;
+
+  if not exists (
+    select 1
+    from foundation.current_defence_estate_incidents
+    where incident_key='railway:test-transition:railway-transition'
+      and state='fail'
+      and reason_code='serving-deployment-crashed'
+  ) then
+    raise exception 'serving crash should open fail incident: %',v;
+  end if;
+
+  if not exists (
+    select 1
+    from foundation.current_defence_estate_incidents
+    where incident_key='railway:test-transition-stuck:railway-transition'
+      and state='warning'
+      and reason_code='release-transition-stuck'
+  ) then
+    raise exception 'stuck transition should open warning incident: %',v;
+  end if;
+end;
+$$;
+
+do $$
+declare
+  v jsonb;
+begin
+  perform foundation.record_defence_railway_transition_v1(
+    '11111111-1111-4111-8111-111111111111',
+    '22222222-2222-4222-8222-222222222222',
+    '33333333-3333-4333-8333-333333333333',
+    '44444444-4444-4444-8444-444444444444',
+    'Deployment.success',
+    'success',
+    'INFO',
+    'GitHub',
+    'main',
+    repeat('a',40),
+    now()+interval '4 seconds',
+    repeat('5',64),
+    'test:transition:serving-recovered',
+    '{"test":true}'::jsonb
+  );
+
+  select foundation.run_defence_railway_transition_sentinel_v1(
+    now()+interval '5 seconds'
+  ) into v;
+
+  if not exists (
+    select 1
+    from foundation.current_defence_estate_incident_state
+    where incident_key='railway:test-transition:railway-transition'
+      and event_type='recovered'
+      and state='pass'
+      and reason_code='healthy'
+  ) then
+    raise exception 'serving recovery should close transition incident: %',v;
   end if;
 end;
 $$;
