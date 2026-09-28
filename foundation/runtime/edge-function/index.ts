@@ -49,40 +49,40 @@ const adapters=createSupabaseRuntimeAdapters({
   defenceGate:createFoundationRuntimeDefenceGateV1()
 });
 
-const gateway=createFoundationGateway({adapters});
-const identityClaim=createIdentityClaimService({adapters});
-const grantConsent=createGrantConsentService({adapters});
-const grantRevocation=createGrantRevocationService({adapters});
-const revocationFeed=createRevocationFeedService({adapters});
-const revocationAck=createRevocationAckService({adapters});
-const revocationHealth=createRevocationHealthService({adapters});
-const appOperationalStatus=createAppOperationalStatusService({adapters});
-const capabilityDiscovery=createCapabilityDiscoveryService({adapters});
-const integrationClientStatus=createIntegrationClientStatusService({adapters});
-const integrationLinkConsent=createIntegrationLinkConsentService({adapters});
-const integrationCapabilityConsent=createIntegrationCapabilityConsentService({adapters});
-const integrationGrantRevocation=createIntegrationGrantRevocationService({adapters});
-const integrationLinkRevocation=createIntegrationLinkRevocationService({adapters});
-const integrationGrantList=createIntegrationGrantListService({adapters});
-const conciergePlan=createConciergePlanService({adapters});
-const conciergeExecute=createConciergeExecuteService({adapters});
-const integrationLinkRequest=createIntegrationLinkRequestService({adapters});
-const integrationLinkApproval=createIntegrationLinkApprovalService({adapters});
-const integrationLinkStatus=createIntegrationLinkStatusService({adapters});
-const integrationLinkExchange=createIntegrationLinkExchangeService({adapters});
-const integrationLinkPreview=createIntegrationLinkPreviewService({adapters});
-const capabilityTicketRedeem=createCapabilityTicketRedeemService({adapters});
-const integrationDelegationRefresh=createIntegrationDelegationRefreshService({adapters});
-const connectedIntegrationList=createConnectedIntegrationListService({adapters});
-const userIntegrationGrantRevocation=createUserGrantRevocationService({adapters});
-const userIntegrationLinkRevocation=createUserLinkRevocationService({adapters});
-const userAccessHistory=createUserAccessHistoryService({adapters});
-const userAccessExplanation=createUserAccessExplanationService({adapters});
-const userConciergeCancellation=createUserConciergeCancellationService({adapters});
-const userConciergeJobs=createUserConciergeJobsService({adapters});
-const conciergeRetry=createConciergeRetryService({adapters});
-const conciergeFleetStatus=createConciergeFleetStatusService({adapters});
-const integrationContextPublish=createIntegrationContextPublishService({adapters});
+const gateway=createFoundationGateway({adapters} as any);
+const identityClaim=createIdentityClaimService({adapters} as any);
+const grantConsent=createGrantConsentService({adapters} as any);
+const grantRevocation=createGrantRevocationService({adapters} as any);
+const revocationFeed=createRevocationFeedService({adapters} as any);
+const revocationAck=createRevocationAckService({adapters} as any);
+const revocationHealth=createRevocationHealthService({adapters} as any);
+const appOperationalStatus=createAppOperationalStatusService({adapters} as any);
+const capabilityDiscovery=createCapabilityDiscoveryService({adapters} as any);
+const integrationClientStatus=createIntegrationClientStatusService({adapters} as any);
+const integrationLinkConsent=createIntegrationLinkConsentService({adapters} as any);
+const integrationCapabilityConsent=createIntegrationCapabilityConsentService({adapters} as any);
+const integrationGrantRevocation=createIntegrationGrantRevocationService({adapters} as any);
+const integrationLinkRevocation=createIntegrationLinkRevocationService({adapters} as any);
+const integrationGrantList=createIntegrationGrantListService({adapters} as any);
+const conciergePlan=createConciergePlanService({adapters} as any);
+const conciergeExecute=createConciergeExecuteService({adapters} as any);
+const integrationLinkRequest=createIntegrationLinkRequestService({adapters} as any);
+const integrationLinkApproval=createIntegrationLinkApprovalService({adapters} as any);
+const integrationLinkStatus=createIntegrationLinkStatusService({adapters} as any);
+const integrationLinkExchange=createIntegrationLinkExchangeService({adapters} as any);
+const integrationLinkPreview=createIntegrationLinkPreviewService({adapters} as any);
+const capabilityTicketRedeem=createCapabilityTicketRedeemService({adapters} as any);
+const integrationDelegationRefresh=createIntegrationDelegationRefreshService({adapters} as any);
+const connectedIntegrationList=createConnectedIntegrationListService({adapters} as any);
+const userIntegrationGrantRevocation=createUserGrantRevocationService({adapters} as any);
+const userIntegrationLinkRevocation=createUserLinkRevocationService({adapters} as any);
+const userAccessHistory=createUserAccessHistoryService({adapters} as any);
+const userAccessExplanation=createUserAccessExplanationService({adapters} as any);
+const userConciergeCancellation=createUserConciergeCancellationService({adapters} as any);
+const userConciergeJobs=createUserConciergeJobsService({adapters} as any);
+const conciergeRetry=createConciergeRetryService({adapters} as any);
+const conciergeFleetStatus=createConciergeFleetStatusService({adapters} as any);
+const integrationContextPublish=createIntegrationContextPublishService({adapters} as any);
 const defenceStatus=createPublicDefenceStatusService({
   ledger:defenceLedger,
   revocations:defenceRevocations
@@ -170,6 +170,6 @@ const handler=createFoundationHttpHandler({
     }
     return {appToken,sourceUserToken,targetJwt};
   }
-});
+} as any);
 
 Deno.serve((request:Request)=>handler(request));
