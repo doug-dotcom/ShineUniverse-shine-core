@@ -178,6 +178,10 @@ jobs:
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/deployment-reconciliation-inbox-v1.test.sql
       - name: Register deployment receipt ingest runtime
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/deployment-receipt-ingest-registration-v1.sql
+      - name: Apply deployment receipt publication attestation
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/deployment-receipt-publication-attestation-v1.sql
+      - name: Run deployment receipt publication attestation tests
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/deployment-receipt-publication-attestation-v1.test.sql
       - name: Apply Shine Defence Sentinel
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-sentinel-v1.sql
       - name: Run Shine Defence Sentinel acceptance tests
