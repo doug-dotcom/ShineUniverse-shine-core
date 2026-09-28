@@ -250,6 +250,10 @@ jobs:
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-readiness-dependency-proposal-v1.sql
       - name: Run Foundation readiness dependency proposal tests
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-readiness-dependency-proposal-v1.test.sql
+      - name: Apply Foundation readiness remediation handoffs
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-readiness-remediation-handoff-v1.sql
+      - name: Run Foundation readiness remediation handoff tests
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-readiness-remediation-handoff-v1.test.sql
       - name: Apply Shine Defence Sentinel
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-sentinel-v1.sql
       - name: Run Shine Defence Sentinel acceptance tests
