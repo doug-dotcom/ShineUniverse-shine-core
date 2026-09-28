@@ -124,7 +124,7 @@ Deno.serve(async(req:Request)=>{
     }
 
     const observedAt=new Date();
-    const validUntil=new Date(observedAt.getTime()+20*60*1000);
+    const validUntil=new Date(observedAt.getTime()+90*60*1000);
     let accepted=0;
 
     for(const observation of body.observations){
