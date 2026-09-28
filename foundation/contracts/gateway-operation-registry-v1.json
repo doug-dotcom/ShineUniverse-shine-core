@@ -444,6 +444,17 @@
       "controlRef": "foundation.publish_integration_context_snapshot_v1"
     },
     {
+      "routeSymbol": "atlasFeedPublishAdmitPath",
+      "method": "POST",
+      "path": "/v1/atlas-feed/publish/admit",
+      "operationKey": "atlas-feed.publish.admit",
+      "riskClass": "context-write",
+      "effectClass": "execute",
+      "authClass": "app-or-user+app",
+      "controlMode": "service-guard",
+      "controlRef": "atlas-feed.publisher-admission-v1"
+    },
+    {
       "routeSymbol": "defenceStatusMatch",
       "method": "GET",
       "path": "/v1/defence/status/:appId",
