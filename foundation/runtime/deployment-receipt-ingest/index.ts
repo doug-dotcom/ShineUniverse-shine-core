@@ -140,20 +140,20 @@ Deno.serve(async(req:Request)=>{
       return jsonResponse(400,{error:'invalid-deployment-receipt'});
     }
 
-    const rows=await sql\`
+    const rows=await sql`
       select foundation.submit_service_deployment_receipt_v1(
         'foundation.gateway',
         'production',
         'supabase-edge',
         'supabase://sjpxqeyewahraxvidvcc/functions/foundation-gateway',
-        \${receipt.runtimeVersion},
-        \${String(receipt.artifactSha256).toLowerCase()},
-        \${receipt.runtimeState},
-        \${'github://doug-dotcom/ShineUniverse-shine-core/commit/'+String(receipt.sourceCommit).toLowerCase()},
-        \${receipt.providerEvidenceRef},
-        \${new Date(receipt.providerObservedAt).toISOString()}::timestamptz,
+        ${receipt.runtimeVersion},
+        ${String(receipt.artifactSha256).toLowerCase()},
+        ${receipt.runtimeState},
+        ${'github://doug-dotcom/ShineUniverse-shine-core/commit/'+String(receipt.sourceCommit).toLowerCase()},
+        ${receipt.providerEvidenceRef},
+        ${new Date(receipt.providerObservedAt).toISOString()}::timestamptz,
         'github-actions-oidc',
-        \${sql.json({
+        ${sql.json({
           transport:'github-oidc',
           githubRunId:identity.runId,
           githubRunAttempt:identity.runAttempt,
@@ -166,16 +166,16 @@ Deno.serve(async(req:Request)=>{
           rollback:receipt.rollback
         })}
       ) as result
-    \`;
+    `;
 
     const result=rows[0]?.result??null;
     if(!result) return jsonResponse(500,{error:'deployment-receipt-result-missing'});
 
-    const statusRows=await sql\`
+    const statusRows=await sql`
       select foundation.get_deployment_reconciliation_status_v1(
         'foundation.gateway','production'
       ) as status
-    \`;
+    `;
 
     return jsonResponse(200,{
       status:'accepted',
