@@ -300,6 +300,9 @@ begin
     count(*) filter (
       where r.timed_out
          or r.error_message is not null
+         or r.http_status is null
+         or r.http_status < 200
+         or r.http_status >= 400
          or (r.http_status between 200 and 299 and not r.contract_ok)
     )::integer,
     max(r.result_sequence)
