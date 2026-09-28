@@ -121,7 +121,45 @@ end;
 $$;
 
 
-do $$
+do $
+declare
+  v_audit uuid := '29000000-0000-4000-8000-000000000004';
+  v_result jsonb;
+  v_state text;
+begin
+  -- Canonical policy evidence must remain recordable even when the Edge driver
+  -- omits or loses the optional policy snapshot. The recorder recomputes it
+  -- authoritatively from route + timestamp.
+  select foundation.record_gateway_operation_audit_event_v1(
+    v_audit,
+    'policy',
+    'POST',
+    '/v1/grants/consent',
+    'production',
+    null,
+    null,
+    null,
+    null,
+    now()
+  ) into v_result;
+
+  if v_result->>'status' <> 'recorded' then
+    raise exception 'authoritative policy fallback should record: %',v_result;
+  end if;
+
+  select policy_state into v_state
+  from foundation.gateway_operation_audit_events
+  where operation_audit_id=v_audit
+    and phase='policy';
+
+  if v_state not in ('admit','admit-degraded','deny','unavailable') then
+    raise exception 'authoritative policy fallback should resolve a real policy state: %',v_state;
+  end if;
+end;
+$;
+
+
+do $
 declare
   v_audit uuid := '29000000-0000-4000-8000-000000000002';
 begin
