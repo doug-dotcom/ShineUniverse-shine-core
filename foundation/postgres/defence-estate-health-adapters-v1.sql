@@ -246,7 +246,7 @@ begin
   end if;
 
   if p_response_mode='text_exact' then
-    return btrim(p_response_content)=p_expected_text;
+    return btrim(p_response_content, E' \\t\\r\\n')=p_expected_text;
   end if;
 
   if p_response_mode='json_contains' then
