@@ -2,9 +2,8 @@ import postgres from 'npm:postgres@3.4.9';
 
 const AUDIENCE='shine-defence-release-head';
 const EXPECTED_ISSUER='https://token.actions.githubusercontent.com';
-const EXPECTED_REPOSITORY='doug-dotcom/ShineUniverse-shine-core';
-const EXPECTED_REF='refs/heads/main';
-const EXPECTED_WORKFLOW_REF='doug-dotcom/ShineUniverse-shine-core/.github/workflows/shine-defence-release-head.yml@refs/heads/main';
+const EXPECTED_WORKFLOW_PATH='.github/workflows/shine-defence-release-head.yml';
+const EXPECTED_WORKFLOW_BRANCH='main';
 const MAX_BODY_BYTES=96*1024;
 const MAX_OBSERVATIONS=50;
 const encoder=new TextEncoder();
@@ -83,16 +82,18 @@ async function verifyGithubOidc(token:string){
   if(!aud.includes(AUDIENCE)) throw new Error('OIDC audience mismatch');
   if(typeof payload.exp!=='number'||payload.exp<now-30) throw new Error('OIDC token expired');
   if(typeof payload.nbf==='number'&&payload.nbf>now+30) throw new Error('OIDC token not active');
-  if(payload.repository!==EXPECTED_REPOSITORY) throw new Error('OIDC repository mismatch');
-  if(payload.ref!==EXPECTED_REF) throw new Error('OIDC ref mismatch');
-  if(payload.workflow_ref!==EXPECTED_WORKFLOW_REF) throw new Error('OIDC workflow mismatch');
+  if(!repository(payload.repository)) throw new Error('OIDC repository claim invalid');
+  if(!clean(payload.ref,256)||!clean(payload.workflow_ref,1024)) throw new Error('OIDC workflow claims missing');
   if(!['schedule','workflow_dispatch','push'].includes(String(payload.event_name))) throw new Error('OIDC event not allowed');
 
   return {
     runId:String(payload.run_id??''),
     runAttempt:String(payload.run_attempt??''),
     eventName:String(payload.event_name),
-    actor:String(payload.actor??'')
+    actor:String(payload.actor??''),
+    repository:String(payload.repository),
+    ref:String(payload.ref),
+    workflowRef:String(payload.workflow_ref)
   };
 }
 
@@ -118,7 +119,7 @@ Deno.serve(async(req:Request)=>{
     if(body?.contract!=='shine-defence/release-head-snapshot-v1'||body?.schemaVersion!=='1.0.0'){
       return jsonResponse(400,{error:'unsupported-release-head-snapshot'});
     }
-    if(!Array.isArray(body.observations)||body.observations.length>MAX_OBSERVATIONS){
+    if(!Array.isArray(body.observations)||body.observations.length!==1){
       return jsonResponse(400,{error:'invalid-observation-count'});
     }
 
@@ -127,6 +128,33 @@ Deno.serve(async(req:Request)=>{
     let accepted=0;
 
     for(const observation of body.observations){
+      const targetRows=await sql`
+        select
+          provider,
+          metadata->>'sourceRepository' as source_repository,
+          metadata->>'sourceBranch' as source_branch
+        from foundation.defence_estate_targets
+        where target_id=${observation?.targetId}
+          and lifecycle='active'
+      `;
+      const target=targetRows[0];
+      if(!target||target.provider!=='railway'){
+        return jsonResponse(400,{error:'release-head-target-not-allowed'});
+      }
+
+      const expectedWorkflowRef=
+        identity.repository+'/'+EXPECTED_WORKFLOW_PATH+'@refs/heads/'+EXPECTED_WORKFLOW_BRANCH;
+
+      if(
+        identity.ref!=='refs/heads/'+EXPECTED_WORKFLOW_BRANCH||
+        identity.workflowRef!==expectedWorkflowRef||
+        String(identity.repository).toLowerCase()!==String(target.source_repository??'').toLowerCase()||
+        String(observation?.repository??'').toLowerCase()!==String(identity.repository).toLowerCase()||
+        String(observation?.branch??'')!==String(target.source_branch??'')
+      ){
+        return jsonResponse(401,{error:'release-head-oidc-source-mismatch'});
+      }
+
       if(
         !targetId(observation?.targetId)||
         !repository(observation?.repository)||
@@ -162,7 +190,10 @@ Deno.serve(async(req:Request)=>{
             githubRunId:identity.runId,
             githubRunAttempt:identity.runAttempt,
             githubEvent:identity.eventName,
-            githubActor:identity.actor
+            githubActor:identity.actor,
+            githubRepository:identity.repository,
+            githubRef:identity.ref,
+            githubWorkflowRef:identity.workflowRef
           })}
         ) as result
       `;
