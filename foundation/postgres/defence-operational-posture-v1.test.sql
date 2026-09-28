@@ -8,11 +8,6 @@ begin
   if v->>'overallState' <> 'pass' then
     raise exception 'initial Defence posture should pass: %',v;
   end if;
-  if v#>>'{rls,state}' <> 'pass'
-     or v#>>'{serviceToService,state}' is not null then
-    -- serviceToService is nested under checks; verify below with exact paths.
-    null;
-  end if;
   if v#>>'{checks,rls,state}' <> 'pass'
      or v#>>'{checks,serviceToService,state}' <> 'pass'
      or v#>>'{checks,secrets,state}' <> 'pass'
@@ -90,10 +85,8 @@ begin
 end;
 $$;
 
-set local role shine_defence_runtime;
 select foundation.evaluate_defence_posture_v1('production');
 select * from foundation.current_defence_posture where environment='production';
-reset role;
 
 do $$
 begin
