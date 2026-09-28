@@ -331,6 +331,9 @@ begin
     v_reason := 'remediation-approval-integrity-failed';
   elsif v_consumption.event_id is null then
     v_reason := 'remediation-approval-not-consumed';
+  elsif p_requested_at<v_receipt.approved_at
+     or p_requested_at<v_consumption.occurred_at then
+    v_reason := 'remediation-execution-admission-not-yet-valid';
   elsif v_receipt.expires_at<=p_requested_at then
     v_reason := 'remediation-approval-expired';
   elsif v_receipt.action_key is distinct from p_action_key then
@@ -387,7 +390,7 @@ begin
     )
     values (
       p_event_id,null,v_receipt.receipt_id,'denied',v_reason,
-      p_action_key,p_incident_event_id,v_live_fingerprint,
+      p_action_key,p_incident_event_id,nullif(v_live_fingerprint,''),
       v_live_release_ref,lower(p_proposal_sha256),p_requested_at
     );
 
