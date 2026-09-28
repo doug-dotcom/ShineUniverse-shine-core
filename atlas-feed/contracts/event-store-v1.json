@@ -45,14 +45,13 @@
     "rlsEnabled": true,
     "anonAccess": false,
     "authenticatedAccess": false,
-    "gatewayAccess": [
-      "select",
-      "insert"
-    ],
     "updateAllowed": false,
     "deleteAllowed": false,
     "realtimePublished": false,
-    "consumerReadApiDefined": false
+    "consumerReadApiDefined": false,
+    "gatewayDirectTableAccess": false,
+    "gatewayWriteAuthority": "foundation.persist_atlas_feed_event_v1",
+    "gatewayFunctionExecuteOnly": true
   },
   "responses": {
     "statusValues": [
