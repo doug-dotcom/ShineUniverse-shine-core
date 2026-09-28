@@ -1,0 +1,51 @@
+{
+  "deploymentTruthContract": "shine-foundation/deployment-truth-v1",
+  "schemaVersion": "1.0.0",
+  "reader": "foundation.get_service_deployment_truth_v1(text,text)",
+  "purpose": "Provide one canonical answer for what Foundation expects to be deployed, what the runtime actually reports, and whether those states agree.",
+  "truthStates": {
+    "aligned": "A current expectation and observation exist and every pinned deployment field matches.",
+    "drift": "A current expectation and observation exist but at least one pinned deployment field differs.",
+    "unknown": "Foundation lacks either the service identity, expected state or observed state needed to make a deployment comparison."
+  },
+  "healthStates": [
+    "healthy",
+    "degraded",
+    "unhealthy",
+    "unknown"
+  ],
+  "principles": {
+    "expectedAndObservedAreSeparate": true,
+    "runtimeActiveDoesNotMeanHealthy": true,
+    "missingEvidenceReturnsUnknown": true,
+    "observationsAreAppendOnly": true,
+    "expectationsAreAppendOnly": true,
+    "noPublicDatabaseAccess": true
+  },
+  "responseFields": [
+    "deploymentTruthResponse",
+    "schemaVersion",
+    "serviceId",
+    "displayName",
+    "ownerComponent",
+    "serviceKind",
+    "contractRef",
+    "requiredForCore",
+    "lifecycle",
+    "environment",
+    "truthState",
+    "healthState",
+    "reasonCodes",
+    "expected",
+    "observed"
+  ],
+  "reasonCodes": [
+    "unknown-service",
+    "missing-expectation",
+    "missing-observation",
+    "runtime-ref-mismatch",
+    "version-mismatch",
+    "artifact-mismatch",
+    "runtime-state-mismatch"
+  ]
+}
