@@ -16,6 +16,7 @@ jobs:
           node-version: '22'
       - run: node security/shine-defence/integration-kit/verify-registry-v1.mjs
       - run: node security/shine-defence/integration-kit/foundation-runtime-inspector-v1.mjs --json
+      - run: node security/shine-defence/integration-kit/reattest-foundation-runtime-v1.mjs --repo-root . --output /tmp/reattest.json --report-output /tmp/reattest-report.json --service foundation.gateway --environment production --artifact aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa --source-commit ${{ github.sha }} --policy-commit ${{ github.sha }}
       - run: node security/shine-defence/integration-kit/estate-provider-collector-v1.mjs --validate-only
       - run: node security/shine-defence/integration-kit/estate-provider-collector-v1.mjs --self-test
       - run: node security/shine-defence/integration-kit/verify-ecosystem-ledger-v1.mjs
