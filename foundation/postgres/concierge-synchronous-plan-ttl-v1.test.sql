@@ -9,7 +9,9 @@ begin
   limit 1;
 
   if fn is null
-     or position('interval ''1 hour''' in fn)=0
+     or position('p_min_age' in fn)=0
+     or position('30 minutes' in fn)=0
+     or position('24 hours' in fn)=0
      or position('concierge_execution_events' in fn)=0
      or position('concierge_step_checkpoints' in fn)=0
      or position('concierge_retry_jobs' in fn)=0 then
