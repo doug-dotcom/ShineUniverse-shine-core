@@ -108,14 +108,17 @@ begin
   end if;
 
   e := jsonb_set(e,'{payload,state}','"red"'::jsonb);
+  r := r || jsonb_build_object(
+    'requestId','55555555-5555-4555-8555-555555555555',
+    'receiptId','66666666-6666-4666-8666-666666666666',
+    'persistedAt','2026-09-28T10:00:01Z',
+    'eventSha256',repeat('e',64),
+    'payloadSha256',repeat('f',64)
+  );
   select foundation.persist_atlas_feed_event_v1(
     '55555555-5555-4555-8555-555555555555',
     e,a,repeat('e',64),repeat('f',64),15,
-    jsonb_set(
-      jsonb_set(r,'{requestId}','"55555555-5555-4555-8555-555555555555"'::jsonb),
-      '{receiptId}','"66666666-6666-4666-8666-666666666666"'::jsonb
-    ),
-    repeat('1',64),'2026-09-28T10:00:01Z'
+    r,repeat('1',64),'2026-09-28T10:00:01Z'
   ) into out3;
 
   if out3->>'outcome'<>'conflict'
