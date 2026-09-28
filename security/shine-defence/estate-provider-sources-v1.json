@@ -1,0 +1,142 @@
+{
+  "contract": "shine-defence/estate-provider-sources-v1",
+  "version": "1.0.0",
+  "meaning": "Non-secret provider bindings for estate-wide runtime/deployment collection. Secrets remain runner-owned.",
+  "sources": [
+    {
+      "targetId": "supabase:sjpxqeyewahraxvidvcc",
+      "provider": "supabase",
+      "projectRef": "sjpxqeyewahraxvidvcc",
+      "projectName": "Shine Foundation"
+    },
+    {
+      "targetId": "supabase:raxfwycrnviwxxzykhfq",
+      "provider": "supabase",
+      "projectRef": "raxfwycrnviwxxzykhfq",
+      "projectName": "Shine-L"
+    },
+    {
+      "targetId": "supabase:isluulaquwvtzlwkakyq",
+      "provider": "supabase",
+      "projectRef": "isluulaquwvtzlwkakyq",
+      "projectName": "Shine Recovery Companion"
+    },
+    {
+      "targetId": "supabase:lqicznkysqqxbrmtxmms",
+      "provider": "supabase",
+      "projectRef": "lqicznkysqqxbrmtxmms",
+      "projectName": "Shine Dive"
+    },
+    {
+      "targetId": "supabase:ojpfpgikbqzsmuukljad",
+      "provider": "supabase",
+      "projectRef": "ojpfpgikbqzsmuukljad",
+      "projectName": "Shine Fish Oracle"
+    },
+    {
+      "targetId": "supabase:kkdgibknfcnoyondnmdb",
+      "provider": "supabase",
+      "projectRef": "kkdgibknfcnoyondnmdb",
+      "projectName": "Shine My Money"
+    },
+    {
+      "targetId": "railway:daash",
+      "provider": "railway",
+      "projectId": "b0e8a4e4-f4ae-4bfd-aa0d-2b34fb8211d2",
+      "environmentId": "3f6f6eab-daac-4da7-9a1d-caaa24dccd01",
+      "serviceId": "e39219ad-cd27-47f8-a6c9-687181113240"
+    },
+    {
+      "targetId": "railway:dive",
+      "provider": "railway",
+      "projectId": "341772f7-a30d-4feb-b4da-2360717c1ca9",
+      "environmentId": "600fe8df-cc75-461c-b8bd-049bd28f0fc1",
+      "serviceId": "f922c795-ee8f-4a4a-92a6-7770ae06cc0a"
+    },
+    {
+      "targetId": "railway:dnd",
+      "provider": "railway",
+      "projectId": "311a5dad-75cb-462b-b503-f05a4109e8d7",
+      "environmentId": "8cc14012-7bf7-48fd-a647-747bb70584d4",
+      "serviceId": "68087e56-6908-4565-81a6-281b2ae6befe",
+      "sleepAllowed": true
+    },
+    {
+      "targetId": "railway:fiona",
+      "provider": "railway",
+      "projectId": "72648456-7ccf-4c6b-ac73-b63aaf7caffa",
+      "environmentId": "0bcb521a-69c0-448a-8066-442ba0a01ba1",
+      "serviceId": "60f991cd-0a34-47ee-998b-4df9b64fbe18"
+    },
+    {
+      "targetId": "railway:fish",
+      "provider": "railway",
+      "projectId": "81486445-2331-46db-b8f1-35e73158853d",
+      "environmentId": "207210fb-694b-493a-aa02-cc607d72c5e4",
+      "serviceId": "2282f233-7e57-4d67-b02a-403968deb390"
+    },
+    {
+      "targetId": "railway:my-money",
+      "provider": "railway",
+      "projectId": "406a2f6d-4542-470a-a6e8-59980f4b5500",
+      "environmentId": "294a94be-dbf4-4b2e-a6b4-afc5bdc5c304",
+      "serviceId": "14f11970-0e22-4f18-a4e0-9fb4b84bbf01"
+    },
+    {
+      "targetId": "railway:project-l",
+      "provider": "railway",
+      "projectId": "72648456-7ccf-4c6b-ac73-b63aaf7caffa",
+      "environmentId": "0bcb521a-69c0-448a-8066-442ba0a01ba1",
+      "serviceId": "0edbbc64-5cb5-46b5-b818-2f938196c2a1"
+    },
+    {
+      "targetId": "railway:punt49",
+      "provider": "railway",
+      "projectId": "72648456-7ccf-4c6b-ac73-b63aaf7caffa",
+      "environmentId": "0bcb521a-69c0-448a-8066-442ba0a01ba1",
+      "serviceId": "af90b122-ef51-402c-8de3-5239926da9ae"
+    },
+    {
+      "targetId": "railway:recovery-companion",
+      "provider": "railway",
+      "projectId": "6b2a1fdf-6908-4b6a-a18a-3f1f50724497",
+      "environmentId": "822c00e0-0969-4dc2-8c88-2c893c2549b9",
+      "serviceId": "1cd8f81c-6f65-4b71-91cb-de2df70eb41f"
+    },
+    {
+      "targetId": "railway:rivers",
+      "provider": "railway",
+      "projectId": "3dba2137-071a-4fcd-8b8d-b83b1a4615ca",
+      "environmentId": "287d1d11-6b96-46c1-8869-1b70a8e30952",
+      "serviceId": "537fb21b-a230-46b5-a7c6-8a437750bd5f"
+    },
+    {
+      "targetId": "railway:shine-ai",
+      "provider": "railway",
+      "projectId": "72648456-7ccf-4c6b-ac73-b63aaf7caffa",
+      "environmentId": "0bcb521a-69c0-448a-8066-442ba0a01ba1",
+      "serviceId": "18cd334c-5e66-4221-915e-f7c2cfdb7ef7"
+    },
+    {
+      "targetId": "railway:ski",
+      "provider": "railway",
+      "projectId": "4514424e-1378-4ea7-b13f-fdacce5195ee",
+      "environmentId": "146dbf93-17ad-47de-8d12-bda33206c4bb",
+      "serviceId": "85991136-5c38-443a-a476-848bda7c184e"
+    },
+    {
+      "targetId": "railway:translate",
+      "provider": "railway",
+      "projectId": "c30e131d-5336-4a3d-a2ca-e2f6337bb5e5",
+      "environmentId": "8ae2870b-7182-4ae0-a13a-2de9309d5e23",
+      "serviceId": "c0e989de-85fb-44d5-b966-a3bdbba60393"
+    },
+    {
+      "targetId": "railway:travel",
+      "provider": "railway",
+      "projectId": "72648456-7ccf-4c6b-ac73-b63aaf7caffa",
+      "environmentId": "0bcb521a-69c0-448a-8066-442ba0a01ba1",
+      "serviceId": "d47224cf-e8db-4aea-8de7-d3ccb588cf5b"
+    }
+  ]
+}
