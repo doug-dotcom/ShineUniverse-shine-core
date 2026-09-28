@@ -382,3 +382,54 @@ export function createConciergeExecuteService({adapters,clock=()=>new Date().toI
     });
   };
 }
+
+
+export function createConciergeSupersedeService({adapters,clock=()=>new Date().toISOString(),idFactory=()=>crypto.randomUUID()}={}){
+  for(const n of [
+    'verifyIntegrationClient','verifyIntegrationIdentity','verifyIntegrationDelegation',
+    'cancelConciergeRequest'
+  ]) requireAdapter(adapters,n);
+
+  return async function handle({envelope,authContext}={}){
+    const kind='shine-concierge/supersede-response-v1';
+    if(!envelope||envelope.conciergeSupersede!=='shine-concierge/supersede-v1'||
+       envelope.schemaVersion!=='1.0.0'||!UUID.test(envelope.requestId??'')||
+       !UUID.test(envelope.supersededByRequestId??'')||
+       envelope.requestId===envelope.supersededByRequestId||
+       !CLIENT.test(envelope.clientId??'')||
+       !fresh(envelope.requestedAt,clock)){
+      return response(kind,envelope,'invalid','invalid-concierge-supersede-request');
+    }
+
+    let verified;
+    try{verified=await verifyPair(adapters,authContext,envelope.clientId)}
+    catch{return response(kind,envelope,'unavailable','foundation-dependency-unavailable')}
+    if(verified.error) return response(kind,envelope,'denied',verified.error);
+
+    try{
+      const result=await adapters.cancelConciergeRequest({
+        eventId:idFactory(),
+        requestId:envelope.requestId,
+        ownerShineId:verified.identity.shineId,
+        clientId:envelope.clientId,
+        reasonCode:'superseded-by-newer-request',
+        occurredAt:clock()
+      });
+      if(!result?.status) return response(kind,envelope,'unavailable','concierge-supersede-write-failed');
+      const status=result.status==='cancelled'?'superseded':
+        result.status==='already-cancelled'?'already-superseded':
+        result.status;
+      return response(kind,envelope,status,result.reasonCode??'superseded-by-newer-request',{
+        supersededRequestId:envelope.requestId,
+        supersededByRequestId:envelope.supersededByRequestId,
+        cancelledAt:result.cancelledAt??null
+      });
+    }catch(error){
+      const message=String(error?.message??'');
+      if(message.includes('not-found')) return response(kind,envelope,'invalid','concierge-request-not-found');
+      if(message.includes('owner-mismatch')) return response(kind,envelope,'denied','concierge-request-owner-mismatch');
+      if(message.includes('client-mismatch')) return response(kind,envelope,'denied','concierge-request-client-mismatch');
+      return response(kind,envelope,'unavailable','concierge-supersede-write-failed');
+    }
+  };
+}
