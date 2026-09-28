@@ -33,6 +33,7 @@ jobs:
       - run: deno check security/shine-defence/runtime-receipts/supabase-v1/index.ts
       - run: deno check foundation/runtime/defence-railway-events/index.ts
       - run: deno check foundation/runtime/defence-release-head-ingest/index.ts
+      - run: deno check foundation/runtime/defence-rollback-readiness/index.ts
 
   persistence:
     runs-on: ubuntu-latest
@@ -222,6 +223,10 @@ jobs:
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-release-admission-v1.sql
       - name: Run Shine Defence release admission acceptance tests
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-release-admission-v1.test.sql
+      - name: Apply Shine Defence rollback readiness
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-rollback-readiness-v1.sql
+      - name: Run Shine Defence rollback readiness acceptance tests
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-rollback-readiness-v1.test.sql
       - name: Apply Shine Defence release admission canonical bootstrap
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-release-admission-bootstrap-v1.sql
       - name: Run Shine Defence release admission canonical bootstrap acceptance tests
