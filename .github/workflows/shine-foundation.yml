@@ -33,6 +33,7 @@ jobs:
       - run: deno check security/shine-defence/runtime-receipts/supabase-v1/index.ts
       - run: deno check foundation/runtime/defence-railway-events/index.ts
       - run: deno check foundation/runtime/defence-release-head-ingest/index.ts
+      - run: deno check foundation/runtime/deployment-receipt-ingest/index.ts
       - run: deno check foundation/runtime/defence-rollback-readiness/index.ts
 
   persistence:
@@ -175,6 +176,8 @@ jobs:
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/deployment-reconciliation-inbox-v1.sql
       - name: Run deployment reconciliation acceptance tests
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/deployment-reconciliation-inbox-v1.test.sql
+      - name: Register deployment receipt ingest runtime
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/deployment-receipt-ingest-registration-v1.sql
       - name: Apply Shine Defence Sentinel
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-sentinel-v1.sql
       - name: Run Shine Defence Sentinel acceptance tests
