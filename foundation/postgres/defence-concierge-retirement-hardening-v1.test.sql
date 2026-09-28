@@ -59,6 +59,22 @@ begin
     raise exception 'list_user_concierge_jobs_v6 must not be public';
   end if;
 
+  if to_regprocedure('foundation.list_user_concierge_jobs_v7(uuid,integer,timestamptz,timestamptz)') is not null
+     and (
+       has_function_privilege('anon','foundation.list_user_concierge_jobs_v7(uuid,integer,timestamptz,timestamptz)','EXECUTE')
+       or has_function_privilege('authenticated','foundation.list_user_concierge_jobs_v7(uuid,integer,timestamptz,timestamptz)','EXECUTE')
+     ) then
+    raise exception 'list_user_concierge_jobs_v7 must not be public';
+  end if;
+
+  if to_regprocedure('foundation.list_user_concierge_jobs_v6(uuid,integer,timestamptz,timestamptz)') is not null
+     and (
+       has_function_privilege('anon','foundation.list_user_concierge_jobs_v6(uuid,integer,timestamptz,timestamptz)','EXECUTE')
+       or has_function_privilege('authenticated','foundation.list_user_concierge_jobs_v6(uuid,integer,timestamptz,timestamptz)','EXECUTE')
+     ) then
+    raise exception 'list_user_concierge_jobs_v6 must not be public';
+  end if;
+
   if to_regprocedure('foundation.retire_stale_concierge_requests_v1(timestamptz,interval,integer)') is not null
      and (
        has_function_privilege('anon','foundation.retire_stale_concierge_requests_v1(timestamptz,interval,integer)','EXECUTE')
