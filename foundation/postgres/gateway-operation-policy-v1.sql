@@ -70,7 +70,7 @@ to foundation_runtime
 using (true);
 
 revoke all on foundation.gateway_operation_policies from public,anon,authenticated;
-grant select on foundation.gateway_operation_policies to foundation_runtime,foundation_gateway;
+grant select on foundation.gateway_operation_policies to foundation_runtime;
 grant select,insert on foundation.gateway_operation_policies to service_role;
 
 create index gateway_operation_policies_current_idx
@@ -107,7 +107,7 @@ order by
   effective_at desc,recorded_at desc,operation_policy_id desc;
 
 revoke all on foundation.current_gateway_operation_policies from public,anon,authenticated;
-grant select on foundation.current_gateway_operation_policies to foundation_runtime,foundation_gateway;
+grant select on foundation.current_gateway_operation_policies to foundation_runtime;
 
 
 create or replace function foundation.evaluate_gateway_operation_policy_v1(
@@ -332,7 +332,7 @@ $$;
 revoke all on function foundation.get_gateway_operation_policy_coverage_v1(text)
   from public,anon,authenticated;
 grant execute on function foundation.get_gateway_operation_policy_coverage_v1(text)
-  to foundation_runtime,foundation_gateway;
+  to foundation_runtime;
 
 
 -- Add scope-aware Defence guard edges. The existing protected-operations edge remains valid.
