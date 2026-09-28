@@ -92,6 +92,9 @@ export function createFoundationHttpHandler({
   integrationContextPublish,
   evaluateOperationPolicy,
   operationPolicyRequired=false,
+  recordOperationAudit,
+  operationAuditRequired=false,
+  operationAuditIdFactory=()=>crypto.randomUUID(),
   maxBodyBytes=16*1024
 }={}){
   if(typeof gateway!=='function') throw new TypeError('gateway must be a function');
@@ -119,6 +122,9 @@ export function createFoundationHttpHandler({
   if(conciergeSupersede!==undefined&&typeof conciergeSupersede!=='function') throw new TypeError('conciergeSupersede must be a function');
   if(evaluateOperationPolicy!==undefined&&typeof evaluateOperationPolicy!=='function') throw new TypeError('evaluateOperationPolicy must be a function');
   if(operationPolicyRequired&&typeof evaluateOperationPolicy!=='function') throw new TypeError('operation policy broker is required');
+  if(recordOperationAudit!==undefined&&typeof recordOperationAudit!=='function') throw new TypeError('recordOperationAudit must be a function');
+  if(operationAuditRequired&&typeof recordOperationAudit!=='function') throw new TypeError('operation audit recorder is required');
+  if(typeof operationAuditIdFactory!=='function') throw new TypeError('operationAuditIdFactory must be a function');
   if(conciergeRetry!==undefined&&(
     !conciergeRetry||
     typeof conciergeRetry.claim!=='function'||
@@ -128,70 +134,121 @@ export function createFoundationHttpHandler({
   return async function handle(request){
     const url=new URL(request.url);
 
+    let operationAuditContext=null;
+    const respond=async(status,body)=>{
+      if(operationAuditContext&&typeof recordOperationAudit==='function'){
+        const responseReasonCode=body&&typeof body==='object'
+          ?(body.reasonCode??body.error??null)
+          :null;
+        const domainRequestId=body&&typeof body==='object'
+          ?(body.requestId??body.traceId??null)
+          :null;
+        try{
+          await recordOperationAudit({
+            operationAuditId:operationAuditContext.operationAuditId,
+            phase:'outcome',
+            method:'POST',
+            path:url.pathname,
+            environment:'production',
+            httpStatus:status,
+            responseReasonCode,
+            domainRequestId:domainRequestId==null?null:String(domainRequestId),
+            occurredAt:new Date().toISOString()
+          });
+        }catch(error){
+          console.error('gateway operation outcome audit write failed',error);
+        }
+      }
+      return json(status,body);
+    };
+
     if(request.method==='POST'&&operationPolicyRequired){
       let policy;
+      const policyOccurredAt=new Date().toISOString();
       try{
         policy=await evaluateOperationPolicy({
           method:'POST',
           path:url.pathname,
           environment:'production',
-          asOf:new Date().toISOString()
+          asOf:policyOccurredAt
         });
       }catch{
-        return json(503,{error:'operation-policy-unavailable'});
+        return respond(503,{error:'operation-policy-unavailable'});
       }
 
       const policyState=policy?.policyState??'unavailable';
       const reasonCode=policy?.reasonCode??'operation-policy-unavailable';
 
+      if(!['not-required','not-registered'].includes(policyState)){
+        if(typeof recordOperationAudit==='function'){
+          const operationAuditId=operationAuditIdFactory();
+          try{
+            await recordOperationAudit({
+              operationAuditId,
+              phase:'policy',
+              method:'POST',
+              path:url.pathname,
+              environment:'production',
+              policy,
+              occurredAt:policyOccurredAt
+            });
+          }catch{
+            return json(503,{error:'operation-audit-unavailable'});
+          }
+          operationAuditContext={operationAuditId};
+        }else if(operationAuditRequired){
+          return json(503,{error:'operation-audit-unavailable'});
+        }
+      }
+
       if(policyState==='deny'){
-        return json(403,{error:'operation-policy-denied',reasonCode});
+        return respond(403,{error:'operation-policy-denied',reasonCode});
       }
 
       if(policyState==='unavailable'){
-        return json(503,{error:'operation-policy-unavailable',reasonCode});
+        return respond(503,{error:'operation-policy-unavailable',reasonCode});
       }
 
       if(!['admit','admit-degraded','worker-only','not-required','not-registered'].includes(policyState)){
-        return json(503,{error:'operation-policy-invalid',reasonCode});
+        return respond(503,{error:'operation-policy-invalid',reasonCode});
       }
     }
     if(request.method==='POST'&&capabilityTicketRedeemPath(url.pathname)){
-      if(typeof capabilityTicketRedeem!=='function') return json(404,{error:'not-found'});
+      if(typeof capabilityTicketRedeem!=='function') return respond(404,{error:'not-found'});
       const contentType=request.headers.get('content-type')??'';
       if(!contentType.toLowerCase().startsWith('application/json')){
-        return json(415,{error:'unsupported-media-type'});
+        return respond(415,{error:'unsupported-media-type'});
       }
       const declared=Number(request.headers.get('content-length'));
-      if(Number.isFinite(declared)&&declared>4096) return json(413,{error:'request-too-large'});
+      if(Number.isFinite(declared)&&declared>4096) return respond(413,{error:'request-too-large'});
       let envelope;
-      try{ envelope=await request.json(); }catch{ return json(400,{error:'invalid-json'}); }
+      try{ envelope=await request.json(); }catch{ return respond(400,{error:'invalid-json'}); }
       const result=await capabilityTicketRedeem({envelope});
       const status={allowed:200,denied:403,invalid:400,unavailable:503}[result.status]??500;
-      return json(status,result);
+      return respond(status,result);
     }
 
     if(request.method==='POST'&&integrationContextPublishPath(url.pathname)){
-      if(typeof integrationContextPublish!=='function'||typeof authenticateApp!=='function') return json(404,{error:'not-found'});
+      if(typeof integrationContextPublish!=='function'||typeof authenticateApp!=='function') return respond(404,{error:'not-found'});
       const contentType=request.headers.get('content-type')??'';
-      if(!contentType.toLowerCase().startsWith('application/json')) return json(415,{error:'unsupported-media-type'});
+      if(!contentType.toLowerCase().startsWith('application/json')) return respond(415,{error:'unsupported-media-type'});
       const limit=1152*1024;
       const declared=Number(request.headers.get('content-length'));
-      if(Number.isFinite(declared)&&declared>limit) return json(413,{error:'request-too-large'});
+      if(Number.isFinite(declared)&&declared>limit) return respond(413,{error:'request-too-large'});
       let raw;
-      try{raw=await request.text()}catch{return json(400,{error:'invalid-body'})}
-      if(new TextEncoder().encode(raw).byteLength>limit) return json(413,{error:'request-too-large'});
+      try{raw=await request.text()}catch{return respond(400,{error:'invalid-body'})}
+      if(new TextEncoder().encode(raw).byteLength>limit) return respond(413,{error:'request-too-large'});
       let envelope;
-      try{envelope=JSON.parse(raw)}catch{return json(400,{error:'invalid-json'})}
+      try{envelope=JSON.parse(raw)}catch{return respond(400,{error:'invalid-json'})}
       let authContext;
-      try{authContext=await authenticateApp(request)}catch{return json(401,{error:'unauthenticated'})}
+      try{authContext=await authenticateApp(request)}catch{return respond(401,{error:'unauthenticated'})}
       const result=await integrationContextPublish({envelope,authContext});
       const status={published:200,'already-published':200,denied:403,invalid:400,unavailable:503}[result.status]??500;
-      return json(status,result);
+      return respond(status,result);
     }
 
     if(request.method==='GET'&&integrationProtocolPath(url.pathname)){
-      return json(200,{
+      return respond(200,{
         protocol:'shine-foundation/open-integration-v1',
         schemaVersion:'1.0.0',
         companionAgnostic:true,
@@ -289,189 +346,189 @@ export function createFoundationHttpHandler({
     }
 
     if(request.method==='GET'&&healthPath(url.pathname)){
-      return json(200,{service:'shine-foundation-gateway',status:'ok',schemaVersion:'1.0.0'});
+      return respond(200,{service:'shine-foundation-gateway',status:'ok',schemaVersion:'1.0.0'});
     }
 
     if(request.method==='GET'&&capabilityDiscoveryPath(url.pathname)){
-      if(typeof capabilityDiscovery!=='function') return json(404,{error:'not-found'});
+      if(typeof capabilityDiscovery!=='function') return respond(404,{error:'not-found'});
       const appId=url.searchParams.get('appId')||null;
       const result=await capabilityDiscovery({appId});
       const status={ok:200,invalid:400,unavailable:503}[result.status]??500;
-      return json(status,result);
+      return respond(status,result);
     }
 
     if(request.method==='GET'&&integrationClientStatusPath(url.pathname)){
       if(typeof integrationClientStatus!=='function'||typeof authenticateIntegrationClient!=='function'){
-        return json(404,{error:'not-found'});
+        return respond(404,{error:'not-found'});
       }
       const clientId=url.searchParams.get('clientId')??'';
       let authContext;
-      try{authContext=await authenticateIntegrationClient(request)}catch{return json(401,{error:'unauthenticated'})}
+      try{authContext=await authenticateIntegrationClient(request)}catch{return respond(401,{error:'unauthenticated'})}
       const result=await integrationClientStatus({clientId,authContext});
       const status={ok:200,denied:403,invalid:400,unavailable:503}[result.status]??500;
-      return json(status,result);
+      return respond(status,result);
     }
 
     if(request.method==='GET'&&conciergeFleetStatusPath(url.pathname)){
       if(typeof conciergeFleetStatus!=='function'||typeof authenticateIntegrationUserAndClient!=='function'){
-        return json(404,{error:'not-found'});
+        return respond(404,{error:'not-found'});
       }
       const clientId=url.searchParams.get('clientId')??'';
       const purpose=url.searchParams.get('purpose')??'concierge.cross-project-read';
       let authContext;
-      try{authContext=await authenticateIntegrationUserAndClient(request)}catch{return json(401,{error:'unauthenticated'})}
+      try{authContext=await authenticateIntegrationUserAndClient(request)}catch{return respond(401,{error:'unauthenticated'})}
       const result=await conciergeFleetStatus({clientId,purpose,authContext});
       const status={ok:200,denied:403,invalid:400,unavailable:503}[result.status]??500;
-      return json(status,result);
+      return respond(status,result);
     }
 
     if(request.method==='GET'&&userConciergeJobsPath(url.pathname)){
       if(typeof userConciergeJobs!=='function'||typeof authenticateIntegrationUser!=='function'){
-        return json(404,{error:'not-found'});
+        return respond(404,{error:'not-found'});
       }
       let authContext;
-      try{authContext=await authenticateIntegrationUser(request)}catch{return json(401,{error:'unauthenticated'})}
+      try{authContext=await authenticateIntegrationUser(request)}catch{return respond(401,{error:'unauthenticated'})}
       const result=await userConciergeJobs({
         limit:url.searchParams.get('limit')??'50',
         before:url.searchParams.get('before')||null,
         authContext
       });
       const status={ok:200,denied:403,invalid:400,unavailable:503}[result.status]??500;
-      return json(status,result);
+      return respond(status,result);
     }
 
     if(request.method==='GET'&&userAccessExplanationPath(url.pathname)){
       if(typeof userAccessExplanation!=='function'||typeof authenticateIntegrationUser!=='function'){
-        return json(404,{error:'not-found'});
+        return respond(404,{error:'not-found'});
       }
       let authContext;
-      try{authContext=await authenticateIntegrationUser(request)}catch{return json(401,{error:'unauthenticated'})}
+      try{authContext=await authenticateIntegrationUser(request)}catch{return respond(401,{error:'unauthenticated'})}
       const result=await userAccessExplanation({
         accessId:url.searchParams.get('accessId')??'',authContext
       });
       const status={ok:200,denied:403,invalid:400,unavailable:503}[result.status]??500;
-      return json(status,result);
+      return respond(status,result);
     }
 
     if(request.method==='GET'&&userAccessHistoryPath(url.pathname)){
       if(typeof userAccessHistory!=='function'||typeof authenticateIntegrationUser!=='function'){
-        return json(404,{error:'not-found'});
+        return respond(404,{error:'not-found'});
       }
       let authContext;
-      try{authContext=await authenticateIntegrationUser(request)}catch{return json(401,{error:'unauthenticated'})}
+      try{authContext=await authenticateIntegrationUser(request)}catch{return respond(401,{error:'unauthenticated'})}
       const result=await userAccessHistory({
         limit:url.searchParams.get('limit')??'50',
         before:url.searchParams.get('before')||null,
         authContext
       });
       const status={ok:200,denied:403,invalid:400,unavailable:503}[result.status]??500;
-      return json(status,result);
+      return respond(status,result);
     }
 
     if(request.method==='GET'&&connectedIntegrationsPath(url.pathname)){
       if(typeof connectedIntegrationList!=='function'||typeof authenticateIntegrationUser!=='function'){
-        return json(404,{error:'not-found'});
+        return respond(404,{error:'not-found'});
       }
       let authContext;
-      try{authContext=await authenticateIntegrationUser(request)}catch{return json(401,{error:'unauthenticated'})}
+      try{authContext=await authenticateIntegrationUser(request)}catch{return respond(401,{error:'unauthenticated'})}
       const result=await connectedIntegrationList({authContext});
       const status={ok:200,denied:403,unavailable:503}[result.status]??500;
-      return json(status,result);
+      return respond(status,result);
     }
 
     if(request.method==='GET'&&integrationDeviceLinkPreviewPath(url.pathname)){
       if(typeof integrationLinkPreview!=='function'||typeof authenticateIntegrationUser!=='function'){
-        return json(404,{error:'not-found'});
+        return respond(404,{error:'not-found'});
       }
       const userCode=url.searchParams.get('code')??'';
       let authContext;
-      try{authContext=await authenticateIntegrationUser(request)}catch{return json(401,{error:'unauthenticated'})}
+      try{authContext=await authenticateIntegrationUser(request)}catch{return respond(401,{error:'unauthenticated'})}
       const result=await integrationLinkPreview({userCode,authContext});
       const status={ok:200,denied:403,invalid:400,unavailable:503}[result.status]??500;
-      return json(status,result);
+      return respond(status,result);
     }
 
     if(request.method==='GET'&&integrationDeviceLinkStatusPath(url.pathname)){
       if(typeof integrationLinkStatus!=='function'||typeof authenticateIntegrationClient!=='function'){
-        return json(404,{error:'not-found'});
+        return respond(404,{error:'not-found'});
       }
       const requestId=url.searchParams.get('requestId')??'';
       const clientId=url.searchParams.get('clientId')??'';
       let authContext;
-      try{authContext=await authenticateIntegrationClient(request)}catch{return json(401,{error:'unauthenticated'})}
+      try{authContext=await authenticateIntegrationClient(request)}catch{return respond(401,{error:'unauthenticated'})}
       const result=await integrationLinkStatus({requestId,clientId,authContext});
       const status={ok:200,denied:403,invalid:400,unavailable:503}[result.status]??500;
-      return json(status,result);
+      return respond(status,result);
     }
 
     if(request.method==='GET'&&integrationGrantsPath(url.pathname)){
       if(typeof integrationGrantList!=='function'||typeof authenticateIntegrationUserAndClient!=='function'){
-        return json(404,{error:'not-found'});
+        return respond(404,{error:'not-found'});
       }
       const clientId=url.searchParams.get('clientId')??'';
       let authContext;
-      try{authContext=await authenticateIntegrationUserAndClient(request)}catch{return json(401,{error:'unauthenticated'})}
+      try{authContext=await authenticateIntegrationUserAndClient(request)}catch{return respond(401,{error:'unauthenticated'})}
       const result=await integrationGrantList({clientId,authContext});
       const status={ok:200,denied:403,invalid:400,unavailable:503}[result.status]??500;
-      return json(status,result);
+      return respond(status,result);
     }
 
     const defenceMatch=defenceStatusMatch(url.pathname);
     if(defenceMatch){
-      if(request.method!=='GET')return json(405,{error:'method-not-allowed'});
-      if(!defenceStatus)return json(404,{error:'not-found'});
+      if(request.method!=='GET')return respond(405,{error:'method-not-allowed'});
+      if(!defenceStatus)return respond(404,{error:'not-found'});
       const releaseSha=url.searchParams.get('releaseSha')??'';
       const profileBlobSha=url.searchParams.get('profileBlobSha')??'';
-      if(!SHA.test(releaseSha)||!SHA.test(profileBlobSha))return json(400,{error:'invalid-defence-status-query'});
+      if(!SHA.test(releaseSha)||!SHA.test(profileBlobSha))return respond(400,{error:'invalid-defence-status-query'});
       try{
-        return json(200,defenceStatus({appId:defenceMatch[1],releaseSha,profileBlobSha}));
+        return respond(200,defenceStatus({appId:defenceMatch[1],releaseSha,profileBlobSha}));
       }catch(error){
-        if(error instanceof TypeError)return json(400,{error:'invalid-defence-status-query'});
-        return json(503,{error:'defence-status-unavailable'});
+        if(error instanceof TypeError)return respond(400,{error:'invalid-defence-status-query'});
+        return respond(503,{error:'defence-status-unavailable'});
       }
     }
 
     if(request.method==='GET'&&appStatusPath(url.pathname)){
       if(typeof appOperationalStatus!=='function'||typeof authenticateApp!=='function'){
-        return json(404,{error:'not-found'});
+        return respond(404,{error:'not-found'});
       }
       const appId=url.searchParams.get('appId')??'';
       let authContext;
-      try{ authContext=await authenticateApp(request); }catch{ return json(401,{error:'unauthenticated'}); }
+      try{ authContext=await authenticateApp(request); }catch{ return respond(401,{error:'unauthenticated'}); }
       const result=await appOperationalStatus({appId,authContext});
       const status={ok:200,denied:403,invalid:400,unavailable:503}[result.status]??500;
-      return json(status,result);
+      return respond(status,result);
     }
 
     if(request.method==='GET'&&revocationStatusPath(url.pathname)){
       if(typeof revocationHealth!=='function'||typeof authenticateApp!=='function'){
-        return json(404,{error:'not-found'});
+        return respond(404,{error:'not-found'});
       }
       const appId=url.searchParams.get('appId')??'';
       let authContext;
-      try{ authContext=await authenticateApp(request); }catch{ return json(401,{error:'unauthenticated'}); }
+      try{ authContext=await authenticateApp(request); }catch{ return respond(401,{error:'unauthenticated'}); }
       const result=await revocationHealth({appId,authContext});
       const status={ok:200,denied:403,invalid:400,unavailable:503}[result.status]??500;
-      return json(status,result);
+      return respond(status,result);
     }
 
     if(request.method==='GET'&&revocationFeedPath(url.pathname)){
       if(typeof revocationFeed!=='function'||typeof authenticateApp!=='function'){
-        return json(404,{error:'not-found'});
+        return respond(404,{error:'not-found'});
       }
       const appId=url.searchParams.get('appId')??'';
       const afterRaw=url.searchParams.get('after')??'0';
       const limitRaw=url.searchParams.get('limit')??'100';
       if(!/^\d+$/.test(afterRaw)||!/^\d+$/.test(limitRaw)){
-        return json(400,{error:'invalid-revocation-feed-query'});
+        return respond(400,{error:'invalid-revocation-feed-query'});
       }
       const afterSequence=Number(afterRaw);
       const limit=Number(limitRaw);
       let authContext;
-      try{ authContext=await authenticateApp(request); }catch{ return json(401,{error:'unauthenticated'}); }
+      try{ authContext=await authenticateApp(request); }catch{ return respond(401,{error:'unauthenticated'}); }
       const result=await revocationFeed({appId,afterSequence,limit,authContext});
       const status={ok:200,denied:403,invalid:400,unavailable:503}[result.status]??500;
-      return json(status,result);
+      return respond(status,result);
     }
 
     const isUserConciergeCancel=userConciergeCancelPath(url.pathname);
@@ -495,164 +552,164 @@ export function createFoundationHttpHandler({
     const isGrantRevocation=grantRevocationPath(url.pathname);
     const isRevocationAck=revocationAckPath(url.pathname);
     const isEvaluate=evaluatePath(url.pathname);
-    if(!isConciergeRetryClaim&&!isConciergeRetryFinish&&!isConciergeSupersede&&!isUserConciergeCancel&&!isUserGrantRevoke&&!isUserLinkRevoke&&!isIntegrationDeviceLinkRequest&&!isIntegrationDeviceLinkApprove&&!isIntegrationDeviceLinkExchange&&!isIntegrationDelegationRefresh&&!isConciergePlan&&!isConciergeExecute&&!isIntegrationLinkConsent&&!isIntegrationLinkRevoke&&!isIntegrationGrantConsent&&!isIntegrationGrantRevoke&&!isClaim&&!isGrantConsent&&!isGrantRevocation&&!isRevocationAck&&!isEvaluate) return json(404,{error:'not-found'});
-    if(request.method!=='POST') return json(405,{error:'method-not-allowed'});
+    if(!isConciergeRetryClaim&&!isConciergeRetryFinish&&!isConciergeSupersede&&!isUserConciergeCancel&&!isUserGrantRevoke&&!isUserLinkRevoke&&!isIntegrationDeviceLinkRequest&&!isIntegrationDeviceLinkApprove&&!isIntegrationDeviceLinkExchange&&!isIntegrationDelegationRefresh&&!isConciergePlan&&!isConciergeExecute&&!isIntegrationLinkConsent&&!isIntegrationLinkRevoke&&!isIntegrationGrantConsent&&!isIntegrationGrantRevoke&&!isClaim&&!isGrantConsent&&!isGrantRevocation&&!isRevocationAck&&!isEvaluate) return respond(404,{error:'not-found'});
+    if(request.method!=='POST') return respond(405,{error:'method-not-allowed'});
 
     const contentType=request.headers.get('content-type')??'';
     if(!contentType.toLowerCase().startsWith('application/json')){
-      return json(415,{error:'unsupported-media-type'});
+      return respond(415,{error:'unsupported-media-type'});
     }
 
     const declared=Number(request.headers.get('content-length'));
-    if(Number.isFinite(declared)&&declared>maxBodyBytes) return json(413,{error:'request-too-large'});
+    if(Number.isFinite(declared)&&declared>maxBodyBytes) return respond(413,{error:'request-too-large'});
 
     let raw;
-    try{ raw=await request.text(); }catch{ return json(400,{error:'invalid-body'}); }
-    if(new TextEncoder().encode(raw).byteLength>maxBodyBytes) return json(413,{error:'request-too-large'});
+    try{ raw=await request.text(); }catch{ return respond(400,{error:'invalid-body'}); }
+    if(new TextEncoder().encode(raw).byteLength>maxBodyBytes) return respond(413,{error:'request-too-large'});
 
     let envelope;
-    try{ envelope=JSON.parse(raw); }catch{ return json(400,{error:'invalid-json'}); }
+    try{ envelope=JSON.parse(raw); }catch{ return respond(400,{error:'invalid-json'}); }
 
     if(isConciergeRetryClaim||isConciergeRetryFinish){
-      if(!conciergeRetry||typeof authenticateIntegrationClient!=='function') return json(404,{error:'not-found'});
+      if(!conciergeRetry||typeof authenticateIntegrationClient!=='function') return respond(404,{error:'not-found'});
       let authContext;
-      try{authContext=await authenticateIntegrationClient(request)}catch{return json(401,{error:'unauthenticated'})}
+      try{authContext=await authenticateIntegrationClient(request)}catch{return respond(401,{error:'unauthenticated'})}
       if(isConciergeRetryClaim){
         const clientId=String(envelope?.clientId??'');
         const result=await conciergeRetry.claim({clientId,authContext});
         const status={ok:200,denied:403,unavailable:503}[result.status]??400;
-        return json(status,result);
+        return respond(status,result);
       }
       const result=await conciergeRetry.finish({envelope,authContext});
       const status={ok:200,denied:403,invalid:400,unavailable:503}[result.status]??500;
-      return json(status,result);
+      return respond(status,result);
     }
 
     if(isConciergeSupersede){
       if(typeof conciergeSupersede!=='function'||typeof authenticateIntegrationUserAndClient!=='function'){
-        return json(404,{error:'not-found'});
+        return respond(404,{error:'not-found'});
       }
       let authContext;
-      try{authContext=await authenticateIntegrationUserAndClient(request)}catch{return json(401,{error:'unauthenticated'})}
+      try{authContext=await authenticateIntegrationUserAndClient(request)}catch{return respond(401,{error:'unauthenticated'})}
       const result=await conciergeSupersede({envelope,authContext});
       const status={superseded:200,'already-superseded':200,denied:403,invalid:400,unavailable:503}[result.status]??500;
-      return json(status,result);
+      return respond(status,result);
     }
 
     if(isUserConciergeCancel){
       if(typeof userConciergeCancellation!=='function'||typeof authenticateIntegrationUser!=='function'){
-        return json(404,{error:'not-found'});
+        return respond(404,{error:'not-found'});
       }
       let authContext;
-      try{authContext=await authenticateIntegrationUser(request)}catch{return json(401,{error:'unauthenticated'})}
+      try{authContext=await authenticateIntegrationUser(request)}catch{return respond(401,{error:'unauthenticated'})}
       const result=await userConciergeCancellation({envelope,authContext});
       const status={cancelled:200,'already-cancelled':200,denied:403,invalid:400,unavailable:503}[result.status]??500;
-      return json(status,result);
+      return respond(status,result);
     }
 
     if(isUserGrantRevoke||isUserLinkRevoke){
-      if(typeof authenticateIntegrationUser!=='function') return json(404,{error:'not-found'});
+      if(typeof authenticateIntegrationUser!=='function') return respond(404,{error:'not-found'});
       let authContext;
-      try{authContext=await authenticateIntegrationUser(request)}catch{return json(401,{error:'unauthenticated'})}
+      try{authContext=await authenticateIntegrationUser(request)}catch{return respond(401,{error:'unauthenticated'})}
       const service=isUserGrantRevoke?userIntegrationGrantRevocation:userIntegrationLinkRevocation;
-      if(typeof service!=='function') return json(404,{error:'not-found'});
+      if(typeof service!=='function') return respond(404,{error:'not-found'});
       const result=await service({envelope,authContext});
       const status={revoked:200,'already-revoked':200,denied:403,invalid:400,unavailable:503}[result.status]??500;
-      return json(status,result);
+      return respond(status,result);
     }
 
     if(isIntegrationDeviceLinkRequest){
       if(typeof integrationLinkRequest!=='function'||typeof authenticateIntegrationClient!=='function'){
-        return json(404,{error:'not-found'});
+        return respond(404,{error:'not-found'});
       }
       let authContext;
-      try{authContext=await authenticateIntegrationClient(request)}catch{return json(401,{error:'unauthenticated'})}
+      try{authContext=await authenticateIntegrationClient(request)}catch{return respond(401,{error:'unauthenticated'})}
       const result=await integrationLinkRequest({envelope,authContext});
       const status={created:201,denied:403,invalid:400,unavailable:503}[result.status]??500;
-      return json(status,result);
+      return respond(status,result);
     }
 
     if(isIntegrationDeviceLinkApprove){
       if(typeof integrationLinkApproval!=='function'||typeof authenticateIntegrationUser!=='function'){
-        return json(404,{error:'not-found'});
+        return respond(404,{error:'not-found'});
       }
       let authContext;
-      try{authContext=await authenticateIntegrationUser(request)}catch{return json(401,{error:'unauthenticated'})}
+      try{authContext=await authenticateIntegrationUser(request)}catch{return respond(401,{error:'unauthenticated'})}
       const result=await integrationLinkApproval({envelope,authContext});
       const status={approved:200,'already-approved':200,denied:403,invalid:400,unavailable:503}[result.status]??500;
-      return json(status,result);
+      return respond(status,result);
     }
 
     if(isIntegrationDelegationRefresh){
       if(typeof integrationDelegationRefresh!=='function'||typeof authenticateIntegrationClient!=='function'){
-        return json(404,{error:'not-found'});
+        return respond(404,{error:'not-found'});
       }
       let authContext;
-      try{authContext=await authenticateIntegrationClient(request)}catch{return json(401,{error:'unauthenticated'})}
+      try{authContext=await authenticateIntegrationClient(request)}catch{return respond(401,{error:'unauthenticated'})}
       const result=await integrationDelegationRefresh({envelope,authContext});
       const status={refreshed:200,denied:403,invalid:400,unavailable:503}[result.status]??500;
-      return json(status,result);
+      return respond(status,result);
     }
 
     if(isIntegrationDeviceLinkExchange){
       if(typeof integrationLinkExchange!=='function'||typeof authenticateIntegrationClient!=='function'){
-        return json(404,{error:'not-found'});
+        return respond(404,{error:'not-found'});
       }
       let authContext;
-      try{authContext=await authenticateIntegrationClient(request)}catch{return json(401,{error:'unauthenticated'})}
+      try{authContext=await authenticateIntegrationClient(request)}catch{return respond(401,{error:'unauthenticated'})}
       const result=await integrationLinkExchange({envelope,authContext});
       const status={exchanged:200,denied:403,invalid:400,unavailable:503}[result.status]??500;
-      return json(status,result);
+      return respond(status,result);
     }
 
     if(isConciergePlan||isConciergeExecute){
-      if(typeof authenticateIntegrationUserAndClient!=='function') return json(404,{error:'not-found'});
+      if(typeof authenticateIntegrationUserAndClient!=='function') return respond(404,{error:'not-found'});
       let authContext;
-      try{authContext=await authenticateIntegrationUserAndClient(request)}catch{return json(401,{error:'unauthenticated'})}
+      try{authContext=await authenticateIntegrationUserAndClient(request)}catch{return respond(401,{error:'unauthenticated'})}
       const service=isConciergePlan?conciergePlan:conciergeExecute;
-      if(typeof service!=='function') return json(404,{error:'not-found'});
+      if(typeof service!=='function') return respond(404,{error:'not-found'});
       const result=await service({envelope,authContext});
       const status={planned:200,ready:202,completed:200,partial:200,failed:502,blocked:409,denied:403,invalid:400,unavailable:503}[result.status]??500;
-      return json(status,result);
+      return respond(status,result);
     }
 
     if(isIntegrationLinkConsent||isIntegrationLinkRevoke||isIntegrationGrantConsent||isIntegrationGrantRevoke){
-      if(typeof authenticateIntegrationUserAndClient!=='function') return json(404,{error:'not-found'});
+      if(typeof authenticateIntegrationUserAndClient!=='function') return respond(404,{error:'not-found'});
       let authContext;
-      try{authContext=await authenticateIntegrationUserAndClient(request)}catch{return json(401,{error:'unauthenticated'})}
+      try{authContext=await authenticateIntegrationUserAndClient(request)}catch{return respond(401,{error:'unauthenticated'})}
 
       const service=isIntegrationLinkConsent?integrationLinkConsent:
         isIntegrationLinkRevoke?integrationLinkRevocation:
         isIntegrationGrantConsent?integrationCapabilityConsent:
         integrationGrantRevocation;
-      if(typeof service!=='function') return json(404,{error:'not-found'});
+      if(typeof service!=='function') return respond(404,{error:'not-found'});
 
       const result=await service({envelope,authContext});
       const status={
         linked:200,'already-linked':200,granted:200,'already-granted':200,
         revoked:200,'already-revoked':200,denied:403,invalid:400,unavailable:503
       }[result.status]??500;
-      return json(status,result);
+      return respond(status,result);
     }
 
     if(isRevocationAck){
       if(typeof revocationAck!=='function'||typeof authenticateApp!=='function'){
-        return json(404,{error:'not-found'});
+        return respond(404,{error:'not-found'});
       }
       let authContext;
-      try{ authContext=await authenticateApp(request); }catch{ return json(401,{error:'unauthenticated'}); }
+      try{ authContext=await authenticateApp(request); }catch{ return respond(401,{error:'unauthenticated'}); }
       const result=await revocationAck({envelope,authContext});
       const status={acknowledged:200,'already-acknowledged':200,denied:403,invalid:400,unavailable:503}[result.status]??500;
-      return json(status,result);
+      return respond(status,result);
     }
 
     if(isClaim){
       if(typeof identityClaim!=='function'||typeof authenticateIdentityClaim!=='function'){
-        return json(404,{error:'not-found'});
+        return respond(404,{error:'not-found'});
       }
 
       let authContext;
-      try{ authContext=await authenticateIdentityClaim(request); }catch{ return json(401,{error:'unauthenticated'}); }
+      try{ authContext=await authenticateIdentityClaim(request); }catch{ return respond(401,{error:'unauthenticated'}); }
 
       const result=await identityClaim({envelope,authContext});
       const status={
@@ -662,28 +719,28 @@ export function createFoundationHttpHandler({
         invalid:400,
         unavailable:503
       }[result.status]??500;
-      return json(status,result);
+      return respond(status,result);
     }
 
     let authContext;
-    try{ authContext=await authenticate(request); }catch{ return json(401,{error:'unauthenticated'}); }
+    try{ authContext=await authenticate(request); }catch{ return respond(401,{error:'unauthenticated'}); }
 
     if(isGrantConsent){
-      if(typeof grantConsent!=='function') return json(404,{error:'not-found'});
+      if(typeof grantConsent!=='function') return respond(404,{error:'not-found'});
       const result=await grantConsent({envelope,authContext});
       const status={granted:200,'already-granted':200,denied:403,invalid:400,unavailable:503}[result.status]??500;
-      return json(status,result);
+      return respond(status,result);
     }
 
     if(isGrantRevocation){
-      if(typeof grantRevocation!=='function') return json(404,{error:'not-found'});
+      if(typeof grantRevocation!=='function') return respond(404,{error:'not-found'});
       const result=await grantRevocation({envelope,authContext});
       const status={revoked:200,'already-revoked':200,denied:403,invalid:400,unavailable:503}[result.status]??500;
-      return json(status,result);
+      return respond(status,result);
     }
 
     const result=await gateway({envelope,authContext});
     const status={allowed:200,denied:403,invalid:400,unavailable:503}[result.status]??500;
-    return json(status,result);
+    return respond(status,result);
   };
 }
