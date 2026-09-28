@@ -79,6 +79,9 @@ create index gateway_operation_audit_events_attempt_idx
 create index gateway_operation_audit_events_operation_idx
   on foundation.gateway_operation_audit_events(environment,operation_key,occurred_at desc);
 
+create index gateway_operation_audit_events_service_idx
+  on foundation.gateway_operation_audit_events(service_id,environment,occurred_at desc);
+
 create index gateway_operation_audit_events_open_idx
   on foundation.gateway_operation_audit_events(environment,occurred_at)
   where phase='policy';
