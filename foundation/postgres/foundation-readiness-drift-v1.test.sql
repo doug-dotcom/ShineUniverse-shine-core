@@ -42,19 +42,15 @@ returns jsonb language sql stable security definer set search_path='' as $identi
  );
 $identity$;
 
-insert into foundation.foundation_release_identity_bindings(
-  binding_id,release_ref,service_id,environment,foundation_layer,source_ref,
-  runtime_version,artifact_sha256,deployment_receipt_id,publication_id,
-  publication_assurance,readiness_state_at_bind,readiness_fingerprint_at_bind,
-  bound_by,metadata,bound_at
-)
-values(
- '43000000-0000-4000-8000-000000000001'::uuid,'foundation:layer-42:aaaaaaaa',
- 'foundation.gateway','production',42,
- 'github://doug-dotcom/ShineUniverse-shine-core/commit/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa','43',repeat('a',64),
- '43000000-0000-4000-8000-000000000002'::uuid,
- '43000000-0000-4000-8000-000000000003'::uuid,
- 'github-oidc','ready',repeat('6',32),'layer43-test','{}'::jsonb,now()
+-- Reuse the valid binding already created by the Layer-35 acceptance fixture.
+-- Make its bind-time readiness fingerprint deterministic for this transaction.
+update foundation.foundation_release_identity_bindings
+set readiness_state_at_bind='ready',
+    readiness_fingerprint_at_bind=repeat('6',32)
+where binding_id=(
+  select binding_id
+  from foundation.current_foundation_release_identity
+  where service_id='foundation.gateway' and environment='production'
 );
 
 do $degraded$
@@ -79,7 +75,7 @@ do $recorded$
 declare v foundation.foundation_readiness_drift_observations%rowtype;
 begin
  select * into v from foundation.foundation_readiness_drift_observations
- where binding_id='43000000-0000-4000-8000-000000000001'::uuid
+ where binding_id=(select binding_id from foundation.current_foundation_release_identity where service_id='foundation.gateway' and environment='production')
  order by observation_sequence desc limit 1;
  if v.drift_state<>'operational-degradation'
     or not v.deployment_identity_stable
