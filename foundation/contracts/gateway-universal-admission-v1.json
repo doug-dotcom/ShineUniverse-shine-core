@@ -1,0 +1,50 @@
+{
+  "gatewayUniversalAdmission": "shine-foundation/gateway-universal-admission-v1",
+  "schemaVersion": "1.0.0",
+  "serviceId": "foundation.gateway",
+  "purpose": "Enforce the Layer 27 operation-policy model at the HTTP front door for every privileged POST route before route-specific authentication and atomic execution guards.",
+  "runtime": {
+    "gatewayVersion": 77,
+    "artifactSha256": "1d81b65a21c9e8c4576df40f6153a7a572e7c58d09eb3a02c4038b59e7b36de0",
+    "sourceCommit": "f4421209d45d64ce4d2778bce73e4703a7c871ca",
+    "sourceRef": "github://doug-dotcom/ShineUniverse-shine-core/commit/f4421209d45d64ce4d2778bce73e4703a7c871ca"
+  },
+  "broker": {
+    "databaseFunction": "foundation.evaluate_gateway_route_policy_v1(text,text,text,timestamptz)",
+    "runtimeAdapter": "evaluateGatewayRoutePolicy",
+    "handlerOption": "evaluateOperationPolicy",
+    "handlerRequiredFlag": "operationPolicyRequired",
+    "productionRequired": true
+  },
+  "policyStates": {
+    "admit": "Continue to normal route authentication and the existing atomic/service guard.",
+    "admit-degraded": "Continue while preserving degraded dependency semantics in the operation policy result.",
+    "worker-only": "Continue to the existing authenticated worker path.",
+    "deny": "Return HTTP 403 before the route service executes.",
+    "unavailable": "Return HTTP 503 before the route service executes.",
+    "not-registered": "Allow the handler to continue to its normal routing result, normally 404 for an unknown POST path."
+  },
+  "coverage": {
+    "registeredRoutes": 39,
+    "privilegedOperations": 23,
+    "dependencyAdmissionPolicies": 21,
+    "workerOnlyPolicies": 2
+  },
+  "layering": [
+    "HTTP route recognition",
+    "route-to-operation policy broker",
+    "route-specific authentication and validation",
+    "existing atomic/service guard",
+    "domain outcome/audit"
+  ],
+  "invariants": {
+    "allPrivilegedPostRoutesPassFrontDoorBroker": true,
+    "productionCannotBootWithoutBrokerWiring": true,
+    "denyFailsBeforeRouteService": true,
+    "unavailableFailsClosed": true,
+    "workerOnlyStillRequiresWorkerAuthentication": true,
+    "unknownRoutesStillReturnNormal404": true,
+    "existingAtomicGuardsRemainAuthoritative": true,
+    "exactSourceDeploymentRequired": true
+  }
+}
