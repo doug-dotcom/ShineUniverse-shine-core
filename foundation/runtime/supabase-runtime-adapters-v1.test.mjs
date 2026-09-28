@@ -528,7 +528,7 @@ test('runtime exposes the complete Gateway adapter surface',()=>{
     'issueCapabilityInvocationTicket','getCapabilityAdapterHealth',
     'recordCapabilityAdapterHealth','invokeCapability',
     'listDiscoverableCapabilities','getAppOperationalStatus',
-    'getAtlasFeedPublisherCapability','getAtlasFeedGrantContext',
+    'getAtlasFeedPublisherCapability','getAtlasFeedGrantContext','persistAtlasFeedEvent',
     'evaluateDependencyAdmission','evaluateGatewayRoutePolicy','getAppManifest','getVaultResource',
     'getEffectiveGrants','evaluateDefence','writeAuditEvent'
   ];
@@ -690,4 +690,42 @@ test('Atlas Feed grant lookup returns effective Foundation grant context',async(
   assert.equal(result.effectiveStatus,'active');
   assert.equal(result.scope,'atlas.dive.read');
   assert.equal(result.appId,'shine.companion');
+});
+
+
+test('Atlas Feed persistence delegates the exact event, admission and receipt to the hosted atomic function',async()=>{
+  const calls=[];
+  const sql=async(strings,...values)=>{
+    const q=strings.join('?').replace(/\s+/g,' ').trim().toLowerCase();
+    if(q.includes('foundation.persist_atlas_feed_event_v1')){
+      calls.push(values);
+      return [{result:JSON.stringify({
+        outcome:'persisted',
+        reasonCode:'atlas-feed-event-persisted',
+        receipt:{receiptId:'44444444-4444-4444-8444-444444444444'},
+        receiptSha256:'d'.repeat(64)
+      })}];
+    }
+    throw new Error('unexpected SQL: '+q);
+  };
+  const adapters=createSupabaseRuntimeAdapters({
+    sql,
+    fetchImpl:async()=>Response.json({}),
+    defenceGate:async()=>({decision:'allow'})
+  });
+  const result=await adapters.persistAtlasFeedEvent({
+    requestId:'11111111-1111-4111-8111-111111111111',
+    event:{eventId:'22222222-2222-4222-8222-222222222222'},
+    admission:{appId:'shine.dive'},
+    eventSha256:'b'.repeat(64),
+    payloadSha256:'c'.repeat(64),
+    receipt:{receiptId:'44444444-4444-4444-8444-444444444444'},
+    receiptSha256:'d'.repeat(64),
+    persistedAt:'2026-09-28T10:00:00Z'
+  });
+  assert.equal(result.outcome,'persisted');
+  assert.equal(calls.length,1);
+  assert.equal(calls[0][0],'11111111-1111-4111-8111-111111111111');
+  assert.equal(JSON.parse(calls[0][1]).eventId,'22222222-2222-4222-8222-222222222222');
+  assert.equal(JSON.parse(calls[0][2]).appId,'shine.dive');
 });
