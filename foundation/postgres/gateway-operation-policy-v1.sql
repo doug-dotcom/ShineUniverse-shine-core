@@ -118,9 +118,9 @@ create or replace function foundation.evaluate_gateway_operation_policy_v1(
 returns jsonb
 language plpgsql
 stable
-security invoker
+security definer
 set search_path = pg_catalog, foundation
-as $$
+as $
 declare
   v_route foundation.gateway_operation_contracts%rowtype;
   v_policy foundation.gateway_operation_policies%rowtype;
@@ -423,7 +423,11 @@ on conflict do nothing;
 with policy_source as (
   select
     r.operation_key,
-    r.control_ref as execution_guard_ref,
+    case
+      when r.operation_key='access.evaluate'
+        then 'gateway-core:permission-engine+runtime-defence'
+      else r.control_ref
+    end as execution_guard_ref,
     case
       when r.operation_key in ('concierge.retry.claim','concierge.retry.finish')
         then 'worker-only'
