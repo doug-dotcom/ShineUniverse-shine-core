@@ -1,0 +1,64 @@
+{
+  "deploymentReconciliation": "shine-foundation/deployment-reconciliation-inbox-v1",
+  "schemaVersion": "1.0.0",
+  "purpose": "Provide a credential-free Foundation ingestion boundary for verified management-plane deployment receipts, automatically reconciling canonical deployment truth while forcing every new runtime to earn fresh health, audit and readiness evidence.",
+  "receipt": {
+    "table": "foundation.service_deployment_receipts",
+    "appendOnly": true,
+    "rls": true,
+    "requiredFields": [
+      "serviceId",
+      "environment",
+      "provider",
+      "runtimeRef",
+      "runtimeVersion",
+      "artifactSha256",
+      "runtimeState",
+      "sourceRef",
+      "providerEvidenceRef",
+      "providerObservedAt",
+      "submittedBy"
+    ],
+    "payloadExcludes": [
+      "provider API token",
+      "service-role key",
+      "request payloads",
+      "user data"
+    ]
+  },
+  "writer": {
+    "function": "foundation.submit_service_deployment_receipt_v1",
+    "executeRole": "service_role",
+    "gatewayAllowed": false,
+    "foundationRuntimeAllowed": false,
+    "publicAllowed": false
+  },
+  "effects": [
+    "append verified deployment receipt",
+    "append deployment expectation",
+    "append deployment observation with healthState=unknown",
+    "return canonical deployment truth",
+    "for foundation.gateway return immediate readiness evaluation"
+  ],
+  "safety": {
+    "sourceRefMustBeExactGitCommit": true,
+    "artifactSha256Required": true,
+    "gatewayRuntimeRefPinned": true,
+    "numericVersionRegressionRejectedUnlessRollbackMetadata": true,
+    "identicalReceiptIdempotent": true,
+    "newRuntimeHealthInherited": false,
+    "newRuntimeReadinessInherited": false
+  },
+  "statusReader": "foundation.get_deployment_reconciliation_status_v1",
+  "states": {
+    "unknown": "No verified deployment receipt exists.",
+    "drift": "Receipt exists but canonical deployment truth is not aligned.",
+    "awaiting-proof": "Deployment is reconciled but current runtime has not yet earned its own health/readiness proof.",
+    "reconciled": "Deployment truth is aligned and current runtime proof is present."
+  },
+  "observerBoundary": {
+    "managementPlaneObserverRunsOutsideDatabase": true,
+    "databaseStoresProviderCredential": false,
+    "rule": "An external trusted observer fetches provider deployment metadata, verifies exact source/artifact evidence, and submits only the non-secret receipt through service_role."
+  }
+}
