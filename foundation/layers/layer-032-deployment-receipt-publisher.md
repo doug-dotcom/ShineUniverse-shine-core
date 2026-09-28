@@ -1,133 +1,207 @@
-# Foundation Layer 32 — Deployment receipt publisher automation
+# Foundation Layer 32 — OIDC deployment receipt publisher
 
-**Status:** BUILT + CI-GATED; production secret presence not observable through the current GitHub connector  
-**Scope:** trusted workflow publication of Layer-31 deployment receipts
+**Status:** LIVE  
+**Scope:** automatic, secretless publication of Layer-31 deployment receipts from an approved GitHub Actions workflow
 
-Layer 31 created the secure Foundation-side inbox for verified management-plane deployment receipts.
+Layer 31 created the secure Foundation-side deployment-receipt inbox.
 
-Layer 32 packages the observer-to-inbox handoff as a reusable GitHub Actions workflow so an authorised deployment mechanism no longer needs a human to construct or submit the receipt manually.
+Layer 32 closes the publication side without putting a Supabase service-role key or management token into GitHub.
 
-## Workflow
+## Architecture
+
+The live path is:
+
+`provider deployment evidence → checked-in receipt manifest → GitHub Actions OIDC → narrow Supabase ingest → Layer-31 receipt RPC → deployment truth → health/audit/readiness`
+
+The publisher remains intentionally separate from the deployer.
+
+It does not deploy Foundation Gateway and it does not guess provider state.
+
+## GitHub workflow
 
 `.github/workflows/publish-foundation-deployment-receipt.yml`
 
-The workflow is intentionally **not a deployer**.
+The workflow runs on:
 
-It runs after an authorised deployer/observer has obtained provider evidence.
+- manual `workflow_dispatch`;
+- pushes to the receipt manifest, workflow, OIDC ingest source or publisher contract.
 
-Required inputs:
+Production receipt manifest:
+
+`foundation/deployments/current-foundation-gateway-provider-receipt.json`
+
+The manifest contains only non-secret deployment evidence:
 
 - runtime version;
 - provider artefact SHA-256;
-- exact 40-character source commit;
-- provider evidence reference;
-- provider observation time;
 - runtime state;
-- explicit rollback flag.
+- exact source commit;
+- provider evidence reference;
+- provider observation timestamp;
+- rollback flag.
 
 ## Exact-source validation
 
-Before publication the workflow verifies that the supplied source commit exists in the checked-out Shine Core repository and resolves exactly to the supplied 40-character SHA.
+Before publication the workflow:
 
-Branch names such as `main` are not accepted as source identity.
+1. parses the receipt manifest;
+2. validates runtime version and SHA formats;
+3. requires an exact 40-character Git commit;
+4. fetches full repository history;
+5. verifies that exact source commit exists in Shine Core.
 
-## Payload builder
+The initial live run exposed a useful CI boundary: the default one-commit checkout could not prove the older v85 source commit.
 
-`foundation/integration-kit/build-deployment-receipt-payload-v1.mjs`
+Layer 32 corrected this with:
 
-builds the RPC payload and rejects:
+`fetch-depth: 0`
 
-- malformed artefact SHA;
-- non-exact source commit;
-- missing provider evidence;
-- invalid runtime state;
-- invalid provider observation timestamp.
+and the following run completed successfully.
 
-The payload includes workflow provenance such as run ID and repository, but never includes secrets.
+## GitHub OIDC authentication
 
-## Secret boundary
+The workflow requests an OIDC token with audience:
 
-The publisher expects two GitHub runtime secrets:
+`shine-foundation-deployment-receipt`
 
-- `FOUNDATION_SUPABASE_URL`;
-- `FOUNDATION_SUPABASE_SERVICE_ROLE_KEY`.
+No Supabase secret is stored in GitHub.
 
-They are referenced only from the `foundation-production` GitHub environment.
+The token is presented to the dedicated Edge Function:
 
-The workflow sends the service-role credential directly to Supabase over HTTPS to invoke the Layer-31 RPC.
+`foundation-deployment-receipt-ingest`
 
-The credential is not:
+The ingest validates the GitHub OIDC signature against GitHub's published JWKS and pins:
 
-- committed to Git;
-- written into the receipt payload;
-- stored in Foundation tables;
-- printed in the workflow's receipt summary.
+- issuer: `https://token.actions.githubusercontent.com`;
+- repository: `doug-dotcom/ShineUniverse-shine-core`;
+- ref: `refs/heads/main`;
+- exact workflow ref;
+- audience;
+- allowed GitHub event types.
 
-The current GitHub connector intentionally does not expose repository/environment secrets, so this build cannot verify whether those two secrets are already configured.
+An unauthenticated request is rejected with HTTP **401**.
 
-Layer 32 therefore does **not** claim a successful live workflow dispatch until secret presence is proven by an actual run.
+## Dedicated management-plane Edge Function
 
-## Workflow behaviour
+Source:
 
-The publisher:
+`foundation/runtime/deployment-receipt-ingest/index.ts`
 
-1. validates the exact source commit;
-2. builds the bounded non-secret receipt;
-3. calls `submit_service_deployment_receipt_v1`;
-4. requires receipt status `reconciled` or `replayed`;
-5. reads `get_deployment_reconciliation_status_v1`;
-6. fails if Foundation reports `unknown` or `drift`.
+Hosted function:
 
-`awaiting-proof` is valid for a genuinely new deployment because Layer 30 must still require fresh runtime health/audit/readiness evidence.
+- slug: `foundation-deployment-receipt-ingest`;
+- version: **1**;
+- verify JWT: **false**;
+- authentication: GitHub OIDC;
+- artefact SHA-256: `ba07c8dbf0f2334ae719f4e8323e223f8ab539705bcd4b4ca51dd7e40baaa596`.
 
-## Separation of authority
+It is separate from the user-facing `foundation-gateway`.
 
-The workflow deliberately does not:
+The Edge Function uses Supabase's server-side database environment and calls:
 
-- deploy the Edge Function;
-- infer a runtime version;
-- calculate or guess the provider artefact identity;
-- poll Supabase using a management PAT;
-- change readiness directly.
+`foundation.submit_service_deployment_receipt_v1`
 
-Deployment authority, provider observation and Foundation reconciliation remain separate concerns.
+The GitHub workflow therefore never receives a database or Supabase service-role credential.
 
-## Production path already proven
+## Foundation registration
 
-Layer 31 proved the same RPC path against Gateway v85:
+The management-plane ingest is registered as:
 
-- version: **85**;
-- artefact: `a596c895d31e272d2358d69e500eb708a43462de69df32e7e8a87d540907b83f`;
-- source: `b7c5331f93eff28a781f0794c89ccf50e90a4045`;
+`foundation.deployment-receipt-ingest`
+
+It is:
+
+- an active Supabase Edge Function;
+- owned by `shine-core`;
+- non-core for Layer-30 readiness;
+- exact-source bound to commit:
+  `002ac12476d133afaa3ac82bf6691ffa3fae53bc`;
+- deployed artefact:
+  `ba07c8dbf0f2334ae719f4e8323e223f8ab539705bcd4b4ca51dd7e40baaa596`.
+
+## Live production proof
+
+The corrected publisher workflow run:
+
+**36389217864**
+
+completed:
+
+- checkout — SUCCESS;
+- deployment receipt manifest validation — SUCCESS;
+- GitHub OIDC token acquisition — SUCCESS;
+- deployment receipt publication — SUCCESS;
+- overall job — **SUCCESS**.
+
+The ingest returned:
+
+- ingest status: `accepted`;
+- receipt status: `replayed`;
+- reconciliation state: `reconciled`.
+
+`replayed` is the correct result because the v85 receipt had already been inserted during Layer 31.
+
+The Edge logs independently recorded:
+
+`POST /functions/v1/foundation-deployment-receipt-ingest → HTTP 200`
+
+An unauthenticated production probe returned:
+
+`HTTP 401`
+
+## Production receipt
+
+The successful OIDC run published the already verified Gateway v85 evidence:
+
+- runtime version: **85**;
+- artefact SHA-256:
+  `a596c895d31e272d2358d69e500eb708a43462de69df32e7e8a87d540907b83f`;
+- source commit:
+  `b7c5331f93eff28a781f0794c89ccf50e90a4045`;
 - reconciliation: **RECONCILED**.
 
-Layer 32 automates construction and submission of that already-proven receipt contract.
+Layer-30 readiness remains independent of receipt publication and continues to enforce fresh health/audit/Defence evidence.
+
+## Security boundary
+
+Layer 32 stores no provider or database credential in GitHub.
+
+It specifically avoids:
+
+- GitHub repository Supabase secrets;
+- Supabase personal access tokens;
+- committed service-role keys;
+- database-stored management credentials.
+
+Trust is based on short-lived GitHub OIDC identity plus the Layer-31 database validation rules.
+
+The workflow cannot directly write Foundation tables.
+
+The OIDC ingest can submit only through the narrow Layer-31 receipt contract.
 
 ## CI
 
-The Foundation contracts job now runs:
+Foundation CI now covers:
 
-`node --test foundation/integration-kit/build-deployment-receipt-payload-v1.test.mjs`
+- deployment receipt payload validation;
+- OIDC ingest Deno type checking;
+- Layer-31 reconciliation schema/tests;
+- registration of the management-plane ingest runtime.
 
-Coverage verifies:
-
-- canonical payload generation;
-- no secret fields;
-- explicit rollback metadata;
-- malformed artefact rejection;
-- non-exact source rejection;
-- missing provider evidence rejection.
+The earlier secret-based workflow design is superseded and is not part of the live architecture.
 
 ## Machine-readable contract
 
 `foundation/contracts/deployment-receipt-publisher-v1.json`
 
-## Operational boundary
+## Closure
 
-Layer 32 closes the **code and workflow automation** side of deployment receipt publication.
+Layer 32 changes deployment receipt publication from:
 
-One operational prerequisite remains externally observable only through a real workflow run:
+> “a human or secret-bearing workflow must tell Foundation what was deployed”
 
-> the `foundation-production` GitHub environment must contain `FOUNDATION_SUPABASE_URL` and `FOUNDATION_SUPABASE_SERVICE_ROLE_KEY`.
+to:
 
-Until an actual dispatch succeeds, Foundation should describe the publisher as **built and CI-gated**, not as proven live automation.
+> **“an approved GitHub workflow proves its identity with OIDC and can publish exact non-secret deployment evidence through a narrow, auditable management-plane boundary.”**
+
+The Layer-31 inbox and Layer-30 readiness gate remain authoritative after publication.
