@@ -28,6 +28,7 @@ jobs:
       - run: deno check foundation/runtime/edge-function/index.ts
       - run: deno check foundation/runtime/defence-provider-ingest/index.ts
       - run: deno check foundation/runtime/defence-reattest/index.ts
+      - run: deno check security/shine-defence/runtime-receipts/supabase-v1/index.ts
 
   persistence:
     runs-on: ubuntu-latest
@@ -181,6 +182,12 @@ jobs:
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-runtime-provenance-v1.sql
       - name: Run Shine Defence runtime provenance acceptance tests
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-runtime-provenance-v1.test.sql
+      - name: Apply Shine Defence Supabase runtime receipts
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-supabase-runtime-receipts-v1.sql
+      - name: Apply Shine Defence Supabase runtime receipt Sentinel
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-supabase-runtime-receipt-sentinel-v1.sql
+      - name: Run Shine Defence Supabase runtime receipt acceptance tests
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-supabase-runtime-receipts-v1.test.sql
       - name: Apply Shine Defence artefact re-attestation
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-artifact-reattestation-v1.sql
       - name: Run Shine Defence artefact re-attestation acceptance tests
