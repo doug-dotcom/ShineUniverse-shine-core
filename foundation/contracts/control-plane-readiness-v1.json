@@ -1,0 +1,106 @@
+{
+  "controlPlaneReadiness": "shine-foundation/control-plane-readiness-v1",
+  "schemaVersion": "1.0.0",
+  "serviceId": "foundation.gateway",
+  "purpose": "Synthesize Foundation registry, exact deployment truth, deployment-bounded health, dependency safety, Gateway route/policy coverage and privileged-operation audit integrity into one conservative operational-readiness decision.",
+  "states": {
+    "ready": {
+      "safeMode": "normal",
+      "privilegedOperationsMode": "normal",
+      "workerOperationsMode": "normal",
+      "meaning": "All required control-plane evidence is current and passing; guarded dependencies are operational."
+    },
+    "restricted": {
+      "safeMode": "guarded",
+      "privilegedOperationsMode": "guarded",
+      "workerOperationsMode": "normal",
+      "meaning": "Foundation core is healthy and coherent, but one or more guard dependencies require protected scopes to remain fail-closed."
+    },
+    "degraded": {
+      "safeMode": "degraded",
+      "privilegedOperationsMode": "degraded",
+      "workerOperationsMode": "degraded",
+      "meaning": "Foundation can continue operating while one or more non-critical health, dependency or audit signals require remediation."
+    },
+    "not-ready": {
+      "safeMode": "blocked",
+      "privilegedOperationsMode": "blocked",
+      "workerOperationsMode": "blocked",
+      "meaning": "A hard control-plane invariant failed; Foundation should not claim operational readiness."
+    },
+    "unknown": {
+      "safeMode": "unknown",
+      "privilegedOperationsMode": "unknown",
+      "workerOperationsMode": "unknown",
+      "meaning": "Required evidence is absent, stale, version-mismatched or not yet proven for the current deployment."
+    }
+  },
+  "checks": [
+    "required core service registry",
+    "exact deployment truth",
+    "deployment-bounded runtime health",
+    "health/runtime-version consistency",
+    "dependency graph integrity",
+    "dependency roll-up and guarded/degraded/blocked scopes",
+    "Gateway route registry",
+    "privileged operation policy coverage",
+    "canonical privileged-operation audit health",
+    "current-runtime complete audit proof",
+    "Shine Defence posture"
+  ],
+  "precedence": [
+    "hard invariant failure -> not-ready",
+    "missing/current-runtime evidence gap -> unknown",
+    "guard dependency fail-closed -> restricted",
+    "non-critical degradation -> degraded",
+    "otherwise -> ready"
+  ],
+  "deploymentSpecificProof": {
+    "healthRuntimeMustMatchExpectedDeployment": true,
+    "currentRuntimeCompleteAuditTraceRequired": true,
+    "newDeploymentCannotInheritPreviousRuntimeReadiness": true
+  },
+  "observationLedger": {
+    "table": "foundation.foundation_readiness_observations",
+    "appendOnly": true,
+    "rls": true,
+    "runtimeReadOnly": true,
+    "writer": "service_role",
+    "deduplication": "meaningful evidence fingerprint",
+    "fingerprintAlgorithm": "md5",
+    "rationale": "The fingerprint is a change-detection key, not a security hash; audit integrity remains SHA-256."
+  },
+  "readers": {
+    "liveEvaluation": "foundation.evaluate_foundation_readiness_v1(text,timestamptz)",
+    "currentObservation": "foundation.current_foundation_readiness_observation"
+  },
+  "recorder": "foundation.record_foundation_readiness_observation_v1(text,timestamptz)",
+  "hostedObserver": {
+    "engine": "pg_cron",
+    "jobName": "shine-foundation-readiness-5m",
+    "cadence": "*/5 * * * *",
+    "writesOnlyOnMeaningfulEvidenceChange": true
+  },
+  "managementPlaneBoundary": {
+    "directSupabaseManagementApiQuery": false,
+    "sourceOfDeploymentState": "reconciled Foundation deployment expectation/observation evidence",
+    "rule": "The readiness gate consumes canonical deployment truth; it does not invent or infer an unobserved Edge function version from health headers.",
+    "implication": "A management-plane deployment must be reconciled into deployment truth before Foundation can make deployment-specific readiness claims about that runtime."
+  },
+  "universeReadinessBridge": {
+    "automatedStages": [
+      "built",
+      "tested",
+      "deployed"
+    ],
+    "humanVerifiedAutomated": false,
+    "rule": "human_verified remains explicit human acceptance evidence and is never inferred from CI, deployment, health or readiness state."
+  },
+  "security": {
+    "anonRead": false,
+    "authenticatedRead": false,
+    "foundationGatewayDirectWrite": false,
+    "foundationRuntimeEvaluate": true,
+    "foundationRuntimeRecord": false
+  }
+}
