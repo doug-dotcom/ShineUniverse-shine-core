@@ -297,6 +297,7 @@ begin
   if exists (
        select 1 from foundation.concierge_execution_events e
        where e.request_id=p_request_id
+         and e.event_type in ('execution-started','execution-completed','execution-failed')
      )
      or exists (
        select 1 from foundation.concierge_step_checkpoints cp
