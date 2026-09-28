@@ -579,9 +579,10 @@ set local role foundation_remediation_approver;
 select foundation.issue_remediation_approval_receipt_v1(
   '41000000-0000-4000-8000-000000000311'::uuid,
   'apply-registry-repair',
-  (select event_id
-   from foundation.current_foundation_control_plane_incident_state
-   where incident_key='production:release_projection'),
+  (
+    foundation.layer41_test_proposal_v1('apply-registry-repair',false)
+      ->>'incidentEventId'
+  )::uuid,
   foundation.get_remediation_proposal_sha256_v1(
     foundation.layer41_test_proposal_v1('apply-registry-repair',true)
   ),
@@ -599,9 +600,10 @@ select foundation.consume_remediation_approval_receipt_v1(
   '41000000-0000-4000-8000-000000000312'::uuid,
   '41000000-0000-4000-8000-000000000311'::uuid,
   'apply-registry-repair',
-  (select event_id
-   from foundation.current_foundation_control_plane_incident_state
-   where incident_key='production:release_projection'),
+  (
+    foundation.layer41_test_proposal_v1('apply-registry-repair',false)
+      ->>'incidentEventId'
+  )::uuid,
   foundation.get_remediation_proposal_sha256_v1(
     foundation.layer41_test_proposal_v1('apply-registry-repair',true)
   ),
@@ -617,9 +619,10 @@ select foundation.issue_remediation_execution_admission_v1(
   '41000000-0000-4000-8000-000000000314'::uuid,
   '41000000-0000-4000-8000-000000000311'::uuid,
   'apply-registry-repair',
-  (select event_id
-   from foundation.current_foundation_control_plane_incident_state
-   where incident_key='production:release_projection'),
+  (
+    foundation.layer41_test_proposal_v1('apply-registry-repair',false)
+      ->>'incidentEventId'
+  )::uuid,
   foundation.get_remediation_proposal_sha256_v1(
     foundation.layer41_test_proposal_v1('apply-registry-repair',true)
   ),
@@ -671,9 +674,10 @@ set local role foundation_remediation_approver;
 select foundation.issue_remediation_approval_receipt_v1(
   '41000000-0000-4000-8000-000000000321'::uuid,
   'apply-registry-repair',
-  (select event_id
-   from foundation.current_foundation_control_plane_incident_state
-   where incident_key='production:release_projection'),
+  (
+    foundation.layer41_test_proposal_v1('apply-registry-repair',false)
+      ->>'incidentEventId'
+  )::uuid,
   foundation.get_remediation_proposal_sha256_v1(
     foundation.layer41_test_proposal_v1('apply-registry-repair',false)
   ),
@@ -691,9 +695,10 @@ select foundation.consume_remediation_approval_receipt_v1(
   '41000000-0000-4000-8000-000000000322'::uuid,
   '41000000-0000-4000-8000-000000000321'::uuid,
   'apply-registry-repair',
-  (select event_id
-   from foundation.current_foundation_control_plane_incident_state
-   where incident_key='production:release_projection'),
+  (
+    foundation.layer41_test_proposal_v1('apply-registry-repair',false)
+      ->>'incidentEventId'
+  )::uuid,
   foundation.get_remediation_proposal_sha256_v1(
     foundation.layer41_test_proposal_v1('apply-registry-repair',false)
   ),
@@ -709,9 +714,10 @@ select foundation.issue_remediation_execution_admission_v1(
   '41000000-0000-4000-8000-000000000324'::uuid,
   '41000000-0000-4000-8000-000000000321'::uuid,
   'apply-registry-repair',
-  (select event_id
-   from foundation.current_foundation_control_plane_incident_state
-   where incident_key='production:release_projection'),
+  (
+    foundation.layer41_test_proposal_v1('apply-registry-repair',false)
+      ->>'incidentEventId'
+  )::uuid,
   foundation.get_remediation_proposal_sha256_v1(
     foundation.layer41_test_proposal_v1('apply-registry-repair',false)
   ),
