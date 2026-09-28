@@ -218,6 +218,10 @@ jobs:
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-remediation-approval-receipts-v1.sql
       - name: Run Foundation remediation approval receipt tests
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-remediation-approval-receipts-v1.test.sql
+      - name: Apply Foundation remediation execution admission
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-remediation-execution-admission-v1.sql
+      - name: Run Foundation remediation execution admission tests
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-remediation-execution-admission-v1.test.sql
       - name: Apply Shine Defence Sentinel
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-sentinel-v1.sql
       - name: Run Shine Defence Sentinel acceptance tests
