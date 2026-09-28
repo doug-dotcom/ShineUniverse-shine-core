@@ -28,7 +28,7 @@ returns jsonb language sql stable security definer set search_path='' as $dep$
  select jsonb_build_object(
   'deploymentTruthResponse','shine-foundation/deployment-truth-response-v1',
   'serviceId',p_service_id,'environment',p_environment,'truthState','aligned',
-  'expected',jsonb_build_object('sourceRef','github://test/commit/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa','version','43','artifactSha256',repeat('a',64))
+  'expected',jsonb_build_object('sourceRef','github://doug-dotcom/ShineUniverse-shine-core/commit/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa','version','43','artifactSha256',repeat('a',64))
  );
 $dep$;
 
@@ -51,7 +51,7 @@ insert into foundation.foundation_release_identity_bindings(
 values(
  '43000000-0000-4000-8000-000000000001'::uuid,'foundation:layer-42:aaaaaaaa',
  'foundation.gateway','production',42,
- 'github://test/commit/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa','43',repeat('a',64),
+ 'github://doug-dotcom/ShineUniverse-shine-core/commit/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa','43',repeat('a',64),
  '43000000-0000-4000-8000-000000000002'::uuid,
  '43000000-0000-4000-8000-000000000003'::uuid,
  'github-oidc','ready',repeat('6',32),'layer43-test','{}'::jsonb,now()
