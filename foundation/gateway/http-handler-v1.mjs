@@ -38,6 +38,7 @@ const integrationGrantRevokePath=p=>p==='/v1/integration/grants/revoke'||p.endsW
 const conciergePlanPath=p=>p==='/v1/concierge/plan'||p.endsWith('/foundation-gateway/v1/concierge/plan');
 const conciergeExecutePath=p=>p==='/v1/concierge/execute'||p.endsWith('/foundation-gateway/v1/concierge/execute');
 const conciergeResumePath=p=>p==='/v1/concierge/resume'||p.endsWith('/foundation-gateway/v1/concierge/resume');
+const conciergeSupersedePath=p=>p==='/v1/concierge/supersede'||p.endsWith('/foundation-gateway/v1/concierge/supersede');
 const conciergeRetryClaimPath=p=>p==='/v1/concierge/retry/claim'||p.endsWith('/foundation-gateway/v1/concierge/retry/claim');
 const conciergeRetryFinishPath=p=>p==='/v1/concierge/retry/finish'||p.endsWith('/foundation-gateway/v1/concierge/retry/finish');
 const capabilityTicketRedeemPath=p=>p==='/v1/capability/ticket/redeem'||p.endsWith('/foundation-gateway/v1/capability/ticket/redeem');
@@ -114,6 +115,7 @@ export function createFoundationHttpHandler({
   }
   if(integrationContextPublish!==undefined&&typeof integrationContextPublish!=='function') throw new TypeError('integrationContextPublish must be a function');
   if(conciergeFleetStatus!==undefined&&typeof conciergeFleetStatus!=='function') throw new TypeError('conciergeFleetStatus must be a function');
+  if(conciergeSupersede!==undefined&&typeof conciergeSupersede!=='function') throw new TypeError('conciergeSupersede must be a function');
   if(evaluateOperationPolicy!==undefined&&typeof evaluateOperationPolicy!=='function') throw new TypeError('evaluateOperationPolicy must be a function');
   if(operationPolicyRequired&&typeof evaluateOperationPolicy!=='function') throw new TypeError('operation policy broker is required');
   if(conciergeRetry!==undefined&&(
@@ -270,6 +272,7 @@ export function createFoundationHttpHandler({
           conciergePlan:{method:'POST',path:'/v1/concierge/plan'},
           conciergeExecute:{method:'POST',path:'/v1/concierge/execute'},
           conciergeResume:{method:'POST',path:'/v1/concierge/resume'},
+          conciergeSupersede:{method:'POST',path:'/v1/concierge/supersede'},
           conciergeRetryClaim:{method:'POST',path:'/v1/concierge/retry/claim'},
           conciergeRetryFinish:{method:'POST',path:'/v1/concierge/retry/finish'},
           conciergeCancel:{method:'POST',path:'/v1/concierge/cancel'},
@@ -479,6 +482,7 @@ export function createFoundationHttpHandler({
     const isIntegrationDelegationRefresh=integrationDelegationRefreshPath(url.pathname);
     const isConciergePlan=conciergePlanPath(url.pathname);
     const isConciergeExecute=conciergeExecutePath(url.pathname)||conciergeResumePath(url.pathname);
+    const isConciergeSupersede=conciergeSupersedePath(url.pathname);
     const isConciergeRetryClaim=conciergeRetryClaimPath(url.pathname);
     const isConciergeRetryFinish=conciergeRetryFinishPath(url.pathname);
     const isIntegrationLinkConsent=integrationLinkConsentPath(url.pathname);
@@ -490,7 +494,7 @@ export function createFoundationHttpHandler({
     const isGrantRevocation=grantRevocationPath(url.pathname);
     const isRevocationAck=revocationAckPath(url.pathname);
     const isEvaluate=evaluatePath(url.pathname);
-    if(!isConciergeRetryClaim&&!isConciergeRetryFinish&&!isUserConciergeCancel&&!isUserGrantRevoke&&!isUserLinkRevoke&&!isIntegrationDeviceLinkRequest&&!isIntegrationDeviceLinkApprove&&!isIntegrationDeviceLinkExchange&&!isIntegrationDelegationRefresh&&!isConciergePlan&&!isConciergeExecute&&!isIntegrationLinkConsent&&!isIntegrationLinkRevoke&&!isIntegrationGrantConsent&&!isIntegrationGrantRevoke&&!isClaim&&!isGrantConsent&&!isGrantRevocation&&!isRevocationAck&&!isEvaluate) return json(404,{error:'not-found'});
+    if(!isConciergeRetryClaim&&!isConciergeRetryFinish&&!isConciergeSupersede&&!isUserConciergeCancel&&!isUserGrantRevoke&&!isUserLinkRevoke&&!isIntegrationDeviceLinkRequest&&!isIntegrationDeviceLinkApprove&&!isIntegrationDeviceLinkExchange&&!isIntegrationDelegationRefresh&&!isConciergePlan&&!isConciergeExecute&&!isIntegrationLinkConsent&&!isIntegrationLinkRevoke&&!isIntegrationGrantConsent&&!isIntegrationGrantRevoke&&!isClaim&&!isGrantConsent&&!isGrantRevocation&&!isRevocationAck&&!isEvaluate) return json(404,{error:'not-found'});
     if(request.method!=='POST') return json(405,{error:'method-not-allowed'});
 
     const contentType=request.headers.get('content-type')??'';
@@ -520,6 +524,17 @@ export function createFoundationHttpHandler({
       }
       const result=await conciergeRetry.finish({envelope,authContext});
       const status={ok:200,denied:403,invalid:400,unavailable:503}[result.status]??500;
+      return json(status,result);
+    }
+
+    if(isConciergeSupersede){
+      if(typeof conciergeSupersede!=='function'||typeof authenticateIntegrationUserAndClient!=='function'){
+        return json(404,{error:'not-found'});
+      }
+      let authContext;
+      try{authContext=await authenticateIntegrationUserAndClient(request)}catch{return json(401,{error:'unauthenticated'})}
+      const result=await conciergeSupersede({envelope,authContext});
+      const status={superseded:200,'already-superseded':200,denied:403,invalid:400,unavailable:503}[result.status]??500;
       return json(status,result);
     }
 
