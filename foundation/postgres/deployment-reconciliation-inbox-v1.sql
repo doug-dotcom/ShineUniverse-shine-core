@@ -329,7 +329,7 @@ begin
   if v_receipt.receipt_id is null then
     v_state := 'unknown';
     v_reason := 'deployment-receipt-missing';
-  elsif coalesce(v_truth->>'deploymentState','unknown')<>'aligned' then
+  elsif coalesce(v_truth->>'truthState','unknown')<>'aligned' then
     v_state := 'drift';
     v_reason := 'deployment-truth-not-aligned';
   elsif coalesce(v_health->>'runtimeVersion','')<>v_receipt.runtime_version then
