@@ -39,7 +39,7 @@ declare
 begin
   select foundation.get_gateway_operation_inventory_v1('production') into v;
 
-  if (v->>'routeCount')::integer <> 39 then
+  if (v->>'routeCount')::integer <> 40 then
     raise exception 'Gateway inventory should expose all 40 routes: %',v;
   end if;
 
