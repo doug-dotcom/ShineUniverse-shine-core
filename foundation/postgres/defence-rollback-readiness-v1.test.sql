@@ -214,12 +214,14 @@ begin
 
   insert into foundation.defence_rollback_source_attestations(
     target_id,repository,rollback_commit_sha,canonical_commit_sha,
-    source_available,observed_at,valid_until,evidence_ref,metadata
+    source_available,canonical_source_available,
+    observed_at,valid_until,evidence_ref,metadata
   ) values (
     'railway:test-rollback-carry',
     'doug-dotcom/test-rollback-carry',
     repeat('3',40),
     repeat('2',40),
+    true,
     true,
     now()-interval '5 minutes',
     now()+interval '90 minutes',
@@ -241,6 +243,32 @@ begin
 
   if (v->>'carriedForwardPriorCanonicalProofTargets')::integer<1 then
     raise exception 'carried-forward proof count missing: %',v;
+  end if;
+end;
+$rollback$;
+
+
+do $rollback$
+declare
+  v jsonb;
+begin
+  select foundation.record_defence_rollback_source_attestation_v2(
+    'railway:test-rollback-ready',
+    'doug-dotcom/test-rollback-ready',
+    repeat('b',40),
+    repeat('a',40),
+    true,
+    true,
+    now()+interval '1 second',
+    now()+interval '2 hours',
+    'test:rollback-ready:dual-proof',
+    '{"test":true}'::jsonb
+  ) into v;
+
+  if v->>'status'<>'recorded'
+     or (v->>'rollbackSourceAvailable')::boolean is not true
+     or (v->>'canonicalSourceAvailable')::boolean is not true then
+    raise exception 'dual rollback source attestation not recorded: %',v;
   end if;
 end;
 $rollback$;
