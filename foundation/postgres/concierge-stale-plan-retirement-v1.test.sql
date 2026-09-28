@@ -25,6 +25,9 @@ begin
   limit 1;
   if fn is null
      or position('concierge_execution_events' in fn)=0
+     or position('execution-started' in fn)=0
+     or position('execution-completed' in fn)=0
+     or position('execution-failed' in fn)=0
      or position('concierge_step_checkpoints' in fn)=0
      or position('concierge_retry_jobs' in fn)=0
      or position('concierge_cancellation_events' in fn)=0 then
