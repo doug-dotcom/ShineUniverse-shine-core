@@ -32,7 +32,9 @@ Both event and receipt tables:
 
 - have RLS enabled;
 - grant no access to `anon` or `authenticated`;
-- allow the Foundation Gateway only `SELECT` + `INSERT`;
+- grant the Foundation Gateway **no direct table privileges**;
+- expose writes only through the narrowly granted `foundation.persist_atlas_feed_event_v1` function;
+- revoke that function from `PUBLIC`, `anon` and `authenticated`;
 - reject `UPDATE` and `DELETE` through the shared append-only trigger.
 
 The store is in the private `foundation` schema and is **not** added to Realtime publication.
