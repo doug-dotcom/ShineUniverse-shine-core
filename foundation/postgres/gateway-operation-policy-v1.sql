@@ -120,7 +120,7 @@ language plpgsql
 stable
 security definer
 set search_path = pg_catalog, foundation
-as $
+as $operation_policy$
 declare
   v_route foundation.gateway_operation_contracts%rowtype;
   v_policy foundation.gateway_operation_policies%rowtype;
@@ -219,7 +219,7 @@ begin
     'admission',v_admission
   );
 end;
-$$;
+$operation_policy$;
 
 revoke all on function foundation.evaluate_gateway_operation_policy_v1(text,text,timestamptz)
   from public,anon,authenticated;
