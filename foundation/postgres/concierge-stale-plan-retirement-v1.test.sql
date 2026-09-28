@@ -40,11 +40,6 @@ begin
     raise exception 'Retired request ticket guard missing';
   end if;
 
-  select pg_get_functiondef(p.oid) into fn
-  from pg_proc p join pg_namespace n on n.oid=p.relnamespace
-  where false;
-exception when undefined_column then
-  null;
 end;
 $$;
 
