@@ -161,7 +161,11 @@ Deno.serve(async(req:Request)=>{
         !clean(observation?.branch,200)||
         !sha40(observation?.headSha)||
         !clean(observation?.headCommittedAt,64)||
-        Number.isNaN(Date.parse(observation.headCommittedAt))
+        Number.isNaN(Date.parse(observation.headCommittedAt))||
+        typeof observation?.deploymentRelevant!=='boolean'||
+        !Number.isInteger(observation?.changedFileCount)||
+        observation.changedFileCount<0||
+        observation.changedFileCount>10000
       ){
         return jsonResponse(400,{error:'invalid-release-head-observation'});
       }
@@ -193,7 +197,9 @@ Deno.serve(async(req:Request)=>{
             githubActor:identity.actor,
             githubRepository:identity.repository,
             githubRef:identity.ref,
-            githubWorkflowRef:identity.workflowRef
+            githubWorkflowRef:identity.workflowRef,
+            deploymentRelevant:observation.deploymentRelevant,
+            changedFileCount:observation.changedFileCount
           })}
         ) as result
       `;
