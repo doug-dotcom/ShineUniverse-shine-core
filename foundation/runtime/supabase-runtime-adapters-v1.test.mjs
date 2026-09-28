@@ -82,6 +82,25 @@ const makeSql=()=> {
     if(q.includes('foundation.get_app_operational_status_v1')){
       return [{status:{appId:'shine.travel',operationalState:'revocation-pending',operationalHealth:'attention'}}];
     }
+    if(q.includes('foundation.evaluate_gateway_route_policy_v1')){
+      return [{policy:{
+        gatewayRoutePolicyResponse:'shine-foundation/gateway-route-policy-response-v1',
+        schemaVersion:'1.0.0',
+        environment:'production',
+        method:'POST',
+        path:'/v1/grants/consent',
+        routeSymbol:'grantConsentPath',
+        operationKey:'grant.consent',
+        riskClass:'permission-write',
+        effectClass:'write',
+        policyState:'admit',
+        reasonCode:'dependency-admission-clear',
+        policy:{
+          policyState:'admit',
+          reasonCode:'dependency-admission-clear'
+        }
+      }}];
+    }
     if(q.includes('foundation.evaluate_gateway_operation_policy_v1')){
       return [{policy:{
         gatewayOperationPolicyResponse:'shine-foundation/gateway-operation-policy-response-v1',
@@ -466,6 +485,19 @@ test('dependency admission delegates to the hosted database function',async()=>{
   assert.equal(result.reasonCode,'dependency-admission-clear');
 });
 
+test('universal route policy delegates to the hosted database broker',async()=>{
+  const {adapters}=makeAdapters();
+  const result=await adapters.evaluateGatewayRoutePolicy({
+    method:'POST',
+    path:'/v1/grants/consent',
+    environment:'production',
+    asOf:'2026-09-28T03:45:00Z'
+  });
+  assert.equal(result.policyState,'admit');
+  assert.equal(result.operationKey,'grant.consent');
+  assert.equal(result.path,'/v1/grants/consent');
+});
+
 test('runtime exposes the complete Gateway adapter surface',()=>{
   const {adapters}=makeAdapters();
   const required=[
@@ -488,7 +520,7 @@ test('runtime exposes the complete Gateway adapter surface',()=>{
     'issueCapabilityInvocationTicket','getCapabilityAdapterHealth',
     'recordCapabilityAdapterHealth','invokeCapability',
     'listDiscoverableCapabilities','getAppOperationalStatus',
-    'evaluateDependencyAdmission','getAppManifest','getVaultResource',
+    'evaluateDependencyAdmission','evaluateGatewayRoutePolicy','getAppManifest','getVaultResource',
     'getEffectiveGrants','evaluateDefence','writeAuditEvent'
   ];
   const missing=required.filter(name=>typeof adapters[name]!=='function');
