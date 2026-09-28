@@ -1,0 +1,21 @@
+{
+  "contract": "shine-foundation/foundation-readiness-incident-response-v1",
+  "version": "1.0.0",
+  "layer": 45,
+  "purpose": "Map readiness watch/incident state to evidence, containment and proposal actions without expanding canonical mutation authority.",
+  "actions": [
+    "inspect-readiness-evidence",
+    "collect-fresh-readiness-evidence",
+    "contain-degraded-scopes",
+    "propose-dependency-remediation"
+  ],
+  "invariants": {
+    "watchCannotActivateContainment": true,
+    "persistentIncidentRequiredForContainment": true,
+    "containmentUsesExistingSafeModeScopes": true,
+    "canonicalTruthMutationAllowed": false,
+    "releaseRebindAllowed": false,
+    "automaticDependencyRepair": false,
+    "authorityExpansion": false
+  }
+}
