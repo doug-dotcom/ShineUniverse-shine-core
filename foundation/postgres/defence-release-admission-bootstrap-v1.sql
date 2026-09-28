@@ -42,6 +42,7 @@ declare
   v_health_fresh boolean := false;
   v_source_identity_ok boolean := false;
   v_transition_blocking boolean := false;
+  v_on_demand_canonical_unchanged boolean := false;
 begin
   select * into v_target
   from foundation.defence_estate_targets
@@ -251,6 +252,16 @@ begin
     false
   );
 
+  v_on_demand_canonical_unchanged := coalesce(
+    v_health_target.probe_mode='on_demand'
+    and v_last.canonical_deployment_id is not null
+    and v_last.canonical_deployment_id=v_serving.deployment_id
+    and v_last.canonical_commit_sha=v_serving.commit_sha
+    and v_recent_samples>=v_required_samples
+    and v_recent_failures=0,
+    false
+  );
+
   if v_last.canonical_deployment_id is not null then
     if v_serving.commit_sha is distinct from v_last.canonical_commit_sha then
       v_rollback_deployment := v_last.canonical_deployment_id;
@@ -284,7 +295,7 @@ begin
       v_decision := 'hold';
       v_reason := 'candidate-transition-failed-no-rollback-anchor';
     end if;
-  elsif not v_health_fresh then
+  elsif not v_health_fresh and not v_on_demand_canonical_unchanged then
     if v_rollback_deployment is not null then
       v_decision := 'rollback-recommended';
       v_reason := 'serving-health-not-clear';
@@ -363,6 +374,7 @@ begin
       'recentSampleWindowEndedAt',v_recent_last,
       'requiredSoakSeconds',v_soak_seconds,
       'transitionBlocking',v_transition_blocking,
+      'onDemandCanonicalUnchanged',v_on_demand_canonical_unchanged,
       'latestCandidateTransitionState',v_transition.transition_state,
       'latestCandidateTransitionAt',v_transition.occurred_at,
       'bootstrapRollbackFound',v_bootstrap_deployment is not null,
