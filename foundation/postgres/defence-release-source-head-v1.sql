@@ -258,12 +258,13 @@ begin
         and serving_commit_sha is not null
         and head_sha<>serving_commit_sha
         and head_committed_at<=now()-interval '30 minutes'
-        and not (
+        and not coalesce(
           transition_commit_sha=head_sha
           and transition_state in (
             'waiting','needs_approval','queued','initializing','building','deploying'
           )
-          and transition_occurred_at>now()-interval '30 minutes'
+          and transition_occurred_at>now()-interval '30 minutes',
+          false
         )
     )
   into v_required,v_fresh,v_missing,v_stale,v_ahead,v_overdue
@@ -321,12 +322,13 @@ begin
           and serving_commit_sha is not null
           and head_sha<>serving_commit_sha
           and head_committed_at<=now()-interval '30 minutes'
-          and not (
+          and not coalesce(
             transition_commit_sha=head_sha
             and transition_state in (
               'waiting','needs_approval','queued','initializing','building','deploying'
             )
-            and transition_occurred_at>now()-interval '30 minutes'
+            and transition_occurred_at>now()-interval '30 minutes',
+            false
           )
           then 'release-source-head-not-serving'
         else 'source-ahead-within-grace'
@@ -351,12 +353,13 @@ begin
       and serving_commit_sha is not null
       and head_sha<>serving_commit_sha
       and head_committed_at<=now()-interval '30 minutes'
-      and not (
+      and not coalesce(
         transition_commit_sha=head_sha
         and transition_state in (
           'waiting','needs_approval','queued','initializing','building','deploying'
         )
-        and transition_occurred_at>now()-interval '30 minutes'
+        and transition_occurred_at>now()-interval '30 minutes',
+        false
       )
     );
 
@@ -462,13 +465,14 @@ begin
       and v_provenance.observation_id is not null
       and v_head.head_sha<>v_provenance.commit_sha
       and v_head.head_committed_at<=p_observed_at-interval '30 minutes'
-      and not (
+      and not coalesce(
         v_transition.event_id is not null
         and v_transition.commit_sha=v_head.head_sha
         and v_transition.transition_state in (
           'waiting','needs_approval','queued','initializing','building','deploying'
         )
-        and v_transition.occurred_at>p_observed_at-interval '30 minutes'
+        and v_transition.occurred_at>p_observed_at-interval '30 minutes',
+        false
       ) then
       v_state := 'warning';
       v_reason := 'release-source-head-not-serving';
