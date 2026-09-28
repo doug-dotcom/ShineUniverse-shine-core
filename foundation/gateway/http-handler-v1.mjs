@@ -43,10 +43,11 @@ const conciergeRetryClaimPath=p=>p==='/v1/concierge/retry/claim'||p.endsWith('/f
 const conciergeRetryFinishPath=p=>p==='/v1/concierge/retry/finish'||p.endsWith('/foundation-gateway/v1/concierge/retry/finish');
 const capabilityTicketRedeemPath=p=>p==='/v1/capability/ticket/redeem'||p.endsWith('/foundation-gateway/v1/capability/ticket/redeem');
 const integrationContextPublishPath=p=>p==='/v1/integration/context/publish'||p.endsWith('/foundation-gateway/v1/integration/context/publish');
+const atlasFeedPublishAdmitPath=p=>p==='/v1/atlas-feed/publish/admit'||p.endsWith('/foundation-gateway/v1/atlas-feed/publish/admit');
 const defenceStatusMatch=p=>p.match(/(?:^|\/foundation-gateway)\/v1\/defence\/status\/([a-z0-9][a-z0-9-]{0,63})$/);
 const SHA=/^[a-f0-9]{40}$/;
 
-/** @param {{gateway:any, authenticate:any, authenticateApp?:any, authenticateIntegrationClient?:any, authenticateIntegrationUserAndClient?:any, authenticateIntegrationUser?:any, defenceStatus?:any, identityClaim?:any, authenticateIdentityClaim?:any, grantConsent?:any, grantRevocation?:any, revocationFeed?:any, revocationAck?:any, revocationHealth?:any, appOperationalStatus?:any, capabilityDiscovery?:any, integrationClientStatus?:any, integrationLinkConsent?:any, integrationCapabilityConsent?:any, integrationGrantRevocation?:any, integrationLinkRevocation?:any, integrationGrantList?:any, conciergePlan?:any, conciergeExecute?:any, integrationLinkRequest?:any, integrationLinkApproval?:any, integrationLinkStatus?:any, integrationLinkExchange?:any, integrationLinkPreview?:any, capabilityTicketRedeem?:any, integrationDelegationRefresh?:any, connectedIntegrationList?:any, userIntegrationGrantRevocation?:any, userIntegrationLinkRevocation?:any, userAccessHistory?:any, userAccessExplanation?:any, userConciergeCancellation?:any, userConciergeJobs?:any, conciergeRetry?:any, maxBodyBytes?:number}} [options] */
+/** @param {{gateway:any, authenticate:any, authenticateApp?:any, authenticateIntegrationClient?:any, authenticateIntegrationUserAndClient?:any, authenticateIntegrationUser?:any, defenceStatus?:any, identityClaim?:any, authenticateIdentityClaim?:any, grantConsent?:any, grantRevocation?:any, revocationFeed?:any, revocationAck?:any, revocationHealth?:any, appOperationalStatus?:any, capabilityDiscovery?:any, integrationClientStatus?:any, integrationLinkConsent?:any, integrationCapabilityConsent?:any, integrationGrantRevocation?:any, integrationLinkRevocation?:any, integrationGrantList?:any, conciergePlan?:any, conciergeExecute?:any, integrationLinkRequest?:any, integrationLinkApproval?:any, integrationLinkStatus?:any, integrationLinkExchange?:any, integrationLinkPreview?:any, capabilityTicketRedeem?:any, integrationDelegationRefresh?:any, connectedIntegrationList?:any, userIntegrationGrantRevocation?:any, userIntegrationLinkRevocation?:any, userAccessHistory?:any, userAccessExplanation?:any, userConciergeCancellation?:any, userConciergeJobs?:any, conciergeRetry?:any, atlasFeedPublisherAdmission?:any, maxBodyBytes?:number}} [options] */
 export function createFoundationHttpHandler({
   gateway,
   authenticate,
@@ -90,6 +91,7 @@ export function createFoundationHttpHandler({
   conciergeRetry,
   conciergeFleetStatus,
   integrationContextPublish,
+  atlasFeedPublisherAdmission,
   evaluateOperationPolicy,
   operationPolicyRequired=false,
   recordOperationAudit,
@@ -118,6 +120,7 @@ export function createFoundationHttpHandler({
     if(v!==undefined&&typeof v!=='function') throw new TypeError(n+' must be a function');
   }
   if(integrationContextPublish!==undefined&&typeof integrationContextPublish!=='function') throw new TypeError('integrationContextPublish must be a function');
+  if(atlasFeedPublisherAdmission!==undefined&&typeof atlasFeedPublisherAdmission!=='function') throw new TypeError('atlasFeedPublisherAdmission must be a function');
   if(conciergeFleetStatus!==undefined&&typeof conciergeFleetStatus!=='function') throw new TypeError('conciergeFleetStatus must be a function');
   if(conciergeSupersede!==undefined&&typeof conciergeSupersede!=='function') throw new TypeError('conciergeSupersede must be a function');
   if(evaluateOperationPolicy!==undefined&&typeof evaluateOperationPolicy!=='function') throw new TypeError('evaluateOperationPolicy must be a function');
@@ -244,6 +247,30 @@ export function createFoundationHttpHandler({
       try{authContext=await authenticateApp(request)}catch{return respond(401,{error:'unauthenticated'})}
       const result=await integrationContextPublish({envelope,authContext});
       const status={published:200,'already-published':200,denied:403,invalid:400,unavailable:503}[result.status]??500;
+      return respond(status,result);
+    }
+
+    if(request.method==='POST'&&atlasFeedPublishAdmitPath(url.pathname)){
+      if(typeof atlasFeedPublisherAdmission!=='function'||typeof authenticateApp!=='function') return respond(404,{error:'not-found'});
+      const contentType=request.headers.get('content-type')??'';
+      if(!contentType.toLowerCase().startsWith('application/json')) return respond(415,{error:'unsupported-media-type'});
+      const limit=80*1024;
+      const declared=Number(request.headers.get('content-length'));
+      if(Number.isFinite(declared)&&declared>limit) return respond(413,{error:'request-too-large'});
+      let raw;
+      try{raw=await request.text()}catch{return respond(400,{error:'invalid-body'})}
+      if(new TextEncoder().encode(raw).byteLength>limit) return respond(413,{error:'request-too-large'});
+      let envelope;
+      try{envelope=JSON.parse(raw)}catch{return respond(400,{error:'invalid-json'})}
+      const dataClass=envelope?.event?.audience?.dataClass;
+      let authContext;
+      try{
+        authContext=(dataClass==='personal'||dataClass==='sensitive')
+          ?await authenticate(request)
+          :await authenticateApp(request);
+      }catch{return respond(401,{error:'unauthenticated'})}
+      const result=await atlasFeedPublisherAdmission({envelope,authContext});
+      const status={admitted:200,denied:403,invalid:400,unavailable:503}[result.status]??500;
       return respond(status,result);
     }
 
