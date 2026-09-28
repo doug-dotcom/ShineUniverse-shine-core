@@ -555,3 +555,71 @@ test('privileged operation audit delegates to the narrow hosted recorder',async(
   assert.equal(result.phase,'policy');
 });
 
+test('hosted JSONB string rows are normalised before operation audit recording',async()=>{
+  const calls=[];
+  const hostedPolicy={
+    gatewayRoutePolicyResponse:'shine-foundation/gateway-route-policy-response-v1',
+    schemaVersion:'1.0.0',
+    environment:'production',
+    method:'POST',
+    path:'/v1/grants/consent',
+    routeSymbol:'grantConsentPath',
+    operationKey:'grant.consent',
+    riskClass:'permission-write',
+    effectClass:'write',
+    policyState:'admit',
+    reasonCode:'dependency-admission-clear',
+    policy:{
+      policyState:'admit',
+      reasonCode:'dependency-admission-clear',
+      policyEvidenceRef:'foundation:operation-policy:gateway:grant-consent:v1',
+      impactScope:'permission-operations',
+      executionGuardRef:'foundation.issue_access_grant_v1',
+      admission:{dependencyEvidence:[]}
+    }
+  };
+  const sql=async(strings,...values)=>{
+    const q=strings.join('?').replace(/\s+/g,' ').trim().toLowerCase();
+    if(q.includes('foundation.evaluate_gateway_route_policy_v1')){
+      return [{policy:JSON.stringify(hostedPolicy)}];
+    }
+    if(q.includes('foundation.record_gateway_operation_audit_event_v1')){
+      calls.push(values);
+      return [{audit:JSON.stringify({
+        status:'recorded',
+        operationAuditId:String(values[0]),
+        phase:String(values[1]),
+        eventHash:'b'.repeat(64)
+      })}];
+    }
+    throw new Error('unexpected SQL: '+q);
+  };
+  const adapters=createSupabaseRuntimeAdapters({
+    sql,
+    fetchImpl:async()=>Response.json({}),
+    defenceGate:async()=>({decision:'allow'})
+  });
+
+  const policy=await adapters.evaluateGatewayRoutePolicy({
+    method:'POST',path:'/v1/grants/consent',environment:'production',
+    asOf:'2026-09-28T04:20:00Z'
+  });
+  assert.equal(policy.operationKey,'grant.consent');
+  assert.equal(policy.policyState,'admit');
+
+  const result=await adapters.recordGatewayOperationAuditEvent({
+    operationAuditId:'29000000-0000-4000-8000-000000009998',
+    phase:'policy',
+    method:'POST',
+    path:'/v1/grants/consent',
+    environment:'production',
+    policy,
+    occurredAt:'2026-09-28T04:20:00Z'
+  });
+
+  assert.equal(result.status,'recorded');
+  assert.equal(calls.length,1);
+  assert.equal(typeof calls[0][5],'string');
+  assert.equal(JSON.parse(calls[0][5]).operationKey,'grant.consent');
+});
+
