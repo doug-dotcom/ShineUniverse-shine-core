@@ -1,0 +1,32 @@
+{
+  "contract": "shine-foundation/foundation-readiness-handoff-response-v1",
+  "version": "1.0.0",
+  "layer": 49,
+  "purpose": "Require the addressed dependency owner to explicitly acknowledge, reject, or request clarification for a current Layer-48 remediation handoff without granting approval or execution authority.",
+  "responderRole": "shine_defence_runtime",
+  "addressedService": "foundation.defence",
+  "addressedOwnerComponent": "universe",
+  "responseStates": [
+    "accepted",
+    "rejected",
+    "clarification-requested"
+  ],
+  "responseLedger": "foundation.readiness_dependency_remediation_handoff_responses",
+  "responseFunction": "foundation.respond_readiness_dependency_remediation_handoff_v1",
+  "statusReader": "foundation.get_readiness_dependency_remediation_handoff_response_status_v1",
+  "invariants": {
+    "serviceRoleCannotRespond": true,
+    "foundationRuntimeCannotRespond": true,
+    "onlyDefenceRuntimeMayRespond": true,
+    "handoffMustBeCurrentAndIntegrityVerified": true,
+    "responseSingleUse": true,
+    "responseBindsHandoffSha256": true,
+    "responseBindsProposalSha256": true,
+    "responseBindsConditionFingerprint": true,
+    "responseBindsRoutingFingerprint": true,
+    "staleHandoffMakesResponseStale": true,
+    "approvalGranted": false,
+    "executionAuthorityGranted": false,
+    "executesAction": false
+  }
+}
