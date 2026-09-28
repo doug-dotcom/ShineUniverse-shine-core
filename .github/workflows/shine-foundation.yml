@@ -117,3 +117,7 @@ jobs:
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/integration-client-fk-index-v1.sql
       - name: Run open capability contract acceptance tests
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/open-capability-contract-v1.test.sql
+      - name: Apply deployment truth contract
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/deployment-truth-v1.sql
+      - name: Run deployment truth acceptance tests
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/deployment-truth-v1.test.sql
