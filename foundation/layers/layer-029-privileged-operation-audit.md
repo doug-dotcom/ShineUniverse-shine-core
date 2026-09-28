@@ -322,3 +322,67 @@ to:
 > “we can prove which policy was enforced, what evidence supported it, which exact runtime executed it, and what happened next — through an immutable hash-linked trace.”
 
 Foundation now has a canonical audit trail worthy of the control plane it protects.
+
+## v82 closure reconciliation
+
+After the initial v81 Layer-29 closure, later Concierge/Defence work advanced the live Gateway to **v82**.
+
+Foundation did not accept that newer runtime from Edge `ACTIVE` state alone.
+
+All **27 / 27** deployed v82 bundle files were compared byte-for-byte against:
+
+`a6c6d8af0da0d8e723e5bf56a1e0c664033d19bf`
+
+and matched exactly.
+
+Relative to the exact-source v81 bundle, only three paths changed:
+
+- `foundation/gateway/concierge-orchestration-v1.mjs`;
+- `foundation/gateway/http-handler-v1.mjs`;
+- `foundation/runtime/supabase-runtime-adapters-v1.mjs`.
+
+The live v82 artefact is:
+
+`6e2368d9d183c0bc6ee93426a8cf095c0f1510b8fb97f3959ea5b67270e78b02`
+
+Deployment truth is now aligned to v82 with source:
+
+`github://doug-dotcom/ShineUniverse-shine-core/commit/a6c6d8af0da0d8e723e5bf56a1e0c664033d19bf`
+
+v82 then earned a fresh deployment-bounded health window:
+
+- probes: **3**;
+- 4xx: **0**;
+- 5xx: **0**;
+- runtime/probe errors: **0**;
+- p95 probe latency: approximately **11.0 ms**;
+- health: **HEALTHY**.
+
+Layer-29 audit proof is also live on v82.
+
+Two observed v82 attempts produced:
+
+- policy events: **2**;
+- outcome events: **2**;
+- broken predecessor links: **0**.
+
+One was normal scheduled worker traffic:
+
+`concierge.retry.claim → worker-only → HTTP 200`
+
+The second deliberately exercised a user/app permission route while current Shine Defence posture was `fail`:
+
+`grant.consent → dependency-guarded → HTTP 403`
+
+The request was stopped at the policy boundary before authentication/domain mutation and still produced the complete hash-linked policy/outcome pair.
+
+At the same closure point, global audit health reported:
+
+- policy events (24h): **68**;
+- outcome events (24h): **68**;
+- open traces: **0**;
+- broken chains: **0**;
+- audit health: **PASS**.
+
+This v82 reconciliation preserves the original v81 production proof as historical evidence while making the current Layer-29 production statement truthful.
+
