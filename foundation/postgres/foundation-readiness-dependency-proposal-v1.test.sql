@@ -2,7 +2,8 @@ begin;
 
 -- Layer 47 proposal generation is exercised against a synthetic active incident.
 -- Upstream Layers 43-46 separately prove the persisted incident chain.
-create or replace view foundation.current_foundation_readiness_incident_state
+drop view foundation.current_foundation_readiness_incident_state;
+create view foundation.current_foundation_readiness_incident_state
 with(security_invoker=true) as
 select
   1::bigint as event_sequence,
