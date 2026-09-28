@@ -1,0 +1,47 @@
+{
+  "contract": "shine-foundation/foundation-remediation-approval-receipts-v1",
+  "version": "1.0.0",
+  "layer": 39,
+  "purpose": "Represent explicit external approval for Layer-38 approval-required remediation actions as immutable, scope-bound, time-bounded, single-use receipts without executing the approved action.",
+  "dedicatedApproverRole": "foundation_remediation_approver",
+  "approverRoleProperties": {
+    "login": false,
+    "inheritedByServiceRole": false,
+    "mayIssueReceipts": true,
+    "mayConsumeReceipts": false
+  },
+  "consumer": "service_role",
+  "receiptLedger": "foundation.remediation_approval_receipts",
+  "consumptionLedger": "foundation.remediation_approval_events",
+  "issueFunction": "foundation.issue_remediation_approval_receipt_v1",
+  "consumeFunction": "foundation.consume_remediation_approval_receipt_v1",
+  "statusReader": "foundation.get_remediation_approval_status_v1",
+  "controlHealth": "foundation.get_remediation_approval_control_health_v1",
+  "scopeBinding": [
+    "current active incident event",
+    "incident severity/state",
+    "Layer-38 action key and policy version",
+    "incident evidence fingerprint",
+    "Foundation release ref",
+    "proposal SHA-256"
+  ],
+  "ttl": {
+    "maximumMinutes": 15,
+    "usableBeforeApprovedAt": false
+  },
+  "singleUse": true,
+  "invariants": {
+    "serviceRoleCannotIssue": true,
+    "foundationRuntimeCannotIssue": true,
+    "approverRoleCannotConsume": true,
+    "wrongScopeDoesNotConsume": true,
+    "replayDenied": true,
+    "expiredReceiptDenied": true,
+    "changedIncidentInvalidatesReceipt": true,
+    "unknownOrDeniedActionCannotReceiveApproval": true,
+    "autoRepairCannotReceiveApproval": true,
+    "consumptionDoesNotExecuteAction": true,
+    "consumptionDoesNotGrantExecutionAuthority": true,
+    "directLedgerInsertDeniedToServiceRole": true
+  }
+}
