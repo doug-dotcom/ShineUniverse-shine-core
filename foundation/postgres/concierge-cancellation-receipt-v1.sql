@@ -305,9 +305,24 @@ enriched as (
       'cancellationReceipt',
       case
         when c.request_id is null then null
-        else c.receipt || jsonb_build_object(
-          'receiptSha256',c.receipt_sha256
+        when encode(
+          extensions.digest(convert_to(c.receipt::text,'UTF8'),'sha256'),
+          'hex'
+        )=c.receipt_sha256
+        then c.receipt || jsonb_build_object(
+          'receiptSha256',c.receipt_sha256,
+          'integrity','verified'
         )
+        else null
+      end,
+      'cancellationReceiptIntegrity',
+      case
+        when c.request_id is null then null
+        when encode(
+          extensions.digest(convert_to(c.receipt::text,'UTF8'),'sha256'),
+          'hex'
+        )=c.receipt_sha256 then 'verified'
+        else 'mismatch'
       end,
       'supersededByRequestId',c.superseded_by_request_id
     ) as item
@@ -345,7 +360,8 @@ select jsonb_build_object(
     'version','shine-foundation/concierge-cancellation-receipt-v1',
     'specialistOutputIncluded',false,
     'conversationTextIncluded',false,
-    'tamperEvidentSha256',true
+    'tamperEvidentSha256',true,
+    'readTimeVerification',true
   ),
   'items',assembled.items
 )
