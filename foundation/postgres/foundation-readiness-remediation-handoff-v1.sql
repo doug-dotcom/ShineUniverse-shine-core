@@ -301,7 +301,7 @@ declare
   h foundation.readiness_dependency_remediation_handoffs%rowtype;
   pstate jsonb;
   expected_hash text;
-  current_v_routing_fingerprint text;
+  current_routing_fingerprint text;
   state text;
 begin
   select * into h
