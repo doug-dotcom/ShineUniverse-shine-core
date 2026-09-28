@@ -143,6 +143,41 @@ where provider='supabase'
   );
 
 
+create table foundation.defence_supabase_runtime_receipt_requests (
+  request_id uuid primary key default gen_random_uuid(),
+  target_id text not null references foundation.defence_estate_targets(target_id),
+  external_request_id bigint unique,
+  target_url text not null check (target_url ~ '^https://'),
+  queued_at timestamptz not null default now(),
+  evidence_ref text not null unique,
+  metadata jsonb not null default '{}'::jsonb,
+  recorded_at timestamptz not null default now(),
+  check (jsonb_typeof(metadata)='object')
+);
+
+alter table foundation.defence_supabase_runtime_receipt_requests enable row level security;
+
+create policy shine_defence_runtime_supabase_receipt_requests_select
+on foundation.defence_supabase_runtime_receipt_requests
+for select
+to shine_defence_runtime
+using (true);
+
+revoke all on foundation.defence_supabase_runtime_receipt_requests
+  from public,anon,authenticated;
+grant select on foundation.defence_supabase_runtime_receipt_requests
+  to shine_defence_runtime,service_role;
+grant insert on foundation.defence_supabase_runtime_receipt_requests
+  to service_role;
+
+create index defence_supabase_runtime_receipt_requests_target_idx
+  on foundation.defence_supabase_runtime_receipt_requests(target_id,queued_at desc);
+
+create trigger defence_supabase_runtime_receipt_requests_append_only
+before update or delete on foundation.defence_supabase_runtime_receipt_requests
+for each row execute function foundation.reject_append_only_mutation();
+
+
 create or replace function foundation.record_defence_supabase_runtime_receipt_v1(
   p_target_id text,
   p_payload jsonb,
