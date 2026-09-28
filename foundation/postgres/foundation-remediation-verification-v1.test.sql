@@ -164,6 +164,24 @@ begin
 end;
 $unresolved$;
 
+-- Separate admissions are used for later verification cases so Layer-41
+-- single-use execution semantics remain intact.
+insert into foundation.remediation_execution_admissions(
+  admission_id,approval_receipt_id,approval_consumption_event_id,environment,
+  incident_event_id,incident_key,action_key,operation_contract,target_authority,
+  mutation_shape,policy_version,evidence_fingerprint,release_ref,proposal_sha256,
+  admitted_at,expires_at,admission,admission_sha256
+)
+select
+  '42000000-0000-4000-8000-000000000210'::uuid,
+  approval_receipt_id,approval_consumption_event_id,environment,incident_event_id,
+  incident_key,action_key,operation_contract,target_authority,mutation_shape,
+  policy_version,evidence_fingerprint,release_ref,proposal_sha256,
+  admitted_at,expires_at,'{"test":"layer42-admission-2"}'::jsonb,
+  encode(extensions.digest(convert_to('{"test": "layer42-admission-2"}'::jsonb::text,'UTF8'),'sha256'),'hex')
+from foundation.remediation_execution_admissions
+where admission_id='42000000-0000-4000-8000-000000000203'::uuid;
+
 -- A separate executed remediation event is used for the successful verification.
 insert into foundation.remediation_execution_events(
   event_id,execution_id,admission_id,approval_receipt_id,incident_event_id,
@@ -173,7 +191,8 @@ insert into foundation.remediation_execution_events(
 select
   '42000000-0000-4000-8000-000000000206'::uuid,
   '42000000-0000-4000-8000-000000000207'::uuid,
-  admission_id,approval_receipt_id,incident_event_id,action_key,event_type,
+  '42000000-0000-4000-8000-000000000210'::uuid,
+  approval_receipt_id,incident_event_id,action_key,event_type,
   reason_code,proposal_sha256,proposal,before_snapshot,mutation_result,
   after_snapshot,now()
 from foundation.remediation_execution_events
@@ -219,6 +238,22 @@ end;
 $verified$;
 
 -- Failed execution cannot be verified or close anything.
+insert into foundation.remediation_execution_admissions(
+  admission_id,approval_receipt_id,approval_consumption_event_id,environment,
+  incident_event_id,incident_key,action_key,operation_contract,target_authority,
+  mutation_shape,policy_version,evidence_fingerprint,release_ref,proposal_sha256,
+  admitted_at,expires_at,admission,admission_sha256
+)
+select
+  '42000000-0000-4000-8000-000000000211'::uuid,
+  approval_receipt_id,approval_consumption_event_id,environment,incident_event_id,
+  incident_key,action_key,operation_contract,target_authority,mutation_shape,
+  policy_version,evidence_fingerprint,release_ref,proposal_sha256,
+  admitted_at,expires_at,'{"test":"layer42-admission-3"}'::jsonb,
+  encode(extensions.digest(convert_to('{"test": "layer42-admission-3"}'::jsonb::text,'UTF8'),'sha256'),'hex')
+from foundation.remediation_execution_admissions
+where admission_id='42000000-0000-4000-8000-000000000203'::uuid;
+
 insert into foundation.remediation_execution_events(
   event_id,execution_id,admission_id,approval_receipt_id,incident_event_id,
   action_key,event_type,reason_code,proposal_sha256,proposal,before_snapshot,
@@ -227,7 +262,8 @@ insert into foundation.remediation_execution_events(
 select
   '42000000-0000-4000-8000-000000000208'::uuid,
   '42000000-0000-4000-8000-000000000209'::uuid,
-  admission_id,approval_receipt_id,incident_event_id,action_key,'failed',
+  '42000000-0000-4000-8000-000000000211'::uuid,
+  approval_receipt_id,incident_event_id,action_key,'failed',
   'scoped-remediation-mutation-failed',proposal_sha256,proposal,before_snapshot,
   'test failure',now()
 from foundation.remediation_execution_events
