@@ -154,3 +154,50 @@ $cycle$;
 revoke all on function foundation.run_foundation_readiness_retest_cycle_v1(text,timestamptz,integer)
  from public,anon,authenticated,foundation_runtime,foundation_gateway;
 grant execute on function foundation.run_foundation_readiness_retest_cycle_v1(text,timestamptz,integer) to service_role;
+
+create or replace function foundation.reconcile_foundation_readiness_retest_cycle_v1(
+ p_cycle_id uuid,p_reconciled_at timestamptz default now()
+)
+returns jsonb language plpgsql security definer set search_path='' as $reconcile$
+declare
+ c foundation.foundation_readiness_retest_cycles%rowtype;
+ o foundation.foundation_readiness_drift_observations%rowtype;
+ prior foundation.foundation_readiness_incident_events%rowtype;
+ eid uuid;sev text;started timestamptz;secs integer;
+begin
+ select * into c from foundation.foundation_readiness_retest_cycles where cycle_id=p_cycle_id;
+ if c.cycle_id is null then raise exception 'readiness-retest-cycle-not-found'; end if;
+ if c.transition_type not in('detected','opened','changed','recovered') then
+  return jsonb_build_object('reconciled',false,'reasonCode','readiness-retest-cycle-has-no-transition');
+ end if;
+ if c.readiness_incident_event_id is not null then
+  return jsonb_build_object('reconciled',false,'reasonCode','readiness-retest-cycle-already-linked','incidentEventId',c.readiness_incident_event_id);
+ end if;
+ select * into o from foundation.foundation_readiness_drift_observations where observation_id=c.readiness_drift_observation_id;
+ select * into prior from foundation.foundation_readiness_incident_events
+ where incident_key=c.environment||':readiness' and occurred_at<=c.occurred_at
+ order by occurred_at desc,event_sequence desc limit 1;
+ started:=coalesce(prior.detection_started_at,c.occurred_at);
+ secs:=coalesce((c.cycle->>'persistenceSeconds')::integer,0);
+ sev:=case when c.transition_type='recovered' then 'info'
+           when o.current_readiness_state in('not-ready','unknown') or jsonb_array_length(o.blocked_scopes)>0 then 'critical'
+           else 'warning' end;
+ if c.transition_type='opened' and (prior.event_type is distinct from 'detected' or secs<coalesce(prior.persistence_threshold_seconds,300)) then
+  raise exception 'readiness-retest-open-reconciliation-invalid';
+ end if;
+ insert into foundation.foundation_readiness_incident_events(
+  incident_key,environment,event_type,readiness_state,drift_state,severity,reason_codes,
+  degraded_scopes,guarded_scopes,blocked_scopes,readiness_drift_observation_id,evidence_fingerprint,
+  condition_fingerprint,detection_started_at,persistence_threshold_seconds,persistence_seconds,snapshot,occurred_at
+ ) values(
+  c.environment||':readiness',c.environment,c.transition_type,o.current_readiness_state,o.drift_state,sev,o.reason_codes,
+  o.degraded_scopes,o.guarded_scopes,o.blocked_scopes,o.observation_id,o.evidence_fingerprint,
+  c.condition_fingerprint,started,coalesce(prior.persistence_threshold_seconds,300),secs,o.snapshot,c.occurred_at
+ ) returning event_id into eid;
+ return jsonb_build_object('reconciled',true,'cycleId',c.cycle_id,'incidentEventId',eid,'eventType',c.transition_type,'persistenceSeconds',secs);
+end;
+$reconcile$;
+
+revoke all on function foundation.reconcile_foundation_readiness_retest_cycle_v1(uuid,timestamptz)
+ from public,anon,authenticated,foundation_runtime,foundation_gateway;
+grant execute on function foundation.reconcile_foundation_readiness_retest_cycle_v1(uuid,timestamptz) to service_role;
