@@ -35,11 +35,13 @@
     "audit/outcome"
   ],
   "leastPrivilege": {
-    "gatewayCanExecuteBroker": true,
-    "gatewayCanReadRawOperationPolicyRows": false,
+    "gatewayUsesSecurityDefinerBroker": true,
     "brokerSecurityDefiner": true,
     "brokerFixedSearchPath": true,
-    "publicExecute": false
+    "publicExecute": false,
+    "gatewayRuntimeRoleInheritance": "foundation_gateway inherits foundation_runtime read-plane privileges",
+    "noNewRawDefenceGrantRequired": true,
+    "rationale": "The broker resolves Defence-backed admission without widening the Gateway role to Defence posture tables that previously failed under RLS."
   },
   "invariants": {
     "allPrivilegedOperationsRequirePolicy": true,
