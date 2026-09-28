@@ -101,6 +101,7 @@ proofed as (
         a.observed_at,
         a.valid_until,
         'rollback-commit-verified'::text as proof_mode,
+        0::integer as proof_priority,
         a.recorded_at
       from foundation.defence_rollback_source_attestations a
       where a.target_id=r.target_id
@@ -114,13 +115,14 @@ proofed as (
         a.observed_at,
         a.valid_until,
         'canonical-commit-verified'::text as proof_mode,
+        1::integer as proof_priority,
         a.recorded_at
       from foundation.defence_rollback_source_attestations a
       where a.target_id=r.target_id
         and lower(a.canonical_commit_sha)=r.commit_sha
         and a.canonical_source_available is not null
     ) evidence
-    order by evidence.observed_at desc,evidence.recorded_at desc,evidence.observation_id desc
+    order by evidence.proof_priority,evidence.observed_at desc,evidence.recorded_at desc,evidence.observation_id desc
     limit 1
   ) p on true
 ),
