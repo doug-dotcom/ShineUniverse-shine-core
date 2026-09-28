@@ -48,7 +48,9 @@ begin
 
   if fn is null
      or position('cancellationReceipt' in fn)=0
-     or position('receiptSha256' in fn)=0 then
+     or position('receiptSha256' in fn)=0
+     or position('cancellationReceiptIntegrity' in fn)=0
+     or position('readTimeVerification' in fn)=0 then
     raise exception 'task-centre cancellation receipt projection missing';
   end if;
 end;
