@@ -4,8 +4,8 @@
   "serviceId": "foundation.gateway",
   "purpose": "Give every privileged Gateway operation an explicit front-door policy while preserving its atomic execution guard behind admission.",
   "productionCoverage": {
-    "privilegedOperations": 24,
-    "dependencyAdmissionPolicies": 22,
+    "privilegedOperations": 25,
+    "dependencyAdmissionPolicies": 23,
     "workerOnlyPolicies": 2,
     "admissionScopes": [
       "protected-operations",
