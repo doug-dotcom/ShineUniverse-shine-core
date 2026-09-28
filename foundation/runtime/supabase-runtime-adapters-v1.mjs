@@ -107,6 +107,47 @@ export function createSupabaseRuntimeAdapters({sql,defenceGate,fetchImpl=fetch}=
       return row?{appId:String(row.app_id),credentialId:String(row.credential_id)}:null;
     },
 
+    async getAtlasFeedPublisherCapability({appId,capabilityId}={}){
+      if(!appId||!capabilityId) return null;
+      const rows=await sql`
+        select capability_id,capability_version,app_id,capability_mode,invocation_state
+        from foundation.app_capabilities
+        where app_id=${appId}
+          and capability_id=${capabilityId}
+        limit 1
+      `;
+      const row=first(rows);
+      return row?{
+        capabilityId:String(row.capability_id),
+        capabilityVersion:String(row.capability_version),
+        appId:String(row.app_id),
+        capabilityMode:String(row.capability_mode),
+        invocationState:String(row.invocation_state)
+      }:null;
+    },
+
+    async getAtlasFeedGrantContext({grantId}={}){
+      if(!grantId) return null;
+      const rows=await sql`
+        select grant_id::text,owner_shine_id::text,app_id,scope,purpose,
+               resource_id::text,resource_category,effective_status
+        from foundation.effective_access_grants
+        where grant_id=${grantId}::uuid
+        limit 1
+      `;
+      const row=first(rows);
+      return row?{
+        grantId:String(row.grant_id),
+        ownerShineId:String(row.owner_shine_id),
+        appId:String(row.app_id),
+        scope:String(row.scope),
+        purpose:String(row.purpose),
+        resourceId:row.resource_id==null?null:String(row.resource_id),
+        resourceCategory:row.resource_category==null?null:String(row.resource_category),
+        effectiveStatus:String(row.effective_status)
+      }:null;
+    },
+
     async verifyIdentity({authContext,claimedAppId}={}){
       if(!claimedAppId) return null;
 
