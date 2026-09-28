@@ -2,19 +2,29 @@
   "deploymentSourceManifest": "shine-foundation/gateway-deployment-source-v1",
   "schemaVersion": "1.0.0",
   "layer": 29,
-  "runtimeVersion": 81,
-  "artifactSha256": "6aebc29aac7e2eab77695549995f50a0c5e4ee5ab9b184ea4b25983bf8aa522d",
-  "sourceCommit": "60837a74d766742dbd4b88ca1cd0da0e14ec2d55",
-  "sourceRef": "github://doug-dotcom/ShineUniverse-shine-core/commit/60837a74d766742dbd4b88ca1cd0da0e14ec2d55",
-  "baseRuntimeVersion": 80,
-  "baseSourceCommit": "998523d9f7956168f3c9b6aa37217a6937600aaf",
+  "runtimeVersion": 82,
+  "artifactSha256": "6e2368d9d183c0bc6ee93426a8cf095c0f1510b8fb97f3959ea5b67270e78b02",
+  "sourceCommit": "a6c6d8af0da0d8e723e5bf56a1e0c664033d19bf",
+  "sourceRef": "github://doug-dotcom/ShineUniverse-shine-core/commit/a6c6d8af0da0d8e723e5bf56a1e0c664033d19bf",
+  "baseRuntimeVersion": 81,
+  "baseSourceCommit": "60837a74d766742dbd4b88ca1cd0da0e14ec2d55",
   "changedBundlePaths": [
+    "foundation/gateway/concierge-orchestration-v1.mjs",
+    "foundation/gateway/http-handler-v1.mjs",
     "foundation/runtime/supabase-runtime-adapters-v1.mjs"
   ],
-  "sourceRule": "v81 is the exact v80 bundle with only the runtime adapter replaced by the commit-60837a74 version. All other Edge paths are unchanged from exact-source v80.",
+  "sourceRule": "v82 was verified byte-for-byte across all 27 Edge bundle paths against commit a6c6d8af0da0d8e723e5bf56a1e0c664033d19bf. Relative to exact-source v81, only Concierge orchestration, the HTTP handler, and the runtime adapter changed; Layer 29 audit wiring remains present and live.",
   "databaseHardeningCommits": [
     "d50496f0f5b1889e061458f28874a7892dd3f5c3",
     "298d34b81a8d727e56503f5cf0b41a4c4c53132a",
     "0116ff801284a45b0d9bb0cc63175976f46e510c"
-  ]
+  ],
+  "currentAuditProof": {
+    "auditHealth": "pass",
+    "runtimeVersion": 82,
+    "attemptsObserved": 2,
+    "policyEvents": 2,
+    "outcomeEvents": 2,
+    "brokenLinks": 0
+  }
 }
