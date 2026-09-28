@@ -191,14 +191,33 @@ begin
     raise exception 'client roles must not read Atlas event storage';
   end if;
 
-  if not has_table_privilege('foundation_gateway','foundation.atlas_feed_events','INSERT')
-     or not has_table_privilege('foundation_gateway','foundation.atlas_feed_events','SELECT') then
-    raise exception 'Foundation Gateway needs narrow Atlas persistence privileges';
+  if has_table_privilege('foundation_gateway','foundation.atlas_feed_events','SELECT')
+     or has_table_privilege('foundation_gateway','foundation.atlas_feed_events','INSERT')
+     or has_table_privilege('foundation_gateway','foundation.atlas_feed_events','UPDATE')
+     or has_table_privilege('foundation_gateway','foundation.atlas_feed_events','DELETE')
+     or has_table_privilege('foundation_gateway','foundation.atlas_feed_persistence_receipts','SELECT')
+     or has_table_privilege('foundation_gateway','foundation.atlas_feed_persistence_receipts','INSERT') then
+    raise exception 'Foundation Gateway must not receive direct Atlas table privileges';
   end if;
 
-  if has_table_privilege('foundation_gateway','foundation.atlas_feed_events','UPDATE')
-     or has_table_privilege('foundation_gateway','foundation.atlas_feed_events','DELETE') then
-    raise exception 'Foundation Gateway must not mutate or delete stored Atlas events';
+  if not has_function_privilege(
+    'foundation_gateway',
+    'foundation.persist_atlas_feed_event_v1(uuid,jsonb,jsonb,text,text,integer,jsonb,text,timestamptz)',
+    'EXECUTE'
+  ) then
+    raise exception 'Foundation Gateway must execute only the narrow Atlas persistence function';
+  end if;
+
+  if has_function_privilege(
+    'anon',
+    'foundation.persist_atlas_feed_event_v1(uuid,jsonb,jsonb,text,text,integer,jsonb,text,timestamptz)',
+    'EXECUTE'
+  ) or has_function_privilege(
+    'authenticated',
+    'foundation.persist_atlas_feed_event_v1(uuid,jsonb,jsonb,text,text,integer,jsonb,text,timestamptz)',
+    'EXECUTE'
+  ) then
+    raise exception 'client roles must not execute Atlas persistence';
   end if;
 end;
 $$;
