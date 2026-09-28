@@ -1,51 +1,76 @@
 {
   "deploymentReceiptPublisher": "shine-foundation/deployment-receipt-publisher-v1",
-  "schemaVersion": "1.0.0",
+  "schemaVersion": "1.1.0",
+  "purpose": "Automatically publish verified non-secret Foundation deployment receipts from an approved GitHub Actions workflow using GitHub OIDC, without storing a Supabase service-role or management token in GitHub.",
   "workflow": ".github/workflows/publish-foundation-deployment-receipt.yml",
-  "trigger": "workflow_dispatch",
-  "purpose": "Publish a verified non-secret Foundation deployment receipt after an authorised deployment or management-plane observation.",
-  "requiredInputs": [
-    "runtime_version",
-    "artifact_sha256",
-    "source_commit",
-    "provider_evidence_ref",
-    "provider_observed_at",
-    "runtime_state",
-    "rollback"
-  ],
-  "sourceValidation": {
-    "exact40CharacterCommitRequired": true,
-    "commitMustExistInCheckedOutRepository": true,
-    "branchNameNotAccepted": true
+  "trigger": {
+    "workflowDispatch": true,
+    "pushOnReceiptManifest": true,
+    "receiptManifest": "foundation/deployments/current-foundation-gateway-provider-receipt.json"
   },
-  "secrets": [
-    "FOUNDATION_SUPABASE_URL",
-    "FOUNDATION_SUPABASE_SERVICE_ROLE_KEY"
-  ],
-  "secretBoundary": {
-    "storedInRepository": false,
-    "storedInFoundationDatabase": false,
-    "onlyInjectedAtWorkflowRuntime": true,
-    "environment": "foundation-production"
+  "identity": {
+    "mechanism": "GitHub Actions OIDC",
+    "audience": "shine-foundation-deployment-receipt",
+    "issuer": "https://token.actions.githubusercontent.com",
+    "repository": "doug-dotcom/ShineUniverse-shine-core",
+    "ref": "refs/heads/main",
+    "workflowRef": "doug-dotcom/ShineUniverse-shine-core/.github/workflows/publish-foundation-deployment-receipt.yml@refs/heads/main",
+    "repositorySecretsRequired": false
   },
-  "actions": [
-    "validate exact source commit",
-    "build bounded non-secret receipt payload",
-    "submit service_role RPC to submit_service_deployment_receipt_v1",
-    "read get_deployment_reconciliation_status_v1",
-    "fail workflow on unknown or drift"
-  ],
-  "nonActions": [
-    "does not deploy Foundation Gateway",
-    "does not guess provider runtime version",
-    "does not guess provider artefact SHA",
-    "does not store provider management token in Postgres"
-  ],
-  "test": "foundation/integration-kit/build-deployment-receipt-payload-v1.test.mjs",
-  "operationalState": {
-    "codeComplete": true,
-    "receiptInboxLive": true,
-    "productionReceiptPathProvenOnV85": true,
-    "githubSecretPresence": "not-observable-through-current-GitHub-connector"
+  "ingest": {
+    "edgeFunction": "foundation-deployment-receipt-ingest",
+    "endpoint": "https://sjpxqeyewahraxvidvcc.supabase.co/functions/v1/foundation-deployment-receipt-ingest",
+    "verifyJwt": false,
+    "authentication": "GitHub OIDC RS256 verified against issuer JWKS",
+    "source": "foundation/runtime/deployment-receipt-ingest/index.ts",
+    "databaseWrite": "foundation.submit_service_deployment_receipt_v1"
+  },
+  "receipt": {
+    "requiredEvidence": [
+      "runtimeVersion",
+      "artifactSha256",
+      "runtimeState",
+      "sourceCommit",
+      "providerEvidenceRef",
+      "providerObservedAt",
+      "rollback"
+    ],
+    "exactSourceCommitRequired": true,
+    "sourceCommitMustExistInRepository": true,
+    "artifactSha256Required": true,
+    "payloadContainsSecrets": false
+  },
+  "security": {
+    "supabaseServiceRoleInGithub": false,
+    "supabaseManagementPatInGithub": false,
+    "providerCredentialInDatabase": false,
+    "anonymousIngestRejected": true,
+    "oidcRepositoryPinned": true,
+    "oidcBranchPinned": true,
+    "oidcWorkflowPinned": true,
+    "oidcAudiencePinned": true
+  },
+  "resultRules": {
+    "acceptedReceiptStatuses": [
+      "reconciled",
+      "replayed"
+    ],
+    "unsafeReconciliationStates": [
+      "unknown",
+      "drift"
+    ],
+    "awaitingProofAllowedForNewRuntime": true
+  },
+  "productionProof": {
+    "workflowRun": 36389217864,
+    "workflowConclusion": "success",
+    "ingestFunctionVersion": 1,
+    "ingestHttpStatus": 200,
+    "receiptStatus": "replayed",
+    "reconciliationState": "reconciled",
+    "unauthenticatedHttpStatus": 401,
+    "runtimeVersion": "85",
+    "artifactSha256": "a596c895d31e272d2358d69e500eb708a43462de69df32e7e8a87d540907b83f",
+    "sourceCommit": "b7c5331f93eff28a781f0794c89ccf50e90a4045"
   }
 }
