@@ -24,6 +24,7 @@ jobs:
         with:
           deno-version: v2.x
       - run: deno check foundation/runtime/edge-function/index.ts
+      - run: deno check foundation/runtime/defence-provider-ingest/index.ts
 
   persistence:
     runs-on: ubuntu-latest
@@ -149,3 +150,7 @@ jobs:
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-estate-sentinel-v1.sql
       - name: Run Shine Defence federated estate Sentinel acceptance tests
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-estate-sentinel-v1.test.sql
+      - name: Apply Shine Defence estate health adapters
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-estate-health-adapters-v1.sql
+      - name: Run Shine Defence estate health adapter acceptance tests
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-estate-health-adapters-v1.test.sql
