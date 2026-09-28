@@ -57,6 +57,12 @@ create index foundation_release_identity_bindings_current_idx
     service_id,environment,bound_at desc,binding_sequence desc
   );
 
+create index foundation_release_identity_bindings_receipt_idx
+  on foundation.foundation_release_identity_bindings(deployment_receipt_id);
+
+create index foundation_release_identity_bindings_publication_idx
+  on foundation.foundation_release_identity_bindings(publication_id);
+
 create trigger foundation_release_identity_bindings_append_only
 before update or delete on foundation.foundation_release_identity_bindings
 for each row execute function foundation.reject_append_only_mutation();
