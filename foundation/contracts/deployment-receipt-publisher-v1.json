@@ -1,0 +1,51 @@
+{
+  "deploymentReceiptPublisher": "shine-foundation/deployment-receipt-publisher-v1",
+  "schemaVersion": "1.0.0",
+  "workflow": ".github/workflows/publish-foundation-deployment-receipt.yml",
+  "trigger": "workflow_dispatch",
+  "purpose": "Publish a verified non-secret Foundation deployment receipt after an authorised deployment or management-plane observation.",
+  "requiredInputs": [
+    "runtime_version",
+    "artifact_sha256",
+    "source_commit",
+    "provider_evidence_ref",
+    "provider_observed_at",
+    "runtime_state",
+    "rollback"
+  ],
+  "sourceValidation": {
+    "exact40CharacterCommitRequired": true,
+    "commitMustExistInCheckedOutRepository": true,
+    "branchNameNotAccepted": true
+  },
+  "secrets": [
+    "FOUNDATION_SUPABASE_URL",
+    "FOUNDATION_SUPABASE_SERVICE_ROLE_KEY"
+  ],
+  "secretBoundary": {
+    "storedInRepository": false,
+    "storedInFoundationDatabase": false,
+    "onlyInjectedAtWorkflowRuntime": true,
+    "environment": "foundation-production"
+  },
+  "actions": [
+    "validate exact source commit",
+    "build bounded non-secret receipt payload",
+    "submit service_role RPC to submit_service_deployment_receipt_v1",
+    "read get_deployment_reconciliation_status_v1",
+    "fail workflow on unknown or drift"
+  ],
+  "nonActions": [
+    "does not deploy Foundation Gateway",
+    "does not guess provider runtime version",
+    "does not guess provider artefact SHA",
+    "does not store provider management token in Postgres"
+  ],
+  "test": "foundation/integration-kit/build-deployment-receipt-payload-v1.test.mjs",
+  "operationalState": {
+    "codeComplete": true,
+    "receiptInboxLive": true,
+    "productionReceiptPathProvenOnV85": true,
+    "githubSecretPresence": "not-observable-through-current-GitHub-connector"
+  }
+}
