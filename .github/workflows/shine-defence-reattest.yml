@@ -1,0 +1,127 @@
+name: Shine Defence Artefact Re-attestation
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/shine-defence-reattest.yml'
+      - 'foundation/runtime/defence-reattest/index.ts'
+      - 'foundation/postgres/defence-artifact-reattestation-v1.sql'
+      - 'security/shine-defence/integration-kit/reattest-foundation-runtime-v1.mjs'
+      - 'security/shine-defence/integration-kit/foundation-runtime-inspector-v1.mjs'
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: shine-defence-reattest
+  cancel-in-progress: false
+
+jobs:
+  reattest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Checkout Defence policy
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Acquire GitHub OIDC token
+        run: |
+          OIDC_JSON="$(curl -fsSL             -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN"             "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=shine-defence-reattest")"
+          OIDC_TOKEN="$(printf '%s' "$OIDC_JSON" | python3 -c 'import json,sys; print(json.load(sys.stdin)["value"])')"
+          echo "::add-mask::$OIDC_TOKEN"
+          printf '%s' "$OIDC_TOKEN" > /tmp/shine-defence-reattest-oidc
+
+      - name: Claim current artefact work
+        id: claim
+        env:
+          FORCE_REATTEST: ${{ github.event_name == 'push' && 'true' || 'false' }}
+        run: |
+          OIDC_TOKEN="$(cat /tmp/shine-defence-reattest-oidc)"
+          node -e 'const fs=require("fs"); fs.writeFileSync("/tmp/reattest-claim-body.json",JSON.stringify({action:"claim",force:process.env.FORCE_REATTEST==="true"}))'
+          HTTP_STATUS="$(curl -sS             -o /tmp/reattest-claim.json             -w '%{http_code}'             -X POST             -H "Authorization: Bearer $OIDC_TOKEN"             -H "Content-Type: application/json"             --data-binary @/tmp/reattest-claim-body.json             https://sjpxqeyewahraxvidvcc.supabase.co/functions/v1/defence-reattest)"
+          if [ "$HTTP_STATUS" != "200" ]; then
+            cat /tmp/reattest-claim.json
+            exit 1
+          fi
+          node <<'NODE'
+          const fs=require('fs');
+          const response=JSON.parse(fs.readFileSync('/tmp/reattest-claim.json','utf8'));
+          if(response.status!=='ok'||!response.work) throw new Error('invalid re-attestation claim response');
+          const work=response.work;
+          const output=process.env.GITHUB_OUTPUT;
+          const append=(k,v)=>fs.appendFileSync(output,`${k}=${v}\n`);
+          if(work.status==='no-work'){
+            append('has_work','false');
+            console.log('No artefact requires re-attestation.');
+            process.exit(0);
+          }
+          if(work.status==='blocked'){
+            console.error('Re-attestation is blocked:',work.reasonCode,work.serviceId,work.artifactSha256);
+            process.exit(2);
+          }
+          if(work.status!=='work') throw new Error('unknown re-attestation work state');
+          if(work.sourceRepository!==process.env.GITHUB_REPOSITORY) throw new Error('source repository is not the canonical Shine Core repository');
+          for(const [key,value] of Object.entries({
+            has_work:'true',
+            service_id:work.serviceId,
+            environment:work.environment,
+            artifact:work.artifactSha256,
+            source_commit:work.sourceCommit,
+            source_repository:work.sourceRepository
+          })){
+            if(typeof value!=='string'||/[\r\n]/.test(value)) throw new Error('invalid claim output: '+key);
+            append(key,value);
+          }
+          console.log('Claimed exact artefact:',work.serviceId,work.artifactSha256,'from',work.sourceCommit);
+          NODE
+
+      - name: Checkout exact deployed source
+        if: steps.claim.outputs.has_work == 'true'
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ steps.claim.outputs.source_repository }}
+          ref: ${{ steps.claim.outputs.source_commit }}
+          path: attestation-target
+
+      - name: Inspect exact deployed source
+        if: steps.claim.outputs.has_work == 'true'
+        id: inspect
+        run: |
+          set +e
+          node security/shine-defence/integration-kit/reattest-foundation-runtime-v1.mjs             --repo-root attestation-target             --output /tmp/reattest-submission.json             --report-output /tmp/reattest-report.json             --service "${{ steps.claim.outputs.service_id }}"             --environment "${{ steps.claim.outputs.environment }}"             --artifact "${{ steps.claim.outputs.artifact }}"             --source-commit "${{ steps.claim.outputs.source_commit }}"             --policy-commit "$GITHUB_SHA"
+          RC=$?
+          set -e
+          echo "exit_code=$RC" >> "$GITHUB_OUTPUT"
+          test -f /tmp/reattest-submission.json
+
+      - name: Submit exact artefact attestation
+        if: steps.claim.outputs.has_work == 'true'
+        env:
+          INSPECTION_EXIT_CODE: ${{ steps.inspect.outputs.exit_code }}
+        run: |
+          node -e 'const fs=require("fs"); const submission=JSON.parse(fs.readFileSync("/tmp/reattest-submission.json","utf8")); fs.writeFileSync("/tmp/reattest-attest-body.json",JSON.stringify({action:"attest",submission}))'
+          OIDC_TOKEN="$(cat /tmp/shine-defence-reattest-oidc)"
+          HTTP_STATUS="$(curl -sS             -o /tmp/reattest-attest-response.json             -w '%{http_code}'             -X POST             -H "Authorization: Bearer $OIDC_TOKEN"             -H "Content-Type: application/json"             --data-binary @/tmp/reattest-attest-body.json             https://sjpxqeyewahraxvidvcc.supabase.co/functions/v1/defence-reattest)"
+          if [ "$HTTP_STATUS" != "200" ]; then
+            cat /tmp/reattest-attest-response.json
+            exit 1
+          fi
+          node -e 'const fs=require("fs"); const r=JSON.parse(fs.readFileSync("/tmp/reattest-attest-response.json","utf8")); if(r.status!=="accepted"||!r.result) throw new Error("attestation was not accepted"); console.log("Re-attestation recorded:",JSON.stringify(r.result));'
+          if [ "$INSPECTION_EXIT_CODE" != "0" ]; then
+            echo "Exact-source inspection failed; fail evidence was recorded."
+            exit 1
+          fi
+
+      - name: Report no work
+        if: steps.claim.outputs.has_work == 'false'
+        run: echo "All current protected artefacts already have fresh exact-SHA assurance."
