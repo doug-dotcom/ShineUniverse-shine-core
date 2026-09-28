@@ -528,6 +528,7 @@ test('runtime exposes the complete Gateway adapter surface',()=>{
     'issueCapabilityInvocationTicket','getCapabilityAdapterHealth',
     'recordCapabilityAdapterHealth','invokeCapability',
     'listDiscoverableCapabilities','getAppOperationalStatus',
+    'getAtlasFeedPublisherCapability','getAtlasFeedGrantContext',
     'evaluateDependencyAdmission','evaluateGatewayRoutePolicy','getAppManifest','getVaultResource',
     'getEffectiveGrants','evaluateDefence','writeAuditEvent'
   ];
@@ -623,3 +624,70 @@ test('hosted JSONB string rows are normalised before operation audit recording',
   assert.equal(JSON.parse(calls[0][5]).operationKey,'grant.consent');
 });
 
+
+
+test('Atlas Feed capability lookup is scoped to app and capability id',async()=>{
+  const seen=[];
+  const sql=async(strings,...values)=>{
+    const q=strings.join('?').replace(/\s+/g,' ').trim().toLowerCase();
+    seen.push({q,values});
+    if(q.includes('from foundation.app_capabilities')){
+      return [{
+        capability_id:'dive.site.condition.publish',
+        capability_version:'1.0.0',
+        app_id:'shine.dive',
+        capability_mode:'advisory',
+        invocation_state:'live'
+      }];
+    }
+    throw new Error('unexpected SQL: '+q);
+  };
+  const adapters=createSupabaseRuntimeAdapters({
+    sql,
+    fetchImpl:async()=>Response.json({}),
+    defenceGate:async()=>({decision:'allow'})
+  });
+
+  const result=await adapters.getAtlasFeedPublisherCapability({
+    appId:'shine.dive',
+    capabilityId:'dive.site.condition.publish'
+  });
+
+  assert.equal(result.appId,'shine.dive');
+  assert.equal(result.capabilityId,'dive.site.condition.publish');
+  assert.equal(result.invocationState,'live');
+  assert.deepEqual(seen[0].values,['shine.dive','dive.site.condition.publish']);
+});
+
+test('Atlas Feed grant lookup returns effective Foundation grant context',async()=>{
+  const sql=async(strings,...values)=>{
+    const q=strings.join('?').replace(/\s+/g,' ').trim().toLowerCase();
+    if(q.includes('from foundation.effective_access_grants')){
+      assert.deepEqual(values,['33333333-3333-4333-8333-333333333333']);
+      return [{
+        grant_id:'33333333-3333-4333-8333-333333333333',
+        owner_shine_id:'11111111-1111-4111-8111-111111111111',
+        app_id:'shine.companion',
+        scope:'atlas.dive.read',
+        purpose:'companion.dive-context',
+        resource_id:'22222222-2222-4222-8222-222222222222',
+        resource_category:null,
+        effective_status:'active'
+      }];
+    }
+    throw new Error('unexpected SQL: '+q);
+  };
+  const adapters=createSupabaseRuntimeAdapters({
+    sql,
+    fetchImpl:async()=>Response.json({}),
+    defenceGate:async()=>({decision:'allow'})
+  });
+
+  const result=await adapters.getAtlasFeedGrantContext({
+    grantId:'33333333-3333-4333-8333-333333333333'
+  });
+
+  assert.equal(result.effectiveStatus,'active');
+  assert.equal(result.scope,'atlas.dive.read');
+  assert.equal(result.appId,'shine.companion');
+});
