@@ -9,8 +9,17 @@ import {createRevocationHealthService} from '../../gateway/revocation-health-v1.
 import {createAppOperationalStatusService} from '../../gateway/app-operational-status-v1.mjs';
 import {createCapabilityDiscoveryService} from '../../gateway/capability-discovery-v1.mjs';
 import {createIntegrationClientStatusService} from '../../gateway/integration-client-status-v1.mjs';
+import {createIntegrationLinkConsentService,createIntegrationCapabilityConsentService,createIntegrationGrantRevocationService,createIntegrationLinkRevocationService,createIntegrationGrantListService} from '../../gateway/integration-user-consent-v1.mjs';
+import {createConciergePlanService,createConciergeExecuteService} from '../../gateway/concierge-orchestration-v1.mjs';
+import {createIntegrationLinkRequestService,createIntegrationLinkApprovalService,createIntegrationLinkStatusService,createIntegrationLinkExchangeService,createIntegrationLinkPreviewService} from '../../gateway/integration-device-link-v1.mjs';
+import {createCapabilityTicketRedeemService} from '../../gateway/capability-ticket-redeem-v2.mjs';
+import {createIntegrationDelegationRefreshService} from '../../gateway/integration-delegation-refresh-v1.mjs';
+import {createConnectedIntegrationListService,createUserGrantRevocationService,createUserLinkRevocationService,createUserAccessHistoryService,createUserAccessExplanationService,createUserConciergeCancellationService,createUserConciergeJobsService} from '../../gateway/user-integration-controls-v1.mjs';
+import {createConciergeRetryService} from '../../gateway/concierge-retry-v1.mjs';
+import {createConciergeFleetStatusService} from '../../gateway/concierge-fleet-status-v1.mjs';
 import {createFoundationHttpHandler} from '../../gateway/http-handler-v1.mjs';
 import {createPublicDefenceStatusService} from '../../gateway/defence-status-v1.mjs';
+import {createIntegrationContextPublishService} from '../../gateway/integration-context-publish-v1.mjs';
 import {createSupabaseRuntimeAdapters} from '../supabase-runtime-adapters-v1.mjs';
 import {createFoundationRuntimeDefenceGateV1} from '../runtime-defence-gate-v1.mjs';
 import defenceLedger from '../../../security/shine-defence/ecosystem-profile-ledger-v1.json' with {type:'json'};
@@ -50,6 +59,30 @@ const revocationHealth=createRevocationHealthService({adapters});
 const appOperationalStatus=createAppOperationalStatusService({adapters});
 const capabilityDiscovery=createCapabilityDiscoveryService({adapters});
 const integrationClientStatus=createIntegrationClientStatusService({adapters});
+const integrationLinkConsent=createIntegrationLinkConsentService({adapters});
+const integrationCapabilityConsent=createIntegrationCapabilityConsentService({adapters});
+const integrationGrantRevocation=createIntegrationGrantRevocationService({adapters});
+const integrationLinkRevocation=createIntegrationLinkRevocationService({adapters});
+const integrationGrantList=createIntegrationGrantListService({adapters});
+const conciergePlan=createConciergePlanService({adapters});
+const conciergeExecute=createConciergeExecuteService({adapters});
+const integrationLinkRequest=createIntegrationLinkRequestService({adapters});
+const integrationLinkApproval=createIntegrationLinkApprovalService({adapters});
+const integrationLinkStatus=createIntegrationLinkStatusService({adapters});
+const integrationLinkExchange=createIntegrationLinkExchangeService({adapters});
+const integrationLinkPreview=createIntegrationLinkPreviewService({adapters});
+const capabilityTicketRedeem=createCapabilityTicketRedeemService({adapters});
+const integrationDelegationRefresh=createIntegrationDelegationRefreshService({adapters});
+const connectedIntegrationList=createConnectedIntegrationListService({adapters});
+const userIntegrationGrantRevocation=createUserGrantRevocationService({adapters});
+const userIntegrationLinkRevocation=createUserLinkRevocationService({adapters});
+const userAccessHistory=createUserAccessHistoryService({adapters});
+const userAccessExplanation=createUserAccessExplanationService({adapters});
+const userConciergeCancellation=createUserConciergeCancellationService({adapters});
+const userConciergeJobs=createUserConciergeJobsService({adapters});
+const conciergeRetry=createConciergeRetryService({adapters});
+const conciergeFleetStatus=createConciergeFleetStatusService({adapters});
+const integrationContextPublish=createIntegrationContextPublishService({adapters});
 const defenceStatus=createPublicDefenceStatusService({
   ledger:defenceLedger,
   revocations:defenceRevocations
@@ -66,8 +99,46 @@ const handler=createFoundationHttpHandler({
   appOperationalStatus,
   capabilityDiscovery,
   integrationClientStatus,
+  integrationLinkConsent,
+  integrationCapabilityConsent,
+  integrationGrantRevocation,
+  integrationLinkRevocation,
+  integrationGrantList,
+  conciergePlan,
+  conciergeExecute,
+  integrationLinkRequest,
+  integrationLinkApproval,
+  integrationLinkStatus,
+  integrationLinkExchange,
+  integrationLinkPreview,
+  capabilityTicketRedeem,
+  integrationDelegationRefresh,
+  connectedIntegrationList,
+  userIntegrationGrantRevocation,
+  userIntegrationLinkRevocation,
+  userAccessHistory,
+  userAccessExplanation,
+  userConciergeCancellation,
+  userConciergeJobs,
+  conciergeRetry,
+  conciergeFleetStatus,
+  integrationContextPublish,
   defenceStatus,
   maxBodyBytes:16*1024,
+  authenticateIntegrationUser:async(request:Request)=>{
+    const authorization=request.headers.get('authorization')??'';
+    const jwt=authorization.startsWith('Bearer ')?authorization.slice('Bearer '.length):'';
+    if(!jwt) throw new Error('missing integration user credential');
+    return {jwt};
+  },
+  authenticateIntegrationUserAndClient:async(request:Request)=>{
+    const authorization=request.headers.get('authorization')??'';
+    const clientToken=request.headers.get('x-shine-client-token')??'';
+    const delegationToken=request.headers.get('x-shine-delegation-token')??'';
+    const jwt=authorization.startsWith('Bearer ')?authorization.slice('Bearer '.length):'';
+    if(!clientToken||(!jwt&&!delegationToken)) throw new Error('missing integration actor credentials');
+    return {clientToken,...(jwt?{jwt}:{}),...(delegationToken?{delegationToken}:{})};
+  },
   authenticateIntegrationClient:async(request:Request)=>{
     const clientToken=request.headers.get('x-shine-client-token')??'';
     const refreshToken=request.headers.get('x-shine-refresh-token')??'';
