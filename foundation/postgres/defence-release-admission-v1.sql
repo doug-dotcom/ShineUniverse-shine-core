@@ -111,6 +111,12 @@ declare
   v_reason text;
   v_rollback_deployment text;
   v_rollback_commit text;
+  v_bootstrap_deployment text;
+  v_bootstrap_commit text;
+  v_bootstrap_first timestamptz;
+  v_bootstrap_last timestamptz;
+  v_bootstrap_samples integer := 0;
+  v_bootstrap_failures integer := 0;
   v_source_fresh boolean := false;
   v_serving_fresh boolean := false;
   v_health_fresh boolean := false;
@@ -200,6 +206,60 @@ begin
     end;
   end if;
 
+  if v_last.canonical_deployment_id is null
+     and v_first_serving_at is not null then
+    with prior_releases as (
+      select
+        p.deployment_id,
+        p.commit_sha,
+        min(p.observed_at) as first_seen,
+        max(p.observed_at) as last_seen
+      from foundation.defence_runtime_provenance_observations p
+      where p.target_id=p_target_id
+        and p.observed_at<v_first_serving_at
+        and p.deployment_id<>v_serving.deployment_id
+        and lower(p.repository)=lower(v_target.metadata->>'sourceRepository')
+        and p.branch=v_target.metadata->>'sourceBranch'
+      group by p.deployment_id,p.commit_sha
+    ),
+    qualified as (
+      select
+        r.deployment_id,
+        r.commit_sha,
+        r.first_seen,
+        r.last_seen,
+        s.sample_count,
+        s.failure_count
+      from prior_releases r
+      cross join lateral (
+        select
+          count(*)::integer as sample_count,
+          count(*) filter (where not contract_ok)::integer as failure_count
+        from (
+          select h.contract_ok
+          from foundation.defence_health_probe_results h
+          where h.target_id=p_target_id
+            and h.response_at>=r.first_seen
+            and h.response_at<=r.last_seen+interval '1 second'
+          order by h.response_at desc,h.result_sequence desc
+          limit v_required_samples
+        ) recent
+      ) s
+      where r.last_seen-r.first_seen>=make_interval(secs=>v_soak_seconds)
+        and s.sample_count>=v_required_samples
+        and s.failure_count=0
+      order by r.last_seen desc
+      limit 1
+    )
+    select
+      deployment_id,commit_sha,first_seen,last_seen,sample_count,failure_count
+    into
+      v_bootstrap_deployment,v_bootstrap_commit,
+      v_bootstrap_first,v_bootstrap_last,
+      v_bootstrap_samples,v_bootstrap_failures
+    from qualified;
+  end if;
+
   if v_first_serving_at is not null then
     with recent as (
       select r.contract_ok,r.response_at,r.result_sequence
@@ -279,6 +339,9 @@ begin
       v_rollback_deployment := v_previous.canonical_deployment_id;
       v_rollback_commit := v_previous.canonical_commit_sha;
     end if;
+  elsif v_bootstrap_deployment is not null then
+    v_rollback_deployment := v_bootstrap_deployment;
+    v_rollback_commit := v_bootstrap_commit;
   end if;
 
   if v_serving.observation_id is null then
@@ -381,7 +444,14 @@ begin
       'requiredSoakSeconds',v_soak_seconds,
       'transitionBlocking',v_transition_blocking,
       'latestCandidateTransitionState',v_transition.transition_state,
-      'latestCandidateTransitionAt',v_transition.occurred_at
+      'latestCandidateTransitionAt',v_transition.occurred_at,
+      'bootstrapRollbackFound',v_bootstrap_deployment is not null,
+      'bootstrapRollbackDeploymentId',v_bootstrap_deployment,
+      'bootstrapRollbackCommitSha',v_bootstrap_commit,
+      'bootstrapRollbackFirstSeenAt',v_bootstrap_first,
+      'bootstrapRollbackLastSeenAt',v_bootstrap_last,
+      'bootstrapRollbackSampleCount',v_bootstrap_samples,
+      'bootstrapRollbackFailureCount',v_bootstrap_failures
     ),
     'evaluatedAt',p_as_of
   );
@@ -470,6 +540,13 @@ begin
       v_state := v_decision;
       v_canonical_deployment := v_last.canonical_deployment_id;
       v_canonical_commit := v_last.canonical_commit_sha;
+
+      if v_canonical_deployment is null
+         and v_rollback_deployment is not null
+         and v_rollback_commit is not null then
+        v_canonical_deployment := v_rollback_deployment;
+        v_canonical_commit := v_rollback_commit;
+      end if;
     end if;
 
     if v_state='canonical'
