@@ -893,84 +893,6 @@ end;
 $layer41_replacement_audit$;
 
 
--- Layer 35 independently proves live release binding. For the Layer 41 rebind
--- dispatch scenario, replace only that dependency with deterministic evidence so this
--- test validates executor routing rather than timestamp ordering across older fixtures.
-create or replace function foundation.get_foundation_release_identity_health_v1(
-  p_environment text default 'production'
-)
-returns jsonb
-language sql
-stable
-security definer
-set search_path = ''
-as $layer41_identity_health_stub$
-  select jsonb_build_object(
-    'foundationReleaseIdentityHealthResponse',
-      'shine-foundation/release-identity-health-response-v1',
-    'schemaVersion','1.0.0',
-    'environment',p_environment,
-    'state','fail',
-    'reasonCodes',jsonb_build_array('release-identity-deployment-mismatch'),
-    'matchesCurrentDeployment',false,
-    'matchesCurrentPublication',false
-  );
-$layer41_identity_health_stub$;
-
-create or replace function foundation.get_foundation_release_projection_health_v1(
-  p_environment text default 'production',
-  p_as_of timestamptz default now()
-)
-returns jsonb
-language sql
-stable
-security definer
-set search_path = ''
-as $layer41_rebind_projection_stub$
-  select jsonb_build_object(
-    'foundationReleaseProjectionHealthResponse',
-      'shine-foundation/release-projection-health-response-v1',
-    'schemaVersion','1.0.0',
-    'environment',p_environment,
-    'evaluatedAt',p_as_of,
-    'state','fail',
-    'reasonCodes',jsonb_build_array('release-identity-health-failed'),
-    'evidenceFingerprint',repeat('b',32),
-    'binding',jsonb_build_object(
-      'releaseRef','foundation:layer-40:aaaaaaaa'
-    ),
-    'registry',jsonb_build_object(
-      'readinessReleaseRef','foundation:layer-40:aaaaaaaa'
-    )
-  );
-$layer41_rebind_projection_stub$;
-
-create or replace function foundation.bind_foundation_release_identity_v1(
-  p_foundation_layer integer,
-  p_bound_by text,
-  p_metadata jsonb default '{}'::jsonb
-)
-returns jsonb
-language sql
-security definer
-set search_path = ''
-as $layer41_bind_stub$
-  select jsonb_build_object(
-    'foundationReleaseIdentityBindingResponse',
-      'shine-foundation/release-identity-binding-response-v1',
-    'schemaVersion','1.0.0',
-    'status','bound-new',
-    'bindingId','41000000-0000-4000-8000-000000000499'::uuid,
-    'releaseRef','foundation:layer-40:bbbbbbbb',
-    'foundationLayer',p_foundation_layer,
-    'sourceRef',
-      'github://doug-dotcom/ShineUniverse-shine-core/commit/bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
-    'runtimeVersion','layer41-b',
-    'artifactSha256',repeat('b',64)
-  );
-$layer41_bind_stub$;
-
-
 do $layer41_open_rebind_incident$
 declare
   v_health jsonb;
@@ -1085,24 +1007,19 @@ reset role;
 
 do $layer41_rebind_applied_narrowly$
 declare
-  v_execution foundation.remediation_execution_events%rowtype;
+  v_binding foundation.foundation_release_identity_bindings%rowtype;
   v_status jsonb;
 begin
-  select * into v_execution
-  from foundation.remediation_execution_events
-  where admission_id='41000000-0000-4000-8000-000000000404'::uuid
-    and event_type='executed';
+  select * into v_binding
+  from foundation.current_foundation_release_identity
+  where service_id='foundation.gateway'
+    and environment='production';
 
-  if v_execution.event_id is null
-     or v_execution.mutation_result->>'operation'<>
-        'append-only-release-rebind'
-     or v_execution.mutation_result->>'previousReleaseRef'<>
-        'foundation:layer-40:aaaaaaaa'
-     or v_execution.mutation_result->>'newReleaseRef'<>
-        'foundation:layer-40:bbbbbbbb'
-     or v_execution.mutation_result->>'runtimeVersion'<>'layer41-b' then
-    raise exception 'Approved release rebind did not dispatch exact binder request: %',
-      row_to_json(v_execution);
+  if v_binding.foundation_layer<>40
+     or v_binding.release_ref<>'foundation:layer-40:bbbbbbbb'
+     or v_binding.runtime_version<>'layer41-b' then
+    raise exception 'Approved release rebind did not bind runtime B: %',
+      row_to_json(v_binding);
   end if;
 
   if not exists (
