@@ -111,6 +111,8 @@ declare
   v_policy_event foundation.gateway_operation_audit_events%rowtype;
   v_observation foundation.service_deployment_observations%rowtype;
   v_expectation foundation.service_deployment_expectations%rowtype;
+  v_authoritative_policy jsonb;
+  v_supplied_policy jsonb;
   v_policy_state text;
   v_policy_reason text;
   v_policy_evidence text;
@@ -161,13 +163,49 @@ begin
     and phase=p_phase;
 
   if p_phase='policy' then
-    if p_policy is null or jsonb_typeof(p_policy)<>'object' then
-      raise exception 'operation-audit-policy-required';
+    -- The database is the authority for policy evidence. Recompute the route
+    -- decision at the caller-supplied timestamp so audit truth does not depend
+    -- on JSON transport fidelity from Edge/Postgres.js.
+    v_authoritative_policy := foundation.evaluate_gateway_route_policy_v1(
+      'POST',
+      p_path,
+      p_environment,
+      p_occurred_at
+    );
+
+    if v_authoritative_policy is null
+       or jsonb_typeof(v_authoritative_policy)<>'object'
+       or coalesce(v_authoritative_policy->>'operationKey','')<>v_route.operation_key then
+      raise exception 'operation-audit-authoritative-policy-unavailable';
     end if;
 
-    if coalesce(p_policy->>'operationKey','') <> v_route.operation_key then
-      raise exception 'operation-audit-policy-operation-mismatch';
+    -- A supplied snapshot is useful as a consistency assertion, but is not
+    -- required to create canonical audit evidence. Some drivers may return or
+    -- transport jsonb as a JSON string, so normalise that representation too.
+    v_supplied_policy := p_policy;
+    if v_supplied_policy is not null and jsonb_typeof(v_supplied_policy)='string' then
+      begin
+        v_supplied_policy := (v_supplied_policy #>> '{}')::jsonb;
+      exception when others then
+        raise exception 'operation-audit-policy-snapshot-invalid';
+      end;
     end if;
+
+    if v_supplied_policy is not null then
+      if jsonb_typeof(v_supplied_policy)<>'object'
+         or coalesce(v_supplied_policy->>'operationKey','')<>v_route.operation_key then
+        raise exception 'operation-audit-policy-snapshot-invalid';
+      end if;
+
+      if coalesce(v_supplied_policy->>'policyState','')
+           <>coalesce(v_authoritative_policy->>'policyState','')
+         or coalesce(v_supplied_policy->>'reasonCode','')
+           <>coalesce(v_authoritative_policy->>'reasonCode','') then
+        raise exception 'operation-audit-policy-snapshot-mismatch';
+      end if;
+    end if;
+
+    p_policy := v_authoritative_policy;
 
     v_policy_state := p_policy->>'policyState';
     v_policy_reason := p_policy->>'reasonCode';
