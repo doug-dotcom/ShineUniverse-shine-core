@@ -421,6 +421,8 @@ begin
 
   if v_already_consumed then
     v_reason := 'remediation-approval-already-consumed';
+  elsif p_occurred_at<v_receipt.approved_at then
+    v_reason := 'remediation-approval-not-yet-valid';
   elsif v_receipt.receipt_sha256 is distinct from v_expected_hash then
     v_reason := 'remediation-approval-integrity-failed';
   elsif v_receipt.expires_at<=p_occurred_at then
@@ -585,6 +587,7 @@ begin
   v_status := case
     when not v_integrity_ok then 'invalid'
     when v_consumed_at is not null then 'consumed'
+    when v_receipt.approved_at>now() then 'not-yet-valid'
     when v_receipt.expires_at<=now() then 'expired'
     when not v_current_incident then 'stale'
     else 'active'
