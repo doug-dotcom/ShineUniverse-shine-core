@@ -395,13 +395,36 @@ assembled as (
 )
 select jsonb_build_object(
   'privacy',(select payload->'privacy' from source),
-  'summary',
-    (select payload->'summary' from source) ||
-    jsonb_build_object(
-      'retired',
-      (select count(*) from jsonb_array_elements(assembled.items) x
-       where x->>'status'='retired')
+  'summary',jsonb_build_object(
+    'total',jsonb_array_length(assembled.items),
+    'attentionRequired',(
+      select count(*) from jsonb_array_elements(assembled.items) x
+      where coalesce((x->>'attentionRequired')::boolean,false)
     ),
+    'automatic',(
+      select count(*) from jsonb_array_elements(assembled.items) x
+      where x->>'status'<>'retired'
+        and x->>'waitingOn' in ('companion','specialist')
+        and not coalesce((x->>'attentionRequired')::boolean,false)
+    ),
+    'completed',(
+      select count(*) from jsonb_array_elements(assembled.items) x
+      where x->>'status'='completed'
+    ),
+    'cancelled',(
+      select count(*) from jsonb_array_elements(assembled.items) x
+      where x->>'status'='cancelled'
+    ),
+    'superseded',(
+      select count(*) from jsonb_array_elements(assembled.items) x
+      where x->>'status'='cancelled'
+        and x->>'supersededByRequestId' is not null
+    ),
+    'retired',(
+      select count(*) from jsonb_array_elements(assembled.items) x
+      where x->>'status'='retired'
+    )
+  ),
   'ordering',(select payload->'ordering' from source),
   'receiptContract',
     (select payload->'receiptContract' from source) ||
