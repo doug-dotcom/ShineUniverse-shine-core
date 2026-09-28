@@ -10,8 +10,8 @@ begin
     raise exception 'production Gateway operation registry should pass: %',v;
   end if;
 
-  if (v->>'routeCount')::integer <> 39 then
-    raise exception 'production Gateway registry should contain 39 routes: %',v;
+  if (v->>'routeCount')::integer <> 40 then
+    raise exception 'production Gateway registry should contain 40 routes: %',v;
   end if;
 
   if (v->>'duplicateMethodPathCount')::integer <> 0 then
@@ -40,7 +40,7 @@ begin
   select foundation.get_gateway_operation_inventory_v1('production') into v;
 
   if (v->>'routeCount')::integer <> 39 then
-    raise exception 'Gateway inventory should expose all 39 routes: %',v;
+    raise exception 'Gateway inventory should expose all 40 routes: %',v;
   end if;
 
   if not exists (
@@ -62,6 +62,20 @@ begin
       and x->>'controlMode'='service-guard'
   ) then
     raise exception 'grant revoke route should be explicitly guarded: %',v;
+  end if;
+
+  if not exists (
+    select 1
+    from jsonb_array_elements(v->'routes') x
+    where x->>'routeSymbol'='conciergeSupersedePath'
+      and x->>'operationKey'='concierge.cancel'
+      and x->>'path'='/v1/concierge/supersede'
+      and x->>'method'='POST'
+      and x->>'authClass'='user+client'
+      and x->>'controlMode'='service-guard'
+      and x->>'controlRef'='foundation.cancel_concierge_request_v1'
+  ) then
+    raise exception 'Concierge supersede route contract missing or wrong: %',v;
   end if;
 
   if not exists (
