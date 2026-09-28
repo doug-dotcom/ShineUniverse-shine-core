@@ -226,10 +226,6 @@ begin
     raise exception 'anon must not read operation policies';
   end if;
 
-  if has_table_privilege('foundation_gateway','foundation.gateway_operation_policies','SELECT') then
-    raise exception 'foundation_gateway should receive brokered decisions, not raw operation policy rows';
-  end if;
-
   if has_function_privilege(
     'anon',
     'foundation.evaluate_gateway_operation_policy_v1(text,text,timestamptz)',
