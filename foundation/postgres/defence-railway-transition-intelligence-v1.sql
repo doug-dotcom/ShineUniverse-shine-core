@@ -190,7 +190,13 @@ begin
       t.occurred_at,
       rp.deployment_id as serving_deployment_id,
       rp.commit_sha as serving_commit_sha,
-      rp.valid_until as serving_valid_until
+      rp.observed_at as serving_observed_at,
+      rp.valid_until as serving_valid_until,
+      (
+        rp.observation_id is not null
+        and rp.observed_at>t.occurred_at
+        and t.deployment_id::text is distinct from rp.deployment_id
+      ) as superseded_by_serving
     from foundation.current_defence_railway_transition t
     left join foundation.current_defence_runtime_provenance rp using(target_id)
   )
@@ -198,6 +204,7 @@ begin
     count(*) filter (
       where transition_state='failed'
         and deployment_id::text is distinct from serving_deployment_id
+        and not superseded_by_serving
     ),
     count(*) filter (
       where transition_state='crashed'
@@ -208,17 +215,20 @@ begin
         'waiting','needs_approval','queued','initializing','building','deploying'
       )
         and occurred_at>now()-interval '20 minutes'
+        and not superseded_by_serving
     ),
     count(*) filter (
       where transition_state in (
         'waiting','needs_approval','queued','initializing','building','deploying'
       )
         and occurred_at<=now()-interval '20 minutes'
+        and not superseded_by_serving
     ),
     count(*) filter (
       where transition_state='success'
         and deployment_id::text is distinct from serving_deployment_id
         and occurred_at<=now()-interval '10 minutes'
+        and not superseded_by_serving
     )
   into
     v_failed_attempts,v_crashed_serving,v_inflight,v_stuck,v_pending_success
@@ -233,7 +243,13 @@ begin
       t.occurred_at,
       rp.deployment_id as serving_deployment_id,
       rp.commit_sha as serving_commit_sha,
-      rp.valid_until as serving_valid_until
+      rp.observed_at as serving_observed_at,
+      rp.valid_until as serving_valid_until,
+      (
+        rp.observation_id is not null
+        and rp.observed_at>t.occurred_at
+        and t.deployment_id::text is distinct from rp.deployment_id
+      ) as superseded_by_serving
     from foundation.current_defence_railway_transition t
     left join foundation.current_defence_runtime_provenance rp using(target_id)
   )
@@ -252,15 +268,18 @@ begin
           then 'serving-deployment-crashed'
         when transition_state='failed'
           and deployment_id::text is distinct from serving_deployment_id
+          and not superseded_by_serving
           then 'release-attempt-failed'
         when transition_state in (
           'waiting','needs_approval','queued','initializing','building','deploying'
         )
           and occurred_at<=now()-interval '20 minutes'
+          and not superseded_by_serving
           then 'release-transition-stuck'
         when transition_state='success'
           and deployment_id::text is distinct from serving_deployment_id
           and occurred_at<=now()-interval '10 minutes'
+          and not superseded_by_serving
           then 'successful-release-not-serving'
         else 'transitioning'
       end
@@ -276,17 +295,20 @@ begin
     or (
       transition_state='failed'
       and deployment_id::text is distinct from serving_deployment_id
+      and not superseded_by_serving
     )
     or (
       transition_state in (
         'waiting','needs_approval','queued','initializing','building','deploying'
       )
       and occurred_at<=now()-interval '20 minutes'
+      and not superseded_by_serving
     )
     or (
       transition_state='success'
       and deployment_id::text is distinct from serving_deployment_id
       and occurred_at<=now()-interval '10 minutes'
+      and not superseded_by_serving
     );
 
   v_state := case
