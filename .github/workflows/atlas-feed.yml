@@ -23,5 +23,5 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
-      - name: Run Atlas Feed Layer 1 acceptance tests
-        run: node --test atlas-feed/runtime/validate-feed-event-v1.test.mjs
+      - name: Run Atlas Feed acceptance tests
+        run: node --test atlas-feed/runtime/validate-feed-event-v1.test.mjs atlas-feed/gateway/publisher-admission-v1.test.mjs
