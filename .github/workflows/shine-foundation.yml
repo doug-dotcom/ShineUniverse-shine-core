@@ -226,6 +226,8 @@ jobs:
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-release-admission-bootstrap-v1.sql
       - name: Run Shine Defence release admission canonical bootstrap acceptance tests
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-release-admission-bootstrap-v1.test.sql
+      - name: Run Shine Defence sleep-aware release admission acceptance tests
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-release-admission-sleep-aware-v1.test.sql
       - name: Apply Shine Defence synchronous Concierge retirement hardening
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-concierge-synchronous-retirement-hardening-v1.sql
       - name: Run Shine Defence synchronous Concierge retirement hardening acceptance tests
