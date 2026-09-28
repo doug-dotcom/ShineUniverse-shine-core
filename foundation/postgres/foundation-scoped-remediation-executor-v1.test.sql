@@ -783,7 +783,7 @@ values (
   repeat('b',64),
   'active',
   'github://doug-dotcom/ShineUniverse-shine-core/commit/bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
-  now()-interval '3 seconds',
+  now()+interval '20 seconds',
   'test:layer41:deployment-expectation:b',
   'Layer 41 replacement deployment fixture.'
 );
@@ -799,7 +799,7 @@ values (
   'layer41-b',
   repeat('b',64),
   'active','healthy',
-  now()-interval '3 seconds',
+  now()+interval '20 seconds',
   'manual-verified',
   'test:layer41:deployment-observation:b',
   'Layer 41 replacement deployment fixture.',
@@ -814,13 +814,13 @@ insert into foundation.service_health_evidence(
 values (
   'foundation.gateway','production','layer41-b',
   now()-interval '5 minutes',
-  now()-interval '2 seconds',
+  now()+interval '21 seconds',
   100,0,0,18,22,
   0,'manual-verified',
   'test:layer41:health:b',
   'Healthy Layer 41 replacement fixture.',
   '{"test":true}'::jsonb,
-  now()-interval '2 seconds'
+  now()+interval '21 seconds'
 );
 
 insert into foundation.service_deployment_receipts(
@@ -837,10 +837,10 @@ values (
   'active',
   'github://doug-dotcom/ShineUniverse-shine-core/commit/bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
   'test:layer41:provider:b',
-  now()-interval '3 seconds',
+  now()+interval '20 seconds',
   'layer41-test',
   '{"test":true}'::jsonb,
-  now()-interval '3 seconds'
+  now()+interval '20 seconds'
 );
 
 insert into foundation.service_deployment_receipt_publications(
@@ -864,7 +864,7 @@ values (
   'doug-dotcom/ShineUniverse-shine-core','refs/heads/main',
   'doug-dotcom/ShineUniverse-shine-core/.github/workflows/publish-foundation-deployment-receipt.yml@refs/heads/main',
   repeat('2',40),false,'{"test":true}'::jsonb,
-  now()-interval '1 second'
+  now()+interval '22 seconds'
 );
 
 do $layer41_replacement_audit$
@@ -873,7 +873,7 @@ declare
   v_audit uuid := '41000000-0000-4000-8000-000000000130'::uuid;
 begin
   select foundation.evaluate_gateway_route_policy_v1(
-    'POST','/v1/grants/consent','production',now()
+    'POST','/v1/grants/consent','production',now()+interval '23 seconds'
   ) into v_policy;
 
   if v_policy->>'policyState'<>'admit' then
@@ -882,12 +882,12 @@ begin
 
   perform foundation.record_gateway_operation_audit_event_v1(
     v_audit,'policy','POST','/v1/grants/consent','production',
-    v_policy,null,null,null,now()
+    v_policy,null,null,null,now()+interval '23 seconds'
   );
 
   perform foundation.record_gateway_operation_audit_event_v1(
     v_audit,'outcome','POST','/v1/grants/consent','production',
-    null,401,'unauthenticated',null,now()
+    null,401,'unauthenticated',null,now()+interval '24 seconds'
   );
 end;
 $layer41_replacement_audit$;
