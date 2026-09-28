@@ -413,7 +413,8 @@ export function createConciergeSupersedeService({adapters,clock=()=>new Date().t
         ownerShineId:verified.identity.shineId,
         clientId:envelope.clientId,
         reasonCode:'superseded-by-newer-request',
-        occurredAt:clock()
+        occurredAt:clock(),
+        supersededByRequestId:envelope.supersededByRequestId
       });
       if(!result?.status) return response(kind,envelope,'unavailable','concierge-supersede-write-failed');
       const status=result.status==='cancelled'?'superseded':
@@ -422,7 +423,9 @@ export function createConciergeSupersedeService({adapters,clock=()=>new Date().t
       return response(kind,envelope,status,result.reasonCode??'superseded-by-newer-request',{
         supersededRequestId:envelope.requestId,
         supersededByRequestId:envelope.supersededByRequestId,
-        cancelledAt:result.cancelledAt??null
+        cancelledAt:result.cancelledAt??null,
+        cancellationReceipt:result.receipt??null,
+        receiptSha256:result.receiptSha256??null
       });
     }catch(error){
       const message=String(error?.message??'');
