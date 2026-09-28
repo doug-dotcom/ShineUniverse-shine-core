@@ -188,6 +188,8 @@ begin
     from universe.readiness_releases
     where app_key='foundation'
       and release_ref=v_registry_release_ref;
+
+    v_registry_target_exists := coalesce(v_registry_target_exists,false);
   end if;
 
   if v_release_ledger_exists and v_binding_release_ref is not null then
@@ -204,6 +206,8 @@ begin
     from universe.readiness_releases
     where app_key='foundation'
       and release_ref=v_binding_release_ref;
+
+    v_binding_release_exists := coalesce(v_binding_release_exists,false);
   end if;
 
   if not v_registry_exists or not v_release_ledger_exists then
