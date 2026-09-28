@@ -128,6 +128,8 @@ const handler=createFoundationHttpHandler({
   defenceStatus,
   evaluateOperationPolicy:adapters.evaluateGatewayRoutePolicy,
   operationPolicyRequired:true,
+  recordOperationAudit:adapters.recordGatewayOperationAuditEvent,
+  operationAuditRequired:true,
   maxBodyBytes:16*1024,
   authenticateIntegrationUser:async(request:Request)=>{
     const authorization=request.headers.get('authorization')??'';
