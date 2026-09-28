@@ -1,0 +1,56 @@
+{
+  "admissionContract": "shine-foundation/dependency-admission-v1",
+  "schemaVersion": "1.0.0",
+  "purpose": "Convert dependency-aware service state into operation-scoped runtime admission before protected Foundation execution.",
+  "productionBinding": {
+    "serviceId": "foundation.gateway",
+    "environment": "production",
+    "operation": "access.evaluate",
+    "impactScope": "protected-operations"
+  },
+  "admissionStates": {
+    "admit": "Dependency state permits normal execution.",
+    "admit-degraded": "Execution may continue but the relevant dependency scope is degraded and the condition is audited.",
+    "deny": "The requested protected scope is blocked or guarded and must fail closed.",
+    "unavailable": "Foundation cannot safely evaluate admission because service state, configuration or graph integrity is unavailable."
+  },
+  "reasonCodes": [
+    "dependency-admission-clear",
+    "dependency-degraded",
+    "dependency-guarded",
+    "dependency-blocked",
+    "service-state-unavailable",
+    "admission-binding-missing",
+    "admission-binding-disabled",
+    "dependency-graph-invalid"
+  ],
+  "gatewayOrder": [
+    "validate-envelope",
+    "verify-app-caller",
+    "verify-user-identity",
+    "validate-app-manifest-declaration",
+    "evaluate-dependency-admission",
+    "load-vault-resource-and-grants",
+    "evaluate-defence-request-context",
+    "evaluate-access-grant",
+    "write-single-access-audit",
+    "respond"
+  ],
+  "audit": {
+    "ledger": "foundation.access_audit_events",
+    "contextField": "request_context.dependencyAdmission",
+    "guardAndBlockDenialsAudited": true,
+    "degradedAdmissionsAudited": true,
+    "separateAdmissionLedger": false
+  },
+  "principles": {
+    "failClosedForGuardedScope": true,
+    "blockBeforeVaultRead": true,
+    "blockBeforeGrantRead": true,
+    "blockBeforeRequestDefenceEvaluation": true,
+    "unaffectedScopesMayContinue": true,
+    "manifestValidationPrecedesAdmission": true,
+    "missingAdmissionBindingFailsSafe": true,
+    "invalidDependencyGraphFailsSafe": true
+  }
+}
