@@ -63,7 +63,7 @@ declare
   route_count integer := 0;
   mapped_scope_count integer := 0;
   expected_scope_count integer := 0;
-  routing_fingerprint text;
+  v_routing_fingerprint text;
   result jsonb := '[]'::jsonb;
   rec record;
   existing foundation.readiness_dependency_remediation_handoffs%rowtype;
@@ -145,7 +145,7 @@ begin
       '[]'::jsonb
     )::text
   )
-  into routing_fingerprint
+  into v_routing_fingerprint
   from jsonb_array_elements_text(p.affected_scopes) s(value)
   join foundation.current_service_dependencies d
     on d.dependent_service_id='foundation.gateway'
@@ -178,11 +178,11 @@ begin
     route_count := route_count + 1;
 
     select * into existing
-    from foundation.readiness_dependency_remediation_handoffs
-    where proposal_id=p.proposal_id
-      and owner_component=rec.owner_component
-      and dependency_service_id=rec.dependency_service_id
-      and routing_fingerprint=routing_fingerprint
+    from foundation.readiness_dependency_remediation_handoffs h
+    where h.proposal_id=p.proposal_id
+      and h.owner_component=rec.owner_component
+      and h.dependency_service_id=rec.dependency_service_id
+      and h.routing_fingerprint=v_routing_fingerprint
     order by handoff_sequence desc
     limit 1;
 
@@ -214,7 +214,7 @@ begin
       'dependencyType',rec.dependency_type,
       'failureMode',rec.failure_mode,
       'routedScopes',rec.routed_scopes,
-      'routingFingerprint',routing_fingerprint,
+      'routingFingerprint',v_routing_fingerprint,
       'requestedWork',jsonb_build_array(
         'inspect-current-defence-and-dependency-evidence',
         'identify-root-cause-for-routed-scopes',
@@ -245,7 +245,7 @@ begin
     )
     values(
       p.environment,p.proposal_id,p.readiness_incident_event_id,
-      p.condition_fingerprint,p.proposal_sha256,routing_fingerprint,
+      p.condition_fingerprint,p.proposal_sha256,v_routing_fingerprint,
       rec.owner_component,rec.dependency_service_id,rec.routed_scopes,
       doc,doc_hash,p_created_at
     )
@@ -270,7 +270,7 @@ begin
     'status','ready',
     'proposalId',p.proposal_id,
     'conditionFingerprint',p.condition_fingerprint,
-    'routingFingerprint',routing_fingerprint,
+    'routingFingerprint',v_routing_fingerprint,
     'ownerRouteCount',route_count,
     'handoffs',result,
     'approvalGranted',false,
@@ -301,7 +301,7 @@ declare
   h foundation.readiness_dependency_remediation_handoffs%rowtype;
   pstate jsonb;
   expected_hash text;
-  current_routing_fingerprint text;
+  current_v_routing_fingerprint text;
   state text;
 begin
   select * into h
