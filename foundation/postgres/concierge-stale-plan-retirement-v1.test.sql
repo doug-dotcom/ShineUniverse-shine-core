@@ -39,7 +39,7 @@ begin
   where n.nspname='foundation'
     and p.proname='issue_capability_invocation_ticket_v2'
   limit 1;
-  if fn is null or position('concierge_request_is_retired_v1' in fn)=0 then
+  if fn is null or position('retire_concierge_request_if_expired_v1' in fn)=0 then
     raise exception 'Retired request ticket guard missing';
   end if;
 
