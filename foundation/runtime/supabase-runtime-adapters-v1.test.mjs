@@ -456,3 +456,33 @@ test('dependency admission delegates to the hosted database function',async()=>{
   assert.equal(result.impactScope,'protected-operations');
   assert.equal(result.reasonCode,'dependency-admission-clear');
 });
+
+test('runtime exposes the complete Gateway adapter surface',()=>{
+  const {adapters}=makeAdapters();
+  const required=[
+    'verifyIntegrationClient','verifyAppCaller','verifyIdentity',
+    'verifyIntegrationIdentity','verifyIntegrationDelegation',
+    'linkIntegrationClient','grantIntegrationClientCapability',
+    'revokeIntegrationClientGrant','revokeIntegrationClientLink',
+    'listIntegrationClientGrants','createIntegrationLinkRequest',
+    'resolveIntegrationLinkApproval','approveIntegrationLinkRequest',
+    'getIntegrationLinkRequestStatus','exchangeIntegrationLinkRequest',
+    'rotateIntegrationDelegation','rotateIntegrationDelegationV2',
+    'planConciergeRequest','gateConciergeExecution','explainConciergeDenial',
+    'recordConciergeExecutionEvent','getConciergeResumeState',
+    'recordConciergeStepCheckpoint','queueConciergeRetry',
+    'claimDueConciergeRetry','finishConciergeRetry','getConciergeFleetStatus',
+    'listConnectedIntegrations','listUserAccessHistory',
+    'explainCapabilityAccess','cancelConciergeRequest','listUserConciergeJobs',
+    'resolveIntegrationSubjectOwner','getIntegrationContextPublishEvent',
+    'publishIntegrationContextSnapshot','redeemCapabilityInvocationTicket',
+    'issueCapabilityInvocationTicket','getCapabilityAdapterHealth',
+    'recordCapabilityAdapterHealth','invokeCapability',
+    'listDiscoverableCapabilities','getAppOperationalStatus',
+    'evaluateDependencyAdmission','getAppManifest','getVaultResource',
+    'getEffectiveGrants','evaluateDefence','writeAuditEvent'
+  ];
+  const missing=required.filter(name=>typeof adapters[name]!=='function');
+  assert.deepEqual(missing,[]);
+});
+
