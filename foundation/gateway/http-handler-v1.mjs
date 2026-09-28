@@ -88,6 +88,8 @@ export function createFoundationHttpHandler({
   conciergeRetry,
   conciergeFleetStatus,
   integrationContextPublish,
+  evaluateOperationPolicy,
+  operationPolicyRequired=false,
   maxBodyBytes=16*1024
 }={}){
   if(typeof gateway!=='function') throw new TypeError('gateway must be a function');
@@ -112,6 +114,8 @@ export function createFoundationHttpHandler({
   }
   if(integrationContextPublish!==undefined&&typeof integrationContextPublish!=='function') throw new TypeError('integrationContextPublish must be a function');
   if(conciergeFleetStatus!==undefined&&typeof conciergeFleetStatus!=='function') throw new TypeError('conciergeFleetStatus must be a function');
+  if(evaluateOperationPolicy!==undefined&&typeof evaluateOperationPolicy!=='function') throw new TypeError('evaluateOperationPolicy must be a function');
+  if(operationPolicyRequired&&typeof evaluateOperationPolicy!=='function') throw new TypeError('operation policy broker is required');
   if(conciergeRetry!==undefined&&(
     !conciergeRetry||
     typeof conciergeRetry.claim!=='function'||
@@ -120,6 +124,35 @@ export function createFoundationHttpHandler({
 
   return async function handle(request){
     const url=new URL(request.url);
+
+    if(request.method==='POST'&&operationPolicyRequired){
+      let policy;
+      try{
+        policy=await evaluateOperationPolicy({
+          method:'POST',
+          path:url.pathname,
+          environment:'production',
+          asOf:new Date().toISOString()
+        });
+      }catch{
+        return json(503,{error:'operation-policy-unavailable'});
+      }
+
+      const policyState=policy?.policyState??'unavailable';
+      const reasonCode=policy?.reasonCode??'operation-policy-unavailable';
+
+      if(policyState==='deny'){
+        return json(403,{error:'operation-policy-denied',reasonCode});
+      }
+
+      if(policyState==='unavailable'){
+        return json(503,{error:'operation-policy-unavailable',reasonCode});
+      }
+
+      if(!['admit','admit-degraded','worker-only','not-required','not-registered'].includes(policyState)){
+        return json(503,{error:'operation-policy-invalid',reasonCode});
+      }
+    }
     if(request.method==='POST'&&capabilityTicketRedeemPath(url.pathname)){
       if(typeof capabilityTicketRedeem!=='function') return json(404,{error:'not-found'});
       const contentType=request.headers.get('content-type')??'';
