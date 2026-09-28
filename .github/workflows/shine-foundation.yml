@@ -172,6 +172,10 @@ jobs:
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-estate-health-coverage-v2.sql
       - name: Run Shine Defence complete Railway health coverage acceptance tests
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-estate-health-coverage-v2.test.sql
+      - name: Apply Shine Defence runtime provenance
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-runtime-provenance-v1.sql
+      - name: Run Shine Defence runtime provenance acceptance tests
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-runtime-provenance-v1.test.sql
       - name: Apply Shine Defence artefact re-attestation
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-artifact-reattestation-v1.sql
       - name: Run Shine Defence artefact re-attestation acceptance tests
