@@ -94,7 +94,7 @@ insert into foundation.defence_rollback_source_attestations(
 (
   'railway:test-ladder-degraded','doug-dotcom/test-ladder-degraded',
   repeat('c',40),repeat('b',40),
-  true,true,
+  true,false,
   now(),now()+interval '2 hours',
   'test:ladder:degraded:c-ready','{}'::jsonb
 ),
