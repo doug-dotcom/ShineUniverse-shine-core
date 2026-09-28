@@ -125,3 +125,7 @@ jobs:
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-operational-posture-v1.sql
       - name: Run Shine Defence operational posture acceptance tests
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-operational-posture-v1.test.sql
+      - name: Apply Shine Defence Sentinel
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-sentinel-v1.sql
+      - name: Run Shine Defence Sentinel acceptance tests
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-sentinel-v1.test.sql
