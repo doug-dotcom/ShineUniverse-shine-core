@@ -101,6 +101,14 @@ const makeSql=()=> {
         }
       }}];
     }
+    if(q.includes('foundation.record_gateway_operation_audit_event_v1')){
+      return [{audit:{
+        status:'recorded',
+        operationAuditId:String(values[0]),
+        phase:String(values[1]),
+        eventHash:'a'.repeat(64)
+      }}];
+    }
     if(q.includes('foundation.evaluate_gateway_operation_policy_v1')){
       return [{policy:{
         gatewayOperationPolicyResponse:'shine-foundation/gateway-operation-policy-response-v1',
@@ -525,5 +533,25 @@ test('runtime exposes the complete Gateway adapter surface',()=>{
   ];
   const missing=required.filter(name=>typeof adapters[name]!=='function');
   assert.deepEqual(missing,[]);
+});
+
+test('privileged operation audit delegates to the narrow hosted recorder',async()=>{
+  const {adapters}=makeAdapters();
+  const result=await adapters.recordGatewayOperationAuditEvent({
+    operationAuditId:'29000000-0000-4000-8000-000000009999',
+    phase:'policy',
+    method:'POST',
+    path:'/v1/grants/consent',
+    environment:'production',
+    policy:{
+      operationKey:'grant.consent',
+      policyState:'admit',
+      reasonCode:'dependency-admission-clear'
+    },
+    occurredAt:'2026-09-28T03:59:00Z'
+  });
+  assert.equal(result.status,'recorded');
+  assert.equal(result.operationAuditId,'29000000-0000-4000-8000-000000009999');
+  assert.equal(result.phase,'policy');
 });
 
