@@ -1,3 +1,129 @@
+CREATE OR REPLACE FUNCTION foundation.retire_concierge_request_if_expired_v1(p_request_id uuid, p_owner_shine_id uuid, p_client_id text, p_as_of timestamp with time zone DEFAULT clock_timestamp(), p_min_age interval DEFAULT '01:00:00'::interval)
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'pg_catalog', 'foundation'
+AS $function$
+declare
+  q foundation.concierge_requests%rowtype;
+  existing foundation.concierge_retirement_events%rowtype;
+  v_receipt jsonb;
+  v_hash text;
+begin
+  if p_request_id is null or p_owner_shine_id is null
+     or p_client_id is null or p_as_of is null
+     or p_min_age < interval '30 minutes'
+     or p_min_age > interval '24 hours' then
+    raise exception 'invalid-concierge-retirement-admission' using errcode='22023';
+  end if;
+
+  select * into q
+  from foundation.concierge_requests x
+  where x.request_id=p_request_id
+  for update;
+
+  if not found then
+    raise exception 'concierge-request-not-found' using errcode='22023';
+  end if;
+  if q.owner_shine_id<>p_owner_shine_id then
+    raise exception 'concierge-request-owner-mismatch' using errcode='22023';
+  end if;
+  if q.client_id<>p_client_id then
+    raise exception 'concierge-request-client-mismatch' using errcode='22023';
+  end if;
+
+  select * into existing
+  from foundation.concierge_retirement_events r
+  where r.request_id=p_request_id;
+
+  if found then
+    return jsonb_build_object(
+      'status','already-retired',
+      'reasonCode',existing.reason_code,
+      'requestId',p_request_id,
+      'retiredAt',existing.retired_at,
+      'receipt',existing.receipt,
+      'receiptSha256',existing.receipt_sha256
+    );
+  end if;
+
+  if foundation.concierge_request_is_cancelled_v1(p_request_id) then
+    return jsonb_build_object(
+      'status','not-retired',
+      'reasonCode','concierge-request-cancelled',
+      'requestId',p_request_id
+    );
+  end if;
+
+  if q.requested_at > p_as_of-p_min_age then
+    return jsonb_build_object(
+      'status','not-retired',
+      'reasonCode','concierge-plan-within-ttl',
+      'requestId',p_request_id,
+      'expiresAt',q.requested_at+p_min_age
+    );
+  end if;
+
+  if exists (
+       select 1 from foundation.concierge_execution_events e
+       where e.request_id=p_request_id
+         and e.event_type in ('execution-started','execution-completed','execution-failed')
+     )
+     or exists (
+       select 1 from foundation.concierge_step_checkpoints cp
+       where cp.request_id=p_request_id
+     )
+     or exists (
+       select 1 from foundation.concierge_retry_jobs j
+       where j.request_id=p_request_id
+     ) then
+    return jsonb_build_object(
+      'status','not-retired',
+      'reasonCode','concierge-execution-already-started',
+      'requestId',p_request_id
+    );
+  end if;
+
+  v_receipt:=jsonb_build_object(
+    'retirementReceipt','shine-foundation/concierge-retirement-receipt-v1',
+    'schemaVersion','1.0.0',
+    'requestId',q.request_id,
+    'clientId',q.client_id,
+    'reasonCode','unused-plan-expired',
+    'requestedAt',q.requested_at,
+    'retiredAt',p_as_of,
+    'minimumAgeSeconds',extract(epoch from p_min_age)::integer,
+    'requestedCapabilities',to_jsonb(q.requested_capabilities),
+    'stepCount',q.step_count,
+    'executionStarted',false,
+    'specialistCheckpointCount',0,
+    'retryCount',0
+  );
+  v_hash:=encode(
+    extensions.digest(convert_to(v_receipt::text,'UTF8'),'sha256'),
+    'hex'
+  );
+
+  insert into foundation.concierge_retirement_events(
+    event_id,request_id,owner_shine_id,client_id,reason_code,retired_at,
+    receipt,receipt_sha256
+  ) values (
+    gen_random_uuid(),q.request_id,q.owner_shine_id,q.client_id,
+    'unused-plan-expired',p_as_of,v_receipt,v_hash
+  );
+
+  return jsonb_build_object(
+    'status','retired',
+    'reasonCode','unused-plan-expired',
+    'requestId',q.request_id,
+    'retiredAt',p_as_of,
+    'receipt',v_receipt,
+    'receiptSha256',v_hash
+  );
+end;
+$function$
+
+
 CREATE OR REPLACE FUNCTION foundation.gate_concierge_execution_v1(p_event_id uuid, p_request_id uuid, p_owner_shine_id uuid, p_client_id text, p_occurred_at timestamp with time zone)
  RETURNS jsonb
  LANGUAGE plpgsql
@@ -223,132 +349,6 @@ begin
   return jsonb_build_object(
     'recorded',true,
     'expiresAt',p_completed_at+interval '24 hours'
-  );
-end;
-$function$
-
-
-CREATE OR REPLACE FUNCTION foundation.retire_concierge_request_if_expired_v1(p_request_id uuid, p_owner_shine_id uuid, p_client_id text, p_as_of timestamp with time zone DEFAULT clock_timestamp(), p_min_age interval DEFAULT '01:00:00'::interval)
- RETURNS jsonb
- LANGUAGE plpgsql
- SECURITY DEFINER
- SET search_path TO 'pg_catalog', 'foundation'
-AS $function$
-declare
-  q foundation.concierge_requests%rowtype;
-  existing foundation.concierge_retirement_events%rowtype;
-  v_receipt jsonb;
-  v_hash text;
-begin
-  if p_request_id is null or p_owner_shine_id is null
-     or p_client_id is null or p_as_of is null
-     or p_min_age < interval '30 minutes'
-     or p_min_age > interval '24 hours' then
-    raise exception 'invalid-concierge-retirement-admission' using errcode='22023';
-  end if;
-
-  select * into q
-  from foundation.concierge_requests x
-  where x.request_id=p_request_id
-  for update;
-
-  if not found then
-    raise exception 'concierge-request-not-found' using errcode='22023';
-  end if;
-  if q.owner_shine_id<>p_owner_shine_id then
-    raise exception 'concierge-request-owner-mismatch' using errcode='22023';
-  end if;
-  if q.client_id<>p_client_id then
-    raise exception 'concierge-request-client-mismatch' using errcode='22023';
-  end if;
-
-  select * into existing
-  from foundation.concierge_retirement_events r
-  where r.request_id=p_request_id;
-
-  if found then
-    return jsonb_build_object(
-      'status','already-retired',
-      'reasonCode',existing.reason_code,
-      'requestId',p_request_id,
-      'retiredAt',existing.retired_at,
-      'receipt',existing.receipt,
-      'receiptSha256',existing.receipt_sha256
-    );
-  end if;
-
-  if foundation.concierge_request_is_cancelled_v1(p_request_id) then
-    return jsonb_build_object(
-      'status','not-retired',
-      'reasonCode','concierge-request-cancelled',
-      'requestId',p_request_id
-    );
-  end if;
-
-  if q.requested_at > p_as_of-p_min_age then
-    return jsonb_build_object(
-      'status','not-retired',
-      'reasonCode','concierge-plan-within-ttl',
-      'requestId',p_request_id,
-      'expiresAt',q.requested_at+p_min_age
-    );
-  end if;
-
-  if exists (
-       select 1 from foundation.concierge_execution_events e
-       where e.request_id=p_request_id
-         and e.event_type in ('execution-started','execution-completed','execution-failed')
-     )
-     or exists (
-       select 1 from foundation.concierge_step_checkpoints cp
-       where cp.request_id=p_request_id
-     )
-     or exists (
-       select 1 from foundation.concierge_retry_jobs j
-       where j.request_id=p_request_id
-     ) then
-    return jsonb_build_object(
-      'status','not-retired',
-      'reasonCode','concierge-execution-already-started',
-      'requestId',p_request_id
-    );
-  end if;
-
-  v_receipt:=jsonb_build_object(
-    'retirementReceipt','shine-foundation/concierge-retirement-receipt-v1',
-    'schemaVersion','1.0.0',
-    'requestId',q.request_id,
-    'clientId',q.client_id,
-    'reasonCode','unused-plan-expired',
-    'requestedAt',q.requested_at,
-    'retiredAt',p_as_of,
-    'minimumAgeSeconds',extract(epoch from p_min_age)::integer,
-    'requestedCapabilities',to_jsonb(q.requested_capabilities),
-    'stepCount',q.step_count,
-    'executionStarted',false,
-    'specialistCheckpointCount',0,
-    'retryCount',0
-  );
-  v_hash:=encode(
-    extensions.digest(convert_to(v_receipt::text,'UTF8'),'sha256'),
-    'hex'
-  );
-
-  insert into foundation.concierge_retirement_events(
-    event_id,request_id,owner_shine_id,client_id,reason_code,retired_at,
-    receipt,receipt_sha256
-  ) values (
-    gen_random_uuid(),q.request_id,q.owner_shine_id,q.client_id,
-    'unused-plan-expired',p_as_of,v_receipt,v_hash
-  );
-
-  return jsonb_build_object(
-    'status','retired',
-    'reasonCode','unused-plan-expired',
-    'requestId',q.request_id,
-    'retiredAt',p_as_of,
-    'receipt',v_receipt,
-    'receiptSha256',v_hash
   );
 end;
 $function$
