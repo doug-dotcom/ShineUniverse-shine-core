@@ -265,8 +265,18 @@ begin
   end if;
 
   if p_proposal_sha256 is null
-     or lower(p_proposal_sha256) !~ '^[a-f0-9]{64}
+     or lower(p_proposal_sha256) !~ '^[a-f0-9]{64}$' then
+    raise exception 'remediation-execution-admission-proposal-invalid';
+  end if;
 
+  if p_requested_at<now()-interval '5 minutes'
+     or p_requested_at>now()+interval '5 minutes' then
+    raise exception 'remediation-execution-admission-requested-at-invalid';
+  end if;
+
+  select * into v_receipt
+  from foundation.remediation_approval_receipts
+  where receipt_id=p_approval_receipt_id;
   if v_receipt.receipt_id is null then
     return jsonb_build_object(
       'foundationRemediationExecutionAdmissionResponse',
