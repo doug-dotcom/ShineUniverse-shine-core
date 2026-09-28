@@ -217,6 +217,9 @@ create index remediation_execution_admission_events_receipt_idx
     approval_receipt_id,occurred_at desc,event_sequence desc
   );
 
+create index remediation_execution_admission_events_admission_idx
+  on foundation.remediation_execution_admission_events(admission_id);
+
 create trigger remediation_execution_admission_events_append_only
 before update or delete on foundation.remediation_execution_admission_events
 for each row execute function foundation.reject_append_only_mutation();
