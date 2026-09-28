@@ -33,9 +33,9 @@ begin
   if v->>'state' <> 'pass' then
     raise exception 'production operation policy coverage should pass: %',v;
   end if;
-  if (v->>'privilegedOperationCount')::integer <> 23
-     or (v->>'coveredOperationCount')::integer <> 23 then
-    raise exception 'all 23 privileged operations must have policy coverage: %',v;
+  if (v->>'privilegedOperationCount')::integer <> 24
+     or (v->>'coveredOperationCount')::integer <> 24 then
+    raise exception 'all 24 privileged route contracts must have policy coverage: %',v;
   end if;
   if (v->>'dependencyAdmissionPolicyCount')::integer <> 21
      or (v->>'workerOnlyPolicyCount')::integer <> 2 then
