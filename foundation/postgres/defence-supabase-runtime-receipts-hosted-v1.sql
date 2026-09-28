@@ -31,7 +31,8 @@ begin
       url := v_url,
       headers := jsonb_build_object(
         'Accept','application/json',
-        'User-Agent','Shine-Defence-Supabase-Receipt/1.0'
+        'User-Agent','Shine-Defence-Supabase-Receipt/1.0',
+        'x-region',v_target.metadata->>'projectRegion'
       ),
       timeout_milliseconds := 10000
     );
