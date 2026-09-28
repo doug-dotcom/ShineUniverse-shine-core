@@ -1,0 +1,13 @@
+{
+  "contract": "shine-foundation/foundation-readiness-dependency-remediation-proposal-v1",
+  "version": "1.0.0",
+  "layer": 47,
+  "purpose": "Create an integrity-bound scope-aware proposal for an active readiness incident.",
+  "approvalGranted": false,
+  "executionAuthorityGranted": false,
+  "canonicalTruthMutationAllowed": false,
+  "releaseRebindAllowed": false,
+  "automaticRepairAllowed": false,
+  "staleOnIncidentOrConditionChange": true,
+  "integrity": "sha256"
+}
