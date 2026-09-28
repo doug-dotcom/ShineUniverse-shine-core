@@ -1,6 +1,60 @@
 begin;
 
--- Force a clean passing Defence posture for deterministic Layer-34 readiness tests.
+-- Complete deterministic Layer-34 fixture: exact deployment, health, Defence,
+-- current-runtime audit proof, deployment receipt and trusted OIDC publication.
+
+insert into foundation.service_deployment_expectations(
+  service_id,environment,expected_runtime_ref,expected_version,
+  expected_artifact_sha256,expected_state,source_ref,effective_at,
+  evidence_ref,evidence_note
+)
+values (
+  'foundation.gateway','production',
+  'supabase://test/functions/foundation-gateway',
+  'layer34-a',
+  repeat('a',64),
+  'active',
+  'github://doug-dotcom/ShineUniverse-shine-core/commit/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+  now()+interval '1 second',
+  'test:layer34:deployment-expectation:a',
+  'Layer 34 provenance readiness fixture.'
+);
+
+insert into foundation.service_deployment_observations(
+  service_id,environment,runtime_ref,runtime_version,artifact_sha256,
+  runtime_state,health_state,observed_at,evidence_kind,evidence_ref,
+  evidence_note,metadata
+)
+values (
+  'foundation.gateway','production',
+  'supabase://test/functions/foundation-gateway',
+  'layer34-a',
+  repeat('a',64),
+  'active','unknown',
+  now()+interval '1 second',
+  'manual-verified',
+  'test:layer34:deployment-observation:a',
+  'Layer 34 provenance readiness fixture.',
+  '{"test":true}'::jsonb
+);
+
+insert into foundation.service_health_evidence(
+  service_id,environment,runtime_version,window_started_at,window_ended_at,
+  request_count,response_4xx_count,response_5xx_count,avg_latency_ms,p95_latency_ms,
+  runtime_error_count,evidence_source,evidence_ref,evidence_note,metadata,observed_at
+)
+values (
+  'foundation.gateway','production','layer34-a',
+  now()-interval '5 minutes',
+  now()+interval '2 seconds',
+  100,0,0,20,25,
+  0,'manual-verified',
+  'test:layer34:health:a',
+  'Healthy Layer 34 fixture.',
+  '{"test":true}'::jsonb,
+  now()+interval '2 seconds'
+);
+
 insert into foundation.defence_posture_observations(
   observation_id,posture_version,environment,overall_state,
   observed_at,valid_until,checks,evidence_ref,recorded_at
@@ -8,19 +62,93 @@ insert into foundation.defence_posture_observations(
 values (
   '34000000-0000-4000-8000-000000000001'::uuid,
   '1.0.0','production','pass',
-  now()+interval '1 second',
+  now()+interval '3 seconds',
   now()+interval '2 hours',
   '{"test":true}'::jsonb,
   'test:layer34:defence:pass',
+  now()+interval '3 seconds'
+);
+
+insert into foundation.service_deployment_receipts(
+  receipt_id,service_id,environment,provider,runtime_ref,runtime_version,
+  artifact_sha256,runtime_state,source_ref,provider_evidence_ref,
+  provider_observed_at,submitted_by,metadata,recorded_at
+)
+values (
+  '34000000-0000-4000-8000-000000000100'::uuid,
+  'foundation.gateway','production','supabase-edge',
+  'supabase://test/functions/foundation-gateway',
+  'layer34-a',
+  repeat('a',64),
+  'active',
+  'github://doug-dotcom/ShineUniverse-shine-core/commit/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+  'test:layer34:provider:a',
+  now()+interval '1 second',
+  'layer34-test',
+  '{"test":true}'::jsonb,
   now()+interval '1 second'
 );
+
+insert into foundation.service_deployment_receipt_publications(
+  publication_key,receipt_id,service_id,environment,provider,runtime_version,
+  artifact_sha256,source_ref,provider_evidence_ref,publication_outcome,
+  submitted_by,transport,transport_run_id,transport_run_attempt,transport_event,
+  transport_repository,transport_ref,transport_workflow_ref,transport_workflow_sha,
+  rollback,metadata,published_at
+)
+values (
+  'github-oidc:340000:1:34000000-0000-4000-8000-000000000100',
+  '34000000-0000-4000-8000-000000000100'::uuid,
+  'foundation.gateway','production','supabase-edge',
+  'layer34-a',
+  repeat('a',64),
+  'github://doug-dotcom/ShineUniverse-shine-core/commit/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+  'test:layer34:provider:a',
+  'accepted-new',
+  'github-actions-oidc',
+  'github-oidc',
+  '340000','1','push',
+  'doug-dotcom/ShineUniverse-shine-core',
+  'refs/heads/main',
+  'doug-dotcom/ShineUniverse-shine-core/.github/workflows/publish-foundation-deployment-receipt.yml@refs/heads/main',
+  repeat('1',40),
+  false,
+  '{"test":true}'::jsonb,
+  now()+interval '4 seconds'
+);
+
+do $layer34_audit$
+declare
+  v_policy jsonb;
+  v_audit uuid := '34000000-0000-4000-8000-000000000200'::uuid;
+begin
+  select foundation.evaluate_gateway_route_policy_v1(
+    'POST','/v1/grants/consent','production',now()+interval '5 seconds'
+  ) into v_policy;
+
+  if v_policy->>'policyState' <> 'admit' then
+    raise exception 'Layer 34 ready fixture policy should admit: %',v_policy;
+  end if;
+
+  perform foundation.record_gateway_operation_audit_event_v1(
+    v_audit,'policy','POST','/v1/grants/consent','production',
+    v_policy,null,null,null,now()+interval '5 seconds'
+  );
+
+  perform foundation.record_gateway_operation_audit_event_v1(
+    v_audit,'outcome','POST','/v1/grants/consent','production',
+    null,401,'unauthenticated',null,now()+interval '6 seconds'
+  );
+end;
+$layer34_audit$;
+
 
 do $layer34_pass$
 declare
   v jsonb;
 begin
   select foundation.evaluate_foundation_readiness_v1(
-    'production',now()+interval '2 seconds'
+    'production',now()+interval '7 seconds'
   ) into v;
 
   if v#>>'{checks,publicationAttestation,state}' <> 'pass'
@@ -51,33 +179,29 @@ insert into foundation.service_deployment_receipt_publications(
   transport_repository,transport_ref,transport_workflow_ref,transport_workflow_sha,
   rollback,metadata,published_at
 )
-select
+values (
   'test:layer34:manual',
-  r.receipt_id,
-  r.service_id,
-  r.environment,
-  r.provider,
-  r.runtime_version,
-  r.artifact_sha256,
-  r.source_ref,
-  r.provider_evidence_ref,
+  '34000000-0000-4000-8000-000000000100'::uuid,
+  'foundation.gateway','production','supabase-edge',
+  'layer34-a',
+  repeat('a',64),
+  'github://doug-dotcom/ShineUniverse-shine-core/commit/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+  'test:layer34:provider:a',
   'replayed-existing',
   'layer34-test',
   'manual-verified',
   null,null,null,null,null,null,null,
   false,
   '{"test":true}'::jsonb,
-  now()+interval '3 seconds'
-from foundation.current_service_deployment_receipt r
-where r.service_id='foundation.gateway'
-  and r.environment='production';
+  now()+interval '8 seconds'
+);
 
 do $layer34_degraded$
 declare
   v jsonb;
 begin
   select foundation.evaluate_foundation_readiness_v1(
-    'production',now()+interval '4 seconds'
+    'production',now()+interval '9 seconds'
   ) into v;
 
   if v#>>'{checks,publicationAttestation,state}' <> 'degraded' then
@@ -109,16 +233,14 @@ insert into foundation.service_deployment_receipt_publications(
   transport_repository,transport_ref,transport_workflow_ref,transport_workflow_sha,
   rollback,metadata,published_at
 )
-select
-  'github-oidc:340001:1:'||r.receipt_id::text,
-  r.receipt_id,
-  r.service_id,
-  r.environment,
-  r.provider,
-  r.runtime_version,
-  r.artifact_sha256,
-  r.source_ref,
-  r.provider_evidence_ref,
+values (
+  'github-oidc:340001:1:34000000-0000-4000-8000-000000000100',
+  '34000000-0000-4000-8000-000000000100'::uuid,
+  'foundation.gateway','production','supabase-edge',
+  'layer34-a',
+  repeat('a',64),
+  'github://doug-dotcom/ShineUniverse-shine-core/commit/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+  'test:layer34:provider:a',
   'replayed-existing',
   'github-actions-oidc',
   'github-oidc',
@@ -129,17 +251,15 @@ select
   repeat('4',40),
   false,
   '{"test":true}'::jsonb,
-  now()+interval '5 seconds'
-from foundation.current_service_deployment_receipt r
-where r.service_id='foundation.gateway'
-  and r.environment='production';
+  now()+interval '10 seconds'
+);
 
 do $layer34_restored$
 declare
   v jsonb;
 begin
   select foundation.evaluate_foundation_readiness_v1(
-    'production',now()+interval '6 seconds'
+    'production',now()+interval '11 seconds'
   ) into v;
 
   if v->>'readinessState' <> 'ready'
@@ -159,16 +279,16 @@ insert into foundation.service_deployment_receipts(
 values (
   '34000000-0000-4000-8000-000000000101'::uuid,
   'foundation.gateway','production','supabase-edge',
-  'supabase://sjpxqeyewahraxvidvcc/functions/foundation-gateway',
-  '999',
-  repeat('9',64),
+  'supabase://test/functions/foundation-gateway',
+  'layer34-b',
+  repeat('b',64),
   'active',
-  'github://doug-dotcom/ShineUniverse-shine-core/commit/9999999999999999999999999999999999999999',
+  'github://doug-dotcom/ShineUniverse-shine-core/commit/bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
   'test:layer34:future-receipt',
-  now()+interval '7 seconds',
+  now()+interval '12 seconds',
   'layer34-test',
   '{"test":true}'::jsonb,
-  now()+interval '7 seconds'
+  now()+interval '12 seconds'
 );
 
 do $layer34_unknown$
@@ -176,7 +296,7 @@ declare
   v jsonb;
 begin
   select foundation.evaluate_foundation_readiness_v1(
-    'production',now()+interval '8 seconds'
+    'production',now()+interval '13 seconds'
   ) into v;
 
   if v#>>'{checks,publicationAttestation,state}' <> 'unknown' then
@@ -207,9 +327,9 @@ values (
   'github-oidc:340002:1:34000000-0000-4000-8000-000000000101',
   '34000000-0000-4000-8000-000000000101'::uuid,
   'foundation.gateway','production','supabase-edge',
-  '999',
-  repeat('9',64),
-  'github://doug-dotcom/ShineUniverse-shine-core/commit/9999999999999999999999999999999999999999',
+  'layer34-b',
+  repeat('b',64),
+  'github://doug-dotcom/ShineUniverse-shine-core/commit/bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
   'test:layer34:future-receipt',
   'replayed-existing',
   'github-actions-oidc',
@@ -221,7 +341,7 @@ values (
   repeat('5',40),
   false,
   '{"test":true}'::jsonb,
-  now()+interval '9 seconds'
+  now()+interval '14 seconds'
 );
 
 do $layer34_mismatch$
@@ -229,7 +349,7 @@ declare
   v jsonb;
 begin
   select foundation.evaluate_foundation_readiness_v1(
-    'production',now()+interval '10 seconds'
+    'production',now()+interval '15 seconds'
   ) into v;
 
   if v#>>'{checks,publicationAttestation,state}' <> 'pass'
