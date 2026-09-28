@@ -141,3 +141,7 @@ jobs:
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-estate-federation-v1.sql
       - name: Run Shine Defence estate federation acceptance tests
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-estate-federation-v1.test.sql
+      - name: Apply Shine Defence federated estate Sentinel
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-estate-sentinel-v1.sql
+      - name: Run Shine Defence federated estate Sentinel acceptance tests
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-estate-sentinel-v1.test.sql
