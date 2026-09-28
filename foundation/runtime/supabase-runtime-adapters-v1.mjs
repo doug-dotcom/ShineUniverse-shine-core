@@ -996,7 +996,7 @@ export function createSupabaseRuntimeAdapters({sql,defenceGate,fetchImpl=fetch}=
 
     async listUserConciergeJobs({ownerShineId,limit=50,before=null}={}){
       const rows=await sql`
-        select foundation.list_user_concierge_jobs_v5(
+        select foundation.list_user_concierge_jobs_v6(
           ${ownerShineId}::uuid,${limit}::integer,${before??null}::timestamptz
         ) as jobs
       `;
