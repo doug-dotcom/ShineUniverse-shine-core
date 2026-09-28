@@ -1,0 +1,54 @@
+{
+  "contract": "shine-foundation/foundation-release-identity-binding-v1",
+  "version": "1.0.0",
+  "layer": 35,
+  "purpose": "Bind a verified Foundation layer to immutable deployment and publication identity so registry release truth cannot remain green across source/runtime drift.",
+  "canonicalService": "foundation.gateway",
+  "ledger": "foundation.foundation_release_identity_bindings",
+  "currentView": "foundation.current_foundation_release_identity",
+  "binder": "foundation.bind_foundation_release_identity_v1",
+  "healthReader": "foundation.get_foundation_release_identity_health_v1",
+  "identityFields": [
+    "foundationLayer",
+    "sourceRef",
+    "runtimeVersion",
+    "artifactSha256",
+    "deploymentReceiptId",
+    "publicationId",
+    "publicationAssurance"
+  ],
+  "evidenceAtBind": [
+    "readinessStateAtBind",
+    "readinessFingerprintAtBind"
+  ],
+  "rules": {
+    "appendOnly": true,
+    "releaseRefGeneratedFromCanonicalSourceCommit": true,
+    "deploymentTruthMustBeAligned": true,
+    "publicationMustPass": true,
+    "publicationAssuranceMustBeGithubOidc": true,
+    "publicationMustMatchDeployment": true,
+    "readinessMustBeBindable": [
+      "ready",
+      "restricted",
+      "degraded"
+    ],
+    "readinessFingerprintIsHistoricalEvidenceNotReleaseIdentity": true,
+    "staleBindingFailsClosedOnDeploymentOrPublicationMismatch": true,
+    "directLedgerInsertDeniedToRuntimeAndServiceRole": true,
+    "binderCallableBy": [
+      "service_role"
+    ],
+    "healthReadableBy": [
+      "foundation_runtime",
+      "service_role"
+    ]
+  },
+  "releaseRefFormat": "foundation:layer-<layer>:<first-8-lowercase-source-commit-sha>",
+  "operationalMeaning": {
+    "pass": "The immutable binding still matches current canonical deployment truth and current publication proof.",
+    "degraded": "Release identity still matches but publication assurance has degraded.",
+    "unknown": "Required deployment/publication identity evidence is missing.",
+    "fail": "The binding no longer matches current deployment or publication identity."
+  }
+}
