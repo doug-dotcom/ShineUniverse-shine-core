@@ -102,6 +102,7 @@ declare
   v_roundtrip_ms numeric;
   v_response_sha256 text;
   v_result_sequence bigint;
+  v_target_row record;
   v_harvested integer := 0;
   v_refreshed integer := 0;
 begin
@@ -186,11 +187,17 @@ begin
     );
 
     v_harvested := v_harvested + 1;
+  end loop;
 
+  for v_target_row in
+    select service_id,environment
+    from foundation.current_service_health_probe_target
+    where enabled=true
+  loop
     perform foundation.refresh_service_health_from_probes_v1(
-      v_row.service_id,
-      v_row.environment,
-      now()
+      v_target_row.service_id,
+      v_target_row.environment,
+      clock_timestamp()
     );
     v_refreshed := v_refreshed + 1;
   end loop;
