@@ -113,6 +113,9 @@ grant select,insert on foundation.defence_health_probe_requests to service_role;
 create index defence_health_probe_requests_target_idx
   on foundation.defence_health_probe_requests(target_id,queued_at desc);
 
+create index defence_health_probe_requests_target_version_idx
+  on foundation.defence_health_probe_requests(target_id,target_version);
+
 create trigger defence_health_probe_requests_append_only
 before update or delete on foundation.defence_health_probe_requests
 for each row execute function foundation.reject_append_only_mutation();
