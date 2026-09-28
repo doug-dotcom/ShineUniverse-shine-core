@@ -601,6 +601,24 @@ export function createSupabaseRuntimeAdapters({sql,defenceGate,fetchImpl=fetch}=
       };
     },
 
+    async evaluateGatewayRoutePolicy({
+      method='POST',
+      path,
+      environment='production',
+      asOf=new Date().toISOString()
+    }={}){
+      if(typeof path!=='string'||!path) return null;
+      const rows=await sql`
+        select foundation.evaluate_gateway_route_policy_v1(
+          ${method},
+          ${path},
+          ${environment},
+          ${asOf}::timestamptz
+        ) as policy
+      `;
+      return first(rows)?.policy??null;
+    },
+
 
     async verifyIntegrationIdentity({authContext}={}){
       const jwt=authContext?.jwt;
