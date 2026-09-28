@@ -579,15 +579,26 @@ export function createSupabaseRuntimeAdapters({sql,defenceGate,fetchImpl=fetch}=
       operation='access.evaluate',
       asOf=new Date().toISOString()
     }={}){
+      if(serviceId!=='foundation.gateway') return null;
       const rows=await sql`
-        select foundation.evaluate_service_admission_v1(
-          ${serviceId},
-          ${environment},
+        select foundation.evaluate_gateway_operation_policy_v1(
           ${operation},
+          ${environment},
           ${asOf}::timestamptz
-        ) as admission
+        ) as policy
       `;
-      return first(rows)?.admission??null;
+      const policy=first(rows)?.policy??null;
+      if(!policy) return null;
+      if(policy.admission&&typeof policy.admission==='object') return policy.admission;
+      return {
+        serviceId,
+        environment,
+        operation,
+        impactScope:policy.impactScope??null,
+        admissionState:policy.policyState??'unavailable',
+        reasonCode:policy.reasonCode??'operation-policy-unavailable',
+        policyEvidenceRef:policy.policyEvidenceRef??null
+      };
     },
 
 
