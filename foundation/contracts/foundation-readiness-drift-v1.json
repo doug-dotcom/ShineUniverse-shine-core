@@ -1,0 +1,20 @@
+{
+  "contract": "shine-foundation/foundation-readiness-drift-v1",
+  "version": "1.0.0",
+  "layer": 43,
+  "purpose": "Attribute post-bind readiness changes without rewriting immutable release identity when deployment identity remains stable.",
+  "states": {
+    "stable": "Current readiness fingerprint matches bind-time fingerprint and deployment identity is stable.",
+    "operational-degradation": "Readiness changed while deployment/source/artefact/publication identity remains stable.",
+    "identity-drift": "Deployment or publication identity no longer matches the immutable binding.",
+    "not-bindable": "No binding exists or current readiness is unknown/not-ready."
+  },
+  "invariants": {
+    "readinessDriftDoesNotRewriteBinding": true,
+    "deploymentIdentityAndOperationalReadinessSeparated": true,
+    "degradedScopesPreserved": true,
+    "privilegedOperationImpactExplicit": true,
+    "releaseRebindRequiredOnlyForIdentityDrift": true,
+    "observationsAppendOnly": true
+  }
+}
