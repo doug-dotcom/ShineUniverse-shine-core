@@ -138,6 +138,10 @@ jobs:
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/service-dependency-rollup-v1.sql
       - name: Run service dependency roll-up acceptance tests
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/service-dependency-rollup-v1.test.sql
+      - name: Apply dependency admission control
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/dependency-admission-control-v1.sql
+      - name: Run dependency admission acceptance tests
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/dependency-admission-control-v1.test.sql
       - name: Apply Shine Defence Sentinel
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-sentinel-v1.sql
       - name: Run Shine Defence Sentinel acceptance tests
