@@ -13,6 +13,9 @@ begin
      or position('30 minutes' in fn)=0
      or position('24 hours' in fn)=0
      or position('concierge_execution_events' in fn)=0
+     or position('execution-started' in fn)=0
+     or position('execution-completed' in fn)=0
+     or position('execution-failed' in fn)=0
      or position('concierge_step_checkpoints' in fn)=0
      or position('concierge_retry_jobs' in fn)=0 then
     raise exception 'Synchronous Concierge plan TTL helper incomplete';
