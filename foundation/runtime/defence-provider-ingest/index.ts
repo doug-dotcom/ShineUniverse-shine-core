@@ -94,7 +94,7 @@ async function verifyGithubOidc(token:string){
   if(payload.repository!==EXPECTED_REPOSITORY) throw new Error('OIDC repository mismatch');
   if(payload.ref!==EXPECTED_REF) throw new Error('OIDC ref mismatch');
   if(payload.workflow_ref!==EXPECTED_WORKFLOW_REF) throw new Error('OIDC workflow mismatch');
-  if(!['schedule','workflow_dispatch'].includes(String(payload.event_name))) throw new Error('OIDC event not allowed');
+  if(!['schedule','workflow_dispatch','push'].includes(String(payload.event_name))) throw new Error('OIDC event not allowed');
 
   return {
     repository:String(payload.repository),
