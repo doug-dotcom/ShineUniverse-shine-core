@@ -124,6 +124,8 @@ const handler=createFoundationHttpHandler({
   conciergeFleetStatus,
   integrationContextPublish,
   defenceStatus,
+  evaluateOperationPolicy:adapters.evaluateGatewayRoutePolicy,
+  operationPolicyRequired:true,
   maxBodyBytes:16*1024,
   authenticateIntegrationUser:async(request:Request)=>{
     const authorization=request.headers.get('authorization')??'';
