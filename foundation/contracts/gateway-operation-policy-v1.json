@@ -1,0 +1,52 @@
+{
+  "gatewayOperationPolicy": "shine-foundation/gateway-operation-policy-v1",
+  "schemaVersion": "1.0.0",
+  "serviceId": "foundation.gateway",
+  "purpose": "Give every privileged Gateway operation an explicit front-door policy while preserving its atomic execution guard behind admission.",
+  "productionCoverage": {
+    "privilegedOperations": 23,
+    "dependencyAdmissionPolicies": 21,
+    "workerOnlyPolicies": 2,
+    "admissionScopes": [
+      "protected-operations",
+      "permission-operations",
+      "credential-operations",
+      "identity-operations",
+      "context-operations",
+      "control-operations"
+    ]
+  },
+  "policyModes": {
+    "dependency-admission": {
+      "failureBehavior": "fail-closed",
+      "broker": "foundation.evaluate_gateway_operation_policy_v1(text,text,timestamptz)",
+      "rule": "Resolve dependency state for the operation scope before the existing route/service guard runs."
+    },
+    "worker-only": {
+      "failureBehavior": "worker-auth-only",
+      "rule": "Internal Concierge retry workers remain explicitly client-authenticated and are not user/app admission routes."
+    }
+  },
+  "layering": [
+    "route registration",
+    "operation policy",
+    "dependency admission",
+    "existing atomic/service guard",
+    "audit/outcome"
+  ],
+  "leastPrivilege": {
+    "gatewayCanExecuteBroker": true,
+    "gatewayCanReadRawOperationPolicyRows": false,
+    "brokerSecurityDefiner": true,
+    "brokerFixedSearchPath": true,
+    "publicExecute": false
+  },
+  "invariants": {
+    "allPrivilegedOperationsRequirePolicy": true,
+    "allDependencyAdmissionPoliciesRequireBinding": true,
+    "allDependencyAdmissionPoliciesRequireDependencyScope": true,
+    "defenceScopesCanCoexistForSameServicePair": true,
+    "existingExecutionGuardsRemainAuthoritative": true,
+    "missingPolicyFailsCoverage": true
+  }
+}
