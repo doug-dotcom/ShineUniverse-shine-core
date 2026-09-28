@@ -121,8 +121,7 @@ begin
     'receiptSha256',v_hash
   );
 end;
-$function$
-
+$function$;
 
 CREATE OR REPLACE FUNCTION foundation.gate_concierge_execution_v1(p_event_id uuid, p_request_id uuid, p_owner_shine_id uuid, p_client_id text, p_occurred_at timestamp with time zone)
  RETURNS jsonb
@@ -209,8 +208,7 @@ begin
     'plan',foundation.get_concierge_plan_v1(p_request_id)
   );
 end;
-$function$
-
+$function$;
 
 CREATE OR REPLACE FUNCTION foundation.issue_capability_invocation_ticket_v2(p_ticket_id uuid, p_concierge_request_id uuid, p_step_id uuid, p_owner_shine_id uuid, p_client_id text, p_expires_at timestamp with time zone, p_occurred_at timestamp with time zone)
  RETURNS jsonb
@@ -291,8 +289,7 @@ begin
     'expiresAt',p_expires_at
   );
 end;
-$function$
-
+$function$;
 
 CREATE OR REPLACE FUNCTION foundation.record_concierge_step_checkpoint_v1(p_checkpoint_id uuid, p_request_id uuid, p_step_id uuid, p_capability_id text, p_result jsonb, p_completed_at timestamp with time zone)
  RETURNS jsonb
@@ -351,5 +348,4 @@ begin
     'expiresAt',p_completed_at+interval '24 hours'
   );
 end;
-$function$
-
+$function$;
