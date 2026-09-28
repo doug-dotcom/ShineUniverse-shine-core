@@ -47,6 +47,7 @@ declare
   v_reason text;
   v_event_type text;
   v_incident_key text;
+  v_superseded_by_serving boolean := false;
   v_created integer := 0;
   v_active integer := 0;
   v_fail integer := 0;
@@ -77,6 +78,14 @@ begin
     order by p.observed_at desc,p.recorded_at desc,p.observation_id desc
     limit 1;
 
+    v_superseded_by_serving := coalesce(
+      v_transition.event_id is not null
+      and v_provenance.observation_id is not null
+      and v_provenance.observed_at>v_transition.occurred_at
+      and v_transition.deployment_id::text is distinct from v_provenance.deployment_id,
+      false
+    );
+
     if v_transition.event_id is null then
       continue;
     elsif v_transition.transition_state='crashed'
@@ -88,13 +97,15 @@ begin
       and (
         v_provenance.observation_id is null
         or v_transition.deployment_id::text is distinct from v_provenance.deployment_id
-      ) then
+      )
+      and not v_superseded_by_serving then
       v_state := 'warning';
       v_reason := 'release-attempt-failed';
     elsif v_transition.transition_state in (
       'waiting','needs_approval','queued','initializing','building','deploying'
     )
-      and v_transition.occurred_at<=p_observed_at-interval '20 minutes' then
+      and v_transition.occurred_at<=p_observed_at-interval '20 minutes'
+      and not v_superseded_by_serving then
       v_state := 'warning';
       v_reason := 'release-transition-stuck';
     elsif v_transition.transition_state='success'
@@ -102,7 +113,8 @@ begin
         v_provenance.observation_id is null
         or v_transition.deployment_id::text is distinct from v_provenance.deployment_id
       )
-      and v_transition.occurred_at<=p_observed_at-interval '10 minutes' then
+      and v_transition.occurred_at<=p_observed_at-interval '10 minutes'
+      and not v_superseded_by_serving then
       v_state := 'warning';
       v_reason := 'successful-release-not-serving';
     else
