@@ -73,6 +73,12 @@ create index service_health_probe_requests_pending_idx
   on foundation.service_health_probe_requests(queued_at,external_request_id)
   where external_request_id is not null;
 
+create index service_health_probe_requests_service_idx
+  on foundation.service_health_probe_requests(service_id,environment,queued_at desc);
+
+create index service_health_probe_requests_target_idx
+  on foundation.service_health_probe_requests(target_id);
+
 create trigger service_health_probe_requests_append_only
 before update or delete on foundation.service_health_probe_requests
 for each row execute function foundation.reject_append_only_mutation();
