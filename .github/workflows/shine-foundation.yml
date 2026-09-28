@@ -209,6 +209,10 @@ jobs:
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-release-transition-coverage-v1.sql
       - name: Run Shine Defence release transition coverage acceptance tests
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-release-transition-coverage-v1.test.sql
+      - name: Apply Shine Defence Concierge retirement hardening
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-concierge-retirement-hardening-v1.sql
+      - name: Run Shine Defence Concierge retirement hardening acceptance tests
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-concierge-retirement-hardening-v1.test.sql
       - name: Apply Shine Defence artefact re-attestation
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-artifact-reattestation-v1.sql
       - name: Run Shine Defence artefact re-attestation acceptance tests
