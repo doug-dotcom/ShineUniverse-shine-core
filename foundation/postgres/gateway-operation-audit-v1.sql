@@ -368,6 +368,7 @@ declare
   v_request_id text;
   v_request_uuid uuid;
   v_domain jsonb := '[]'::jsonb;
+  v_extra jsonb := '[]'::jsonb;
 begin
   select coalesce(jsonb_agg(jsonb_build_object(
     'sequence',audit_event_sequence,
@@ -442,49 +443,95 @@ begin
         'outcome',i.outcome,'reasonCode',i.reason_code,'occurredAt',i.occurred_at
       )
       from foundation.identity_claim_events i where i.request_id=v_request_uuid
-      union all
-      select jsonb_build_object(
-        'source','integration_client_grant_events','eventId',g.event_id::text,
-        'outcome',g.outcome,'reasonCode',g.reason_code,'occurredAt',g.occurred_at
-      )
-      from foundation.integration_client_grant_events g where g.request_id=v_request_uuid
-      union all
-      select jsonb_build_object(
-        'source','integration_client_link_events','eventId',l.event_id::text,
-        'outcome',l.outcome,'reasonCode',l.reason_code,'occurredAt',l.occurred_at
-      )
-      from foundation.integration_client_link_events l where l.request_id=v_request_uuid
-      union all
-      select jsonb_build_object(
-        'source','integration_context_snapshot_events','eventId',c.event_id::text,
-        'outcome',c.event_type,'reasonCode',c.reason_code,'occurredAt',c.occurred_at
-      )
-      from foundation.integration_context_snapshot_events c where c.request_id=v_request_uuid
-      union all
-      select jsonb_build_object(
-        'source','concierge_execution_events','eventId',c.event_id::text,
-        'outcome',c.event_type,'reasonCode',c.reason_code,'occurredAt',c.occurred_at
-      )
-      from foundation.concierge_execution_events c where c.request_id=v_request_uuid
-      union all
-      select jsonb_build_object(
-        'source','concierge_outcome_events','eventId',c.event_id::text,
-        'outcome',c.outcome,'reasonCode',c.reason_code,'occurredAt',c.occurred_at
-      )
-      from foundation.concierge_outcome_events c where c.request_id=v_request_uuid
-      union all
-      select jsonb_build_object(
-        'source','concierge_cancellation_events','eventId',c.event_id::text,
-        'outcome','cancelled','reasonCode',c.reason_code,'occurredAt',c.cancelled_at
-      )
-      from foundation.concierge_cancellation_events c where c.request_id=v_request_uuid
-      union all
-      select jsonb_build_object(
-        'source','integration_link_request_events','eventId',l.event_id::text,
-        'outcome',l.event_type,'reasonCode',null,'occurredAt',l.occurred_at
-      )
-      from foundation.integration_link_request_events l where l.request_id=v_request_uuid
     ) q;
+
+    if to_regclass('foundation.integration_client_grant_events') is not null then
+      execute $sql$
+        select coalesce(jsonb_agg(jsonb_build_object(
+          'source','integration_client_grant_events','eventId',event_id::text,
+          'outcome',outcome,'reasonCode',reason_code,'occurredAt',occurred_at
+        ) order by occurred_at),'[]'::jsonb)
+        from foundation.integration_client_grant_events
+        where request_id=$1
+      $sql$ into v_extra using v_request_uuid;
+      v_domain := v_domain || v_extra;
+    end if;
+
+    if to_regclass('foundation.integration_client_link_events') is not null then
+      execute $sql$
+        select coalesce(jsonb_agg(jsonb_build_object(
+          'source','integration_client_link_events','eventId',event_id::text,
+          'outcome',outcome,'reasonCode',reason_code,'occurredAt',occurred_at
+        ) order by occurred_at),'[]'::jsonb)
+        from foundation.integration_client_link_events
+        where request_id=$1
+      $sql$ into v_extra using v_request_uuid;
+      v_domain := v_domain || v_extra;
+    end if;
+
+    if to_regclass('foundation.integration_context_snapshot_events') is not null then
+      execute $sql$
+        select coalesce(jsonb_agg(jsonb_build_object(
+          'source','integration_context_snapshot_events','eventId',event_id::text,
+          'outcome',event_type,'reasonCode',reason_code,'occurredAt',occurred_at
+        ) order by occurred_at),'[]'::jsonb)
+        from foundation.integration_context_snapshot_events
+        where request_id=$1
+      $sql$ into v_extra using v_request_uuid;
+      v_domain := v_domain || v_extra;
+    end if;
+
+    if to_regclass('foundation.concierge_execution_events') is not null then
+      execute $sql$
+        select coalesce(jsonb_agg(jsonb_build_object(
+          'source','concierge_execution_events','eventId',event_id::text,
+          'outcome',event_type,'reasonCode',reason_code,'occurredAt',occurred_at
+        ) order by occurred_at),'[]'::jsonb)
+        from foundation.concierge_execution_events
+        where request_id=$1
+      $sql$ into v_extra using v_request_uuid;
+      v_domain := v_domain || v_extra;
+    end if;
+
+    if to_regclass('foundation.concierge_outcome_events') is not null then
+      execute $sql$
+        select coalesce(jsonb_agg(jsonb_build_object(
+          'source','concierge_outcome_events','eventId',event_id::text,
+          'outcome',outcome,'reasonCode',reason_code,'occurredAt',occurred_at
+        ) order by occurred_at),'[]'::jsonb)
+        from foundation.concierge_outcome_events
+        where request_id=$1
+      $sql$ into v_extra using v_request_uuid;
+      v_domain := v_domain || v_extra;
+    end if;
+
+    if to_regclass('foundation.concierge_cancellation_events') is not null then
+      execute $sql$
+        select coalesce(jsonb_agg(jsonb_build_object(
+          'source','concierge_cancellation_events','eventId',event_id::text,
+          'outcome','cancelled','reasonCode',reason_code,'occurredAt',cancelled_at
+        ) order by cancelled_at),'[]'::jsonb)
+        from foundation.concierge_cancellation_events
+        where request_id=$1
+      $sql$ into v_extra using v_request_uuid;
+      v_domain := v_domain || v_extra;
+    end if;
+
+    if to_regclass('foundation.integration_link_request_events') is not null then
+      execute $sql$
+        select coalesce(jsonb_agg(jsonb_build_object(
+          'source','integration_link_request_events','eventId',event_id::text,
+          'outcome',event_type,'reasonCode',null,'occurredAt',occurred_at
+        ) order by occurred_at),'[]'::jsonb)
+        from foundation.integration_link_request_events
+        where request_id=$1
+      $sql$ into v_extra using v_request_uuid;
+      v_domain := v_domain || v_extra;
+    end if;
+
+    select coalesce(jsonb_agg(e order by e->>'occurredAt'),'[]'::jsonb)
+    into v_domain
+    from jsonb_array_elements(v_domain) e;
   end if;
 
   return jsonb_build_object(
@@ -496,6 +543,7 @@ begin
     'domainEvidence',v_domain
   );
 end;
+
 $layer29$;
 
 revoke all on function foundation.get_gateway_operation_audit_trace_v1(uuid)
