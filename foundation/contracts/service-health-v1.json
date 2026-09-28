@@ -1,0 +1,53 @@
+{
+  "healthContract": "shine-foundation/service-health-v1",
+  "schemaVersion": "1.0.0",
+  "readers": {
+    "serviceHealth": "foundation.get_service_health_v1(text,text)",
+    "serviceState": "foundation.get_service_state_v1(text,text)",
+    "foundationHealth": "foundation.get_foundation_health_v1(text)"
+  },
+  "purpose": "Turn fresh runtime telemetry into explicit, policy-backed health and combine it with deployment truth without conflating the two.",
+  "healthStates": {
+    "healthy": "Fresh evidence meets the service's warning thresholds.",
+    "degraded": "Fresh evidence crosses one or more warning thresholds but no critical threshold.",
+    "unhealthy": "Fresh evidence crosses one or more critical thresholds.",
+    "unknown": "The service, policy, sample or evidence freshness is insufficient to make a safe health decision."
+  },
+  "operationalStates": [
+    "operational",
+    "degraded",
+    "unhealthy",
+    "drift",
+    "unknown"
+  ],
+  "signals": [
+    "request volume",
+    "5xx response rate",
+    "p95 execution latency",
+    "runtime error count",
+    "evidence freshness"
+  ],
+  "principles": {
+    "deploymentDoesNotImplyHealth": true,
+    "healthRequiresPolicy": true,
+    "healthRequiresFreshEvidence": true,
+    "insufficientTrafficReturnsUnknown": true,
+    "4xxResponsesAreRecordedButNotTreatedAsServiceFailures": true,
+    "policiesAreAppendOnly": true,
+    "evidenceIsAppendOnly": true,
+    "noPublicDatabaseAccess": true
+  },
+  "reasonCodes": [
+    "unknown-service",
+    "missing-health-policy",
+    "missing-health-evidence",
+    "health-evidence-stale",
+    "insufficient-request-sample",
+    "elevated-5xx-rate",
+    "critical-5xx-rate",
+    "elevated-p95-latency",
+    "critical-p95-latency",
+    "runtime-errors-observed",
+    "critical-runtime-errors"
+  ]
+}
