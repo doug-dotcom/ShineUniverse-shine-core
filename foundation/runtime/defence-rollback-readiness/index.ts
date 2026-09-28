@@ -161,7 +161,8 @@ Deno.serve(async(req:Request)=>{
       !targetId(submission.targetId)||
       !sha40(submission.rollbackCommitSha)||
       !sha40(submission.canonicalCommitSha)||
-      typeof submission.sourceAvailable!=='boolean'
+      typeof submission.sourceAvailable!=='boolean'||
+      typeof submission.canonicalSourceAvailable!=='boolean'
     ){
       return jsonResponse(400,{error:'invalid-rollback-attestation'});
     }
@@ -182,17 +183,18 @@ Deno.serve(async(req:Request)=>{
     ].join(':');
 
     const rows=await sql`
-      select foundation.record_defence_rollback_source_attestation_v1(
+      select foundation.record_defence_rollback_source_attestation_v2(
         ${submission.targetId},
         ${identity.repository},
         ${String(submission.rollbackCommitSha).toLowerCase()},
         ${String(submission.canonicalCommitSha).toLowerCase()},
         ${submission.sourceAvailable},
+        ${submission.canonicalSourceAvailable},
         ${observedAt.toISOString()}::timestamptz,
         ${validUntil.toISOString()}::timestamptz,
         ${evidenceRef},
         ${sql.json({
-          collector:'shine-defence/rollback-readiness-v1',
+          collector:'shine-defence/rollback-readiness-v2',
           githubRunId:identity.runId,
           githubRunAttempt:identity.runAttempt,
           githubEvent:identity.eventName,
