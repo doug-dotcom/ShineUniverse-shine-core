@@ -26,6 +26,7 @@ jobs:
           deno-version: v2.x
       - run: deno check foundation/runtime/edge-function/index.ts
       - run: deno check foundation/runtime/defence-provider-ingest/index.ts
+      - run: deno check foundation/runtime/defence-reattest/index.ts
 
   persistence:
     runs-on: ubuntu-latest
@@ -167,3 +168,7 @@ jobs:
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-estate-health-coverage-v2.sql
       - name: Run Shine Defence complete Railway health coverage acceptance tests
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-estate-health-coverage-v2.test.sql
+      - name: Apply Shine Defence artefact re-attestation
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-artifact-reattestation-v1.sql
+      - name: Run Shine Defence artefact re-attestation acceptance tests
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-artifact-reattestation-v1.test.sql
