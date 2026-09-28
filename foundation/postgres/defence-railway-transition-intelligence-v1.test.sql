@@ -321,7 +321,113 @@ end;
 $$;
 
 
-do $$
+do $
+declare
+  v_request uuid;
+  v_sequence bigint;
+  v jsonb;
+begin
+  insert into foundation.defence_estate_targets(
+    target_id,display_name,provider,provider_project_ref,environment_ref,service_ref,
+    target_role,required_for_estate,allowed_runtime_states,lifecycle,metadata
+  ) values (
+    'railway:test-transition-superseded',
+    'Railway Transition Superseded Test',
+    'railway',
+    'cccccccc-cccc-4ccc-8ccc-cccccccccccc',
+    'dddddddd-dddd-4ddd-8ddd-dddddddddddd',
+    'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee',
+    'primary_service',true,array['active']::text[],'active','{}'::jsonb
+  );
+
+  insert into foundation.defence_health_probe_targets(
+    target_version,target_id,target_url,response_mode,expected_json,expected_text,
+    timeout_milliseconds,evaluation_window_seconds,max_evidence_age_seconds,
+    min_samples,degraded_failure_count,unhealthy_failure_count,startup_grace_seconds,
+    enabled,effective_at,evidence_ref,evidence_note,probe_mode
+  ) values (
+    'test-v1',
+    'railway:test-transition-superseded',
+    'https://example.invalid/health',
+    'json_contains','{"status":"ok"}'::jsonb,null,
+    10000,1200,600,1,1,1,1200,true,now(),
+    'test:transition:superseded-health-target',
+    'Transaction-only superseded transition fixture.',
+    'continuous'
+  );
+
+  insert into foundation.defence_health_probe_requests(
+    target_id,target_version,external_request_id,target_url,queued_at,evidence_ref,metadata
+  ) values (
+    'railway:test-transition-superseded','test-v1',null,
+    'https://example.invalid/health',now(),
+    'test:transition:superseded-health-request','{}'::jsonb
+  ) returning probe_request_id into v_request;
+
+  v_sequence := foundation.record_defence_health_probe_result_v1(
+    v_request,200,false,null,true,now(),100,null,
+    'test:transition:superseded-health-result','{}'::jsonb
+  );
+
+  perform foundation.record_defence_railway_transition_v1(
+    'cccccccc-cccc-4ccc-8ccc-cccccccccccc',
+    'dddddddd-dddd-4ddd-8ddd-dddddddddddd',
+    'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee',
+    'ffffffff-ffff-4fff-8fff-ffffffffffff',
+    'Deployment.success',
+    'success',
+    'INFO',
+    'GitHub',
+    'main',
+    repeat('6',40),
+    now()-interval '30 minutes',
+    repeat('7',64),
+    'test:transition:superseded-old-success',
+    '{"test":true}'::jsonb
+  );
+
+  insert into foundation.defence_runtime_provenance_observations(
+    target_id,provider,repository,commit_sha,branch,deployment_id,
+    service_name,environment_name,health_probe_result_sequence,
+    observed_at,valid_until,evidence_ref,metadata
+  ) values (
+    'railway:test-transition-superseded',
+    'railway',
+    'doug-dotcom/test-transition-superseded',
+    repeat('8',40),
+    'main',
+    '12121212-1212-4212-8212-121212121212',
+    'test-transition-superseded',
+    'production',
+    v_sequence,
+    now()-interval '5 minutes',
+    now()+interval '1 hour',
+    'test:transition:superseded-new-serving',
+    '{}'::jsonb
+  );
+
+  select foundation.get_defence_railway_transition_summary_v1() into v;
+  if exists (
+    select 1
+    from jsonb_array_elements(v->'attention') x
+    where x->>'targetId'='railway:test-transition-superseded'
+  ) then
+    raise exception 'superseded successful release must not remain transition attention: %',v;
+  end if;
+
+  select foundation.run_defence_railway_transition_sentinel_v1(now()) into v;
+  if exists (
+    select 1
+    from foundation.current_defence_estate_incidents
+    where incident_key='railway:test-transition-superseded:railway-transition'
+  ) then
+    raise exception 'superseded successful release must not open transition incident: %',v;
+  end if;
+end;
+$;
+
+
+do $
 begin
   if has_table_privilege(
        'anon','foundation.defence_railway_transition_events','SELECT'
