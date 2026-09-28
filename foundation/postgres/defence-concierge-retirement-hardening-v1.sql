@@ -71,6 +71,11 @@ begin
     execute 'grant execute on function foundation.list_user_concierge_jobs_v6(uuid,integer,timestamptz,timestamptz) to foundation_gateway,service_role';
   end if;
 
+  if to_regprocedure('foundation.list_user_concierge_jobs_v7(uuid,integer,timestamptz,timestamptz)') is not null then
+    execute 'revoke all on function foundation.list_user_concierge_jobs_v7(uuid,integer,timestamptz,timestamptz) from public,anon,authenticated';
+    execute 'grant execute on function foundation.list_user_concierge_jobs_v7(uuid,integer,timestamptz,timestamptz) to foundation_gateway,service_role';
+  end if;
+
   if to_regprocedure('foundation.retire_stale_concierge_requests_v1(timestamptz,interval,integer)') is not null then
     execute 'revoke all on function foundation.retire_stale_concierge_requests_v1(timestamptz,interval,integer) from public,anon,authenticated';
     execute 'grant execute on function foundation.retire_stale_concierge_requests_v1(timestamptz,interval,integer) to service_role';
