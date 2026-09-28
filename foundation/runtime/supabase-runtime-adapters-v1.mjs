@@ -20,6 +20,19 @@ function decodeJwtPayload(jwt){
   }
 }
 
+const normalizeJsonObject=value=>{
+  if(value==null) return null;
+  if(typeof value==='string'){
+    try{
+      const parsed=JSON.parse(value);
+      return parsed&&typeof parsed==='object'&&!Array.isArray(parsed)?parsed:null;
+    }catch{
+      return null;
+    }
+  }
+  return typeof value==='object'&&!Array.isArray(value)?value:null;
+};
+
 const toIso=v=>v==null?undefined:(v instanceof Date?v.toISOString():String(v));
 
 const mapResource=row=>row?{
@@ -616,7 +629,7 @@ export function createSupabaseRuntimeAdapters({sql,defenceGate,fetchImpl=fetch}=
           ${asOf}::timestamptz
         ) as policy
       `;
-      return first(rows)?.policy??null;
+      return normalizeJsonObject(first(rows)?.policy);
     },
 
     async recordGatewayOperationAuditEvent({
@@ -632,6 +645,11 @@ export function createSupabaseRuntimeAdapters({sql,defenceGate,fetchImpl=fetch}=
       occurredAt=new Date().toISOString()
     }={}){
       if(!operationAuditId||!phase||!path) throw new TypeError('operation audit event is incomplete');
+      const normalizedPolicy=normalizeJsonObject(policy);
+      if(phase==='policy'&&!normalizedPolicy){
+        throw new TypeError('operation audit policy snapshot must be a JSON object');
+      }
+      const policyJson=normalizedPolicy?JSON.stringify(normalizedPolicy):null;
       const rows=await sql`
         select foundation.record_gateway_operation_audit_event_v1(
           ${operationAuditId}::uuid,
@@ -639,14 +657,14 @@ export function createSupabaseRuntimeAdapters({sql,defenceGate,fetchImpl=fetch}=
           ${method},
           ${path},
           ${environment},
-          ${policy?JSON.stringify(policy):null}::jsonb,
+          ${policyJson}::jsonb,
           ${httpStatus}::integer,
           ${responseReasonCode},
           ${domainRequestId},
           ${occurredAt}::timestamptz
         ) as audit
       `;
-      return first(rows)?.audit??null;
+      return normalizeJsonObject(first(rows)?.audit);
     },
 
 
