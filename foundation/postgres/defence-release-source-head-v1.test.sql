@@ -202,7 +202,7 @@ end;
 $$;
 
 
-do $
+do $nondeploy$
 declare
   v jsonb;
 begin
@@ -240,10 +240,10 @@ begin
     raise exception 'non-deployment source head must not open an incident: %',v;
   end if;
 end;
-$;
+$nondeploy$;
 
 
-do $
+do $$
 begin
   if has_table_privilege(
        'anon','foundation.defence_release_source_head_observations','SELECT'
