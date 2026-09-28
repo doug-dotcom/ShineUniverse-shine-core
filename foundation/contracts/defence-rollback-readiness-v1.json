@@ -1,0 +1,24 @@
+{
+  "rollbackReadinessContract": "shine-defence/rollback-readiness-v1",
+  "schemaVersion": "1.0.0",
+  "scope": "railway-canonical-releases",
+  "authority": {
+    "canonicalState": "foundation.current_defence_release_admission",
+    "targetIdentity": "foundation.defence_estate_targets",
+    "sourceAttestations": "foundation.defence_rollback_source_attestations"
+  },
+  "principles": [
+    "rollback readiness is separate from current serving health",
+    "a remembered deployment id is not enough to claim recovery readiness",
+    "repo-local GitHub OIDC proves whether the exact rollback commit still exists in the registered private repository",
+    "targets without a prior qualified canonical release are history-building, not failed",
+    "Railway native image rollback availability is not claimed without fresh provider evidence",
+    "Defence recommends and verifies rollback targets but never performs rollback automatically"
+  ],
+  "states": [
+    "source-ready",
+    "source-unavailable",
+    "source-proof-stale",
+    "history-building"
+  ]
+}
