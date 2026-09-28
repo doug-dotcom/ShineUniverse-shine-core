@@ -1,0 +1,26 @@
+{
+  "healthAdapterContract": "shine-defence/estate-health-adapters-v1",
+  "schemaVersion": "1.0.0",
+  "purpose": "Normalise app-specific public health responses into bounded Defence health evidence without weakening Foundation's canonical service health contract.",
+  "responseModes": {
+    "json_contains": "HTTP 2xx, no timeout/error, JSON object contains the configured expected top-level key/value pairs.",
+    "text_exact": "HTTP 2xx, no timeout/error, trimmed response text exactly matches the configured expected text."
+  },
+  "aggregation": {
+    "defaultEvaluationWindowSeconds": 1200,
+    "defaultMinimumSamples": 3,
+    "degradedAtFailureCount": 1,
+    "unhealthyAtFailureCount": 2,
+    "evidenceMaxAgeSeconds": 600,
+    "startupGraceSeconds": 1200
+  },
+  "principles": {
+    "healthDoesNotReplaceProviderTruth": true,
+    "providerFreshnessAndHealthFreshnessIndependent": true,
+    "responseBodiesNotPersisted": true,
+    "responseBodiesHashedOnly": true,
+    "noCredentialsInProbeTargets": true,
+    "sleepingServicesExcludedFromContinuousProbes": true,
+    "canonicalFoundationHealthContractUnchanged": true
+  }
+}
