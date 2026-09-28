@@ -668,6 +668,109 @@ end;
 $layer41_bad_registry_consumed$;
 
 
+-- CLOSED PROPOSAL SCHEMA: an exact-hash proposal carrying an unrecognised
+-- field must be rejected by the executor before mutation and without consuming
+-- the otherwise-valid admission.
+set local role foundation_remediation_approver;
+
+select foundation.issue_remediation_approval_receipt_v1(
+  '41000000-0000-4000-8000-000000000317'::uuid,
+  'apply-registry-repair',
+  (
+    foundation.layer41_test_proposal_v1('apply-registry-repair',false)
+      ->>'incidentEventId'
+  )::uuid,
+  foundation.get_remediation_proposal_sha256_v1(
+    foundation.layer41_test_proposal_v1('apply-registry-repair',false)
+      || '{"unexpected":"blocked"}'::jsonb
+  ),
+  'human:layer41-closed-schema',
+  'explicit-human',
+  now()-interval '1 second',
+  now()+interval '10 minutes'
+);
+
+reset role;
+
+set local role service_role;
+
+select foundation.consume_remediation_approval_receipt_v1(
+  '41000000-0000-4000-8000-000000000318'::uuid,
+  '41000000-0000-4000-8000-000000000317'::uuid,
+  'apply-registry-repair',
+  (
+    foundation.layer41_test_proposal_v1('apply-registry-repair',false)
+      ->>'incidentEventId'
+  )::uuid,
+  foundation.get_remediation_proposal_sha256_v1(
+    foundation.layer41_test_proposal_v1('apply-registry-repair',false)
+      || '{"unexpected":"blocked"}'::jsonb
+  ),
+  now()
+);
+
+reset role;
+
+set local role foundation_remediation_executor;
+
+select foundation.issue_remediation_execution_admission_v1(
+  '41000000-0000-4000-8000-000000000319'::uuid,
+  '41000000-0000-4000-8000-000000000320'::uuid,
+  '41000000-0000-4000-8000-000000000317'::uuid,
+  'apply-registry-repair',
+  (
+    foundation.layer41_test_proposal_v1('apply-registry-repair',false)
+      ->>'incidentEventId'
+  )::uuid,
+  foundation.get_remediation_proposal_sha256_v1(
+    foundation.layer41_test_proposal_v1('apply-registry-repair',false)
+      || '{"unexpected":"blocked"}'::jsonb
+  ),
+  now()
+);
+
+reset role;
+
+set local role foundation_remediation_mutator;
+
+select foundation.execute_scoped_remediation_v1(
+  '41000000-0000-4000-8000-000000000327'::uuid,
+  '41000000-0000-4000-8000-000000000328'::uuid,
+  '41000000-0000-4000-8000-000000000320'::uuid,
+  foundation.layer41_test_proposal_v1('apply-registry-repair',false)
+    || '{"unexpected":"blocked"}'::jsonb,
+  now()
+);
+
+reset role;
+
+do $layer41_closed_schema_rejected$
+declare
+  v_status jsonb;
+begin
+  if not exists (
+    select 1
+    from foundation.remediation_execution_events
+    where admission_id='41000000-0000-4000-8000-000000000320'::uuid
+      and event_type='denied'
+      and reason_code='remediation-execution-proposal-fields-invalid'
+  ) then
+    raise exception 'Unknown remediation proposal fields must fail closed';
+  end if;
+
+  select foundation.get_remediation_execution_admission_status_v1(
+    '41000000-0000-4000-8000-000000000320'::uuid
+  ) into v_status;
+
+  if v_status->>'status'<>'active'
+     or v_status->>'mayAttemptExecution'<>'true' then
+    raise exception 'Pre-mutation schema denial must not consume admission: %',
+      v_status;
+  end if;
+end;
+$layer41_closed_schema_rejected$;
+
+
 -- Fresh approval/admission with the correct exact before-state.
 set local role foundation_remediation_approver;
 
