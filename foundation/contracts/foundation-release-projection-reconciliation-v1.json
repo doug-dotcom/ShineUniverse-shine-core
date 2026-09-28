@@ -1,0 +1,52 @@
+{
+  "contract": "shine-foundation/foundation-release-projection-reconciliation-v1",
+  "version": "1.0.0",
+  "layer": 36,
+  "purpose": "Continuously reconcile Universe registry projection, readiness-release ledger and immutable Foundation release identity.",
+  "canonicalApp": "foundation",
+  "canonicalService": "foundation.gateway",
+  "healthReader": "foundation.get_foundation_release_projection_health_v1",
+  "observationLedger": "foundation.foundation_release_projection_observations",
+  "currentObservationView": "foundation.current_foundation_release_projection_observation",
+  "recorder": "foundation.record_foundation_release_projection_observation_v1",
+  "hostedObserver": {
+    "engine": "pg_cron",
+    "jobName": "shine-foundation-release-projection-5m",
+    "cadence": "1,6,11,16,21,26,31,36,41,46,51,56 * * * *",
+    "writesOnlyOnMeaningfulEvidenceChange": true
+  },
+  "reconciliationChecks": [
+    "Foundation registry row exists",
+    "Registry current layer matches immutable binding layer",
+    "Registry readiness release ref matches immutable binding release ref",
+    "Registry release target exists in Universe readiness release ledger",
+    "Immutable binding release exists in Universe readiness release ledger",
+    "Release ledger source layer matches binding layer",
+    "Canonical repo remains confirmed",
+    "Registry verification/build state remains verified/deployed",
+    "Layer-35 release identity health remains non-failing"
+  ],
+  "states": {
+    "aligned": "Registry, release ledger and immutable binding agree.",
+    "degraded": "Identity agrees but registry verification state or release evidence quality is degraded.",
+    "unknown": "Required projection schema or release identity health cannot be established.",
+    "fail": "A required registry, release-ledger or binding invariant is missing or mismatched."
+  },
+  "mutationPolicy": {
+    "automaticallyDetect": true,
+    "automaticallyRecordChanges": true,
+    "automaticallyRepair": false,
+    "rationale": "Authoritative registry and release-ledger mutation requires a separate admitted control-plane operation rather than silent reconciliation writes."
+  },
+  "access": {
+    "healthReader": [
+      "foundation_runtime",
+      "service_role"
+    ],
+    "recorder": [
+      "service_role",
+      "cron-owner"
+    ],
+    "directObservationInsert": []
+  }
+}
