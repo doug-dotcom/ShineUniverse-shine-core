@@ -268,6 +268,8 @@ as $$
 declare
   v_policy foundation.service_health_policies%rowtype;
   v_runtime_version text;
+  v_deployment_observed_at timestamptz;
+  v_window_floor timestamptz;
   v_window_start timestamptz;
   v_window_end timestamptz;
   v_request_count integer;
@@ -294,6 +296,17 @@ begin
       'environment',p_environment
     );
   end if;
+
+  select o.runtime_version,o.observed_at
+    into v_runtime_version,v_deployment_observed_at
+  from foundation.current_service_deployment_observations o
+  where o.service_id=p_service_id
+    and o.environment=p_environment;
+
+  v_window_floor := greatest(
+    p_as_of - make_interval(secs=>v_policy.evaluation_window_seconds),
+    coalesce(v_deployment_observed_at,'-infinity'::timestamptz)
+  );
 
   select
     min(r.response_at),
@@ -325,7 +338,7 @@ begin
   from foundation.service_health_probe_results r
   where r.service_id=p_service_id
     and r.environment=p_environment
-    and r.response_at > p_as_of - make_interval(secs=>v_policy.evaluation_window_seconds)
+    and r.response_at >= v_window_floor
     and r.response_at <= p_as_of;
 
   if coalesce(v_request_count,0)=0 then
@@ -337,13 +350,8 @@ begin
     );
   end if;
 
-  select o.runtime_version
-    into v_runtime_version
-  from foundation.current_service_deployment_observations o
-  where o.service_id=p_service_id
-    and o.environment=p_environment;
-
-  v_evidence_ref := 'health-probe-window:' || p_service_id || ':' || p_environment || ':' || v_latest_sequence::text;
+  v_evidence_ref := 'health-probe-window:' || p_service_id || ':' || p_environment || ':' ||
+    coalesce(v_runtime_version,'unknown') || ':' || v_latest_sequence::text;
 
   insert into foundation.service_health_evidence(
     service_id,environment,runtime_version,window_started_at,window_ended_at,
@@ -358,7 +366,9 @@ begin
     jsonb_build_object(
       'collector','shine-foundation/automatic-health-collector-v1',
       'latestProbeResultSequence',v_latest_sequence,
-      'syntheticProbe',true
+      'syntheticProbe',true,
+      'deploymentObservedAt',v_deployment_observed_at,
+      'windowFloor',v_window_floor
     ),
     p_as_of
   )
