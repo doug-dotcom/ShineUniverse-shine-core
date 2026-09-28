@@ -2,12 +2,49 @@
   "contract": "shine-foundation/foundation-readiness-dependency-remediation-proposal-v1",
   "version": "1.0.0",
   "layer": 47,
-  "purpose": "Create an integrity-bound scope-aware proposal for an active readiness incident.",
+  "purpose": "Generate a bounded, integrity-bound dependency-remediation proposal for the exact active readiness incident and semantic condition without granting approval or execution authority.",
+  "generator": "foundation.propose_readiness_dependency_remediation_v1",
+  "statusReader": "foundation.get_readiness_dependency_proposal_status_v1",
+  "ledger": "foundation.readiness_dependency_remediation_proposals",
+  "prerequisites": [
+    "readiness incident is opened or changed",
+    "Layer-45 propose-dependency-remediation response action is admitted",
+    "semantic condition fingerprint is current"
+  ],
+  "scopeRules": {
+    "uniqueProposalPerIncidentCondition": true,
+    "affectedScopesDeduplicated": true,
+    "dispositionPrecedence": [
+      "degraded",
+      "guarded",
+      "blocked"
+    ],
+    "blockedOutranksGuardedAndDegraded": true
+  },
+  "boundedWork": [
+    "investigate-dependency-evidence",
+    "repair-external-dependency-or-defence-posture",
+    "collect-fresh-readiness-evidence"
+  ],
+  "prohibitedWork": [
+    "mutate-foundation-canonical-truth",
+    "rebind-foundation-release",
+    "bypass-safe-mode",
+    "automatic-unapproved-repair"
+  ],
+  "staleOnIncidentOrConditionChange": true,
+  "integrity": "sha256",
   "approvalGranted": false,
   "executionAuthorityGranted": false,
   "canonicalTruthMutationAllowed": false,
   "releaseRebindAllowed": false,
   "automaticRepairAllowed": false,
-  "staleOnIncidentOrConditionChange": true,
-  "integrity": "sha256"
+  "invariants": {
+    "repeatedGenerationReusesExistingProposal": true,
+    "statusReaderRevalidatesIntegrity": true,
+    "recoveredIncidentMakesProposalStale": true,
+    "serviceRoleCannotInsertDirectly": true,
+    "runtimeCannotGenerate": true,
+    "executesAction": false
+  }
 }
