@@ -182,6 +182,10 @@ jobs:
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/deployment-receipt-publication-attestation-v1.sql
       - name: Run deployment receipt publication attestation tests
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/deployment-receipt-publication-attestation-v1.test.sql
+      - name: Apply readiness publication assurance
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/readiness-publication-assurance-v1.sql
+      - name: Run readiness publication assurance tests
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/readiness-publication-assurance-v1.test.sql
       - name: Apply Shine Defence Sentinel
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-sentinel-v1.sql
       - name: Run Shine Defence Sentinel acceptance tests
