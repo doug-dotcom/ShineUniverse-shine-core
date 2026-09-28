@@ -80,6 +80,7 @@ begin
     'eventId','22222222-2222-4222-8222-222222222222',
     'publisherAppId','shine.atlas-test',
     'capabilityId','atlas.test.publish',
+    'capabilityVersion','1.0.0',
     'persistedAt','2026-09-28T10:00:00Z',
     'eventSha256',repeat('b',64),
     'payloadSha256',repeat('c',64)
@@ -87,7 +88,7 @@ begin
 
   select foundation.persist_atlas_feed_event_v1(
     '11111111-1111-4111-8111-111111111111',
-    e,a,repeat('b',64),repeat('c',64),r,repeat('d',64),
+    e,a,repeat('b',64),repeat('c',64),17,r,repeat('d',64),
     '2026-09-28T10:00:00Z'
   ) into out1;
 
@@ -97,7 +98,7 @@ begin
 
   select foundation.persist_atlas_feed_event_v1(
     '11111111-1111-4111-8111-111111111111',
-    e,a,repeat('b',64),repeat('c',64),r,repeat('d',64),
+    e,a,repeat('b',64),repeat('c',64),17,r,repeat('d',64),
     '2026-09-28T10:00:00Z'
   ) into out2;
 
@@ -109,7 +110,7 @@ begin
   e := jsonb_set(e,'{payload,state}','"red"'::jsonb);
   select foundation.persist_atlas_feed_event_v1(
     '55555555-5555-4555-8555-555555555555',
-    e,a,repeat('e',64),repeat('f',64),
+    e,a,repeat('e',64),repeat('f',64),15,
     jsonb_set(
       jsonb_set(r,'{requestId}','"55555555-5555-4555-8555-555555555555"'::jsonb),
       '{receiptId}','"66666666-6666-4666-8666-666666666666"'::jsonb
