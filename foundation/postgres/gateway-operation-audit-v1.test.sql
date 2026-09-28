@@ -121,7 +121,7 @@ end;
 $$;
 
 
-do $
+do $audit_fallback$
 declare
   v_audit uuid := '29000000-0000-4000-8000-000000000004';
   v_result jsonb;
@@ -156,10 +156,10 @@ begin
     raise exception 'authoritative policy fallback should resolve a real policy state: %',v_state;
   end if;
 end;
-$;
+$audit_fallback$;
 
 
-do $
+do $audit_order$
 declare
   v_audit uuid := '29000000-0000-4000-8000-000000000002';
 begin
@@ -187,7 +187,7 @@ begin
       end if;
   end;
 end;
-$$;
+$audit_order$;
 
 
 do $$
