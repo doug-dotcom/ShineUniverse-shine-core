@@ -183,6 +183,16 @@ Current Layer-37 incident summary:
 
 The first post-promotion sentinel run recorded the new aligned Layer-37 projection observation and correctly created no incident event.
 
+The first real hosted pg_cron execution then ran automatically at:
+
+`2026-09-28 09:57:00 UTC`
+
+with status:
+
+**succeeded**
+
+and returned one row while leaving the incident summary NORMAL with no active incident/watch.
+
 ## Acceptance coverage
 
 Foundation CI proves:
