@@ -6,9 +6,9 @@ create table foundation.atlas_feed_events (
   event_id uuid primary key,
   first_request_id uuid not null unique,
   source_app_id text not null references foundation.app_registry(app_id),
-  source_capability_id text not null references foundation.app_capabilities(capability_id),
+  source_capability_id text not null,
   publisher_capability_version text not null,
-  publisher_credential_id uuid not null references foundation.app_credentials(credential_id),
+  publisher_credential_id uuid not null,
   source_release_ref text not null,
   topic text not null check (topic ~ '^[a-z0-9]+([._-][a-z0-9]+){1,7}$'),
   subject_kind text not null,
@@ -38,7 +38,11 @@ create table foundation.atlas_feed_events (
   check ((audience_mode='grant') = (grant_id is not null)),
   check (data_class='general' or audience_mode<>'internal'),
   check (data_class='general' or owner_shine_id is not null),
-  check (grant_id is null or owner_shine_id is not null)
+  check (grant_id is null or owner_shine_id is not null),
+  foreign key (source_app_id,source_capability_id)
+    references foundation.app_capabilities(app_id,capability_id),
+  foreign key (publisher_credential_id,source_app_id)
+    references foundation.app_credentials(credential_id,app_id)
 );
 
 create unique index atlas_feed_events_event_hash_idx
@@ -61,11 +65,13 @@ create table foundation.atlas_feed_persistence_receipts (
   event_sha256 text not null check (event_sha256 ~ '^[a-f0-9]{64}$'),
   payload_sha256 text not null check (payload_sha256 ~ '^[a-f0-9]{64}$'),
   publisher_app_id text not null references foundation.app_registry(app_id),
-  publisher_capability_id text not null references foundation.app_capabilities(capability_id),
+  publisher_capability_id text not null,
   persisted_at timestamptz not null,
   receipt jsonb not null check (jsonb_typeof(receipt)='object'),
   receipt_sha256 text not null check (receipt_sha256 ~ '^[a-f0-9]{64}$'),
-  created_at timestamptz not null default now()
+  created_at timestamptz not null default now(),
+  foreign key (publisher_app_id,publisher_capability_id)
+    references foundation.app_capabilities(app_id,capability_id)
 );
 
 create index atlas_feed_receipts_app_time_idx
