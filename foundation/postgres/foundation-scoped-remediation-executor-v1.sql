@@ -78,6 +78,12 @@ create index remediation_execution_events_action_idx
     action_key,occurred_at desc,event_sequence desc
   );
 
+create index remediation_execution_events_approval_receipt_idx
+  on foundation.remediation_execution_events(approval_receipt_id);
+
+create index remediation_execution_events_incident_idx
+  on foundation.remediation_execution_events(incident_event_id);
+
 create unique index remediation_execution_events_consuming_once_idx
   on foundation.remediation_execution_events(admission_id)
   where event_type in ('executed','failed');
