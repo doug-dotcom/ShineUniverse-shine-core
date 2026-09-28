@@ -1,0 +1,26 @@
+{
+  "contract": "shine-foundation/foundation-readiness-remediation-handoff-v1",
+  "version": "1.0.0",
+  "layer": 48,
+  "purpose": "Route a current Layer-47 readiness-remediation proposal to the explicitly registered owner of every affected dependency scope without granting approval or execution authority.",
+  "sourceProposal": "foundation.readiness_dependency_remediation_proposals",
+  "dependencyRouting": "foundation.current_service_dependencies + foundation.service_registry",
+  "handoffLedger": "foundation.readiness_dependency_remediation_handoffs",
+  "generator": "foundation.generate_readiness_dependency_remediation_handoff_v1",
+  "statusReader": "foundation.get_readiness_dependency_remediation_handoff_status_v1",
+  "invariants": {
+    "everyAffectedScopeMustResolveToActiveDependencyOwner": true,
+    "routingIsDeterministic": true,
+    "duplicateScopesUseStrongestDisposition": true,
+    "onePacketPerOwnerAndDependency": true,
+    "proposalMustRemainCurrent": true,
+    "routingChangesMakeHandoffStale": true,
+    "handoffIntegrityHasSha256": true,
+    "approvalGranted": false,
+    "executionAuthorityGranted": false,
+    "executesAction": false,
+    "canonicalTruthMutation": false,
+    "releaseRebind": false,
+    "safeModeBypass": false
+  }
+}
