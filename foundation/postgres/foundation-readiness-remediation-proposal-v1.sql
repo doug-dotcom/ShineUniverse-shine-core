@@ -109,23 +109,23 @@ begin
   )
   into scopes
   from (
-    select value::text #>> '{}' as scope,'blocked'::text as disposition,3 as rank
-    from jsonb_array_elements(current_event.blocked_scopes)
+    select value as scope,'blocked'::text as disposition,3 as rank
+    from jsonb_array_elements_text(current_event.blocked_scopes) as t(value)
     union all
-    select value::text #>> '{}','guarded',2
-    from jsonb_array_elements(current_event.guarded_scopes)
+    select value,'guarded',2
+    from jsonb_array_elements_text(current_event.guarded_scopes) as t(value)
     union all
-    select value::text #>> '{}','degraded',1
-    from jsonb_array_elements(current_event.degraded_scopes)
+    select value,'degraded',1
+    from jsonb_array_elements_text(current_event.degraded_scopes) as t(value)
   ) x
   where not exists (
     select 1
     from (
-      select value::text #>> '{}' as scope2,3 as rank2 from jsonb_array_elements(current_event.blocked_scopes)
+      select value as scope2,3 as rank2 from jsonb_array_elements_text(current_event.blocked_scopes) as t(value)
       union all
-      select value::text #>> '{}',2 from jsonb_array_elements(current_event.guarded_scopes)
+      select value,2 from jsonb_array_elements_text(current_event.guarded_scopes) as t(value)
       union all
-      select value::text #>> '{}',1 from jsonb_array_elements(current_event.degraded_scopes)
+      select value,1 from jsonb_array_elements_text(current_event.degraded_scopes) as t(value)
     ) y
     where y.scope2=x.scope and y.rank2>x.rank
   );
