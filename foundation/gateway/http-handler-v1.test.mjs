@@ -781,3 +781,52 @@ test('production audit mode cannot be enabled without an audit recorder',()=>{
   }),/operation audit recorder is required/);
 });
 
+
+
+test('Concierge supersede route is constructor-bound and uses dual integration authentication',async()=>{
+  let authCalls=0,serviceCalls=0;
+  const supersedeHandler=createFoundationHttpHandler({
+    gateway:async()=>({status:'allowed'}),
+    authenticate:async()=>({}),
+    authenticateIntegrationUserAndClient:async request=>{
+      authCalls++;
+      assert.equal(request.headers.get('x-shine-client-token'),'client');
+      assert.equal(request.headers.get('x-shine-delegation-token'),'delegation');
+      return {clientToken:'client',delegationToken:'delegation'};
+    },
+    conciergeSupersede:async({envelope,authContext})=>{
+      serviceCalls++;
+      assert.equal(envelope.conciergeSupersede,'shine-concierge/supersede-v1');
+      assert.equal(authContext.clientToken,'client');
+      return {
+        conciergeResponse:'shine-concierge/supersede-response-v1',
+        schemaVersion:'1.0.0',
+        requestId:envelope.requestId,
+        status:'superseded',
+        reasonCode:'superseded-by-newer-request'
+      };
+    }
+  });
+
+  const res=await supersedeHandler(new Request(base+'/v1/concierge/supersede',{
+    method:'POST',
+    headers:{
+      'content-type':'application/json',
+      'x-shine-client-token':'client',
+      'x-shine-delegation-token':'delegation'
+    },
+    body:JSON.stringify({
+      conciergeSupersede:'shine-concierge/supersede-v1',
+      schemaVersion:'1.0.0',
+      requestId:'11111111-1111-4111-8111-111111111111',
+      supersededByRequestId:'22222222-2222-4222-8222-222222222222',
+      clientId:'shine.companion',
+      requestedAt:new Date().toISOString()
+    })
+  }));
+
+  assert.equal(res.status,200);
+  assert.equal(authCalls,1);
+  assert.equal(serviceCalls,1);
+  assert.equal((await res.json()).reasonCode,'superseded-by-newer-request');
+});
