@@ -42,15 +42,49 @@ returns jsonb language sql stable security definer set search_path='' as $identi
  );
 $identity$;
 
--- Reuse the valid binding already created by the Layer-35 acceptance fixture.
--- Make its bind-time readiness fingerprint deterministic for this transaction.
-update foundation.foundation_release_identity_bindings
-set readiness_state_at_bind='ready',
-    readiness_fingerprint_at_bind=repeat('6',32)
-where binding_id=(
-  select binding_id
-  from foundation.current_foundation_release_identity
-  where service_id='foundation.gateway' and environment='production'
+-- Build one valid immutable binding chain for Layer 43.
+insert into foundation.service_deployment_receipts(
+  receipt_id,service_id,environment,provider,runtime_ref,runtime_version,
+  artifact_sha256,runtime_state,source_ref,provider_evidence_ref,
+  provider_observed_at,submitted_by,metadata,recorded_at
+) values (
+  '43000000-0000-4000-8000-000000000002'::uuid,'foundation.gateway','production',
+  'supabase-edge','supabase://sjpxqeyewahraxvidvcc/functions/foundation-gateway',
+  '43',repeat('a',64),'active',
+  'github://doug-dotcom/ShineUniverse-shine-core/commit/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+  'test:layer43:provider',now(),'layer43-test','{"test":true}'::jsonb,now()
+);
+
+insert into foundation.service_deployment_receipt_publications(
+  publication_id,publication_key,receipt_id,service_id,environment,provider,
+  runtime_version,artifact_sha256,source_ref,provider_evidence_ref,
+  publication_outcome,submitted_by,transport,transport_run_id,
+  transport_run_attempt,transport_event,transport_repository,transport_ref,
+  transport_workflow_ref,transport_workflow_sha,rollback,metadata,published_at
+) values (
+  '43000000-0000-4000-8000-000000000003'::uuid,
+  'github-oidc:430000:1:43000000-0000-4000-8000-000000000002',
+  '43000000-0000-4000-8000-000000000002'::uuid,'foundation.gateway','production',
+  'supabase-edge','43',repeat('a',64),
+  'github://doug-dotcom/ShineUniverse-shine-core/commit/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+  'test:layer43:provider','accepted-new','github-actions-oidc','github-oidc',
+  '430000','1','push','doug-dotcom/ShineUniverse-shine-core','refs/heads/main',
+  'doug-dotcom/ShineUniverse-shine-core/.github/workflows/publish-foundation-deployment-receipt.yml@refs/heads/main',
+  repeat('4',40),false,'{"test":true}'::jsonb,now()
+);
+
+insert into foundation.foundation_release_identity_bindings(
+  binding_id,release_ref,service_id,environment,foundation_layer,source_ref,
+  runtime_version,artifact_sha256,deployment_receipt_id,publication_id,
+  publication_assurance,readiness_state_at_bind,readiness_fingerprint_at_bind,
+  bound_by,metadata,bound_at
+) values (
+  '43000000-0000-4000-8000-000000000001'::uuid,'foundation:layer-42:aaaaaaaa',
+  'foundation.gateway','production',42,
+  'github://doug-dotcom/ShineUniverse-shine-core/commit/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+  '43',repeat('a',64),'43000000-0000-4000-8000-000000000002'::uuid,
+  '43000000-0000-4000-8000-000000000003'::uuid,'github-oidc',
+  'ready',repeat('6',32),'layer43-test','{}'::jsonb,now()
 );
 
 do $degraded$
@@ -75,7 +109,7 @@ do $recorded$
 declare v foundation.foundation_readiness_drift_observations%rowtype;
 begin
  select * into v from foundation.foundation_readiness_drift_observations
- where binding_id=(select binding_id from foundation.current_foundation_release_identity where service_id='foundation.gateway' and environment='production')
+ where binding_id='43000000-0000-4000-8000-000000000001'::uuid
  order by observation_sequence desc limit 1;
  if v.drift_state<>'operational-degradation'
     or not v.deployment_identity_stable
