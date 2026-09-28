@@ -1,0 +1,29 @@
+{
+  "runtimeProvenanceContract": "shine-defence/runtime-provenance-v1",
+  "schemaVersion": "1.0.0",
+  "provider": "railway",
+  "transport": "health-response-headers",
+  "headers": {
+    "provider": "x-shine-runtime-provider",
+    "repository": "x-shine-runtime-repository",
+    "commit": "x-shine-runtime-commit",
+    "branch": "x-shine-runtime-branch",
+    "deployment": "x-shine-runtime-deployment",
+    "service": "x-shine-runtime-service",
+    "environment": "x-shine-runtime-environment"
+  },
+  "rules": {
+    "providerMustEqual": "railway",
+    "repositoryMustMatchRegisteredTarget": true,
+    "branchMustMatchRegisteredTarget": true,
+    "commitShaFormat": "40 lowercase/uppercase hex",
+    "deploymentIdFormat": "UUID",
+    "healthContractMustPassBeforeProvenanceAccepted": true,
+    "responseBodiesRemainUnpersisted": true,
+    "continuousValiditySeconds": 900,
+    "onDemandValiditySeconds": 172800,
+    "continuousRolloutGraceSeconds": 1200,
+    "acceptedEvidenceKind": "runtime-self-report"
+  },
+  "meaning": "Credential-free proof of the Railway release actually serving a successful monitored health response. This is serving-runtime evidence, not provider control-plane evidence about failed or queued deployments."
+}
