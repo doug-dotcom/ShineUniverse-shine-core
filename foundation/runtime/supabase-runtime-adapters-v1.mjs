@@ -573,6 +573,23 @@ export function createSupabaseRuntimeAdapters({sql,defenceGate,fetchImpl=fetch}=
       return first(rows)?.status??null;
     },
 
+    async evaluateDependencyAdmission({
+      serviceId='foundation.gateway',
+      environment='production',
+      operation='access.evaluate',
+      asOf=new Date().toISOString()
+    }={}){
+      const rows=await sql`
+        select foundation.evaluate_service_admission_v1(
+          ${serviceId},
+          ${environment},
+          ${operation},
+          ${asOf}::timestamptz
+        ) as admission
+      `;
+      return first(rows)?.admission??null;
+    },
+
     async getAppManifest({appId}={}){
       const rows=await sql`
         select manifest from foundation.app_registry
