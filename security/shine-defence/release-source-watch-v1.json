@@ -1,0 +1,77 @@
+{
+  "contract": "shine-defence/release-source-watch-v1",
+  "schemaVersion": "1.0.0",
+  "cadenceMinutes": 5,
+  "sources": [
+    {
+      "targetId": "railway:daash",
+      "repository": "doug-dotcom/Shine-DaAsh",
+      "branch": "main"
+    },
+    {
+      "targetId": "railway:dive",
+      "repository": "doug-dotcom/shine-dive-",
+      "branch": "codex/dive-foundation"
+    },
+    {
+      "targetId": "railway:dnd",
+      "repository": "doug-dotcom/shine-D-D",
+      "branch": "build/layer-001-foundation"
+    },
+    {
+      "targetId": "railway:fiona",
+      "repository": "doug-dotcom/Fiona-Finance",
+      "branch": "main"
+    },
+    {
+      "targetId": "railway:fish",
+      "repository": "doug-dotcom/shine-fish",
+      "branch": "build/first-app"
+    },
+    {
+      "targetId": "railway:my-money",
+      "repository": "doug-dotcom/shine-my-money-",
+      "branch": "main"
+    },
+    {
+      "targetId": "railway:project-l",
+      "repository": "doug-dotcom/Project-L-Modular",
+      "branch": "main"
+    },
+    {
+      "targetId": "railway:punt49",
+      "repository": "doug-dotcom/Punt-49",
+      "branch": "main"
+    },
+    {
+      "targetId": "railway:recovery-companion",
+      "repository": "doug-dotcom/Project-RC",
+      "branch": "main"
+    },
+    {
+      "targetId": "railway:rivers",
+      "repository": "doug-dotcom/shine-music",
+      "branch": "main"
+    },
+    {
+      "targetId": "railway:shine-ai",
+      "repository": "doug-dotcom/Shine-Ai",
+      "branch": "main"
+    },
+    {
+      "targetId": "railway:ski",
+      "repository": "doug-dotcom/Shine-Ski",
+      "branch": "main"
+    },
+    {
+      "targetId": "railway:translate",
+      "repository": "doug-dotcom/shine-translate",
+      "branch": "main"
+    },
+    {
+      "targetId": "railway:travel",
+      "repository": "doug-dotcom/shine-travel",
+      "branch": "main"
+    }
+  ]
+}
