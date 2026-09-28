@@ -287,7 +287,7 @@ export function createFoundationHttpHandler({
           transientRetryWindowSeconds:86400,
           transientRetryStoresSpecialistInputs:false,
           userTaskCentre:true,
-          taskCentreStatuses:['planned','ready','running','partial','retry-scheduled','retry-running','completed','failed','blocked','cancelled'],
+          taskCentreStatuses:['planned','ready','running','partial','retry-scheduled','retry-running','completed','failed','blocked','cancelled','retired'],
           taskCentreStoresConversationContent:false,
           taskCentreOrdering:'deterministic-workflow-state',
           taskCentreUsesAiPriorityScore:false,
@@ -300,6 +300,10 @@ export function createFoundationHttpHandler({
           cancellationReceipts:true,
           cancellationReceiptIncludesSpecialistOutputs:false,
           cancellationReceiptTamperEvidentSha256:true,
+          stalePlanRetirement:true,
+          stalePlanRetirementMinimumAgeSeconds:3600,
+          stalePlanRetirementCronMinutes:15,
+          stalePlanRetirementExecutesSpecialists:false,
           capabilityChangesAudited:true,
           purposeBoundCapabilityGrants:true,
           accessHistoryStoresConversationContent:false
@@ -595,7 +599,7 @@ export function createFoundationHttpHandler({
       let authContext;
       try{authContext=await authenticateIntegrationUserAndClient(request)}catch{return respond(401,{error:'unauthenticated'})}
       const result=await conciergeSupersede({envelope,authContext});
-      const status={superseded:200,'already-superseded':200,denied:403,invalid:400,unavailable:503}[result.status]??500;
+      const status={superseded:200,'already-superseded':200,retired:200,denied:403,invalid:400,unavailable:503}[result.status]??500;
       return respond(status,result);
     }
 
@@ -606,7 +610,7 @@ export function createFoundationHttpHandler({
       let authContext;
       try{authContext=await authenticateIntegrationUser(request)}catch{return respond(401,{error:'unauthenticated'})}
       const result=await userConciergeCancellation({envelope,authContext});
-      const status={cancelled:200,'already-cancelled':200,denied:403,invalid:400,unavailable:503}[result.status]??500;
+      const status={cancelled:200,'already-cancelled':200,retired:200,denied:403,invalid:400,unavailable:503}[result.status]??500;
       return respond(status,result);
     }
 
