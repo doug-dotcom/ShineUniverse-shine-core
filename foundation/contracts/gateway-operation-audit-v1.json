@@ -1,0 +1,120 @@
+{
+  "gatewayOperationAudit": "shine-foundation/gateway-operation-audit-v1",
+  "schemaVersion": "1.0.0",
+  "serviceId": "foundation.gateway",
+  "purpose": "Provide canonical, append-only, reconstructable audit truth for every privileged Gateway POST attempt without copying request bodies, tokens, conversation content or context payloads.",
+  "scope": {
+    "registeredGatewayRoutes": 40,
+    "privilegedRouteContracts": 24,
+    "distinctPrivilegedOperations": 23,
+    "dependencyAdmissionPolicies": 21,
+    "workerOnlyPolicies": 2
+  },
+  "eventModel": {
+    "phases": [
+      "policy",
+      "outcome"
+    ],
+    "policyPhase": {
+      "timing": "before route-specific execution",
+      "mandatory": true,
+      "failureBehavior": "fail-closed-http-503",
+      "policyAuthority": "database-recomputed route policy at occurredAt",
+      "suppliedEdgeSnapshot": "optional consistency assertion"
+    },
+    "outcomePhase": {
+      "timing": "after route result is known",
+      "mandatoryForHealthyTrace": true,
+      "failureBehavior": "preserve-domain-response-and-surface-open-trace",
+      "rationale": "Do not convert a completed side effect into a retry-inducing failure solely because the post-execution audit append failed."
+    }
+  },
+  "integrity": {
+    "hashAlgorithm": "sha256",
+    "policyEventHasPreviousHash": false,
+    "outcomePreviousHash": "policy event hash",
+    "uniqueOperationAuditPhase": true,
+    "appendOnly": true,
+    "replaySafe": true,
+    "conflictingReplayRejected": true
+  },
+  "deploymentEvidence": {
+    "snapshotsRuntimeVersion": true,
+    "snapshotsDeploymentEvidenceRef": true,
+    "snapshotsDeploymentSourceRef": true,
+    "snapshotsArtifactSha256": true
+  },
+  "policyEvidence": {
+    "operationKey": true,
+    "routeSymbol": true,
+    "pathTemplate": true,
+    "riskClass": true,
+    "effectClass": true,
+    "policyState": true,
+    "policyReasonCode": true,
+    "policyEvidenceRef": true,
+    "impactScope": true,
+    "dependencyEvidence": true,
+    "executionGuardRef": true
+  },
+  "outcomeEvidence": {
+    "httpStatus": true,
+    "outcomeClass": true,
+    "responseReasonCode": true,
+    "domainRequestId": "optional non-payload correlation id"
+  },
+  "dataMinimisation": {
+    "requestBodies": false,
+    "authTokens": false,
+    "jwtBodies": false,
+    "conversationText": false,
+    "integrationContextPayloads": false,
+    "capabilityInputs": false,
+    "secrets": false
+  },
+  "readers": {
+    "trace": "foundation.get_gateway_operation_audit_trace_v1(uuid)",
+    "health": "foundation.get_gateway_operation_audit_health_v1(text,integer)"
+  },
+  "domainEvidenceResolution": {
+    "coreSources": [
+      "foundation.access_audit_events",
+      "foundation.grant_consent_events",
+      "foundation.grant_revocation_events",
+      "foundation.identity_claim_events"
+    ],
+    "optionalSources": [
+      "foundation.integration_client_grant_events",
+      "foundation.integration_client_link_events",
+      "foundation.integration_context_snapshot_events",
+      "foundation.concierge_execution_events",
+      "foundation.concierge_outcome_events",
+      "foundation.concierge_cancellation_events",
+      "foundation.integration_link_request_events"
+    ],
+    "optionalSourceDiscovery": "to_regclass + dynamic SQL"
+  },
+  "health": {
+    "pass": "policy/outcome chains present with no stale open trace or broken predecessor hash",
+    "degraded": "one or more policy events remain without outcome past the stale threshold",
+    "fail": "one or more outcome events have a missing/mismatched policy predecessor",
+    "unknown": "no policy events observed"
+  },
+  "security": {
+    "tableRls": true,
+    "gatewayDirectInsert": false,
+    "gatewayUsesNarrowRecorder": true,
+    "recorderSecurityDefiner": true,
+    "recorderFixedSearchPath": true,
+    "anonRead": false,
+    "authenticatedRead": false,
+    "anonRecorderExecute": false
+  },
+  "production": {
+    "gatewayVersion": 81,
+    "edgeSourceCommit": "60837a74d766742dbd4b88ca1cd0da0e14ec2d55",
+    "artifactSha256": "6aebc29aac7e2eab77695549995f50a0c5e4ee5ab9b184ea4b25983bf8aa522d",
+    "finalFoundationCiCommit": "0116ff801284a45b0d9bb0cc63175976f46e510c",
+    "finalFoundationCiRun": 36378138630
+  }
+}
