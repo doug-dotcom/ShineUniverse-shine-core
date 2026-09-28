@@ -1,0 +1,19 @@
+{
+  "contract": "shine-foundation/foundation-readiness-retest-v1",
+  "version": "1.0.0",
+  "layer": 46,
+  "purpose": "Retest readiness with fresh raw evidence while persisting operational conditions by semantic fingerprint, atomically advancing the readiness lifecycle.",
+  "fingerprints": {
+    "rawEvidence": "Changes when underlying health/Defence/readiness evidence refreshes.",
+    "semanticCondition": "Changes only when readiness state, reason codes, affected scopes or operation modes change."
+  },
+  "invariants": {
+    "rawEvidenceRefreshDoesNotResetSameCondition": true,
+    "semanticConditionChangeMayResetOrChangeLifecycle": true,
+    "retestTransitionAndIncidentEventAtomic": true,
+    "historicalEvidenceAppendOnly": true,
+    "orphanedHistoricalRetestMayBeReconciledByAppendingOnly": true,
+    "noCanonicalTruthMutation": true,
+    "noAutomaticRepair": true
+  }
+}
