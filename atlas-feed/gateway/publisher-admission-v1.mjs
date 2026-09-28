@@ -175,7 +175,7 @@ export function createAtlasFeedPublisherAdmissionService({
         capabilityState:capability.invocationState,
         audienceMode:mode,
         dataClass,
-        ownerShineId:permission.ownerShineId??null,
+        ownerShineId:permission.ownerShineId??grant?.ownerShineId??null,
         grantId:grant?.grantId??null
       }
     });
