@@ -830,3 +830,94 @@ test('Concierge supersede route is constructor-bound and uses dual integration a
   assert.equal(serviceCalls,1);
   assert.equal((await res.json()).reasonCode,'superseded-by-newer-request');
 });
+
+
+test('Atlas Feed admission uses app-only authentication for general signals',async()=>{
+  let appAuth=0,userAppAuth=0,serviceCalls=0;
+  const h=createFoundationHttpHandler({
+    gateway:async()=>({status:'allowed'}),
+    authenticate:async()=>{userAppAuth++;return {appToken:'app',jwt:'user'}},
+    authenticateApp:async request=>{
+      appAuth++;
+      assert.equal(request.headers.get('x-shine-app-token'),'app');
+      return {appToken:'app'};
+    },
+    atlasFeedPublisherAdmission:async({envelope,authContext})=>{
+      serviceCalls++;
+      assert.equal(envelope.event.audience.dataClass,'general');
+      assert.equal(authContext.appToken,'app');
+      assert.equal(authContext.jwt,undefined);
+      return {
+        atlasFeedPublisherAdmissionResponse:'shine-universe/atlas-feed-publisher-admission-response-v1',
+        schemaVersion:'1.0.0',
+        requestId:envelope.requestId,
+        status:'admitted',
+        reasonCode:'publisher-admission-clear'
+      };
+    }
+  });
+
+  const res=await h(new Request(base+'/v1/atlas-feed/publish/admit',{
+    method:'POST',
+    headers:{'content-type':'application/json','x-shine-app-token':'app'},
+    body:JSON.stringify({
+      atlasFeedPublishAdmissionRequest:'shine-universe/atlas-feed-publisher-admission-v1',
+      schemaVersion:'1.0.0',
+      requestId:'44444444-4444-4444-8444-444444444444',
+      requestedAt:'2026-09-28T09:19:50.000Z',
+      event:{audience:{dataClass:'general'}}
+    })
+  }));
+
+  assert.equal(res.status,200);
+  assert.equal(appAuth,1);
+  assert.equal(userAppAuth,0);
+  assert.equal(serviceCalls,1);
+});
+
+test('Atlas Feed admission requires app plus user authentication for private signals',async()=>{
+  let appAuth=0,userAppAuth=0,serviceCalls=0;
+  const h=createFoundationHttpHandler({
+    gateway:async()=>({status:'allowed'}),
+    authenticate:async request=>{
+      userAppAuth++;
+      assert.equal(request.headers.get('authorization'),'Bearer user');
+      assert.equal(request.headers.get('x-shine-app-token'),'app');
+      return {appToken:'app',jwt:'user'};
+    },
+    authenticateApp:async()=>{appAuth++;return {appToken:'app'}},
+    atlasFeedPublisherAdmission:async({envelope,authContext})=>{
+      serviceCalls++;
+      assert.equal(envelope.event.audience.dataClass,'personal');
+      assert.equal(authContext.jwt,'user');
+      return {
+        atlasFeedPublisherAdmissionResponse:'shine-universe/atlas-feed-publisher-admission-response-v1',
+        schemaVersion:'1.0.0',
+        requestId:envelope.requestId,
+        status:'denied',
+        reasonCode:'owner-session-unverified'
+      };
+    }
+  });
+
+  const res=await h(new Request(base+'/foundation-gateway/v1/atlas-feed/publish/admit',{
+    method:'POST',
+    headers:{
+      'content-type':'application/json',
+      'x-shine-app-token':'app',
+      authorization:'Bearer user'
+    },
+    body:JSON.stringify({
+      atlasFeedPublishAdmissionRequest:'shine-universe/atlas-feed-publisher-admission-v1',
+      schemaVersion:'1.0.0',
+      requestId:'55555555-5555-4555-8555-555555555555',
+      requestedAt:'2026-09-28T09:19:50.000Z',
+      event:{audience:{dataClass:'personal'}}
+    })
+  }));
+
+  assert.equal(res.status,403);
+  assert.equal(appAuth,0);
+  assert.equal(userAppAuth,1);
+  assert.equal(serviceCalls,1);
+});
