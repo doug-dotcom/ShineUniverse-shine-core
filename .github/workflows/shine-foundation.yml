@@ -148,6 +148,10 @@ jobs:
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/gateway-operation-registry-v1.sql
       - name: Run Gateway operation registry acceptance tests
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/gateway-operation-registry-v1.test.sql
+      - name: Apply Gateway operation policy
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/gateway-operation-policy-v1.sql
+      - name: Run Gateway operation policy acceptance tests
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/gateway-operation-policy-v1.test.sql
       - name: Apply Shine Defence Sentinel
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-sentinel-v1.sql
       - name: Run Shine Defence Sentinel acceptance tests
