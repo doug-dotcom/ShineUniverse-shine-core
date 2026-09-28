@@ -217,6 +217,7 @@ begin
       h.head_committed_at,
       h.observed_at,
       h.valid_until,
+      coalesce((h.metadata->>'deploymentRelevant')::boolean,true) as deployment_relevant,
       rp.commit_sha as serving_commit_sha,
       tr.transition_state,
       tr.commit_sha as transition_commit_sha,
@@ -249,12 +250,15 @@ begin
     count(*) filter (
       where observation_id is not null
         and valid_until>now()
+        and deployment_relevant
         and serving_commit_sha is not null
         and head_sha<>serving_commit_sha
     ),
     count(*) filter (
       where observation_id is not null
         and valid_until>now()
+        and deployment_relevant
+        and deployment_relevant
         and serving_commit_sha is not null
         and head_sha<>serving_commit_sha
         and head_committed_at<=now()-interval '30 minutes'
@@ -281,6 +285,7 @@ begin
       h.head_committed_at,
       h.observed_at,
       h.valid_until,
+      coalesce((h.metadata->>'deploymentRelevant')::boolean,true) as deployment_relevant,
       rp.commit_sha as serving_commit_sha,
       tr.transition_state,
       tr.commit_sha as transition_commit_sha,
@@ -309,6 +314,7 @@ begin
       'observedAt',observed_at,
       'validUntil',valid_until,
       'transitionState',transition_state,
+      'deploymentRelevant',deployment_relevant,
       'reasonCode',case
         when observation_id is null
           and now()>effective_at+interval '20 minutes'
@@ -319,6 +325,7 @@ begin
           then 'release-source-watch-stale'
         when observation_id is not null
           and valid_until>now()
+          and deployment_relevant
           and serving_commit_sha is not null
           and head_sha<>serving_commit_sha
           and head_committed_at<=now()-interval '30 minutes'
@@ -350,6 +357,7 @@ begin
     or (
       observation_id is not null
       and valid_until>now()
+      and deployment_relevant
       and serving_commit_sha is not null
       and head_sha<>serving_commit_sha
       and head_committed_at<=now()-interval '30 minutes'
