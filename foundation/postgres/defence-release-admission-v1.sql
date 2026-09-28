@@ -272,7 +272,7 @@ begin
   );
 
   if v_last.canonical_deployment_id is not null then
-    if v_serving.deployment_id is distinct from v_last.canonical_deployment_id then
+    if v_serving.commit_sha is distinct from v_last.canonical_commit_sha then
       v_rollback_deployment := v_last.canonical_deployment_id;
       v_rollback_commit := v_last.canonical_commit_sha;
     elsif v_previous.canonical_deployment_id is not null then
@@ -318,7 +318,6 @@ begin
       v_reason := 'post-release-health-failure-no-rollback-anchor';
     end if;
   elsif v_last.canonical_deployment_id is not null
-    and v_serving.deployment_id=v_last.canonical_deployment_id
     and v_serving.commit_sha=v_last.canonical_commit_sha then
     v_decision := 'canonical';
     v_reason := 'canonical-serving';
@@ -458,8 +457,8 @@ begin
       v_canonical_commit := v_serving_commit;
     elsif v_decision='canonical' then
       if v_last.admission_state='rollback-recommended'
-         and v_last.canonical_deployment_id=v_serving_deployment
-         and v_last.serving_deployment_id is distinct from v_serving_deployment then
+         and v_last.canonical_commit_sha=v_serving_commit
+         and v_last.serving_commit_sha is distinct from v_serving_commit then
         v_state := 'rollback-observed';
         v_reason := 'serving-rollback-observed';
       else
@@ -580,7 +579,6 @@ begin
     count(*) filter (where canonical_deployment_id is not null),
     count(*) filter (
       where canonical_deployment_id is not null
-        and serving_deployment_id=canonical_deployment_id
         and serving_commit_sha=canonical_commit_sha
     ),
     count(*) filter (where admission_state='soaking'),
