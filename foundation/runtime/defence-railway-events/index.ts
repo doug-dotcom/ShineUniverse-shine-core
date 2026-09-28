@@ -180,10 +180,15 @@ Deno.serve(async(req:Request)=>{
       ) as result
     `;
 
+    const sentinelRows=await sql`
+      select foundation.run_defence_railway_transition_sentinel_v1(now()) as sentinel
+    `;
+
     return json(200,{
       status:'accepted',
       contract:CONTRACT,
-      result:rows[0]?.result??null
+      result:rows[0]?.result??null,
+      sentinel:sentinelRows[0]?.sentinel??null
     });
   }catch(error){
     console.error('defence-railway-events',error instanceof Error?error.message:'receiver-error');
