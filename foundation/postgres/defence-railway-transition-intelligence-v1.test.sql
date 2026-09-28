@@ -321,7 +321,7 @@ end;
 $$;
 
 
-do $
+do $supersede$
 declare
   v_request uuid;
   v_sequence bigint;
@@ -455,6 +455,6 @@ begin
       null;
   end;
 end;
-$$;
+$supersede$;
 
 rollback;
