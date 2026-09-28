@@ -10,6 +10,9 @@ on:
       - '.github/workflows/shine-defence-reattest.yml'
       - 'foundation/runtime/defence-reattest/index.ts'
       - 'foundation/postgres/defence-artifact-reattestation-v1.sql'
+      - 'foundation/contracts/defence-runtime-provenance-v1.json'
+      - 'foundation/postgres/defence-runtime-provenance-v1.sql'
+      - 'foundation/postgres/defence-runtime-provenance-hosted-v1.sql'
       - 'security/shine-defence/integration-kit/reattest-foundation-runtime-v1.mjs'
       - 'security/shine-defence/integration-kit/foundation-runtime-inspector-v1.mjs'
 
