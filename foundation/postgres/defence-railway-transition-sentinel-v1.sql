@@ -1,6 +1,35 @@
 -- Shine Defence Railway transition Sentinel v1.
 -- Best-effort webhook evidence is advisory; serving runtime provenance remains authoritative.
 
+alter table foundation.defence_estate_incident_events
+  drop constraint if exists defence_estate_incident_events_reason_code_check;
+
+alter table foundation.defence_estate_incident_events
+  add constraint defence_estate_incident_events_reason_code_check
+  check (reason_code in (
+    'healthy',
+    'missing-observation',
+    'stale-observation',
+    'runtime-failure',
+    'unexpected-runtime-state',
+    'health-coverage-missing',
+    'health-degraded',
+    'health-unhealthy',
+    'health-observation-missing',
+    'health-observation-stale',
+    'runtime-provenance-coverage-missing',
+    'runtime-provenance-missing',
+    'runtime-provenance-stale',
+    'supabase-runtime-receipt-coverage-missing',
+    'supabase-runtime-receipt-missing',
+    'supabase-runtime-receipt-stale',
+    'supabase-runtime-receipt-database-unhealthy',
+    'serving-deployment-crashed',
+    'release-attempt-failed',
+    'release-transition-stuck',
+    'successful-release-not-serving'
+  ));
+
 create or replace function foundation.run_defence_railway_transition_sentinel_v1(
   p_observed_at timestamptz default now()
 )
