@@ -24,14 +24,11 @@ begin
     and p.proname='retire_stale_concierge_requests_v1'
   limit 1;
   if fn is null
-     or position('concierge_execution_events' in fn)=0
-     or position('execution-started' in fn)=0
-     or position('execution-completed' in fn)=0
-     or position('execution-failed' in fn)=0
-     or position('concierge_step_checkpoints' in fn)=0
-     or position('concierge_retry_jobs' in fn)=0
-     or position('concierge_cancellation_events' in fn)=0 then
-    raise exception 'Stale-plan retirement safety predicates incomplete';
+     or position('retire_concierge_request_if_expired_v1' in fn)=0
+     or position('concierge_retirement_events' in fn)=0
+     or position('concierge_cancellation_events' in fn)=0
+     or position('for update skip locked' in lower(fn))=0 then
+    raise exception 'Stale-plan retirement delegation incomplete';
   end if;
 
   select pg_get_functiondef(p.oid) into fn
@@ -55,7 +52,7 @@ begin
   where n.nspname='foundation'
     and p.proname='record_concierge_step_checkpoint_v1'
   limit 1;
-  if fn is null or position('concierge_request_is_retired_v1' in fn)=0 then
+  if fn is null or position('retire_concierge_request_if_expired_v1' in fn)=0 then
     raise exception 'Retired request checkpoint guard missing';
   end if;
 
