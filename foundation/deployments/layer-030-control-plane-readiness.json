@@ -1,0 +1,39 @@
+{
+  "foundationReadinessDeployment": "shine-foundation/control-plane-readiness-deployment-v1",
+  "schemaVersion": "1.0.0",
+  "layer": 30,
+  "releaseRef": "foundation:layer-30:d363e45c",
+  "sourceCommit": "d363e45c662c4783c63559bb393a7aba198154c3",
+  "sourceRef": "github://doug-dotcom/ShineUniverse-shine-core/commit/d363e45c662c4783c63559bb393a7aba198154c3",
+  "persistence": {
+    "coreMigration": "foundation_control_plane_readiness_v1",
+    "hostedMigration": "foundation_control_plane_readiness_hosted_v1",
+    "cronJob": "shine-foundation-readiness-5m",
+    "cadence": "*/5 * * * *"
+  },
+  "gatewayEvidenceAtClosure": {
+    "runtimeVersion": 85,
+    "artifactSha256": "a596c895d31e272d2358d69e500eb708a43462de69df32e7e8a87d540907b83f",
+    "exactSourceCommit": "b7c5331f93eff28a781f0794c89ccf50e90a4045",
+    "bundlePathsVerified": 27,
+    "healthState": "healthy",
+    "healthProbeCount": 3,
+    "currentRuntimeAuditProof": true
+  },
+  "readinessAtClosure": {
+    "state": "restricted",
+    "safeMode": "guarded",
+    "privilegedOperationsMode": "guarded",
+    "workerOperationsMode": "normal",
+    "reasonCodes": [
+      "dependency-guarded"
+    ],
+    "evidenceFingerprint": "04c5081f86084c2bdd2134d95872f768"
+  },
+  "universeReadiness": {
+    "built": "eligible with release-specific source commit evidence",
+    "tested": "eligible with live five-state rollback acceptance evidence",
+    "deployed": "eligible with applied migrations and active/successful cron observer evidence",
+    "humanVerified": "not asserted"
+  }
+}
