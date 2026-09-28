@@ -1,0 +1,20 @@
+{
+  "deploymentSourceManifest": "shine-foundation/gateway-deployment-source-v1",
+  "schemaVersion": "1.0.0",
+  "layer": 29,
+  "runtimeVersion": 81,
+  "artifactSha256": "6aebc29aac7e2eab77695549995f50a0c5e4ee5ab9b184ea4b25983bf8aa522d",
+  "sourceCommit": "60837a74d766742dbd4b88ca1cd0da0e14ec2d55",
+  "sourceRef": "github://doug-dotcom/ShineUniverse-shine-core/commit/60837a74d766742dbd4b88ca1cd0da0e14ec2d55",
+  "baseRuntimeVersion": 80,
+  "baseSourceCommit": "998523d9f7956168f3c9b6aa37217a6937600aaf",
+  "changedBundlePaths": [
+    "foundation/runtime/supabase-runtime-adapters-v1.mjs"
+  ],
+  "sourceRule": "v81 is the exact v80 bundle with only the runtime adapter replaced by the commit-60837a74 version. All other Edge paths are unchanged from exact-source v80.",
+  "databaseHardeningCommits": [
+    "d50496f0f5b1889e061458f28874a7892dd3f5c3",
+    "298d34b81a8d727e56503f5cf0b41a4c4c53132a",
+    "0116ff801284a45b0d9bb0cc63175976f46e510c"
+  ]
+}
