@@ -320,22 +320,28 @@ $layer56_integrity$;
 do $layer57_security$
 begin
   if not has_function_privilege(
-    'foundation_runtime',
+    'shine_core_control_plane',
     'foundation.get_readiness_runtime_health_owner_inbox_v1(text,integer)',
     'EXECUTE'
-  ) then raise exception 'Foundation runtime must read Shine-core runtime-health inbox'; end if;
+  ) then raise exception 'Shine-core control plane must read runtime-health inbox'; end if;
 
   if not has_function_privilege(
-    'foundation_runtime',
+    'shine_core_control_plane',
     'foundation.respond_readiness_runtime_health_investigation_v1(uuid,text,text,text,timestamptz)',
     'EXECUTE'
-  ) then raise exception 'Foundation runtime must acknowledge Shine-core investigation ownership'; end if;
+  ) then raise exception 'Shine-core control plane must acknowledge investigation ownership'; end if;
 
   if has_function_privilege(
     'service_role',
     'foundation.respond_readiness_runtime_health_investigation_v1(uuid,text,text,text,timestamptz)',
     'EXECUTE'
   ) then raise exception 'service_role must not acknowledge Shine-core investigation'; end if;
+
+  if has_function_privilege(
+    'foundation_runtime',
+    'foundation.respond_readiness_runtime_health_investigation_v1(uuid,text,text,text,timestamptz)',
+    'EXECUTE'
+  ) then raise exception 'Inherited Foundation runtime role must not acknowledge Shine-core investigation'; end if;
 
   if has_function_privilege(
     'foundation_gateway',
@@ -353,23 +359,41 @@ begin
     'foundation_runtime',
     'foundation.readiness_runtime_health_investigation_proposals',
     'SELECT'
-  ) then raise exception 'Foundation runtime must use bounded proposal inbox/status APIs'; end if;
+  ) then raise exception 'Foundation runtime direct proposal SELECT must be removed'; end if;
 
   if has_table_privilege(
-    'foundation_runtime',
+    'shine_core_control_plane',
+    'foundation.readiness_runtime_health_investigation_proposals',
+    'SELECT'
+  ) then raise exception 'Shine-core control plane must use bounded proposal inbox/status APIs'; end if;
+
+  if has_table_privilege(
+    'shine_core_control_plane',
     'foundation.readiness_runtime_health_investigation_responses',
     'INSERT'
-  ) then raise exception 'Foundation runtime must not directly insert response receipts'; end if;
+  ) then raise exception 'Shine-core control plane must not directly insert response receipts'; end if;
 
   if has_table_privilege(
-    'foundation_runtime',
+    'shine_core_control_plane',
     'foundation.readiness_runtime_health_investigation_responses',
     'SELECT'
-  ) then raise exception 'Foundation runtime must use bounded response status API'; end if;
+  ) then raise exception 'Shine-core control plane must use bounded response status API'; end if;
+
+  if pg_has_role(
+    'foundation_gateway',
+    'shine_core_control_plane',
+    'MEMBER'
+  ) then raise exception 'Gateway must not inherit Shine-core control-plane capability'; end if;
+
+  if exists(
+    select 1 from pg_roles
+    where rolname='shine_core_control_plane'
+      and (rolcanlogin or rolsuper or rolcreatedb or rolcreaterole or rolinherit or rolbypassrls)
+  ) then raise exception 'Shine-core control-plane capability role must remain no-login/no-inherit/least-privilege'; end if;
 end;
 $layer57_security$;
 
-set local role foundation_runtime;
+set local role shine_core_control_plane;
 
 do $layer57_pending$
 declare
@@ -520,7 +544,7 @@ as $layer57_stale$
  );
 $layer57_stale$;
 
-set local role foundation_runtime;
+set local role shine_core_control_plane;
 
 do $layer57_stale_response$
 declare
