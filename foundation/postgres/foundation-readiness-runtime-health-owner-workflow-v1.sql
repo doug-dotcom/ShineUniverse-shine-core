@@ -1,7 +1,22 @@
 -- Foundation Layer 57: Shine-core runtime-health owner inbox and acknowledgement.
 -- Converts current Layer-56 investigation proposals into a bounded owner workflow.
--- foundation_runtime is the Shine-core control-plane principal; foundation_gateway
--- remains the unhealthy execution surface and receives no acknowledgement authority.
+-- A dedicated no-login, no-inherit capability role is used because foundation_gateway
+-- intentionally inherits foundation_runtime. The unhealthy execution surface must not
+-- inherit owner acknowledgement authority.
+
+do $layer57_role$
+begin
+  if not exists(select 1 from pg_roles where rolname='shine_core_control_plane') then
+    create role shine_core_control_plane
+      nologin noinherit nosuperuser nocreatedb nocreaterole nobypassrls;
+  else
+    alter role shine_core_control_plane
+      nologin noinherit nosuperuser nocreatedb nocreaterole nobypassrls;
+  end if;
+end;
+$layer57_role$;
+
+grant usage on schema foundation to shine_core_control_plane;
 
 -- Tighten Layer-56 owner visibility: use verified inbox/status APIs instead of
 -- direct proposal-ledger SELECT from the owner principal.
@@ -38,9 +53,9 @@ alter table foundation.readiness_runtime_health_investigation_responses
 
 -- Policy exists as defence in depth, but foundation_runtime receives no direct
 -- table SELECT grant. Reads are through bounded status/inbox functions only.
-create policy foundation_runtime_runtime_health_responses_select
+create policy shine_core_control_plane_runtime_health_responses_select
 on foundation.readiness_runtime_health_investigation_responses
-for select to foundation_runtime using(true);
+for select to shine_core_control_plane using(true);
 
 revoke all on foundation.readiness_runtime_health_investigation_responses
   from public,anon,authenticated,foundation_gateway,foundation_runtime,
@@ -239,10 +254,10 @@ $layer57_respond$;
 
 revoke all on function foundation.respond_readiness_runtime_health_investigation_v1(
   uuid,text,text,text,timestamptz
-) from public,anon,authenticated,foundation_gateway,service_role,shine_defence_runtime;
+) from public,anon,authenticated,foundation_runtime,foundation_gateway,service_role,shine_defence_runtime;
 grant execute on function foundation.respond_readiness_runtime_health_investigation_v1(
   uuid,text,text,text,timestamptz
-) to foundation_runtime;
+) to shine_core_control_plane;
 
 
 create or replace function foundation.get_readiness_runtime_health_investigation_response_status_v1(
@@ -322,9 +337,9 @@ end;
 $layer57_status$;
 
 revoke all on function foundation.get_readiness_runtime_health_investigation_response_status_v1(uuid)
-  from public,anon,authenticated,foundation_gateway,shine_defence_runtime;
+  from public,anon,authenticated,foundation_runtime,foundation_gateway,shine_defence_runtime;
 grant execute on function foundation.get_readiness_runtime_health_investigation_response_status_v1(uuid)
-  to foundation_runtime,service_role;
+  to shine_core_control_plane,service_role;
 
 
 create or replace function foundation.get_readiness_runtime_health_owner_inbox_v1(
@@ -401,7 +416,7 @@ begin
           'proposalState','current',
           'responseState','pending',
           'integrityVerified',true,
-          'responderRole','foundation_runtime',
+          'responderRole','shine_core_control_plane',
           'responseFunction',
             'foundation.respond_readiness_runtime_health_investigation_v1',
           'runtimeMutationAuthorityGranted',false,
@@ -425,7 +440,7 @@ begin
     'environment',p_environment,
     'serviceId','foundation.gateway',
     'ownerComponent','shine-core',
-    'responderRole','foundation_runtime',
+    'responderRole','shine_core_control_plane',
     'responseFunction',
       'foundation.respond_readiness_runtime_health_investigation_v1',
     'pendingCount',pending_count,
@@ -444,6 +459,6 @@ end;
 $layer57_inbox$;
 
 revoke all on function foundation.get_readiness_runtime_health_owner_inbox_v1(text,integer)
-  from public,anon,authenticated,foundation_gateway,service_role,shine_defence_runtime;
+  from public,anon,authenticated,foundation_runtime,foundation_gateway,service_role,shine_defence_runtime;
 grant execute on function foundation.get_readiness_runtime_health_owner_inbox_v1(text,integer)
-  to foundation_runtime;
+  to shine_core_control_plane;
