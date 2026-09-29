@@ -85,6 +85,7 @@ declare
   rs jsonb;
   doc jsonb;
   doc_hash text;
+  response_hash text;
   eid uuid;
   bad_count integer;
 begin
@@ -260,11 +261,17 @@ begin
   from foundation.readiness_runtime_health_investigation_responses
   where proposal_id=p.proposal_id;
 
+  response_hash:=encode(
+    extensions.digest(convert_to(r.response::text,'UTF8'),'sha256'),
+    'hex'
+  );
+
   if r.response_id is null
      or r.response_state<>'accepted'
      or r.proposal_sha256 is distinct from p.proposal_sha256
      or r.condition_fingerprint is distinct from p.condition_fingerprint
-     or r.response_sha256 is distinct from rs->>'responseSha256' then
+     or r.response_sha256 is distinct from response_hash
+     or r.response_id::text is distinct from rs->>'responseId' then
     raise exception 'runtime-health-investigation-evidence-response-binding-invalid';
   end if;
 
