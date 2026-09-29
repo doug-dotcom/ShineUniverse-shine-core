@@ -261,6 +261,8 @@ Command Centre v1.4 also exposes the Estate Timeline Snapshot Planner as a bound
 
 Explicit human-required actions and pre-candidate diff reviews that are not started/in progress take the human-attention bucket. Canonical blocks, profile-claim refresh and no-helper remediation states are blocked. Existing guarded non-human helpers are machine-action available, and `nextAction: none` is healthy/no-action unless another explicit condition applies. Ordering is deterministic by bucket, workflow stage and app id; it is operational ordering only, never a security risk score. The queue invokes nothing.
 
+Attention Queue v1.1 also accepts the Command Centre's bounded estate-level `timelinePlanning` summary. A planner `unsupported_change` becomes a separate `scope: estate` human-attention item and is ordered ahead of app-level work, preserving the affected app and unknown status/dimension names for review. Other estate timeline states appear only when the planner exposes an explicit human-required action. The existing app `items` and app-only `counts` remain intact; `queueItems` / `queueCounts` provide the unified prioritised view. Estate alerts never replace or rewrite an app's Operations Controller `nextAction`.
+
 ### Staleness visibility
 
 `security/shine-defence/staleness-visibility-v1.json` defines timestamp and age visibility for deployment observations, human review, pending candidates and certification completion. `staleness-visibility-v1.mjs` reports elapsed hours/days plus `current` (<24h), `ageing` (24h–7d), `stale` (7d+) and explicit `unknown` / `not_applicable` states against a supplied report `asOf` time. Future timestamps fail closed.
