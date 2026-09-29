@@ -372,14 +372,20 @@
     {
       "id": "command-centre",
       "path": "security/shine-defence/command-centre-v1.json",
-      "version": "1.3.0",
-      "blobSha": "f4c05a89dfacd70e56fec727c0aca01a30106c05"
+      "version": "1.4.0",
+      "blobSha": "ddb9976b7e8cfe619eaef689584e098a871bb19f"
     },
     {
       "id": "command-centre-helper",
       "path": "security/shine-defence/integration-kit/command-centre-v1.mjs",
-      "version": "1.3.0",
-      "blobSha": "ddc246e30df4afb86dd852e78581136ffcdcb4aa"
+      "version": "1.4.0",
+      "blobSha": "6df976f9dc71cc4459dbf510fe34ef5c4dd12506"
+    },
+    {
+      "id": "command-centre-core-helper",
+      "path": "security/shine-defence/integration-kit/command-centre-core-v1.mjs",
+      "version": "1.0.0",
+      "blobSha": "1163ad1756ad392c028c98cdc96a5a494bcb6f95"
     },
     {
       "id": "attention-queue",
@@ -450,8 +456,8 @@
     {
       "id": "audit-export-helper",
       "path": "security/shine-defence/integration-kit/audit-export-v1.mjs",
-      "version": "1.0.1",
-      "blobSha": "88894084d93de1c857202fbc91f1be1777036dd1"
+      "version": "1.0.2",
+      "blobSha": "fd8fcb8f7afa61583ba8b016e9615f40c6e9f7f5"
     },
     {
       "id": "estate-audit-manifest",
