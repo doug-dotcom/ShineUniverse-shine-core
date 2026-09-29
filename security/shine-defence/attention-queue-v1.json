@@ -1,28 +1,48 @@
 {
   "contract": "shine-defence/attention-queue-v1",
-  "version": "1.0.0",
-  "purpose": "Read-only prioritised projection of Defence Command Centre rows into human attention, blocked, safe machine action available, and healthy/no-action buckets.",
+  "version": "1.1.0",
+  "purpose": "Read-only prioritised projection of Defence Command Centre app rows plus bounded estate-level timeline-planning signals into human attention, blocked, safe machine action available, and healthy/no-action buckets.",
   "buckets": [
-    {"id":"human_attention","meaning":"The existing next action explicitly requires human judgement, or a pre-candidate human diff review is in progress/not started."},
-    {"id":"blocked","meaning":"The current state has no authorised automatic path and requires repair, profile-claim refresh or investigation before workflow can continue."},
-    {"id":"machine_action_available","meaning":"An existing guarded helper is available and the next action does not require human judgement. The queue never executes it."},
-    {"id":"healthy_no_action","meaning":"No current Defence action is required."}
+    {
+      "id": "human_attention",
+      "meaning": "The existing app next action explicitly requires human judgement, a pre-candidate human diff review is in progress/not started, or an estate-level timeline-planning action explicitly requires human review."
+    },
+    {
+      "id": "blocked",
+      "meaning": "The current state has no authorised automatic path and requires repair, profile-claim refresh or investigation before workflow can continue."
+    },
+    {
+      "id": "machine_action_available",
+      "meaning": "An existing guarded helper is available and the next action does not require human judgement. The queue never executes it."
+    },
+    {
+      "id": "healthy_no_action",
+      "meaning": "No current Defence action is required."
+    }
   ],
   "rules": [
-    "Classification uses Command Centre fields only and never recomputes certification, deployment or review validity.",
-    "Explicit nextAction.humanRequired always maps to human_attention.",
+    "Classification uses Command Centre fields only and never recomputes certification, deployment, review or timeline-planner validity.",
+    "Existing per-app items remain separate and preserve the exact app nextAction selected by Operations Controller.",
+    "Estate timeline-planning signals are emitted as separate scope=estate queue items and never overwrite an app workflow action.",
+    "unsupported_change always emits a human_attention estate item and is ordered before every app-level human-attention item.",
+    "Other timeline-planning states emit an estate item only when the Command Centre exposes an explicit human-required next action.",
+    "snapshot_hash_only and no_change do not create estate attention items.",
+    "Explicit app nextAction.humanRequired always maps to human_attention.",
     "Pre-candidate review progress not_started or in_progress maps to human_attention.",
     "blocked_canonical_state, profile_refresh_required, needs_review without an authorised helper, partial-service observation gaps and other no-helper remediation states map to blocked.",
-    "A non-human next action with an existing helper maps to machine_action_available.",
-    "nextAction none maps to healthy_no_action unless another explicit blocked/human condition applies.",
-    "Ordering is deterministic: human_attention, blocked, machine_action_available, healthy_no_action; then workflow-stage priority; then app id.",
+    "A non-human app next action with an existing helper maps to machine_action_available.",
+    "App nextAction none maps to healthy_no_action unless another explicit blocked/human condition applies.",
+    "items and counts remain app-only for backward-compatible estate accounting; estateItems contains estate-level signals; queueItems and queueCounts are the unified prioritised queue.",
+    "Unified ordering is deterministic: bucket, workflow-stage priority, estate before app for an equal stage, then stable id. unsupported_change has the earliest workflow-stage priority.",
     "Priority is workflow ordering only, not a security risk score.",
-    "The attention queue is read-only and never invokes a helper."
+    "The attention queue is read-only and never invokes a helper or timeline append action."
   ],
   "nonClaims": [
     "Earlier queue position does not mean an app is less safe.",
     "machine_action_available does not mean the action has been executed.",
     "healthy_no_action does not imply perfect security.",
-    "blocked does not mean unsafe."
+    "blocked does not mean unsafe.",
+    "An estate timeline signal does not change any app certification, review state, deployment state or next action.",
+    "unsupported_change does not mean the estate is unsafe; it means the current timeline-planning contract cannot safely classify new diff semantics without review."
   ]
 }
