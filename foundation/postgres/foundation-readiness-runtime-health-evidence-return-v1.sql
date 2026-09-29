@@ -381,7 +381,9 @@ declare
   ps jsonb;
   rs jsonb;
   e foundation.readiness_runtime_health_investigation_evidence_returns%rowtype;
+  r foundation.readiness_runtime_health_investigation_responses%rowtype;
   expected_hash text;
+  response_hash text;
   state text;
 begin
   ps:=foundation.get_readiness_runtime_health_investigation_proposal_status_v1(
@@ -425,11 +427,26 @@ begin
     'hex'
   );
 
+  select * into r
+  from foundation.readiness_runtime_health_investigation_responses
+  where response_id=e.response_id;
+
+  response_hash:=case
+    when r.response_id is null then null
+    else encode(
+      extensions.digest(convert_to(r.response::text,'UTF8'),'sha256'),
+      'hex'
+    )
+  end;
+
   state:=case
     when expected_hash is distinct from e.evidence_return_sha256 then 'invalid'
     when rs->>'integrityVerified' is distinct from 'true' then 'invalid'
+    when r.response_id is null then 'invalid'
+    when r.response_sha256 is distinct from response_hash then 'invalid'
+    when e.response_sha256 is distinct from r.response_sha256 then 'invalid'
+    when r.proposal_id is distinct from e.proposal_id then 'invalid'
     when ps->>'state'<>'current' or rs->>'state'<>'accepted' then 'stale'
-    when e.response_sha256 is distinct from rs->>'responseSha256' then 'invalid'
     else 'current'
   end;
 
