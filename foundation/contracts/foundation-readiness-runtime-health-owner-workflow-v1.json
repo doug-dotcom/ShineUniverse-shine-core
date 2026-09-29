@@ -4,7 +4,7 @@
   "layer": 57,
   "purpose": "Deliver current integrity-verified Layer-56 runtime-health investigation proposals to the Shine-core control-plane owner and record one immutable acknowledgement without granting runtime mutation authority.",
   "ownerComponent": "shine-core",
-  "ownerPrincipal": "foundation_runtime",
+  "ownerPrincipal": "shine_core_control_plane",
   "executionSurface": "foundation_gateway",
   "inboxFunction": "foundation.get_readiness_runtime_health_owner_inbox_v1",
   "responseFunction": "foundation.respond_readiness_runtime_health_investigation_v1",
@@ -14,6 +14,9 @@
   "invariants": {
     "onlyCurrentIntegrityVerifiedProposalsEnterInbox": true,
     "ownerUsesBoundedInboxInsteadOfDirectProposalSelect": true,
+    "ownerCapabilityRoleIsNoLoginNoInherit": true,
+    "gatewayDoesNotInheritOwnerCapability": true,
+    "foundationRuntimeCannotAcknowledgeOwnerInvestigation": true,
     "gatewayCannotAcknowledgeOwnInvestigation": true,
     "defenceCannotAcknowledgeShineCoreInvestigation": true,
     "serviceRoleCannotAcknowledgeOwnerInvestigation": true,
