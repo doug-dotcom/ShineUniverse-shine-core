@@ -504,8 +504,8 @@
     {
       "id": "timeline-snapshot-planner-helper",
       "path": "security/shine-defence/integration-kit/timeline-snapshot-planner-v1.mjs",
-      "version": "1.1.0",
-      "blobSha": "37d64315123a0c82586b95a2ebe4e94ae7481748"
+      "version": "1.1.1",
+      "blobSha": "9228aa28340b6276a12f4d12903a5fc241cf0983"
     }
   ]
 }
