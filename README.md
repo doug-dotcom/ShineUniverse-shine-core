@@ -253,6 +253,8 @@ A successful bridge result is `candidate_intake_ready` and includes the determin
 
 Each row shows estate/certification state, deployment coverage, observed deployment identity/status, pre-candidate human-review progress, intake readiness/candidate preview when available, and the exact next action already selected by Operations Controller. The Command Centre deliberately does not recompute certification or release status and invokes no helper; missing data is shown explicitly rather than inferred. This makes it an operational projection, not a new authority.
 
+Command Centre v1.4 also exposes the Estate Timeline Snapshot Planner as a bounded top-level `timelinePlanning` summary. In particular, `unsupported_change` is rendered explicitly as requiring human review and preserves the affected app plus any unknown diff status/dimension names. To avoid a dependency cycle, per-app Audit Export uses the extracted `command-centre-core-v1.mjs` base projection; the human-facing wrapper adds timeline planning only after that base is complete. The overlay remains read-only and never invokes timeline `--apply`. The timeline planner helper is import-safe, so embedding it in the Command Centre does not execute its CLI entrypoint.
+
 ### Command Centre attention queue
 
 `security/shine-defence/attention-queue-v1.json` defines a read-only prioritised projection over Command Centre rows. `attention-queue-v1.mjs` groups reviewed apps into `human_attention`, `blocked`, `machine_action_available` and `healthy_no_action`, preserving the exact next action already selected downstream rather than inventing a new workflow decision.

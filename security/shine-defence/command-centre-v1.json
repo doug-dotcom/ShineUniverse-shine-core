@@ -1,14 +1,15 @@
 {
   "contract": "shine-defence/command-centre-v1",
-  "version": "1.3.0",
-  "purpose": "Read-only estate-wide projection of Shine Defence certification, deployment observation, coverage, review progress, intake readiness and exact next action.",
+  "version": "1.4.0",
+  "purpose": "Read-only estate-wide projection of Shine Defence certification, deployment observation, coverage, review progress, intake readiness, exact next action and estate timeline-planning state.",
   "sources": [
     "operations-controller-v1",
     "deployment-coverage-v1",
     "review-intake-planner-v1",
     "candidate-intake-readiness-v1",
     "human-diff-review artifacts",
-    "human-review integrity checkpoints"
+    "human-review integrity checkpoints",
+    "timeline-snapshot-planner-v1"
   ],
   "rules": [
     "The Command Centre joins existing authoritative/read-only projections and does not reimplement certification or deployment-status logic.",
@@ -26,7 +27,10 @@
     "Human review progress exposes lastActivityAt only from explicit Human Diff Review workspace activity.",
     "Accepted pre-candidate reviews expose checkpoint integrity as pending, verified or invalid; reviews without accepted evidence expose not_applicable.",
     "Checkpoint integrity is display/audit context only and does not alter estate state, next action, attention bucket, review state or certification.",
-    "verified requires the checkpoint store to validate against the bound Human Review Event Ledger including historical-prefix replay."
+    "verified requires the checkpoint store to validate against the bound Human Review Event Ledger including historical-prefix replay.",
+    "Estate timeline planning is surfaced as a top-level bounded summary from timeline-snapshot-planner-v1; the Command Centre does not recompute manifest-diff classification.",
+    "unsupported_change remains explicit, preserves affected app/status/dimension names and is displayed as requiring human review.",
+    "Timeline planning visibility never invokes the timeline append action and grants no timeline, review, deployment or certification authority."
   ],
   "reviewProgressStates": [
     "not_applicable",
@@ -43,6 +47,13 @@
     "Review progress is not checklist approval.",
     "Coverage does not imply a protected deployment.",
     "Age or staleness bands are not security risk scores.",
-    "A verified integrity checkpoint does not mean the human review judgement was correct."
+    "A verified integrity checkpoint does not mean the human review judgement was correct.",
+    "unsupported_change is not a finding that the estate is unsafe; it means the current planner contract cannot safely classify the new diff semantics without review."
+  ],
+  "timelinePlanningStates": [
+    "unsupported_change",
+    "material_change",
+    "snapshot_hash_only",
+    "no_change"
   ]
 }

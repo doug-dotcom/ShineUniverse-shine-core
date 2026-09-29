@@ -3,12 +3,12 @@ import {createHash} from 'node:crypto';
 import {existsSync,readFileSync} from 'node:fs';
 import {join} from 'node:path';
 import {fileURLToPath,pathToFileURL} from 'node:url';
-import {loadLiveCommandCentre} from './command-centre-v1.mjs';
+import {loadLiveCommandCentreCore} from './command-centre-core-v1.mjs';
 import {buildReviewSessionSummary} from './review-session-summary-v1.mjs';
 import {verifyEventLedger} from './human-review-event-ledger-v1.mjs';
 import {verifyCheckpointStore} from './review-integrity-checkpoint-v1.mjs';
 
-export const SHINE_DEFENCE_AUDIT_EXPORT_VERSION='1.0.1';
+export const SHINE_DEFENCE_AUDIT_EXPORT_VERSION='1.0.2';
 const root=fileURLToPath(new URL('../../../',import.meta.url));
 const P={
   ledger:'security/shine-defence/ecosystem-profile-ledger-v1.json',
@@ -65,7 +65,7 @@ export function buildAuditExport({app,commandRow,observation,review,eventLedger,
     checkpointIntegrity:checkpointStore?{store:clone(checkpointStore),verification:checkpointVerification}:checkpointVerification,
     provenance:{
       reviewedLedger:'security/shine-defence/ecosystem-profile-ledger-v1.json',
-      commandCentre:'security/shine-defence/integration-kit/command-centre-v1.mjs',
+      commandCentre:'security/shine-defence/integration-kit/command-centre-core-v1.mjs',
       deploymentObservations:'security/shine-defence/deployment-observations-v1.json',
       humanReview:review?'security/shine-defence/human-diff-reviews/'+reviewId+'.json':null,
       reviewEvents:eventLedger?'security/shine-defence/human-review-events/'+reviewId+'.json':null,
@@ -77,7 +77,7 @@ export function buildAuditExport({app,commandRow,observation,review,eventLedger,
 
 export function loadAuditExport({appId,asOf}){
   const ledger=readJson(P.ledger),app=ledger.apps.find(a=>a.id===appId);if(!app)fail('app is not in canonical reviewed ecosystem ledger');
-  const cc=loadLiveCommandCentre(asOf),row=cc.items.find(i=>i.appId===appId);if(!row)fail('reviewed app missing from Command Centre');
+  const cc=loadLiveCommandCentreCore(asOf),row=cc.items.find(i=>i.appId===appId);if(!row)fail('reviewed app missing from Command Centre');
   const observations=readJson(P.observations).observations||[];
   const observation=row.deployment?.observationId?observations.find(o=>o.observationId===row.deployment.observationId)||null:null;
   const id=boundReviewId(row);

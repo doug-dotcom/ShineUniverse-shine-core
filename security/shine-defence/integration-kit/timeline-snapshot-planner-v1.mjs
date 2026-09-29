@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 import {readFileSync} from 'node:fs';
 import {join} from 'node:path';
-import {fileURLToPath} from 'node:url';
+import {fileURLToPath,pathToFileURL} from 'node:url';
 import {loadEstateAuditManifest} from './estate-audit-manifest-v1.mjs';
 import {diffEstateManifests,verifyManifest} from './estate-manifest-diff-v1.mjs';
 import {verifyTimeline} from './estate-audit-timeline-v1.mjs';
 
-export const SHINE_DEFENCE_TIMELINE_SNAPSHOT_PLANNER_VERSION='1.1.0';
+export const SHINE_DEFENCE_TIMELINE_SNAPSHOT_PLANNER_VERSION='1.1.1';
 const root=fileURLToPath(new URL('../../../',import.meta.url));
 const timelinePath=join(root,'security/shine-defence/estate-audit-timeline.json');
 const MATERIAL=new Set(['repository','reviewCommitSha','observedReleaseCommitSha','deploymentState','checkpointIntegrityState']);
@@ -98,4 +98,4 @@ async function main(){
   if(ti<0||!args[ti+1])fail('--as-of is required');
   console.log(JSON.stringify(loadLiveSnapshotPlan(args[ti+1]),null,2));
 }
-main();
+if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href)main();
