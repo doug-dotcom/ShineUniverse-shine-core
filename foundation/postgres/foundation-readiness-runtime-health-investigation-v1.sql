@@ -297,6 +297,9 @@ grant select on foundation.readiness_runtime_health_investigation_proposals
 create index readiness_runtime_health_proposals_incident_idx
  on foundation.readiness_runtime_health_investigation_proposals(readiness_incident_event_id);
 
+create index readiness_runtime_health_proposals_service_idx
+ on foundation.readiness_runtime_health_investigation_proposals(service_id,environment,created_at desc);
+
 create trigger readiness_runtime_health_investigation_proposals_append_only
 before update or delete on foundation.readiness_runtime_health_investigation_proposals
 for each row execute function foundation.reject_append_only_mutation();
