@@ -1,0 +1,26 @@
+{
+  "contract": "shine-foundation/foundation-readiness-runtime-health-investigation-v1",
+  "version": "1.0.0",
+  "layer": 56,
+  "purpose": "Route readiness incidents by actual cause and create a bounded non-executing investigation proposal for Foundation Gateway runtime-health failures.",
+  "responseAction": "propose-runtime-health-investigation",
+  "proposalFunction": "foundation.propose_readiness_runtime_health_investigation_v1",
+  "statusFunction": "foundation.get_readiness_runtime_health_investigation_proposal_status_v1",
+  "ledger": "foundation.readiness_runtime_health_investigation_proposals",
+  "ownerComponent": "shine-core",
+  "invariants": {
+    "runtimeOnlyIncidentDoesNotAdmitDependencyProposal": true,
+    "runtimeHealthProposalIsCauseSpecific": true,
+    "oneProposalPerIncidentCondition": true,
+    "healthPolicyThresholdMutationProhibited": true,
+    "automaticRestartProhibited": true,
+    "automaticRedeployProhibited": true,
+    "releaseRebindProhibited": true,
+    "safeModeBypassProhibited": true,
+    "readinessChanged": false,
+    "incidentClosurePerformed": false,
+    "approvalGranted": false,
+    "executionAuthorityGranted": false,
+    "executesRemediation": false
+  }
+}
