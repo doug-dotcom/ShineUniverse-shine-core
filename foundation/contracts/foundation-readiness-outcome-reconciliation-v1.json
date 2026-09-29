@@ -1,0 +1,27 @@
+{
+  "contract": "shine-foundation/foundation-readiness-outcome-reconciliation-v1",
+  "version": "1.0.0",
+  "layer": 54,
+  "purpose": "Compare the dependency owner's reported remediation outcome with Foundation's independent canonical readiness retest and record an immutable confirmed, contradicted, or unresolved verdict.",
+  "executorRole": "service_role",
+  "classifier": "foundation.classify_readiness_dependency_remediation_outcome_v1",
+  "reconcileFunction": "foundation.reconcile_readiness_dependency_remediation_outcome_v1",
+  "statusFunction": "foundation.get_readiness_dependency_remediation_outcome_reconciliation_status_v1",
+  "ledger": "foundation.readiness_dependency_remediation_outcome_reconciliations",
+  "verdicts": ["confirmed","contradicted","unresolved"],
+  "canonicalOutcomes": ["resolved","improved","unchanged","worsened","inconclusive"],
+  "invariants": {
+    "completedIntegrityVerifiedRetestRequired": true,
+    "ownerCannotReconcileOwnClaim": true,
+    "foundationReadRuntimeCannotWriteReconciliation": true,
+    "oneReconciliationPerEvidenceRetest": true,
+    "appendOnly": true,
+    "replayPreservesFirstReconciliation": true,
+    "ownerOutcomeChangesReadiness": false,
+    "reconciliationChangesReadiness": false,
+    "incidentClosurePerformed": false,
+    "approvalGranted": false,
+    "executionAuthorityGranted": false,
+    "executesRemediation": false
+  }
+}
