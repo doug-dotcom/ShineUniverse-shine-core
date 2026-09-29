@@ -290,6 +290,10 @@ jobs:
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-readiness-runtime-health-owner-workflow-v1.sql
       - name: Run Foundation runtime health owner workflow tests
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-readiness-runtime-health-owner-workflow-v1.test.sql
+      - name: Apply Foundation runtime health evidence return
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-readiness-runtime-health-evidence-return-v1.sql
+      - name: Run Foundation runtime health evidence return tests
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-readiness-runtime-health-evidence-return-v1.test.sql
       - name: Apply Shine Defence Sentinel
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-sentinel-v1.sql
       - name: Run Shine Defence Sentinel acceptance tests
