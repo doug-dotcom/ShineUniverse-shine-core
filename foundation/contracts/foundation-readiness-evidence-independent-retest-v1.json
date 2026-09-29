@@ -1,0 +1,28 @@
+{
+  "contract": "shine-foundation/foundation-readiness-evidence-independent-retest-v1",
+  "version": "1.0.0",
+  "layer": 53,
+  "purpose": "Consume a current Defence evidence return only as a trigger for a fresh canonical Foundation semantic readiness retest, under the existing service_role retest authority.",
+  "executorRole": "service_role",
+  "runFunction": "foundation.run_readiness_dependency_remediation_evidence_retest_v1",
+  "statusFunction": "foundation.get_readiness_dependency_remediation_evidence_retest_status_v1",
+  "proofLedger": "foundation.readiness_dependency_remediation_evidence_retests",
+  "canonicalRetestFunction": "foundation.run_foundation_readiness_retest_cycle_v1",
+  "invariants": {
+    "currentIntegrityVerifiedEvidenceRequired": true,
+    "freshEvidenceRequired": true,
+    "ownerCannotTriggerRetest": true,
+    "foundationReadRuntimeCannotTriggerRetest": true,
+    "serviceRoleUsesFunctionNotDirectInsert": true,
+    "oneCanonicalRetestPerEvidenceReturn": true,
+    "replayPreservesFirstRetest": true,
+    "ownerFactsAreNotCanonicalRetestInputs": true,
+    "ownerOutcomeAcceptedAsReadiness": false,
+    "sourceEvidenceUsedAsTriggerOnly": true,
+    "independentRetest": true,
+    "readinessChangedByOwnerEvidence": false,
+    "approvalGranted": false,
+    "executionAuthorityGranted": false,
+    "executesRemediation": false
+  }
+}
