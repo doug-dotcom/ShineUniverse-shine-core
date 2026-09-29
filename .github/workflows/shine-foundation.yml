@@ -278,6 +278,10 @@ jobs:
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-readiness-outcome-reconciliation-v1.sql
       - name: Run Foundation readiness outcome reconciliation tests
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-readiness-outcome-reconciliation-v1.test.sql
+      - name: Apply Foundation owner outcome receipts
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-readiness-owner-outcome-receipts-v1.sql
+      - name: Run Foundation owner outcome receipt tests
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-readiness-owner-outcome-receipts-v1.test.sql
       - name: Apply Shine Defence Sentinel
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-sentinel-v1.sql
       - name: Run Shine Defence Sentinel acceptance tests
