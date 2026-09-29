@@ -241,7 +241,6 @@ declare
  replay jsonb;
  s jsonb;
  pid uuid;
- stored_hash text;
 begin
  v:=foundation.propose_readiness_runtime_health_investigation_v1(
    'production',now()
@@ -289,20 +288,33 @@ begin
    raise exception 'Layer 56 proposal status invalid: %',s;
  end if;
 
- select encode(
-   extensions.digest(convert_to(proposal::text,'UTF8'),'sha256'),
-   'hex'
- )
- into stored_hash
- from foundation.readiness_runtime_health_investigation_proposals
- where proposal_id=pid;
-
- if stored_hash<>v->>'proposalSha256' then
-   raise exception 'Layer 56 proposal hash mismatch';
- end if;
 end;
 $layer56_proposal$;
 
 reset role;
+
+do $layer56_integrity$
+declare
+ p foundation.readiness_runtime_health_investigation_proposals%rowtype;
+ expected_hash text;
+begin
+ select * into p
+ from foundation.readiness_runtime_health_investigation_proposals
+ limit 1;
+
+ if p.proposal_id is null then
+   raise exception 'Layer 56 proposal row missing';
+ end if;
+
+ expected_hash:=encode(
+   extensions.digest(convert_to(p.proposal::text,'UTF8'),'sha256'),
+   'hex'
+ );
+
+ if expected_hash<>p.proposal_sha256 then
+   raise exception 'Layer 56 proposal hash mismatch';
+ end if;
+end;
+$layer56_integrity$;
 
 rollback;
