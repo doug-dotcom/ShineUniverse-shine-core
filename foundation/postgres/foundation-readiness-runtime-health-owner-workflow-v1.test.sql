@@ -385,6 +385,12 @@ begin
     'MEMBER'
   ) then raise exception 'Gateway must not inherit Shine-core control-plane capability'; end if;
 
+  if not pg_has_role(
+    'postgres',
+    'shine_core_control_plane',
+    'MEMBER'
+  ) then raise exception 'Postgres control plane must be able to explicitly assume Shine-core capability'; end if;
+
   if exists(
     select 1 from pg_roles
     where rolname='shine_core_control_plane'
