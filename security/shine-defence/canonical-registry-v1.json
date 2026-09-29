@@ -390,14 +390,14 @@
     {
       "id": "attention-queue",
       "path": "security/shine-defence/attention-queue-v1.json",
-      "version": "1.0.0",
-      "blobSha": "0de44917db7dacdd9d2b2e7a881e78508b05896a"
+      "version": "1.1.0",
+      "blobSha": "72c7acfc0736974abd02bc061d8b1478283f930e"
     },
     {
       "id": "attention-queue-helper",
       "path": "security/shine-defence/integration-kit/attention-queue-v1.mjs",
-      "version": "1.1.0",
-      "blobSha": "d4c1d28edfb2d53460135fd26a375155d8917f52"
+      "version": "1.2.0",
+      "blobSha": "6471ba6a511c2f59fcee1e87b95e22cdedd1731a"
     },
     {
       "id": "staleness-visibility",
