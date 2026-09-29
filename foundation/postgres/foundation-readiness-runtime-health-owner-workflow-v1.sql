@@ -18,6 +18,10 @@ $layer57_role$;
 
 grant usage on schema foundation to shine_core_control_plane;
 
+-- Match the established Foundation privileged-capability pattern: postgres may
+-- explicitly SET ROLE into this no-inherit capability; Gateway is never a member.
+grant shine_core_control_plane to postgres;
+
 -- Tighten Layer-56 owner visibility: use verified inbox/status APIs instead of
 -- direct proposal-ledger SELECT from the owner principal.
 revoke select on foundation.readiness_runtime_health_investigation_proposals
