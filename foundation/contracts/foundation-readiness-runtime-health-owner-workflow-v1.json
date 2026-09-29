@@ -15,6 +15,7 @@
     "onlyCurrentIntegrityVerifiedProposalsEnterInbox": true,
     "ownerUsesBoundedInboxInsteadOfDirectProposalSelect": true,
     "ownerCapabilityRoleIsNoLoginNoInherit": true,
+    "ownerCapabilityExplicitlyAssumableByPostgresControlPlane": true,
     "gatewayDoesNotInheritOwnerCapability": true,
     "foundationRuntimeCannotAcknowledgeOwnerInvestigation": true,
     "gatewayCannotAcknowledgeOwnInvestigation": true,
