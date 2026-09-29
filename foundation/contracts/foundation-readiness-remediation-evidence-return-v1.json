@@ -1,0 +1,34 @@
+{
+  "contract": "shine-foundation/foundation-readiness-remediation-evidence-return-v1",
+  "version": "1.0.0",
+  "layer": 52,
+  "purpose": "Allow the authenticated Defence owner to return one immutable, integrity-bound investigation evidence packet for a current accepted remediation handoff without changing Foundation readiness or gaining execution authority.",
+  "writerRole": "shine_defence_runtime",
+  "submitFunction": "foundation.return_readiness_dependency_remediation_evidence_v1",
+  "statusFunction": "foundation.get_readiness_dependency_remediation_evidence_return_status_v1",
+  "ledger": "foundation.readiness_dependency_remediation_evidence_returns",
+  "invariants": {
+    "currentHandoffRequired": true,
+    "integrityVerifiedHandoffRequired": true,
+    "acceptedOwnerResponseRequired": true,
+    "oneAuthoritativeReturnPerHandoff": true,
+    "appendOnly": true,
+    "defenceHasNoDirectLedgerInsert": true,
+    "defenceHasNoDirectLedgerSelect": true,
+    "serviceRoleCannotSubmit": true,
+    "foundationRuntimeCannotSubmit": true,
+    "staleHandoffMakesEvidenceStale": true,
+    "requiresIndependentRetest": true,
+    "readinessChanged": false,
+    "approvalGranted": false,
+    "executionAuthorityGranted": false,
+    "executesAction": false
+  },
+  "ownerReportedOutcomes": [
+    "resolved",
+    "improved",
+    "unchanged",
+    "worsened",
+    "inconclusive"
+  ]
+}
