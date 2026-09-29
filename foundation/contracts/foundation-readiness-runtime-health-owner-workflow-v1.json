@@ -1,0 +1,32 @@
+{
+  "contract": "shine-foundation/foundation-readiness-runtime-health-owner-workflow-v1",
+  "version": "1.0.0",
+  "layer": 57,
+  "purpose": "Deliver current integrity-verified Layer-56 runtime-health investigation proposals to the Shine-core control-plane owner and record one immutable acknowledgement without granting runtime mutation authority.",
+  "ownerComponent": "shine-core",
+  "ownerPrincipal": "foundation_runtime",
+  "executionSurface": "foundation_gateway",
+  "inboxFunction": "foundation.get_readiness_runtime_health_owner_inbox_v1",
+  "responseFunction": "foundation.respond_readiness_runtime_health_investigation_v1",
+  "responseStatusFunction": "foundation.get_readiness_runtime_health_investigation_response_status_v1",
+  "responseLedger": "foundation.readiness_runtime_health_investigation_responses",
+  "responseStates": ["accepted","rejected","clarification-requested"],
+  "invariants": {
+    "onlyCurrentIntegrityVerifiedProposalsEnterInbox": true,
+    "ownerUsesBoundedInboxInsteadOfDirectProposalSelect": true,
+    "gatewayCannotAcknowledgeOwnInvestigation": true,
+    "defenceCannotAcknowledgeShineCoreInvestigation": true,
+    "serviceRoleCannotAcknowledgeOwnerInvestigation": true,
+    "oneImmutableResponsePerProposal": true,
+    "acceptanceMeansInvestigationOwnershipOnly": true,
+    "runtimeMutationAuthorityGranted": false,
+    "healthPolicyMutationAuthorityGranted": false,
+    "releaseRebindAuthorityGranted": false,
+    "safeModeBypassAuthorityGranted": false,
+    "readinessChanged": false,
+    "incidentClosurePerformed": false,
+    "approvalGranted": false,
+    "executionAuthorityGranted": false,
+    "executesRemediation": false
+  }
+}
