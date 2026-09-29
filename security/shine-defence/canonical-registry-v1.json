@@ -492,14 +492,14 @@
     {
       "id": "timeline-snapshot-planner",
       "path": "security/shine-defence/timeline-snapshot-planner-v1.json",
-      "version": "1.0.0",
-      "blobSha": "48d11eb76d635bd25769c84d8aecf92bc699de79"
+      "version": "1.1.0",
+      "blobSha": "281663d1e2fc06da8cb839bbab5f3054c25bee24"
     },
     {
       "id": "timeline-snapshot-planner-helper",
       "path": "security/shine-defence/integration-kit/timeline-snapshot-planner-v1.mjs",
-      "version": "1.0.0",
-      "blobSha": "068e2684e470fe81bdf8e24506f506105dc2810c"
+      "version": "1.1.0",
+      "blobSha": "37d64315123a0c82586b95a2ebe4e94ae7481748"
     }
   ]
 }
