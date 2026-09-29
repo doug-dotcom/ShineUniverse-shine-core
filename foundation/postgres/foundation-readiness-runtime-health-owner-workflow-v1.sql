@@ -9,9 +9,20 @@ begin
   if not exists(select 1 from pg_roles where rolname='shine_core_control_plane') then
     create role shine_core_control_plane
       nologin noinherit nosuperuser nocreatedb nocreaterole nobypassrls;
-  else
-    alter role shine_core_control_plane
-      nologin noinherit nosuperuser nocreatedb nocreaterole nobypassrls;
+  elsif exists(
+    select 1
+    from pg_roles
+    where rolname='shine_core_control_plane'
+      and (
+        rolcanlogin
+        or rolinherit
+        or rolsuper
+        or rolcreatedb
+        or rolcreaterole
+        or rolbypassrls
+      )
+  ) then
+    raise exception 'shine-core-control-plane-role-posture-invalid';
   end if;
 end;
 $layer57_role$;
