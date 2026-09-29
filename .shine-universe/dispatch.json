@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "request_id": "universe-go-0002",
+  "request_id": "universe-go-0003",
   "pass": 1,
   "scope": "core",
   "dispatch_group": "shine-core",
@@ -9,5 +9,5 @@
     "Concierge",
     "Defence"
   ],
-  "note": "Bootstrap live test of one-room Shine Universe Chat Control."
+  "note": "One governed Shine Universe core pass from Chat Control."
 }
