@@ -1,7 +1,7 @@
 begin;
 
 -- Layer 51 isolates readiness-cause semantics by stubbing the evidence providers.
-create or replace function foundation.get_service_deployment_truth_v1(p_service_id text,p_environment text)
+create or replace function foundation.get_service_deployment_truth_v1(p_service_id text,p_environment text default 'production')
 returns jsonb language sql stable security definer set search_path='' as $$
   select jsonb_build_object(
     'truthState','aligned',
@@ -14,7 +14,7 @@ returns jsonb language sql stable security definer set search_path='' as $$
   );
 $$;
 
-create or replace function foundation.get_service_health_v1(p_service_id text,p_environment text)
+create or replace function foundation.get_service_health_v1(p_service_id text,p_environment text default 'production')
 returns jsonb language sql stable security definer set search_path='' as $$
   select jsonb_build_object(
     'healthState','unhealthy',
@@ -23,12 +23,12 @@ returns jsonb language sql stable security definer set search_path='' as $$
   );
 $$;
 
-create or replace function foundation.get_dependency_graph_health_v1(p_environment text)
+create or replace function foundation.get_dependency_graph_health_v1(p_environment text default 'production')
 returns jsonb language sql stable security definer set search_path='' as $$
   select jsonb_build_object('state','pass','cycleCount',0);
 $$;
 
-create or replace function foundation.get_foundation_dependency_rollup_v1(p_environment text,p_as_of timestamptz)
+create or replace function foundation.get_foundation_dependency_rollup_v1(p_environment text default 'production',p_as_of timestamptz default now())
 returns jsonb language sql stable security definer set search_path='' as $$
   select jsonb_build_object(
     'effectiveState','blocked',
@@ -52,12 +52,12 @@ returns jsonb language sql stable security definer set search_path='' as $$
   );
 $$;
 
-create or replace function foundation.get_gateway_operation_registry_health_v1(p_environment text)
+create or replace function foundation.get_gateway_operation_registry_health_v1(p_environment text default 'production')
 returns jsonb language sql stable security definer set search_path='' as $$
   select jsonb_build_object('state','pass','routeCount',42,'invalidContractCount',0);
 $$;
 
-create or replace function foundation.get_gateway_operation_policy_coverage_v1(p_environment text)
+create or replace function foundation.get_gateway_operation_policy_coverage_v1(p_environment text default 'production')
 returns jsonb language sql stable security definer set search_path='' as $$
   select jsonb_build_object(
     'state','pass','privilegedOperationCount',26,'coveredOperationCount',26,
@@ -65,12 +65,12 @@ returns jsonb language sql stable security definer set search_path='' as $$
   );
 $$;
 
-create or replace function foundation.get_gateway_operation_audit_health_v1(p_environment text,p_stale_after_seconds integer)
+create or replace function foundation.get_gateway_operation_audit_health_v1(p_environment text default 'production',p_stale_after_seconds integer default 300)
 returns jsonb language sql stable security definer set search_path='' as $$
   select jsonb_build_object('state','pass','openTraceCount',0,'brokenChainCount',0);
 $$;
 
-create or replace function foundation.get_service_native_state_v1(p_service_id text,p_environment text,p_as_of timestamptz)
+create or replace function foundation.get_service_native_state_v1(p_service_id text,p_environment text default 'production',p_as_of timestamptz default now())
 returns jsonb language sql stable security definer set search_path='' as $$
   select jsonb_build_object(
     'operationalState','operational',
@@ -96,7 +96,7 @@ end;
 $runtime_only$;
 
 -- A real dependency-edge block must still remain a dependency block.
-create or replace function foundation.get_service_health_v1(p_service_id text,p_environment text)
+create or replace function foundation.get_service_health_v1(p_service_id text,p_environment text default 'production')
 returns jsonb language sql stable security definer set search_path='' as $$
   select jsonb_build_object(
     'healthState','operational',
@@ -105,7 +105,7 @@ returns jsonb language sql stable security definer set search_path='' as $$
   );
 $$;
 
-create or replace function foundation.get_foundation_dependency_rollup_v1(p_environment text,p_as_of timestamptz)
+create or replace function foundation.get_foundation_dependency_rollup_v1(p_environment text default 'production',p_as_of timestamptz default now())
 returns jsonb language sql stable security definer set search_path='' as $$
   select jsonb_build_object(
     'effectiveState','blocked',
@@ -214,7 +214,7 @@ insert into foundation.foundation_readiness_incident_events(
  '{"current":{"privilegedOperationsMode":"blocked","workerOperationsMode":"blocked"}}',now()
 );
 
-create or replace function foundation.evaluate_readiness_incident_response_v1(p_action_key text,p_environment text)
+create or replace function foundation.evaluate_readiness_incident_response_v1(p_action_key text,p_environment text default 'production')
 returns jsonb language sql stable security definer set search_path='' as $$
  select jsonb_build_object('decision','admit');
 $$;
