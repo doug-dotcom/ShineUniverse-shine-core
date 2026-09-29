@@ -1,0 +1,32 @@
+{
+  "contract": "shine-foundation/foundation-readiness-owner-inbox-v1",
+  "version": "1.0.0",
+  "layer": 50,
+  "purpose": "Give the addressed Defence runtime an authenticated, least-privilege inbox of current pending remediation handoffs while preserving the Layer-49 acknowledgement boundary.",
+  "readerRole": "shine_defence_runtime",
+  "addressedService": "foundation.defence",
+  "addressedOwnerComponent": "universe",
+  "inboxReader": "foundation.get_readiness_dependency_remediation_owner_inbox_v1",
+  "acknowledgementFunction": "foundation.respond_readiness_dependency_remediation_handoff_v1",
+  "sourceLedger": "foundation.readiness_dependency_remediation_handoffs",
+  "responseLedger": "foundation.readiness_dependency_remediation_handoff_responses",
+  "invariants": {
+    "onlyDefenceRuntimeMayReadInbox": true,
+    "serviceRoleCannotReadInbox": true,
+    "foundationRuntimeCannotReadInbox": true,
+    "defenceHasNoDirectHandoffTableSelect": true,
+    "onlyCurrentHandoffsVisible": true,
+    "onlyIntegrityVerifiedHandoffsVisible": true,
+    "onlyPendingHandoffsVisible": true,
+    "staleHandoffsExcluded": true,
+    "respondedHandoffsExcluded": true,
+    "handoffPayloadIncluded": true,
+    "handoffSha256Included": true,
+    "proposalSha256Included": true,
+    "conditionFingerprintIncluded": true,
+    "routingFingerprintIncluded": true,
+    "approvalGranted": false,
+    "executionAuthorityGranted": false,
+    "executesAction": false
+  }
+}
