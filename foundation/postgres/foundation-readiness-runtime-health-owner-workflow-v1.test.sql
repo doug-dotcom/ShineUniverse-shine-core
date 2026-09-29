@@ -544,19 +544,21 @@ as $layer57_stale$
  );
 $layer57_stale$;
 
-set local role shine_core_control_plane;
-
 do $layer57_stale_response$
 declare
   pid uuid;
   status jsonb;
 begin
+  -- Administrative test harness identifies the row; the owner principal itself
+  -- remains unable to SELECT the response ledger directly.
   select proposal_id into pid
   from foundation.readiness_runtime_health_investigation_responses
   limit 1;
 
+  set local role shine_core_control_plane;
   status:=
     foundation.get_readiness_runtime_health_investigation_response_status_v1(pid);
+  reset role;
 
   if status->>'state'<>'stale'
      or status->>'executionAuthorityGranted'<>'false'
@@ -565,7 +567,5 @@ begin
   end if;
 end;
 $layer57_stale_response$;
-
-reset role;
 
 rollback;
