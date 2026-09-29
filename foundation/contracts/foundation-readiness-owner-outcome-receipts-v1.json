@@ -1,0 +1,27 @@
+{
+  "contract": "shine-foundation/foundation-readiness-owner-outcome-receipts-v1",
+  "version": "1.0.0",
+  "layer": 55,
+  "purpose": "Give the authenticated Defence owner a least-privilege read-only receipt projection of integrity-verified Foundation reconciliation outcomes for handoffs addressed to Defence.",
+  "readerRole": "shine_defence_runtime",
+  "function": "foundation.get_readiness_dependency_remediation_owner_outcome_receipts_v1",
+  "sourceLedgers": [
+    "foundation.readiness_dependency_remediation_handoffs",
+    "foundation.readiness_dependency_remediation_evidence_returns",
+    "foundation.readiness_dependency_remediation_evidence_retests",
+    "foundation.readiness_dependency_remediation_outcome_reconciliations"
+  ],
+  "invariants": {
+    "defenceOnlyFunctionAccess": true,
+    "defenceDirectLedgerSelect": false,
+    "onlyDefenceAddressedHandoffsVisible": true,
+    "onlyIntegrityVerifiedReconciliationsExposed": true,
+    "historicalReceiptsRemainVisible": true,
+    "boundedProjection": true,
+    "readinessChanged": false,
+    "incidentClosurePerformed": false,
+    "approvalGranted": false,
+    "executionAuthorityGranted": false,
+    "executesRemediation": false
+  }
+}
