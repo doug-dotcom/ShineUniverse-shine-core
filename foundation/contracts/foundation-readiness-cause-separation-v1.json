@@ -1,0 +1,20 @@
+{
+  "contract": "shine-foundation/foundation-readiness-cause-separation-v1",
+  "version": "1.0.0",
+  "layer": 51,
+  "purpose": "Separate Foundation Gateway's own runtime health from dependency-edge impact so runtime failure is not mislabelled as dependency failure, and make dependency remediation explicitly not applicable when no dependency scopes are affected.",
+  "canonicalReadinessReader": "foundation.evaluate_foundation_readiness_v1",
+  "dependencyProposalFunction": "foundation.propose_readiness_dependency_remediation_v1",
+  "invariants": {
+    "gatewayOwnHealthEvaluatedIndependently": true,
+    "dependencyReasonsComeOnlyFromDependencyEdgeImpact": true,
+    "runtimeUnhealthyDoesNotImplyDependencyBlocked": true,
+    "realBlockedDependencyStillReportsDependencyBlocked": true,
+    "dependencyServiceEffectiveStateRetainedForDiagnostics": true,
+    "dependencyImpactStateExposedSeparately": true,
+    "noDependencyScopesReturnsNotApplicable": true,
+    "noDependencyScopesDoesNotThrow": true,
+    "approvalGranted": false,
+    "executionAuthorityGranted": false
+  }
+}
