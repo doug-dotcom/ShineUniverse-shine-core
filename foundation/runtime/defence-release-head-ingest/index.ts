@@ -5,6 +5,8 @@ import {bindGithubOidcOperation,oidcReplayConflict} from '../_shared/github-oidc
 const AUDIENCE='shine-defence-release-head';
 const EXPECTED_WORKFLOW_PATH='.github/workflows/shine-defence-release-head.yml';
 const EXPECTED_WORKFLOW_BRANCH='main';
+const EXPECTED_JOB_WORKFLOW_REF='doug-dotcom/ShineUniverse-shine-core/.github/workflows/shine-defence-release-attestation-v1.yml@7bfd7fe685b4b2da814ac53dafdbfac2350591c8';
+const EXPECTED_JOB_WORKFLOW_SHA='7bfd7fe685b4b2da814ac53dafdbfac2350591c8';
 const OIDC_POLICY={
   audience:AUDIENCE,
   expectedRepositoryOwner:'doug-dotcom',
@@ -14,6 +16,8 @@ const OIDC_POLICY={
   expectedRunnerEnvironment:'github-hosted',
   subjectMode:'repository-ref',
   expectedWorkflow:{path:EXPECTED_WORKFLOW_PATH,branch:EXPECTED_WORKFLOW_BRANCH},
+  expectedJobWorkflowRef:EXPECTED_JOB_WORKFLOW_REF,
+  expectedJobWorkflowSha:EXPECTED_JOB_WORKFLOW_SHA,
   allowedEvents:["schedule","workflow_dispatch","push"]
 };
 const MAX_BODY_BYTES=96*1024;
