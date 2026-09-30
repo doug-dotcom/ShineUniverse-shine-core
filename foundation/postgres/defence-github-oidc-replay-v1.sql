@@ -266,8 +266,7 @@ begin
   if p_runtime_state not in ('active','sleeping','transitioning','inactive','failed','unknown')
      or p_health_state not in ('healthy','degraded','unhealthy','unknown')
      or p_evidence_kind not in (
-       'supabase-management-api','railway-api','manual-verified',
-       'github-oidc','supabase-runtime-receipt'
+       'supabase-management-api','railway-api','runtime-self-report','manual-verified'
      )
      or p_valid_until<=p_observed_at
      or p_metadata is null
