@@ -1,6 +1,6 @@
 {
   "contract": "shine-defence/release-attestation-authority-v1",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "purpose": "Centralize the authority-bearing release-head and rollback attestation job in Shine Core so app callers cannot silently change attestation logic.",
   "reusableWorkflow": {
     "repository": "doug-dotcom/ShineUniverse-shine-core",
@@ -43,7 +43,8 @@
     "Caller repository identity remains independently verified; reusable workflow authority does not replace repository binding.",
     "A future central workflow revision receives a new SHA and must be deliberately promoted before it can exercise authority.",
     "Release-head and rollback OIDC tokens without the exact pinned Core reusable workflow authority are rejected.",
-    "Authority-gated runtime consumers import one shared immutable authority binding; they do not duplicate the authority ref or SHA locally."
+    "Authority-gated runtime consumers import one shared immutable authority binding; they do not duplicate the authority ref or SHA locally.",
+    "Every active authority is the final entry in the append-only authority lineage and its workflow blob is proven against repository history."
   ],
   "enforcement": {
     "mode": "mandatory",
@@ -55,11 +56,17 @@
     "requiredJobWorkflowSha": "7bfd7fe685b4b2da814ac53dafdbfac2350591c8",
     "failureMode": "401 unauthorized",
     "runtimeBindingPath": "foundation/runtime/_shared/shine-defence-release-attestation-authority-v1.mjs",
-    "rotationRule": "Rotate the shared runtime binding and this contract together; CI rejects contract/runtime divergence before merge."
+    "rotationRule": "Append and validate a successor lineage entry first, then rotate the shared runtime binding and this contract together; CI rejects missing predecessor linkage, workflow-blob mismatch or contract/runtime divergence."
   },
   "runtimeBinding": {
     "path": "foundation/runtime/_shared/shine-defence-release-attestation-authority-v1.mjs",
     "version": "1.0.0",
     "role": "Single runtime source of truth for the immutable Core reusable-workflow authority ref and SHA."
+  },
+  "lineage": {
+    "path": "security/shine-defence/release-attestation-authority-lineage-v1.json",
+    "verifierPath": "security/shine-defence/integration-kit/verify-release-attestation-authority-lineage-v1.mjs",
+    "mode": "append-only-predecessor-chain",
+    "workflowBlobProof": "git-history"
   }
 }
