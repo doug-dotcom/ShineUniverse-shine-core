@@ -1,6 +1,6 @@
 # Foundation Layer 87 — Reconciliation executor reconciliation
 
-**Status:** IMPLEMENTED — CI and production verification pending  
+**Status:** LIVE — CI green and production verification complete  
 **Scope:** independently prove that a successful Layer-86 execution claim agrees with the durable Layer-82 receipt and the policy/incident evidence that authorised it
 
 Layer 86 is now the only service-role path that can invoke Layer 82.
@@ -115,6 +115,41 @@ CI proves:
 6. Layer-82, Layer-86 and verification counts do not change while Layer 87 runs;
 7. the Layer-87 ledger is append-only;
 8. role and Gateway-inheritance boundaries remain intact.
+
+## Production proof
+
+Layer 87 is deployed in the Shine Foundation Supabase project as:
+
+- `20260930215952 — foundation_layer_087_reconciliation_executor_reconciliation`
+
+Advisor hardening added the Layer-82 foreign-key covering index. Two concurrent rooms applied the same idempotent `CREATE INDEX IF NOT EXISTS` one second apart, so migration history truthfully contains both entries:
+
+- `20260930220436 — foundation_layer_087_reconciliation_executor_layer82_fk_index`
+- `20260930220437 — foundation_layer_087_layer82_fk_index`
+
+There is only one physical index:
+
+`foundation.case_audit_verify_reconcile_exec_reconcile_layer82_idx`
+
+Live production verification confirms:
+
+- Layer-87 ledger, evaluator, runner and summary exist;
+- current Layer-87 receipt count: **0**;
+- current Layer-86 event count: **0**;
+- current Layer-82 reconciliation count: **0**;
+- current Layer-81 execution count: **0**;
+- current Layer-77 verification count: **0**;
+- current Layer-87 problem count: **0**;
+- service role can run Layer 87 but cannot directly INSERT reconciliation rows;
+- Foundation runtime cannot run Layer 87, but can use its read-only evaluator and summary;
+- Gateway cannot run Layer 87 and reads the summary only through existing `foundation_runtime` membership with no direct grant;
+- Shine Core, Shine Defence and browser roles cannot run Layer 87;
+- a nonexistent Layer-86 event returns `not-applicable / event-not-found`;
+- that harmless negative probe creates no Layer-87 receipt and changes no upstream ledger count;
+- Layer 83 remains **idle** and Layer 84 remains **normal**;
+- Supabase security advisors report no Layer-87-specific finding;
+- Supabase no longer reports an unindexed Layer-87 foreign key;
+- the three Layer-87 indexes currently appear only as expected `unused_index` INFO because the healthy production ledger is empty.
 
 ## Invariant
 
