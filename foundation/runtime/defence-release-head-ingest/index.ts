@@ -155,6 +155,8 @@ Deno.serve(async(req:Request)=>{
             githubRef:identity.ref,
             githubWorkflowRef:identity.workflowRef,
             githubWorkflowSha:identity.workflowSha,
+          githubJobWorkflowRef:identity.jobWorkflowRef||null,
+          githubJobWorkflowSha:identity.jobWorkflowSha||null,
             githubRunnerEnvironment:identity.runnerEnvironment,
             deploymentRelevant:observation.deploymentRelevant,
             changedFileCount:observation.changedFileCount
