@@ -1,6 +1,6 @@
 # Foundation Layer 84 — Reconciliation coverage incident lifecycle
 
-**Status:** IMPLEMENTED — CI and production verification pending  
+**Status:** LIVE — CI green and production verification complete  
 **Scope:** turn persistent Layer-83 reconciliation-coverage failures into append-only operational incidents
 
 Layer 83 answers:
@@ -154,6 +154,30 @@ CI proves:
 - Gateway reads summary only through Foundation runtime inheritance;
 - Core, Defence and browser roles remain denied;
 - incident history is append-only.
+
+## Production proof
+
+Layer 84 is deployed in the Shine Foundation Supabase project as:
+
+- `20260930135059 — foundation_layer_084_reconciliation_coverage_incident_lifecycle`
+- `20260930135106 — foundation_layer_084_reconciliation_coverage_incident_hosted`
+
+Live production verification confirms:
+
+- operational state: **normal**;
+- Layer-83 reconciliation coverage state: **idle**;
+- active incidents: **0**;
+- watches: **0**;
+- reconciliation problems: **0**;
+- reconciliation coverage: **100%**;
+- healthy reconciliation: **100%**;
+- a real `service_role` sentinel execution returned no event and performed no reconciliation, repair, Layer-81 rerun or authoritative-truth mutation;
+- `service_role` can run the sentinel but cannot run the transition helper or directly INSERT incident events;
+- Foundation runtime can read the summary;
+- Gateway can read the summary only through existing `foundation_runtime` membership and has no direct summary grant;
+- Shine Core, Shine Defence and browser roles cannot read the summary;
+- hosted pg_cron job `shine-foundation-case-audit-verify-reconcile-incident-5m` is active as job **37** on the documented cadence;
+- Supabase advisors report no Layer-84-specific security or performance finding.
 
 ## Invariant
 
