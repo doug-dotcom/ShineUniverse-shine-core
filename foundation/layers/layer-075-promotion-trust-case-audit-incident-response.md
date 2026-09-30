@@ -1,6 +1,6 @@
 # Foundation Layer 75 — Promotion-trust case-audit incident response policy
 
-**Status:** IMPLEMENTED — CI and production verification pending  
+**Status:** LIVE — CI green, response policy deployed and fail-closed production baseline verified  
 **Scope:** decide the safe next action for case-chain structural incidents without creating repair authority
 
 Layer 74 escalates persistent failures in the governance chain itself.
@@ -120,6 +120,12 @@ Layer 75 executes no action.
 
 ## Acceptance coverage
 
+Initial full Foundation CI run `36696759415` completed successfully and proved the Layer-75 cause/response semantics across the full Foundation/Defence chain.
+
+The first production proof then exposed a small honesty issue: unknown actions correctly returned `deny / prohibited`, but mutation flags were JSON `null` because no action class existed. That was safe but ambiguous. Layer 75 was hardened so unknown/fail-closed actions now explicitly return `mutatesAuthoritativeTruth: false` and `mutatesIncidentHistory: false`.
+
+The hardened full Foundation run `36697106346` completed successfully with persistence **207/207** green and all downstream Shine Defence checks passing.
+
 CI proves:
 
 - healthy baseline has no cause;
@@ -133,6 +139,63 @@ CI proves:
 - history deletion remains denied;
 - observer freshness admits only evidence refresh;
 - runtime/Gateway read-only role graph remains intact.
+
+## Production proof
+
+Layer 75 is deployed in the Shine Foundation Supabase project through:
+
+- `foundation_layer_075_promoted_release_case_audit_incident_response_policy`
+- `foundation_layer_075_case_audit_response_explicit_fail_closed_flags`
+
+Current production is healthy:
+
+- Layer-74 incident state: **normal**
+- Layer-73 case-audit state: **normal**
+- cause class: **none**
+- source domain: **none**
+- next evidence action: **none**
+- authority expansion: **false**
+- automatic repair allowed: **false**
+- history rewrite allowed: **false**
+
+Current response plan contains **15** declared actions.
+
+Healthy-baseline behaviour:
+
+- inspect promotion case audit: **admit / read-only**
+- inspect promotion case history: **not applicable**
+- record fresh case-audit observation: **not applicable**
+- materialise current owner handoff: **not applicable**
+
+Hard fail-closed proof:
+
+- automatic case-chain repair: **deny / prohibited**
+- case-chain history rewrite: **deny / prohibited**
+- unknown action: **deny / prohibited**
+- unknown-action authoritative mutation flag: **false**
+- unknown-action incident-history mutation flag: **false**
+- unknown-action executes action: **false**
+
+Release-truth authority remains delegated to:
+
+`foundation.evaluate_control_plane_incident_response_v1`
+
+and missing-current-handoff work is permitted only through the existing bounded:
+
+`foundation.generate_foundation_promoted_release_owner_handoff_v1`
+
+Layer 75 itself executes neither path.
+
+Production privilege proof:
+
+- Foundation runtime can read/evaluate response plan: **yes**
+- service role can read/evaluate response plan: **yes**
+- Gateway can read through existing `foundation_runtime` membership: **yes**
+- Shine Core owner can read plan: **no**
+- Shine Defence runtime can read plan: **no**
+- anonymous/authenticated roles can read plan: **no**
+
+Supabase advisors show no Layer-75-specific security or performance finding. Layer 75 adds functions only; existing estate-wide notices remain unrelated.
 
 ## Invariant
 
