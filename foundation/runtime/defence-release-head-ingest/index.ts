@@ -7,7 +7,12 @@ const EXPECTED_WORKFLOW_PATH='.github/workflows/shine-defence-release-head.yml';
 const EXPECTED_WORKFLOW_BRANCH='main';
 const OIDC_POLICY={
   audience:AUDIENCE,
+  expectedRepositoryOwner:'doug-dotcom',
+  expectedRepositoryOwnerId:'225530237',
   expectedRef:'refs/heads/'+EXPECTED_WORKFLOW_BRANCH,
+  expectedRefType:'branch',
+  expectedRunnerEnvironment:'github-hosted',
+  subjectMode:'repository-ref',
   expectedWorkflow:{path:EXPECTED_WORKFLOW_PATH,branch:EXPECTED_WORKFLOW_BRANCH},
   allowedEvents:["schedule","workflow_dispatch","push"]
 };
@@ -67,6 +72,9 @@ Deno.serve(async(req:Request)=>{
         select
           provider,
           metadata->>'sourceRepository' as source_repository,
+          metadata->>'sourceRepositoryId' as source_repository_id,
+          metadata->>'sourceRepositoryOwner' as source_repository_owner,
+          metadata->>'sourceRepositoryOwnerId' as source_repository_owner_id,
           metadata->>'sourceBranch' as source_branch
         from foundation.defence_estate_targets
         where target_id=${observation?.targetId}
@@ -79,6 +87,9 @@ Deno.serve(async(req:Request)=>{
 
       if(
         String(identity.repository).toLowerCase()!==String(target.source_repository??'').toLowerCase()||
+        String(identity.repositoryId)!==String(target.source_repository_id??'')||
+        String(identity.repositoryOwner)!==String(target.source_repository_owner??'')||
+        String(identity.repositoryOwnerId)!==String(target.source_repository_owner_id??'')||
         String(observation?.repository??'').toLowerCase()!==String(identity.repository).toLowerCase()||
         String(observation?.branch??'')!==String(target.source_branch??'')
       ){
@@ -138,8 +149,13 @@ Deno.serve(async(req:Request)=>{
             githubEvent:identity.eventName,
             githubActor:identity.actor,
             githubRepository:identity.repository,
+            githubRepositoryId:identity.repositoryId,
+            githubRepositoryOwner:identity.repositoryOwner,
+            githubRepositoryOwnerId:identity.repositoryOwnerId,
             githubRef:identity.ref,
             githubWorkflowRef:identity.workflowRef,
+            githubWorkflowSha:identity.workflowSha,
+            githubRunnerEnvironment:identity.runnerEnvironment,
             deploymentRelevant:observation.deploymentRelevant,
             changedFileCount:observation.changedFileCount
           })}
