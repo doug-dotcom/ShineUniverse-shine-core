@@ -1,0 +1,39 @@
+{
+  "contract": "shine-defence/github-oidc-immutable-principal-v1",
+  "version": "1.0.0",
+  "purpose": "Bind Defence GitHub OIDC trust to immutable repository and owner identities in addition to mutable repository names.",
+  "owner": {
+    "login": "doug-dotcom",
+    "id": "225530237"
+  },
+  "coreRepository": {
+    "name": "doug-dotcom/ShineUniverse-shine-core",
+    "id": "1072897952"
+  },
+  "releaseSources": "security/shine-defence/release-source-watch-v1.json",
+  "requiredClaims": [
+    "repository",
+    "repository_id",
+    "repository_owner",
+    "repository_owner_id",
+    "ref",
+    "ref_type",
+    "workflow_ref",
+    "workflow_sha",
+    "runner_environment",
+    "sub"
+  ],
+  "acceptedRefType": "branch",
+  "acceptedRunnerEnvironment": "github-hosted",
+  "subjectRule": "Exact GitHub legacy repository-ref subject or exact GitHub immutable repository-ref subject only.",
+  "dynamicBinding": "Release-head and rollback consumers compare signed repository_id and repository_owner_id against Foundation target metadata.",
+  "fixedBinding": "Core provider, re-attestation and deployment-receipt consumers pin the Core repository ID and owner ID directly in OIDC policy.",
+  "invariants": [
+    "A repository rename cannot silently rebind Defence trust.",
+    "A deleted and recreated repository with the same owner/name does not inherit the old repository identity.",
+    "A repository transferred away from the pinned owner identity fails closed.",
+    "Self-hosted runner tokens are rejected by current Defence ingestion paths.",
+    "workflow_sha is preserved from GitHub's signed workflow_sha claim.",
+    "Legacy and immutable GitHub subject formats are accepted only when every embedded name/id/ref matches the signed claims."
+  ]
+}
