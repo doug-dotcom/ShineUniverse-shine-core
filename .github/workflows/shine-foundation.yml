@@ -410,6 +410,10 @@ jobs:
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-case-audit-verification-executor-v1.sql
       - name: Run Foundation bounded overdue verification executor tests
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-case-audit-verification-executor-v1.test.sql
+      - name: Apply Foundation verification execution reconciliation
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-case-audit-verification-exec-reconciliation-v1.sql
+      - name: Run Foundation verification execution reconciliation tests
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-case-audit-verification-exec-reconciliation-v1.test.sql
       - name: Apply Shine Defence Sentinel
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-sentinel-v1.sql
       - name: Run Shine Defence Sentinel acceptance tests
