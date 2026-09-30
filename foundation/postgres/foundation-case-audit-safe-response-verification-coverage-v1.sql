@@ -93,18 +93,27 @@ begin
                 is not distinct from x.durable_evidence_id::text
           and x.verification_proof->>'durableEvidenceFingerprint'
                 is not distinct from x.durable_evidence_fingerprint
-          and coalesce(
-                (x.verification_proof->>'independentDurableEvidenceRead')::boolean,
-                false
-              )
-          and coalesce(
-                (x.verification_proof->>'targetReexecuted')::boolean,
-                true
-              )=false
-          and coalesce(
-                (x.verification_proof->>'mutationPerformed')::boolean,
-                true
-              )=false
+          and x.verification_proof->>'foundationCaseAuditSafeResponseVerificationProof'
+                is not distinct from
+                'shine-foundation/case-audit-safe-response-verification-proof-v1'
+          and x.verification_proof->>'schemaVersion'
+                is not distinct from '1.0.0'
+          and x.verification_proof->'independentDurableEvidenceRead'
+                = 'true'::jsonb
+          and x.verification_proof->'targetReexecuted'
+                = 'false'::jsonb
+          and x.verification_proof->'historyRewritePerformed'
+                = 'false'::jsonb
+          and x.verification_proof->'releaseTruthMutationPerformed'
+                = 'false'::jsonb
+          and x.verification_proof->'incidentHistoryMutationPerformed'
+                = 'false'::jsonb
+          and x.verification_proof->'approvalGranted'
+                = 'false'::jsonb
+          and x.verification_proof->'executionAuthorityGranted'
+                = 'false'::jsonb
+          and x.verification_proof->'mutationPerformed'
+                = 'false'::jsonb
       end as proof_integrity_verified
     from executed x
   ),
