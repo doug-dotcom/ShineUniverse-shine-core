@@ -140,6 +140,23 @@ test('shared verifier fails closed after refresh and enforces consumer claim pol
   const immutableIdentity=await verifier.verify(await signJwt(immutablePayload,key),policy);
   assert.equal(immutableIdentity.subject,immutablePayload.sub);
 
+  const reusablePayload={
+    ...basePayload(),
+    job_workflow_ref:'doug-dotcom/ShineUniverse-shine-core/.github/workflows/shine-defence-release-attestation-v1.yml@deadbeefdeadbeefdeadbeefdeadbeefdeadbeef',
+    job_workflow_sha:'deadbeefdeadbeefdeadbeefdeadbeefdeadbeef'
+  };
+  const reusablePolicy={
+    ...policy,
+    expectedJobWorkflowRef:reusablePayload.job_workflow_ref,
+    expectedJobWorkflowSha:reusablePayload.job_workflow_sha
+  };
+  const reusableIdentity=await verifier.verify(await signJwt(reusablePayload,key),reusablePolicy);
+  assert.equal(reusableIdentity.jobWorkflowRef,reusablePayload.job_workflow_ref);
+  assert.equal(reusableIdentity.jobWorkflowSha,reusablePayload.job_workflow_sha);
+
+  const wrongJobWorkflow=await signJwt({...reusablePayload,job_workflow_sha:'c'.repeat(40)},key);
+  await assert.rejects(()=>verifier.verify(wrongJobWorkflow,reusablePolicy),/OIDC job workflow sha mismatch/);
+
 
   const expired=await signJwt({...basePayload(),exp:nowSeconds-60},key);
   await assert.rejects(()=>verifier.verify(expired,policy),/OIDC token expired/);
