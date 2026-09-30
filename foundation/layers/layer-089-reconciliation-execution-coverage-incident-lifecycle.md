@@ -1,6 +1,6 @@
 # Foundation Layer 89 — Layer-88 coverage incident lifecycle
 
-**Status:** IMPLEMENTED — CI and production verification pending  
+**Status:** LIVE — CI green and production verification complete  
 **Scope:** turn persistent Layer-88 reconciliation-coverage failures into append-only operational incidents
 
 Layer 88 answers:
@@ -122,6 +122,35 @@ Layer 89 grants no authority to:
 ## Acceptance coverage
 
 CI proves first GAP detection, persistence before opening, quiet unchanged evidence, CHANGED on material evidence change, recovery to PENDING/NORMAL, INVALID watches, clock-noise-resistant fingerprints, service-role-only sentinel execution, append-only history and the complete read/execute role boundary.
+
+## Production proof
+
+Layer 89 is deployed in the Shine Foundation Supabase project as:
+
+- `20260930223811 — foundation_layer_089_layer88_coverage_incident_lifecycle`
+- `20260930223816 — foundation_layer_089_layer88_coverage_incident_hosted`
+
+Live production verification confirms:
+
+- operational state: **normal**;
+- Layer-88 coverage state: **idle**;
+- active incidents: **0**;
+- watches: **0**;
+- problem count: **0**;
+- Layer-87 reconciliation coverage: **100%**;
+- healthy Layer-87 reconciliation: **100%**;
+- Layer-86 execution count: **0**;
+- Layer-87 reconciliation receipt count: **0**;
+- Layer-89 incident-event count: **0**;
+- a real service-role sentinel execution returned `eventCreated=false`;
+- the sentinel performed no Layer-87 reconciliation, repair, Layer-86/82/81 rerun, verification rerun or authoritative-truth mutation;
+- service role can run the sentinel but cannot call the transition helper or directly insert incident rows;
+- Foundation runtime can read the summary;
+- Gateway reads the summary only through existing `foundation_runtime` membership and receives no direct grant;
+- Shine Core, Shine Defence and browser roles cannot read the summary;
+- hosted pg_cron job `shine-foundation-case-audit-reconcile-exec-coverage-incident-5m` is active as job **38** on `3,8,13,18,23,28,33,38,43,48,53,58 * * * *`;
+- Supabase security advisors report no Layer-89-specific finding;
+- Supabase performance advisors report no Layer-89-specific finding.
 
 ## Invariant
 
