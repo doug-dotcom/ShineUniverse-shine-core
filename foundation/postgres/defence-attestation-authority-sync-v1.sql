@@ -69,7 +69,12 @@ begin
        and v_existing.authority_ref=p_authority_ref
        and lower(v_existing.workflow_blob_sha)=lower(p_workflow_blob_sha)
        and v_existing.activation_kind=p_activation_kind
-       and v_existing.activated_at=p_activated_at then
+       and v_existing.activated_at=p_activated_at
+       and coalesce(v_existing.metadata->>'lineageSequence','')=coalesce(p_metadata->>'lineageSequence','')
+       and coalesce(v_existing.metadata->>'lineageBlobSha','')=coalesce(p_metadata->>'lineageBlobSha','')
+       and coalesce(v_existing.metadata->>'authorityContractBlobSha','')=coalesce(p_metadata->>'authorityContractBlobSha','')
+       and (v_existing.metadata->'promotionReceipt') is not distinct from (p_metadata->'promotionReceipt')
+       and (v_existing.metadata->'rollbackReceipt') is not distinct from (p_metadata->'rollbackReceipt') then
       return jsonb_build_object(
         'status','replayed',
         'activationSequence',v_existing.activation_sequence,
