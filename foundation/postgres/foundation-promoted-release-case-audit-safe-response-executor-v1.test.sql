@@ -145,7 +145,7 @@ begin
     raise exception 'Layer 76 semantic replay must reuse execution receipt: %',replay;
   end if;
 
-  summary:=foundation.get_foundation_promoted_release_case_audit_safe_response_execution_summary_v1(
+  summary:=foundation.get_case_audit_safe_response_exec_summary_v1(
     'production',25
   );
 
@@ -392,6 +392,26 @@ end;
 $l76_unsupported_action$;
 
 
+do $l76_function_identifier_closure$
+begin
+  if to_regprocedure(
+       'foundation.case_audit_safe_response_policy_fingerprint_v1(jsonb,jsonb)'
+     ) is null
+     or to_regprocedure(
+       'foundation.get_case_audit_safe_response_exec_summary_v1(text,integer)'
+     ) is null
+     or to_regprocedure(
+       'foundation.foundation_promoted_release_case_audit_response_policy_fingerpr(jsonb,jsonb)'
+     ) is not null
+     or to_regprocedure(
+       'foundation.get_foundation_promoted_release_case_audit_safe_response_execut(text,integer)'
+     ) is not null then
+    raise exception 'Layer 76 canonical function identifier convergence invalid';
+  end if;
+end;
+$l76_function_identifier_closure$;
+
+
 do $l76_privileges$
 begin
   if not has_function_privilege(
@@ -426,17 +446,17 @@ begin
      )
      or not has_function_privilege(
        'foundation_runtime',
-       'foundation.get_foundation_promoted_release_case_audit_safe_response_execution_summary_v1(text,integer)',
+       'foundation.get_case_audit_safe_response_exec_summary_v1(text,integer)',
        'EXECUTE'
      )
      or has_function_privilege(
        'anon',
-       'foundation.get_foundation_promoted_release_case_audit_safe_response_execution_summary_v1(text,integer)',
+       'foundation.get_case_audit_safe_response_exec_summary_v1(text,integer)',
        'EXECUTE'
      )
      or has_function_privilege(
        'authenticated',
-       'foundation.get_foundation_promoted_release_case_audit_safe_response_execution_summary_v1(text,integer)',
+       'foundation.get_case_audit_safe_response_exec_summary_v1(text,integer)',
        'EXECUTE'
      ) then
     raise exception 'Layer 76 safe-response executor privilege boundary invalid';
