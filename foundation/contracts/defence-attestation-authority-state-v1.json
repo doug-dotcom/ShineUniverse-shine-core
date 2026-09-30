@@ -1,0 +1,30 @@
+{
+  "contract": "shine-defence/release-attestation-authority-state-v1",
+  "version": "1.0.0",
+  "purpose": "Make release-source evidence admissible only when its signed reusable-workflow authority matches the currently active Shine Defence attestation authority.",
+  "sourceOfTruth": {
+    "historyTable": "foundation.defence_attestation_authority_activations",
+    "currentView": "foundation.current_defence_attestation_authority",
+    "bootstrapAuthoritySha": "7bfd7fe685b4b2da814ac53dafdbfac2350591c8",
+    "bootstrapWorkflowBlobSha": "71218df29b79919af76115b9180a6afbbd8dbf79",
+    "bootstrapAuthorityRef": "doug-dotcom/ShineUniverse-shine-core/.github/workflows/shine-defence-release-attestation-v1.yml@7bfd7fe685b4b2da814ac53dafdbfac2350591c8"
+  },
+  "evidenceBinding": {
+    "sourceObservationTable": "foundation.defence_release_source_head_observations",
+    "signedAuthorityShaField": "metadata.githubJobWorkflowSha",
+    "signedAuthorityRefField": "metadata.githubJobWorkflowRef"
+  },
+  "invariants": [
+    "Authority activations are append-only.",
+    "The current authority is the latest activation by activatedAt and activation sequence.",
+    "A release-source observation is authority-current only when both signed job_workflow_sha and job_workflow_ref equal the current authority activation.",
+    "Time freshness never overrides authority freshness.",
+    "Release admission must hold when source evidence was produced by an older or unknown attestation authority.",
+    "Authority parity is evaluated independently for every required active Railway estate target."
+  ],
+  "failureMode": {
+    "parityState": "warning",
+    "releaseAdmissionDecision": "hold",
+    "releaseAdmissionReasonCode": "source-watch-authority-stale"
+  }
+}

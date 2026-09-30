@@ -430,6 +430,10 @@ jobs:
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-release-source-head-v1.sql
       - name: Run Shine Defence release source-head acceptance tests
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-release-source-head-v1.test.sql
+      - name: Apply Shine Defence active attestation authority state
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-attestation-authority-state-v1.sql
+      - name: Run Shine Defence active attestation authority state tests
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-attestation-authority-state-v1.test.sql
       - name: Apply Shine Defence release transition coverage
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-release-transition-coverage-v1.sql
       - name: Run Shine Defence release transition coverage acceptance tests
@@ -486,3 +490,7 @@ jobs:
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-github-oidc-principal-binding-v1.sql
       - name: Run Shine Defence immutable GitHub OIDC principal binding tests
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-github-oidc-principal-binding-v1.test.sql
+      - name: Apply Shine Defence release authority-evidence parity hardening
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-release-authority-evidence-parity-v1.sql
+      - name: Run Shine Defence release authority-evidence parity tests
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-release-authority-evidence-parity-v1.test.sql
