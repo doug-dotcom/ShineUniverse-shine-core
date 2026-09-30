@@ -24,6 +24,7 @@ declare
   v_existing foundation.defence_attestation_authority_activations%rowtype;
   v_sequence bigint;
   v_lineage_sequence bigint;
+  v_current_lineage_sequence bigint;
   v_expected_ref text;
 begin
   if p_authority_sha !~ '^[a-fA-F0-9]{40}$'
@@ -95,11 +96,25 @@ begin
     );
   end if;
 
-  if v_lineage_sequence<>v_current.activation_sequence+1 then
+  v_current_lineage_sequence := case
+    when v_current.activation_kind='bootstrap' then 1
+    when coalesce(v_current.metadata->>'lineageSequence','') ~ '^[0-9]{1,18}$'
+      then (v_current.metadata->>'lineageSequence')::bigint
+    else null
+  end;
+
+  if v_current_lineage_sequence is null then
+    return jsonb_build_object(
+      'status','rejected',
+      'reasonCode','active-authority-lineage-sequence-missing'
+    );
+  end if;
+
+  if v_lineage_sequence<>v_current_lineage_sequence+1 then
     return jsonb_build_object(
       'status','rejected',
       'reasonCode','authority-lineage-sequence-gap',
-      'expectedLineageSequence',v_current.activation_sequence+1
+      'expectedLineageSequence',v_current_lineage_sequence+1
     );
   end if;
 
@@ -146,8 +161,16 @@ begin
 
     select * into v_restore
     from foundation.defence_attestation_authority_activations
-    where activation_sequence=p_restore_from_sequence
+    where (
+      case
+        when activation_kind='bootstrap' then 1
+        when coalesce(metadata->>'lineageSequence','') ~ '^[0-9]{1,18}$'
+          then (metadata->>'lineageSequence')::bigint
+        else null
+      end
+    )=p_restore_from_sequence
       and activation_sequence<v_current.activation_sequence
+    order by activation_sequence asc
     limit 1;
 
     if v_restore.activation_sequence is null then
@@ -184,6 +207,7 @@ begin
   return jsonb_build_object(
     'status','recorded',
     'activationSequence',v_sequence,
+    'lineageSequence',v_lineage_sequence,
     'authoritySha',lower(p_authority_sha),
     'activationKind',p_activation_kind,
     'activatedAt',p_activated_at
