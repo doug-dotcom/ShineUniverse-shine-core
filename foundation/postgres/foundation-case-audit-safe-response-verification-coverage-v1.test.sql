@@ -108,7 +108,10 @@ begin
         'durableEvidence',durable_snapshot,
         'executionActionResult',action_result,
         'independentDurableEvidenceRead',true,
-        'targetReexecuted',false,
+        'targetReexecuted',case
+          when i=6 then '"banana"'::jsonb
+          else 'false'::jsonb
+        end,
         'historyRewritePerformed',false,
         'releaseTruthMutationPerformed',false,
         'incidentHistoryMutationPerformed',false,
@@ -137,7 +140,7 @@ begin
         'record-fresh-promotion-case-audit-observation',
         policy_fp,verification_state,reason_code,durable_id,durable_fp,
         durable_snapshot,action_result,proof,
-        case when i=6 then repeat('f',64) else proof_hash end,
+        proof_hash,
         verification_recorded_at
       );
     end if;
