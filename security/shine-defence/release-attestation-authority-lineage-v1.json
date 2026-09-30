@@ -1,0 +1,27 @@
+{
+  "contract": "shine-defence/release-attestation-authority-lineage-v1",
+  "version": "1.0.0",
+  "purpose": "Append-only audit lineage for immutable Shine Defence release-attestation authority rotations.",
+  "workflow": {
+    "repository": "doug-dotcom/ShineUniverse-shine-core",
+    "repositoryId": "1072897952",
+    "path": ".github/workflows/shine-defence-release-attestation-v1.yml"
+  },
+  "entries": [
+    {
+      "sequence": 1,
+      "authoritySha": "7bfd7fe685b4b2da814ac53dafdbfac2350591c8",
+      "workflowBlobSha": "71218df29b79919af76115b9180a6afbbd8dbf79",
+      "activatedAt": "2026-09-30T06:58:39.000Z",
+      "predecessorAuthoritySha": null,
+      "reason": "Initial central reusable release-attestation authority."
+    }
+  ],
+  "rules": [
+    "Entries are append-only and sequence numbers are contiguous from 1.",
+    "Each successor names the immediately preceding authority SHA.",
+    "Every authority SHA must resolve to a repository commit containing the declared reusable workflow path at the recorded workflow blob SHA.",
+    "The final lineage entry must exactly match the active shared runtime authority binding and canonical authority contract.",
+    "Authority rotation is fail-closed: a new authority cannot become active unless its lineage entry, workflow blob and runtime/contract bindings validate together."
+  ]
+}
