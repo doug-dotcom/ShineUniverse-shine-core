@@ -138,6 +138,14 @@ Deno.serve(async(req:Request)=>{
               collector:'shine-defence/estate-provider-collector-v1',
               githubRunId:identity.runId,
               githubRunAttempt:identity.runAttempt,
+          githubRepository:identity.repository,
+          githubRepositoryId:identity.repositoryId,
+          githubRepositoryOwner:identity.repositoryOwner,
+          githubRepositoryOwnerId:identity.repositoryOwnerId,
+          githubRef:identity.ref,
+          githubWorkflowRef:identity.workflowRef,
+          githubWorkflowSha:identity.workflowSha,
+          githubRunnerEnvironment:identity.runnerEnvironment,
               githubEvent:identity.eventName
             })}
           )
