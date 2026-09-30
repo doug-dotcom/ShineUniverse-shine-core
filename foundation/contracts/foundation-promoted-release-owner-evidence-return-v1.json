@@ -1,0 +1,42 @@
+{
+  "contract": "shine-foundation/promoted-release-owner-evidence-return-v1",
+  "version": "1.0.0",
+  "layer": 69,
+  "purpose": "Allow an accepted Shine Core owner to return one immutable evidence packet for current promotion-trust work without making owner claims canonical promotion truth.",
+  "ownerRole": "shine_core_control_plane",
+  "sourceHandoff": "foundation.foundation_promoted_release_owner_handoffs",
+  "sourceAcknowledgement": "foundation.foundation_promoted_release_owner_handoff_responses",
+  "ledger": "foundation.foundation_promoted_release_owner_evidence_returns",
+  "returnFunction": "foundation.return_foundation_promoted_release_owner_evidence_v1",
+  "statusFunction": "foundation.get_foundation_promoted_release_owner_evidence_status_v1",
+  "ownerReportedOutcomes": [
+    "resolved",
+    "improved",
+    "unchanged",
+    "worsened",
+    "inconclusive"
+  ],
+  "invariants": {
+    "currentHandoffRequired": true,
+    "acceptedIntegrityVerifiedOwnerAcknowledgementRequired": true,
+    "oneEvidencePacketPerHandoff": true,
+    "evidenceBindsHandoffSha256": true,
+    "evidenceBindsResponseSha256": true,
+    "evidenceBindsResponsePlanFingerprint": true,
+    "ownerEvidenceIsCanonicalPromotionTrust": false,
+    "ownerOutcomeClaimOnly": true,
+    "requiresIndependentVerification": true,
+    "promotionTrustChangedByOwnerEvidence": false,
+    "incidentClosurePerformed": false,
+    "layer38ApprovalGranted": false,
+    "releaseTruthMutationAuthorityGranted": false,
+    "releaseRebindAuthorityGranted": false,
+    "incidentHistoryMutationAuthorityGranted": false,
+    "runtimeMutationAuthorityGranted": false,
+    "approvalGranted": false,
+    "executionAuthorityGranted": false,
+    "executesAction": false,
+    "recoveredOrStaleHandoffMakesEvidenceStale": true,
+    "directLedgerInsertDenied": true
+  }
+}
