@@ -1,0 +1,27 @@
+{
+  "contract": "shine-foundation/promoted-release-producer-consumer-parity-v1",
+  "version": "1.0.0",
+  "layer": 63,
+  "purpose": "Prove in CI that the actual PostgreSQL promoted-release producer emits responses accepted by the exact pinned Layer-62 consumer validator, including both promoted and fail-closed hold states.",
+  "producer": "foundation.get_foundation_promoted_release_v1",
+  "producerSource": "foundation/postgres/foundation-promoted-release-consumer-v1.sql",
+  "consumerValidator": "foundation/integration-kit/promoted-release-response-v1.mjs",
+  "canonicalSchema": "foundation/schemas/promoted-release-response-v1.schema.json",
+  "parityVerifier": "foundation/integration-kit/verify-promoted-release-producer-consumer-parity-v1.mjs",
+  "ciPlacement": "after Layer-61 PostgreSQL apply and acceptance tests in the Foundation persistence job",
+  "testStates": [
+    "promoted-current-closure",
+    "hold-stale-closure"
+  ],
+  "rules": {
+    "usesActualProducerFunction": true,
+    "usesActualConsumerValidator": true,
+    "transactionalDependencyStubsRollBack": true,
+    "databaseStatePersistsFromParityTest": false,
+    "promotedMustValidate": true,
+    "holdMustValidate": true,
+    "holdMustCarryNoPromotedIdentity": true,
+    "runtimeReadinessMustRemainSeparate": true,
+    "authoritativeTruthMutationClaimForbidden": true
+  }
+}

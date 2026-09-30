@@ -73,6 +73,9 @@ jobs:
       PGPASSWORD: postgres
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
       - name: Install PostgreSQL client
         run: |
           sudo apt-get update
@@ -323,6 +326,8 @@ jobs:
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-promoted-release-consumer-v1.sql
       - name: Run Foundation promoted release consumer projection tests
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-promoted-release-consumer-v1.test.sql
+      - name: Verify promoted release producer-consumer parity
+        run: node foundation/integration-kit/verify-promoted-release-producer-consumer-parity-v1.mjs
       - name: Apply Shine Defence Sentinel
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-sentinel-v1.sql
       - name: Run Shine Defence Sentinel acceptance tests
