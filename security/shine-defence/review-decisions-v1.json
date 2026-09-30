@@ -30,6 +30,18 @@
       "decidedAt": "2026-09-26T12:28:03.000Z",
       "authority": "shine-defence-core",
       "summary": "Travel Layer 240 was accepted into the canonical ecosystem ledger and certification receipt after healthy deployment and security-diff review evidence."
+    },
+    {
+      "decisionId": "shine-wellness-2ccf929c9eba-superseded",
+      "candidateId": "shine-wellness-2ccf929c9eba",
+      "appId": "shine-wellness",
+      "outcome": "superseded",
+      "decidedAt": "2026-09-30T04:05:50.000Z",
+      "authority": "shine-defence-core",
+      "successorCandidateId": "shine-wellness-1c22e0fc99f4",
+      "summary": "Build 22 replaced the pending Build 21 Wellness candidate before human review was finalized; no review findings or authorization carry forward.",
+      "reviewChecklistBlobSha": "7e23cb90eff17c72d4bbb83b915fc559c1d996fb",
+      "reviewRegistryBlobSha": "fab8bd8429b46385df854074336f50b182ba1fbc"
     }
   ]
 }
