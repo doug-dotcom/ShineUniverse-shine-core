@@ -1,0 +1,50 @@
+{
+  "contract": "shine-foundation/promoted-release-incident-response-policy-v1",
+  "version": "1.0.0",
+  "layer": 66,
+  "purpose": "Classify promoted-release trust incident causes and provide a deterministic response plan without expanding release-truth mutation authority.",
+  "causeReader": "foundation.get_foundation_promoted_release_incident_cause_v1",
+  "evaluator": "foundation.evaluate_foundation_promoted_release_incident_response_v1",
+  "responsePlan": "foundation.get_foundation_promoted_release_incident_response_plan_v1",
+  "releaseTruthAuthority": "foundation.evaluate_control_plane_incident_response_v1",
+  "causeClasses": [
+    "none",
+    "canonical-source-truth",
+    "promotion-closure-open",
+    "promotion-closure-integrity",
+    "promotion-closure-stale",
+    "observer-drift",
+    "observer-freshness",
+    "promotion-hold-other",
+    "unknown"
+  ],
+  "localActions": {
+    "inspect-promoted-release-trust": "read-only",
+    "inspect-canonical-source-truth": "read-only",
+    "inspect-promotion-closure": "read-only",
+    "record-fresh-promoted-release-observation": "evidence-only"
+  },
+  "delegatedLayer38Actions": [
+    "request-release-reattestation",
+    "propose-registry-repair",
+    "propose-release-ledger-repair",
+    "apply-registry-repair",
+    "apply-release-ledger-repair",
+    "rebind-release-identity"
+  ],
+  "alwaysDeniedActions": [
+    "auto-repair-authoritative-truth",
+    "suppress-promoted-release-incident",
+    "delete-promoted-release-incident-history"
+  ],
+  "invariants": {
+    "incidentSeverityNeverExpandsAuthority": true,
+    "authoritativeActionsDelegateToLayer38": true,
+    "delegatedDecisionIsNeverUpgraded": true,
+    "observerRefreshIsEvidenceOnly": true,
+    "automaticAuthoritativeRepairAlwaysDenied": true,
+    "incidentHistoryMutationAlwaysDenied": true,
+    "unknownActionFailsClosed": true,
+    "layerExecutesNoRepair": true
+  }
+}
