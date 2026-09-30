@@ -153,7 +153,7 @@ end;
 $$;
 
 
-do $
+do $authority_sync_test$
 declare
   v jsonb;
 begin
