@@ -1,6 +1,6 @@
 # Foundation Layer 76 — Bounded safe-response executor
 
-**Status:** IMPLEMENTED — CI and production verification pending  
+**Status:** LIVE — bounded executor green, production upgrade path converged and canonical schema verified  
 **Scope:** execute only the two safe Layer-75 responses through a policy-coupled append-only dispatcher
 
 Layer 75 classifies what may happen next.
@@ -156,6 +156,28 @@ Layer 76 is deliberately not cron-driven.
 
 ## Acceptance coverage
 
+Initial full Foundation CI run `36705378585` completed successfully and proved the bounded dispatcher itself across the full Foundation/Defence chain.
+
+The first production advisor/schema sweep then exposed a naming issue before Layer 76 was stamped live: the original execution-ledger identifier was 64 characters, while PostgreSQL identifiers are limited to 63 bytes. PostgreSQL had silently truncated the physical table, sequence, constraints, indexes and trigger names.
+
+The ledger was therefore standardised to:
+
+`foundation.case_audit_safe_response_exec_events`
+
+A dedicated identifier-convergence migration now upgrades already-live databases, while fresh databases create the short name directly.
+
+The production rename also exposed a second upgrade-only seam: PL/pgSQL function source text still referenced the old identifier after the physical table rename. A separate idempotent function-convergence step now reapplies the already-tested executor/summary definitions against the canonical table.
+
+Full convergence CI run `36706561597` completed successfully:
+
+- Foundation contracts: **28/28**
+- persistence: **211/211**
+- canonical Layer-76 create: **PASS**
+- identifier convergence: **PASS**
+- stored-function convergence: **PASS**
+- bounded executor tests: **PASS**
+- downstream Shine Defence chain: **PASS**
+
 CI proves:
 
 - GAP dispatches only the Layer-67 bounded generator;
@@ -167,6 +189,61 @@ CI proves:
 - service role cannot directly insert the execution ledger;
 - runtime/Gateway/owner/Defence cannot execute;
 - execution history is append-only.
+
+## Production proof
+
+Layer 76 is deployed in the Shine Foundation Supabase project through:
+
+- `foundation_layer_076_promoted_release_case_audit_safe_response_executor`
+- `foundation_layer_076_case_audit_safe_response_identifier_convergence`
+- `foundation_layer_076_case_audit_safe_response_function_identifier_convergence`
+
+Healthy production currently has no Layer-74 structural incident.
+
+A direct bounded-executor attempt therefore correctly fails before dispatch with:
+
+`promotion-case-audit-safe-response-current-incident-required`
+
+and creates **no execution receipt**.
+
+Current execution summary:
+
+- total: **0**
+- executed: **0**
+- denied: **0**
+- failed: **0**
+- arbitrary SQL execution: **false**
+- history rewrite performed: **false**
+- release-truth mutation performed: **false**
+- incident-history mutation performed: **false**
+
+Canonical physical schema proof:
+
+- table: `foundation.case_audit_safe_response_exec_events`
+- old truncated table: **absent**
+- identity sequence: `foundation.case_audit_safe_response_exec_events_event_sequence_seq`
+- append-only trigger: `case_audit_safe_response_exec_append_only`
+- PK/unique/FK/check constraints: canonical short names
+- incident index: `case_audit_safe_response_exec_incident_idx`
+- action index: `case_audit_safe_response_exec_action_idx`
+
+Production privilege proof:
+
+- service role can execute bounded dispatcher: **yes**
+- Foundation runtime can execute: **no**
+- Gateway can execute: **no**
+- Shine Core owner can execute: **no**
+- Shine Defence runtime can execute: **no**
+- service role direct execution-ledger INSERT: **no**
+- Foundation runtime can read bounded execution summary: **yes**
+- anonymous/authenticated roles can read summary: **no**
+
+Supabase advisors:
+
+- no Layer-76-specific security finding;
+- no Layer-76 unindexed foreign-key finding;
+- the two Layer-76 query indexes currently appear as `unused_index` INFO because production contains zero execution receipts;
+- remaining estate-wide findings are unrelated to Layer 76.
 
 ## Invariant
 
