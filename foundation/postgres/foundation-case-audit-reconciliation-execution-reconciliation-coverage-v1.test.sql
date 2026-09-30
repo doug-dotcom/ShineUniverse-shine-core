@@ -87,7 +87,7 @@ begin
       executor_id,'production',target_id,
       '88000000-0000-4000-8000-000000000201'::uuid,
       'run-independent-verification','verification-omission',
-      repeat((i+6)::text,64),'executed',
+      repeat(to_hex(i+6),64),'executed',
       'case-audit-overdue-verification-layer77-ran',
       '{}'::jsonb,'{}'::jsonb,'{}'::jsonb,'{}'::jsonb,
       layer81_result,'{}'::jsonb,now()-interval '15 minutes'
