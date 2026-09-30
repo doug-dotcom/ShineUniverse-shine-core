@@ -62,7 +62,11 @@ For every proof it recomputes SHA-256 from the immutable proof document and requ
 - original execution action result;
 - independent-read flag;
 - no-target-reexecution flag;
+- no history/release/incident mutation flags;
+- no approval or execution-authority flags;
 - no-mutation flag.
+
+Malformed flag types are treated as an **invalid proof**, not as an evaluator error.
 
 ## Overall states
 
