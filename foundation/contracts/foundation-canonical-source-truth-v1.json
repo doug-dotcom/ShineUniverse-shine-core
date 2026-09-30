@@ -1,0 +1,35 @@
+{
+  "contract": "shine-foundation/canonical-source-truth-v1",
+  "version": "1.0.0",
+  "layer": 59,
+  "purpose": "Fail closed unless the immutable Foundation release binding, Universe registry projection, readiness-release ledger provenance and current deployment identity agree on one exact release.",
+  "reader": "foundation.get_foundation_canonical_source_truth_v1",
+  "assertion": "foundation.assert_foundation_canonical_source_truth_v1",
+  "runtimeHealthAffectsSourceTruth": false,
+  "acceptedProjectionStates": ["aligned", "degraded"],
+  "requiredChecks": [
+    "projectionStructurallyClosed",
+    "bindingSourceRefValid",
+    "bindingReleaseRefMatchesSource",
+    "registryLayerMatchesBinding",
+    "registryReleaseRefMatchesBinding",
+    "registryVerified",
+    "canonicalRepoConfirmed",
+    "boundReleaseLedgerPresent",
+    "boundReleaseLayerMatches",
+    "boundReleaseSourceCommitMatches",
+    "boundReleaseEvidenceMatches",
+    "deploymentAligned",
+    "deploymentSourceMatchesBinding",
+    "deploymentRuntimeMatchesBinding",
+    "deploymentArtifactMatchesBinding"
+  ],
+  "invariants": [
+    "CI success alone is never canonical production truth.",
+    "A release-ledger row is valid only when layer, source commit and canonical evidence URL match the immutable binding.",
+    "The Universe registry must project the exact current immutable binding and must be verified and deployed.",
+    "The current aligned deployment expectation must match the immutable binding source, runtime version and artifact.",
+    "Runtime health degradation remains a separate concern and must not be hidden by source-of-truth reconciliation.",
+    "The assertion endpoint is service-role-only and never mutates authoritative truth."
+  ]
+}
