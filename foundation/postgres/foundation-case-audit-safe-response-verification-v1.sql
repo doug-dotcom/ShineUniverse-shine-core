@@ -189,6 +189,10 @@ begin
           'durableEvidencePresent',false
         );
       else
+        v_recomputed_hash :=
+          foundation.foundation_promoted_release_case_audit_semantic_fingerprint_v1(
+            v_observation.snapshot
+          );
         v_evidence_fingerprint := v_observation.semantic_fingerprint;
         v_evidence_snapshot := jsonb_build_object(
           'evidenceType','promotion-case-audit-observation',
@@ -213,13 +217,16 @@ begin
             v_observation.environment=v_exec.environment,
           'semanticFingerprintMatches',
             v_exec.action_result->>'semanticFingerprint'
-              is not distinct from v_observation.semantic_fingerprint
+              is not distinct from v_observation.semantic_fingerprint,
+          'storedSnapshotFingerprintValid',
+            v_recomputed_hash is not distinct from v_observation.semantic_fingerprint
         );
 
         if (v_checks->>'actionResultContractValid')::boolean
            and (v_checks->>'actionResultStatusValid')::boolean
            and (v_checks->>'environmentMatches')::boolean
-           and (v_checks->>'semanticFingerprintMatches')::boolean then
+           and (v_checks->>'semanticFingerprintMatches')::boolean
+           and (v_checks->>'storedSnapshotFingerprintValid')::boolean then
           v_state := 'verified';
           v_reason := 'case-audit-safe-response-observation-durable';
         else
