@@ -96,6 +96,16 @@ Layer 80 itself still does not invoke it.
 
 Known **missing** or **mismatched** evidence is not sent back through Layer 77 again because Layer 77 proofs are immutable and replay-safe. Re-running the verifier would only return the existing proof.
 
+### Layer 81 execution gate
+
+Layer 80 remains policy-only.
+
+After Layer 81, an admitted `run-independent-verification` decision can be executed only through:
+
+`foundation.execute_case_audit_overdue_verification_v1(...)`
+
+Direct `service_role` access to the underlying Layer-77 proof writer is revoked, so Layer-80 admission cannot be bypassed by calling Layer 77 directly.
+
 ## Explicitly prohibited responses
 
 Layer 80 always denies:
