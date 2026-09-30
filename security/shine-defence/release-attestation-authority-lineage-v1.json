@@ -1,6 +1,6 @@
 {
   "contract": "shine-defence/release-attestation-authority-lineage-v1",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "purpose": "Append-only audit lineage for immutable Shine Defence release-attestation authority rotations.",
   "workflow": {
     "repository": "doug-dotcom/ShineUniverse-shine-core",
@@ -15,22 +15,30 @@
       "activatedAt": "2026-09-30T06:58:39.000Z",
       "predecessorAuthoritySha": null,
       "reason": "Initial central reusable release-attestation authority.",
-      "promotionReceipt": null
+      "promotionReceipt": null,
+      "kind": "bootstrap",
+      "rollbackReceipt": null
     }
   ],
   "rules": [
     "Entries are append-only and sequence numbers are contiguous from 1.",
-    "Each successor names the immediately preceding authority SHA.",
+    "Each activation names the immediately preceding active authority SHA.",
     "Every authority SHA must resolve to a repository commit containing the declared reusable workflow path at the recorded workflow blob SHA.",
-    "Sequence 1 is the documented bootstrap authority and has no promotion receipt.",
-    "Every successor entry after sequence 1 must reference one approved authority-promotion receipt by exact path and Git blob SHA.",
-    "The referenced promotion receipt must bind the immediate predecessor, successor authority SHA and successor workflow blob SHA before activation.",
+    "Sequence 1 is the documented bootstrap authority and has no promotion or rollback receipt.",
+    "A promotion activation introduces a previously unused authority SHA and references one approved promotion receipt by exact path and Git blob SHA.",
+    "A rollback activation may reuse only an authority SHA that appeared earlier in lineage, must reuse that earlier entry's exact workflow blob SHA and references one approved rollback receipt by exact path and Git blob SHA.",
+    "Promotion and rollback receipts are mutually exclusive for one lineage entry.",
+    "Rollback appends reactivation history; it never removes, rewrites or hides the failed authority generation.",
     "The final lineage entry must exactly match the active shared runtime authority binding and canonical authority contract.",
-    "Authority rotation is fail-closed: a new authority cannot become active unless lineage, workflow blob, promotion receipt and runtime/contract bindings validate together."
+    "Authority change is fail-closed unless lineage, workflow blob, required authorization receipt and runtime/contract bindings validate together."
   ],
   "promotionGate": {
     "contractPath": "security/shine-defence/release-attestation-authority-promotion-v1.json",
     "receiptDirectory": "security/shine-defence/release-attestation-authority-promotions",
     "bootstrapSequence": 1
+  },
+  "rollbackGate": {
+    "contractPath": "security/shine-defence/release-attestation-authority-rollback-v1.json",
+    "receiptDirectory": "security/shine-defence/release-attestation-authority-rollbacks"
   }
 }
