@@ -1,6 +1,6 @@
 {
   "contract": "shine-defence/github-actions-oidc-verifier-v1",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "purpose": "Single canonical GitHub Actions OIDC verification boundary for Foundation and Shine Defence runtime ingestion paths.",
   "issuer": "https://token.actions.githubusercontent.com",
   "signing": {
@@ -15,10 +15,13 @@
       "iss",
       "aud",
       "exp",
+      "iat",
       "repository",
       "ref",
       "workflow_ref",
-      "event_name"
+      "event_name",
+      "run_id",
+      "run_attempt"
     ],
     "clockSkewSeconds": 30,
     "repositoryFormat": "owner/repository",
@@ -26,7 +29,9 @@
       "audience",
       "repository/ref/workflow when supplied",
       "allowed event names"
-    ]
+    ],
+    "maxTokenAgeSeconds": 600,
+    "runIdentity": "run_id + run_attempt are mandatory decimal strings and feed the replay-binding layer."
   },
   "consumers": [
     "foundation/runtime/defence-reattest/index.ts",
@@ -41,6 +46,8 @@
     "Unknown signing keys trigger one forced refresh so normal GitHub signing-key rotation does not require a deployment.",
     "An unknown key after refresh fails closed.",
     "Audience, workflow, repository/ref and event restrictions remain consumer policy and are never weakened by the shared verifier.",
+    "Tokens older than the bounded issued-at freshness window are rejected even if their expiry claim has not yet elapsed.",
+    "run_id and run_attempt are mandatory verified claims before any replay-binding decision is made.",
     "The verifier returns bounded identity metadata only; it does not return the raw token."
   ]
 }

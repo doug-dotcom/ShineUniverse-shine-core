@@ -1,5 +1,6 @@
 import postgres from 'npm:postgres@3.4.9';
 import {verifyGithubActionsOidc} from '../_shared/github-actions-oidc-v1.mjs';
+import {bindGithubOidcOperation,oidcReplayConflict} from '../_shared/github-oidc-operation-v1.mjs';
 
 const AUDIENCE='shine-defence-provider-ingest';
 const EXPECTED_REPOSITORY='doug-dotcom/ShineUniverse-shine-core';
@@ -90,6 +91,18 @@ Deno.serve(async(req:Request)=>{
     if(!Array.isArray(body.observations)||body.observations.length>MAX_OBSERVATIONS) return jsonResponse(400,{error:'invalid-observation-count'});
     const observations=body.observations.map(validateObservation);
 
+    const oidcBinding=await bindGithubOidcOperation({
+      sql:rawSql,
+      identity,
+      audience:AUDIENCE,
+      operation:'provider-snapshot',
+      targetKey:'estate-provider-snapshot',
+      request:body
+    });
+    if(oidcReplayConflict(oidcBinding)){
+      return jsonResponse(409,{error:'oidc-replay-conflict',binding:oidcBinding});
+    }
+
     const now=new Date();
     const observedAt=now.toISOString();
     const validUntil=new Date(now.getTime()+2*60*60*1000).toISOString();
@@ -132,7 +145,8 @@ Deno.serve(async(req:Request)=>{
       contract:'shine-defence/provider-ingest-v1',
       accepted,
       observedAt,
-      validUntil
+      validUntil,
+      oidcBinding:{status:oidcBinding.status,bindingId:oidcBinding.bindingId}
     });
   }catch(error){
     const message=error instanceof Error?error.message:'provider-ingest-error';

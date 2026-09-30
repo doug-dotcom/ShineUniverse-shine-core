@@ -522,14 +522,26 @@
     {
       "id": "github-actions-oidc-verifier",
       "path": "security/shine-defence/github-actions-oidc-verifier-v1.json",
-      "version": "1.0.0",
-      "blobSha": "6a0567f08f0df0cd074c6c14db4b2d3984a5dbd9"
+      "version": "1.1.0",
+      "blobSha": "c627f23efb6af446dcd098fccbb63dee6a89c48b"
     },
     {
       "id": "github-actions-oidc-verifier-runtime",
       "path": "foundation/runtime/_shared/github-actions-oidc-v1.mjs",
+      "version": "1.1.0",
+      "blobSha": "8565e6885c08fceff939f5e364a315960a2afe1c"
+    },
+    {
+      "id": "github-oidc-operation-replay",
+      "path": "security/shine-defence/github-oidc-operation-replay-v1.json",
       "version": "1.0.0",
-      "blobSha": "216b51c05e3ed57e017dd250049d6d7fcd2c1b12"
+      "blobSha": "161081bf5e0037edf426815cbb30f81287542330"
+    },
+    {
+      "id": "github-oidc-operation-replay-runtime",
+      "path": "foundation/runtime/_shared/github-oidc-operation-v1.mjs",
+      "version": "1.0.0",
+      "blobSha": "34432b10b5defefafec41c066cf2d50b1fb4d381"
     }
   ]
 }
