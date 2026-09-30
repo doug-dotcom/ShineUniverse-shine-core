@@ -702,4 +702,20 @@ begin
 end;
 $l82_append_only$;
 
+do $layer82_verification_fk_index$
+begin
+  if not exists (
+    select 1
+    from pg_indexes
+    where schemaname='foundation'
+      and tablename='case_audit_verify_exec_reconciliations'
+      and indexname='case_audit_verify_reconcile_verification_idx'
+      and indexdef ilike '%(verification_id)%'
+  ) then
+    raise exception 'Layer 82 verification foreign key lacks covering index';
+  end if;
+end;
+$layer82_verification_fk_index$;
+
+
 rollback;
