@@ -1,0 +1,76 @@
+{
+  "contract": "shine-foundation/case-audit-verification-incident-lifecycle-v1",
+  "version": "1.0.0",
+  "layer": 79,
+  "purpose": "Escalate persistent Layer-78 verification-coverage GAP or INVALID states into append-only operational incident evidence without automatically verifying executions, rerunning targets, repairing durable evidence, or mutating authoritative truth.",
+  "source": "foundation.get_case_audit_safe_response_verification_coverage_v1",
+  "fingerprint": "foundation.case_audit_verify_incident_fingerprint_v1",
+  "ledger": "foundation.case_audit_verify_incident_events",
+  "currentStateView": "foundation.current_case_audit_verify_incident_state",
+  "activeIncidentsView": "foundation.current_case_audit_verify_incidents",
+  "watchesView": "foundation.current_case_audit_verify_watches",
+  "sentinel": "foundation.run_case_audit_verify_incident_sentinel_v1",
+  "summary": "foundation.get_case_audit_verify_incident_summary_v1",
+  "sourceStates": [
+    "idle",
+    "normal",
+    "pending",
+    "gap",
+    "invalid"
+  ],
+  "incidentStates": [
+    "detected",
+    "opened",
+    "changed",
+    "recovered"
+  ],
+  "incidentSourceStates": [
+    "gap",
+    "invalid"
+  ],
+  "nonIncidentSourceStates": [
+    "idle",
+    "normal",
+    "pending"
+  ],
+  "persistenceThresholdSeconds": 300,
+  "verificationGraceSeconds": 300,
+  "severityMapping": {
+    "gap": "critical",
+    "invalid": "critical",
+    "idle": "non-incident",
+    "normal": "non-incident",
+    "pending": "non-incident"
+  },
+  "hostedSentinel": {
+    "engine": "pg_cron",
+    "jobName": "shine-foundation-case-audit-verify-incident-5m",
+    "cadence": "2,7,12,17,22,27,32,37,42,47,52,57 * * * *"
+  },
+  "readerRoles": [
+    "foundation_runtime",
+    "service_role"
+  ],
+  "invariants": {
+    "pendingWithinGraceNeverCreatesIncident": true,
+    "firstGapOrInvalidSampleCreatesWatch": true,
+    "persistenceRequiredBeforeOpen": true,
+    "unchangedOpenEvidenceDoesNotAppendNoise": true,
+    "materialEvidenceChangeAppendsChangedEvent": true,
+    "nonIncidentCoverageRecoversWatchOrIncident": true,
+    "fingerprintExcludesEvaluationTimeAndAgeOnlyNoise": true,
+    "directIncidentInsertDeniedToServiceRole": true,
+    "transitionHelperNotCallableByServiceRole": true,
+    "sentinelCallableOnlyByServiceRole": true,
+    "gatewayReadsSummaryOnlyViaFoundationRuntimeInheritance": true,
+    "gatewayReceivesNoDirectSummaryGrant": true,
+    "ownerDenied": true,
+    "defenceDenied": true,
+    "browserRolesDenied": true,
+    "automaticVerification": false,
+    "automaticRepair": false,
+    "targetReexecuted": false,
+    "mutatesAuthoritativeTruth": false,
+    "mutatesIncidentHistory": false
+  }
+}
