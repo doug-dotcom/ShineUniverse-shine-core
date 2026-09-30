@@ -26,7 +26,7 @@ as $layer81_policy_fp$
           'targetExecutionPolicyFingerprint',
             p_target->>'executionPolicyFingerprint',
           'targetRequestedAt',p_target->'executionRequestedAt',
-          'targetAgeSeconds',p_target->'executionAgeSeconds',
+          'verificationGraceSeconds',p_target->'verificationGraceSeconds',
           'targetVerificationState',p_target->>'verificationState',
           'incidentState',p_decision->>'incidentState',
           'causeClass',p_decision->>'causeClass',
