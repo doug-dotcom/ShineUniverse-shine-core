@@ -118,6 +118,7 @@ begin
   for v_rec in
     select
       h.*,
+      h.response_plan_fingerprint as handoff_response_plan_fingerprint,
       r.response_id,
       r.response_state,
       r.incident_event_id as response_incident_event_id,
@@ -125,7 +126,7 @@ begin
       r.owner_service_id as response_owner_service_id,
       r.owner_component as response_owner_component,
       r.handoff_sha256 as response_handoff_sha256,
-      r.response_plan_fingerprint as response_plan_fingerprint,
+      r.response_plan_fingerprint as response_response_plan_fingerprint,
       r.response as response_doc,
       r.response_sha256,
       r.responded_at,
@@ -214,16 +215,9 @@ begin
         and v_rec.response_owner_service_id is not distinct from v_rec.owner_service_id
         and v_rec.response_owner_component is not distinct from v_rec.owner_component
         and v_rec.response_handoff_sha256 is not distinct from v_rec.handoff_sha256
-        and v_rec.response_plan_fingerprint is not distinct from v_rec.response_plan_fingerprint
+        and v_rec.response_response_plan_fingerprint is not distinct from
+            v_rec.handoff_response_plan_fingerprint
       );
-
-    -- response_plan_fingerprint name collision above is resolved by explicit comparison below.
-    if v_rec.response_id is not null then
-      v_response_binding :=
-        v_response_binding
-        and v_rec.response_plan_fingerprint is not distinct from
-            v_rec.response_plan_fingerprint;
-    end if;
 
     v_evidence_binding :=
       v_rec.evidence_return_id is null
@@ -237,7 +231,7 @@ begin
         and v_rec.evidence_handoff_sha256 is not distinct from v_rec.handoff_sha256
         and v_rec.evidence_response_sha256 is not distinct from v_rec.response_sha256
         and v_rec.evidence_response_plan_fingerprint is not distinct from
-            v_rec.response_plan_fingerprint
+            v_rec.handoff_response_plan_fingerprint
       );
 
     v_verification_binding :=
