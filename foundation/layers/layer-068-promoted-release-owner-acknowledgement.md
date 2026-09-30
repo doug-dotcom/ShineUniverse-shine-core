@@ -1,6 +1,6 @@
 # Foundation Layer 68 — Shine Core owner acknowledgement
 
-**Status:** IMPLEMENTED — CI and production verification pending  
+**Status:** LIVE — CI green, isolated Shine Core owner inbox deployed and production capability boundary verified  
 **Scope:** require explicit Shine Core ownership acknowledgement for current promotion-trust handoffs without granting repair authority
 
 Layer 67 converts persistent promotion-trust incidents into owned Shine Core work.
@@ -65,6 +65,10 @@ Recovery therefore does not erase acknowledgement history, but it prevents old o
 
 ## Acceptance coverage
 
+Full Foundation CI run `36679304319` completed successfully. Both Foundation jobs passed, the Layer-68 acknowledgement tests passed, and every downstream Shine Defence acceptance step remained green.
+
+The commit was rebased onto concurrent Defence immutable-GitHub-principal work with a normal non-fast-forward retry; no force push or concurrent overwrite was used.
+
 CI proves:
 
 - existing Shine Core role posture remains least privilege;
@@ -79,6 +83,52 @@ CI proves:
 - owner has no direct table access;
 - service role cannot respond or directly insert;
 - response history is append-only.
+
+## Production proof
+
+Layer 68 is deployed in the Shine Foundation Supabase project.
+
+Production is healthy and currently contains no promotion-trust handoff to acknowledge, so the live owner inbox correctly reports:
+
+- pending count: **0**
+- visible count: **0**
+- has more: **false**
+- owner service: `foundation.gateway`
+- owner component: `shine-core`
+- responder role: `shine_core_control_plane`
+- approval granted: **false**
+- execution authority granted: **false**
+- executes action: **false**
+
+No synthetic production incident or fake handoff was created merely to exercise the response path.
+
+Capability proof:
+
+- `shine_core_control_plane` exists: **yes**
+- login capability: **no**
+- role inheritance: **no**
+- RLS bypass: **no**
+- PostgreSQL control plane may explicitly assume role: **yes**
+- Gateway may assume role: **no**
+- Foundation runtime may assume role: **no**
+- owner can read bounded inbox: **yes**
+- owner can execute acknowledgement function: **yes**
+- Gateway can acknowledge: **no**
+- Foundation runtime can acknowledge: **no**
+- service role can acknowledge: **no**
+- Shine Defence runtime can acknowledge: **no**
+- owner direct Layer-67 handoff SELECT: **no**
+- owner direct response-ledger SELECT: **no**
+- owner direct response-ledger INSERT: **no**
+- service role direct response-ledger INSERT: **no**
+- production response receipt count: **0**
+
+Supabase advisors:
+
+- no Layer-68-specific security finding;
+- no Layer-68 unindexed foreign-key finding;
+- both new Layer-68 response-ledger indexes currently appear as `unused_index` INFO because healthy production has zero response rows. They are retained for incident/owner response lookup paths once acknowledgements exist.
+- the remaining unindexed-foreign-key INFO belongs to concurrent GitHub-OIDC replay-alert work, not Layer 68.
 
 ## Invariant
 
