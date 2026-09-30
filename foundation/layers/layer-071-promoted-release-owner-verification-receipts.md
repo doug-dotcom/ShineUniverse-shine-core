@@ -1,6 +1,6 @@
 # Foundation Layer 71 — Shine Core verification outcome receipts
 
-**Status:** IMPLEMENTED — CI and production verification pending  
+**Status:** LIVE — CI green, owner-only verification receipt projection deployed and healthy production baseline verified  
 **Scope:** return Foundation's independent Layer-70 conclusion to the Shine Core owner through a bounded read-only receipt
 
 Layers 67–70 now form a complete work-and-proof chain:
@@ -113,6 +113,8 @@ Response counts:
 
 ## Acceptance coverage
 
+Full Foundation CI run `36688868807` completed successfully. Foundation contracts passed, persistence completed the full chain, Layer-71 apply/tests passed, and all downstream Shine Defence acceptance checks remained green.
+
 CI proves:
 
 - Shine Core can read one verified receipt;
@@ -122,6 +124,43 @@ CI proves:
 - after recovery/staleness the same verified historical receipt remains visible;
 - invalid Layer-70 proof status hides content and increments invalidCount;
 - receipt projection changes no trust, incident, approval or execution state.
+
+## Production proof
+
+Layer 71 is deployed in the Shine Foundation Supabase project as:
+
+`foundation_layer_071_promoted_release_owner_verification_receipts`
+
+Healthy production currently has no Layer-70 verification rows, so the live owner receipt projection correctly reports:
+
+- receipt count: **0**
+- visible count: **0**
+- invalid count: **0**
+- has more: **false**
+- owner service: `foundation.gateway`
+- owner component: `shine-core`
+- reader role: `shine_core_control_plane`
+- owner outcome accepted as promotion trust: **false**
+- incident closure performed: **false**
+- promotion trust changed by receipt: **false**
+- release-truth mutation performed: **false**
+- approval granted: **false**
+- execution authority granted: **false**
+- executes action: **false**
+
+No synthetic Layer-70 proof was created in production just to populate the receipt feed.
+
+Privilege proof:
+
+- Shine Core owner can execute receipt projection: **yes**
+- service role can execute owner projection: **no**
+- Foundation runtime can execute owner projection: **no**
+- Gateway can execute owner projection: **no**
+- Shine Defence runtime can execute owner projection: **no**
+- anonymous/authenticated roles can execute owner projection: **no**
+- Shine Core direct Layer-70 verification-ledger SELECT: **no**
+
+Supabase advisors show no Layer-71-specific security or performance finding. Layer 71 adds no table or index; existing estate-wide notices remain unrelated to this receipt projection.
 
 ## Invariant
 
