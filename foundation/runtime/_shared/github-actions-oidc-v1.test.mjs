@@ -187,8 +187,37 @@ test('all Foundation OIDC consumers delegate cryptography to the shared verifier
     assert.match(source,/verifyGithubActionsOidc\(auth\.slice\(7\),OIDC_POLICY\)/,path+' must apply an explicit local claim policy');
     assert.match(source,/github-oidc-operation-v1\.mjs/,path+' must import the shared OIDC replay binder');
     assert.match(source,/bindGithubOidcOperation\(/,path+' must bind verified run identity to request semantics');
+    assert.match(source,/expectedRepositoryOwner:'doug-dotcom'/,path+' must pin the repository owner name');
+    assert.match(source,/expectedRepositoryOwnerId:'225530237'/,path+' must pin the immutable repository owner id');
+    assert.match(source,/expectedRefType:'branch'/,path+' must restrict OIDC to branch refs');
+    assert.match(source,/expectedRunnerEnvironment:'github-hosted'/,path+' must reject self-hosted runner tokens');
+    assert.match(source,/subjectMode:'repository-ref'/,path+' must enforce repository-ref subject semantics');
     assert.doesNotMatch(source,/token\.actions\.githubusercontent\.com/,path+' must not own issuer discovery');
     assert.doesNotMatch(source,/crypto\.subtle\.verify/,path+' must not implement JWT signature verification');
     assert.doesNotMatch(source,/getJwks|oidcMetadataPromise|jwksPromise/,path+' must not own JWKS caching');
+  }
+});
+
+test('dynamic release consumers bind signed immutable repository ids to Foundation target metadata',()=>{
+  const root=fileURLToPath(new URL('../../../',import.meta.url));
+  const release=readFileSync(root+'foundation/runtime/defence-release-head-ingest/index.ts','utf8');
+  const rollback=readFileSync(root+'foundation/runtime/defence-rollback-readiness/index.ts','utf8');
+  for(const [name,source] of [['release-head',release],['rollback',rollback]]){
+    assert.match(source,/sourceRepositoryId/,name+' must load immutable repository id from target metadata');
+    assert.match(source,/sourceRepositoryOwnerId/,name+' must load immutable owner id from target metadata');
+    assert.match(source,/identity\.repositoryId/,name+' must compare the signed repository id');
+    assert.match(source,/identity\.repositoryOwnerId/,name+' must compare the signed owner id');
+  }
+});
+
+test('fixed Core OIDC consumers pin the immutable Core repository id',()=>{
+  const root=fileURLToPath(new URL('../../../',import.meta.url));
+  for(const path of [
+    'foundation/runtime/defence-provider-ingest/index.ts',
+    'foundation/runtime/deployment-receipt-ingest/index.ts',
+    'foundation/runtime/defence-reattest/index.ts'
+  ]){
+    const source=readFileSync(root+path,'utf8');
+    assert.match(source,/expectedRepositoryId:'1072897952'/,path+' must pin Core repository id');
   }
 });
