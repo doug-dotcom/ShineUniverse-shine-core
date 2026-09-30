@@ -1,0 +1,111 @@
+name: Shine Defence Authority State
+run-name: "Defence Authority State • ${{ github.sha }}"
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/shine-defence-authority-state.yml'
+      - 'security/shine-defence/canonical-registry-v1.json'
+      - 'security/shine-defence/release-attestation-authority-v1.json'
+      - 'security/shine-defence/release-attestation-authority-lineage-v1.json'
+      - 'security/shine-defence/release-attestation-authority-promotion-v1.json'
+      - 'security/shine-defence/release-attestation-authority-rollback-v1.json'
+      - 'security/shine-defence/release-attestation-authority-promotions/**'
+      - 'security/shine-defence/release-attestation-authority-rollbacks/**'
+      - 'foundation/runtime/_shared/shine-defence-release-attestation-authority-v1.mjs'
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Verify canonical Defence registry
+        run: node security/shine-defence/integration-kit/verify-registry-v1.mjs
+
+      - name: Self-test authority lineage verifier
+        run: node security/shine-defence/integration-kit/verify-release-attestation-authority-lineage-v1.mjs --self-test
+
+      - name: Verify active authority lineage
+        run: node security/shine-defence/integration-kit/verify-release-attestation-authority-lineage-v1.mjs
+
+      - name: Build signed authority activation payload
+        env:
+          PUBLISHER_COMMIT_SHA: ${{ github.sha }}
+        run: |
+          node <<'NODE'
+          const fs=require('node:fs');
+          const {execFileSync}=require('node:child_process');
+
+          const lineagePath='security/shine-defence/release-attestation-authority-lineage-v1.json';
+          const authorityPath='security/shine-defence/release-attestation-authority-v1.json';
+          const lineage=JSON.parse(fs.readFileSync(lineagePath,'utf8'));
+          const authority=JSON.parse(fs.readFileSync(authorityPath,'utf8'));
+          const tip=lineage.entries.at(-1);
+          if(!tip) throw new Error('authority lineage has no tip');
+
+          const kind=tip.kind||'bootstrap';
+          let restoreFromSequence=null;
+          if(kind==='rollback'){
+            const ref=tip.rollbackReceipt;
+            if(!ref?.path) throw new Error('rollback receipt reference missing');
+            const receipt=JSON.parse(fs.readFileSync(ref.path,'utf8'));
+            restoreFromSequence=receipt.restoreFromSequence;
+          }
+
+          const blob=path=>execFileSync('git',['hash-object',path],{encoding:'utf8'}).trim();
+          const body={
+            contract:'shine-defence/attestation-authority-activation-v1',
+            schemaVersion:'1.0.0',
+            publisherCommitSha:process.env.PUBLISHER_COMMIT_SHA,
+            lineageBlobSha:blob(lineagePath),
+            authorityContractBlobSha:blob(authorityPath),
+            activation:{
+              lineageSequence:tip.sequence,
+              activationKind:kind,
+              authoritySha:tip.authoritySha,
+              authorityRef:authority.enforcement.requiredJobWorkflowRef,
+              workflowBlobSha:tip.workflowBlobSha,
+              activatedAt:tip.activatedAt,
+              predecessorAuthoritySha:tip.predecessorAuthoritySha,
+              restoreFromSequence,
+              promotionReceipt:tip.promotionReceipt??null,
+              rollbackReceipt:tip.rollbackReceipt??null
+            }
+          };
+
+          if(body.activation.authoritySha!==authority.reusableWorkflow.authoritySha){
+            throw new Error('lineage tip diverges from authority contract');
+          }
+          fs.writeFileSync('/tmp/shine-defence-authority-state.json',JSON.stringify(body,null,2)+'\n');
+          NODE
+
+      - name: Request GitHub OIDC token
+        env:
+          ACTIONS_ID_TOKEN_REQUEST_TOKEN: ${{ env.ACTIONS_ID_TOKEN_REQUEST_TOKEN }}
+          ACTIONS_ID_TOKEN_REQUEST_URL: ${{ env.ACTIONS_ID_TOKEN_REQUEST_URL }}
+        run: |
+          OIDC_JSON="$(curl -fsSL             -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN"             "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=shine-defence-authority-state")"
+          printf '%s' "$OIDC_JSON" | python3 -c 'import json,sys; print(json.load(sys.stdin)["value"])'             > "$RUNNER_TEMP/shine-defence-authority-state-oidc"
+
+      - name: Publish authority state to Foundation
+        run: |
+          OIDC_TOKEN="$(cat "$RUNNER_TEMP/shine-defence-authority-state-oidc")"
+          HTTP_STATUS="$(curl -sS             -o "$RUNNER_TEMP/shine-defence-authority-state-response.json"             -w '%{http_code}'             -X POST             -H "Authorization: Bearer $OIDC_TOKEN"             -H "Content-Type: application/json"             --data-binary @/tmp/shine-defence-authority-state.json             https://sjpxqeyewahraxvidvcc.supabase.co/functions/v1/defence-attestation-authority-ingest)"
+          cat "$RUNNER_TEMP/shine-defence-authority-state-response.json"
+          if [ "$HTTP_STATUS" != "200" ]; then
+            exit 1
+          fi
