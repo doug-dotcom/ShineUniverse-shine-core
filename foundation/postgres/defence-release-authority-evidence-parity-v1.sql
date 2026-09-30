@@ -1,6 +1,7 @@
 -- Shine Defence release authority-evidence parity hardening v1.
 -- Final admission evaluator: time-fresh source evidence is admissible only when
 -- its signed reusable-workflow authority equals the current Defence authority.
+-- The full-estate overlay preserves the OIDC replay Sentinel and adds authority parity.
 
 create or replace function foundation.evaluate_defence_release_admission_v1(
   p_target_id text,
@@ -419,15 +420,13 @@ revoke all on function foundation.evaluate_defence_release_admission_v1(text,tim
 grant execute on function foundation.evaluate_defence_release_admission_v1(text,timestamptz)
   to shine_defence_runtime,service_role;
 
--- Shine Defence full-estate integration for rollback readiness v1.
-
 create or replace function foundation.get_defence_full_estate_summary_v1()
 returns jsonb
 language plpgsql
-stable
+volatile
 security definer
 set search_path = pg_catalog, foundation
-as $$
+as $full_estate_replay$
 declare
   v_estate jsonb;
   v_supabase jsonb;
@@ -437,8 +436,10 @@ declare
   v_admission jsonb;
   v_rollback jsonb;
   v_ladder jsonb;
+  v_oidc_replay jsonb;
   v_authority_parity jsonb;
   v_state text;
+  v_evaluated_at timestamptz := clock_timestamp();
 begin
   v_estate := foundation.get_defence_estate_summary_v1();
   v_supabase := foundation.get_defence_supabase_runtime_receipt_summary_v1();
@@ -449,9 +450,11 @@ begin
   v_admission := foundation.get_defence_release_admission_summary_v1();
   v_rollback := foundation.get_defence_rollback_readiness_summary_v1();
   v_ladder := foundation.get_defence_rollback_ladder_v1();
+  v_oidc_replay := foundation.get_defence_github_oidc_replay_summary_v1(v_evaluated_at,86400);
 
   v_state := case
-    when v_estate->>'state'='fail'
+    when v_oidc_replay->>'state'='fail'
+      or v_estate->>'state'='fail'
       or v_supabase->>'state'='fail'
       or v_transitions->>'state'='fail'
       then 'fail'
@@ -470,7 +473,7 @@ begin
 
   return jsonb_build_object(
     'defenceFullEstateSummary','shine-defence/full-estate-summary-v1',
-    'schemaVersion','1.7.0',
+    'schemaVersion','1.8.0',
     'state',v_state,
     'estate',v_estate,
     'supabaseRuntimeReceipts',v_supabase,
@@ -481,10 +484,11 @@ begin
     'releaseAdmission',v_admission,
     'rollbackReadiness',v_rollback,
     'rollbackLadder',v_ladder,
-    'evaluatedAt',now()
+    'githubOidcReplay',v_oidc_replay,
+    'evaluatedAt',v_evaluated_at
   );
 end;
-$$;
+$full_estate_replay$;
 
 revoke all on function foundation.get_defence_full_estate_summary_v1()
   from public,anon,authenticated;
