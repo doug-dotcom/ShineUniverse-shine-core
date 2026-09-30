@@ -107,9 +107,11 @@ declare
   replay jsonb;
   status jsonb;
 begin
-  select h.handoff_id into hid
-  from foundation.foundation_promoted_release_owner_handoffs h
-  order by handoff_sequence desc limit 1;
+  hid:=(
+    foundation.get_foundation_promoted_release_owner_inbox_v1(
+      'production',25,now()
+    )->'items'->0->>'handoffId'
+  )::uuid;
 
   result:=foundation.return_foundation_promoted_release_owner_evidence_v1(
     hid,
