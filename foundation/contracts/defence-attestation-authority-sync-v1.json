@@ -1,6 +1,6 @@
 {
   "contract": "shine-defence/attestation-authority-sync-v1",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "purpose": "Synchronize the validated Core attestation-authority lineage tip into Foundation through a signed GitHub OIDC control-plane path.",
   "publisher": {
     "repository": "doug-dotcom/ShineUniverse-shine-core",
@@ -9,7 +9,8 @@
     "repositoryOwnerId": "225530237",
     "branch": "main",
     "workflowPath": ".github/workflows/shine-defence-authority-state.yml",
-    "audience": "shine-defence-authority-state"
+    "audience": "shine-defence-authority-state",
+    "schedule": "hourly heartbeat plus authority-related main-branch pushes"
   },
   "database": {
     "historyTable": "foundation.defence_attestation_authority_activations",
@@ -24,6 +25,15 @@
     "Rollback may restore only a previously recorded authority SHA at the exact original workflow blob and referenced source sequence.",
     "Activation timestamps strictly increase.",
     "Exact request replay is idempotent; conflicting replay is rejected by the GitHub OIDC operation binding.",
-    "The database history is append-only and the current authority is derived only from that history."
-  ]
+    "The database history is append-only and the current authority is derived only from that history.",
+    "Every successful publication emits an append-only post-validation sync receipt.",
+    "Promotion and rollback authority activation plus sync receipt commit atomically.",
+    "The hourly scheduled publisher refreshes sync proof without duplicating authority activation history."
+  ],
+  "heartbeat": {
+    "contractPath": "foundation/contracts/defence-attestation-authority-sync-heartbeat-v1.json",
+    "receiptTable": "foundation.defence_attestation_authority_sync_receipts",
+    "summaryFunction": "foundation.get_defence_attestation_authority_sync_summary_v1",
+    "maxAgeSeconds": 5400
+  }
 }

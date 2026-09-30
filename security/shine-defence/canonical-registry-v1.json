@@ -624,26 +624,44 @@
     {
       "id": "release-attestation-authority-sync-contract",
       "path": "foundation/contracts/defence-attestation-authority-sync-v1.json",
-      "version": "1.0.0",
-      "blobSha": "0dbe27aa6617d3fe2ada44edc4a13484a834bb45"
+      "version": "1.1.0",
+      "blobSha": "02e75c870fbc90ab258a3bd93880a8b45077db61"
     },
     {
       "id": "release-attestation-authority-sync-workflow",
       "path": ".github/workflows/shine-defence-authority-state.yml",
-      "version": "1.0.0",
-      "blobSha": "4badc9a7b22159563f3ff009d28b36804209c5e0"
+      "version": "1.1.0",
+      "blobSha": "e86a7da21b67e3ec5da668e6af3ad38c15d9bd73"
     },
     {
       "id": "release-attestation-authority-sync-runtime",
       "path": "foundation/runtime/defence-attestation-authority-ingest/index.ts",
-      "version": "1.0.0",
-      "blobSha": "666df99fc8501c387de0345293015a588640ee48"
+      "version": "1.1.0",
+      "blobSha": "a2c9bd2729ab107deb88b564657147644bf20616"
     },
     {
       "id": "release-attestation-authority-sync-db",
       "path": "foundation/postgres/defence-attestation-authority-sync-v1.sql",
       "version": "1.0.0",
       "blobSha": "e53c7e4b3913ec5a8b9f83f6cba2eff6fe0f4cf9"
+    },
+    {
+      "id": "release-attestation-authority-sync-heartbeat",
+      "path": "foundation/contracts/defence-attestation-authority-sync-heartbeat-v1.json",
+      "version": "1.0.0",
+      "blobSha": "ba79b5d2cb4c1dbb770ba181db0940e5c758e44a"
+    },
+    {
+      "id": "release-attestation-authority-sync-heartbeat-db",
+      "path": "foundation/postgres/defence-attestation-authority-sync-heartbeat-v1.sql",
+      "version": "1.0.0",
+      "blobSha": "aa660ede0ec3305d18e1ad09a8f1694bb9579867"
+    },
+    {
+      "id": "release-attestation-authority-sync-heartbeat-integration-db",
+      "path": "foundation/postgres/defence-attestation-authority-sync-heartbeat-integration-v1.sql",
+      "version": "1.0.0",
+      "blobSha": "7a6125314fd913e34c7c5a37881f96743ff3b675"
     }
   ]
 }
