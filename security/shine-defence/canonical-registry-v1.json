@@ -582,8 +582,8 @@
     {
       "id": "release-attestation-authority",
       "path": "security/shine-defence/release-attestation-authority-v1.json",
-      "version": "1.6.0",
-      "blobSha": "c7ccb96ad5f340907c51c60b52f51ccb33492d35"
+      "version": "1.7.0",
+      "blobSha": "d7656dc07757feb6693ccd6aab63c98a255f0550"
     },
     {
       "id": "release-attestation-authority-promotion",
@@ -606,8 +606,8 @@
     {
       "id": "release-attestation-live-authority-verifier",
       "path": "foundation/runtime/_shared/shine-defence-active-authority-v1.mjs",
-      "version": "1.0.0",
-      "blobSha": "9e7d689ff13e312db5ded982ac87cc34fc96c41f"
+      "version": "1.1.0",
+      "blobSha": "eed4c7c1f6adae253e289e2e76c7e7201572bf32"
     },
     {
       "id": "release-head-ingest-runtime",
