@@ -46,6 +46,7 @@ jobs:
       - run: deno check security/shine-defence/runtime-receipts/supabase-v1/index.ts
       - run: deno check foundation/runtime/defence-railway-events/index.ts
       - run: deno check foundation/runtime/defence-release-head-ingest/index.ts
+      - run: deno check foundation/runtime/defence-attestation-authority-ingest/index.ts
       - run: deno check foundation/runtime/deployment-receipt-ingest/index.ts
       - run: deno check foundation/runtime/defence-rollback-readiness/index.ts
 
@@ -438,6 +439,10 @@ jobs:
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-attestation-authority-state-v1.sql
       - name: Run Shine Defence active attestation authority state tests
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-attestation-authority-state-v1.test.sql
+      - name: Apply Shine Defence signed attestation authority synchronization
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-attestation-authority-sync-v1.sql
+      - name: Run Shine Defence signed attestation authority synchronization tests
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-attestation-authority-sync-v1.test.sql
       - name: Apply Shine Defence release transition coverage
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-release-transition-coverage-v1.sql
       - name: Run Shine Defence release transition coverage acceptance tests
