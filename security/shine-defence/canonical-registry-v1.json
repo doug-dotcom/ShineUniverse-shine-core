@@ -553,7 +553,7 @@
       "id": "github-oidc-replay-sentinel-db",
       "path": "foundation/postgres/defence-github-oidc-replay-sentinel-v1.sql",
       "version": "1.0.0",
-      "blobSha": "4be7f235e5313bda987672dc66e8f9fdae47c75c"
+      "blobSha": "e48c4bf482be9b4d3f731a0ae7efcaae8f84dca2"
     }
   ]
 }
