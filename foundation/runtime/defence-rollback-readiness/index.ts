@@ -7,7 +7,12 @@ const EXPECTED_WORKFLOW_PATH='.github/workflows/shine-defence-release-head.yml';
 const EXPECTED_WORKFLOW_BRANCH='main';
 const OIDC_POLICY={
   audience:AUDIENCE,
+  expectedRepositoryOwner:'doug-dotcom',
+  expectedRepositoryOwnerId:'225530237',
   expectedRef:'refs/heads/'+EXPECTED_WORKFLOW_BRANCH,
+  expectedRefType:'branch',
+  expectedRunnerEnvironment:'github-hosted',
+  subjectMode:'repository-ref',
   expectedWorkflow:{path:EXPECTED_WORKFLOW_PATH,branch:EXPECTED_WORKFLOW_BRANCH},
   allowedEvents:["schedule","workflow_dispatch","push"]
 };
@@ -36,11 +41,14 @@ const jsonResponse=(status:number,body:unknown)=>new Response(JSON.stringify(bod
   headers:{'content-type':'application/json','cache-control':'no-store'}
 });
 
-async function verifyTargetBinding(target:string,repo:string){
+async function verifyTargetBinding(target:string,identity:any){
   const rows=await sql`
     select
       provider,
-      metadata->>'sourceRepository' as source_repository
+      metadata->>'sourceRepository' as source_repository,
+      metadata->>'sourceRepositoryId' as source_repository_id,
+      metadata->>'sourceRepositoryOwner' as source_repository_owner,
+      metadata->>'sourceRepositoryOwnerId' as source_repository_owner_id
     from foundation.defence_estate_targets
     where target_id=${target}
       and lifecycle='active'
@@ -50,7 +58,10 @@ async function verifyTargetBinding(target:string,repo:string){
   return Boolean(
     row&&
     row.provider==='railway'&&
-    String(row.source_repository??'').toLowerCase()===repo.toLowerCase()
+    String(row.source_repository??'').toLowerCase()===String(identity.repository??'').toLowerCase()&&
+    String(row.source_repository_id??'')===String(identity.repositoryId??'')&&
+    String(row.source_repository_owner??'')===String(identity.repositoryOwner??'')&&
+    String(row.source_repository_owner_id??'')===String(identity.repositoryOwnerId??'')
   );
 }
 
@@ -70,7 +81,7 @@ Deno.serve(async(req:Request)=>{
 
     if(body?.action==='claim'){
       if(!targetId(body?.targetId)) return jsonResponse(400,{error:'invalid-target'});
-      if(!(await verifyTargetBinding(body.targetId,identity.repository))){
+      if(!(await verifyTargetBinding(body.targetId,identity))){
         return jsonResponse(401,{error:'rollback-oidc-source-mismatch'});
       }
       const claimBinding=await bindGithubOidcOperation({
@@ -112,7 +123,7 @@ Deno.serve(async(req:Request)=>{
       return jsonResponse(400,{error:'invalid-rollback-attestation'});
     }
 
-    if(!(await verifyTargetBinding(submission.targetId,identity.repository))){
+    if(!(await verifyTargetBinding(submission.targetId,identity))){
       return jsonResponse(401,{error:'rollback-oidc-source-mismatch'});
     }
 
@@ -156,7 +167,14 @@ Deno.serve(async(req:Request)=>{
           githubRunAttempt:identity.runAttempt,
           githubEvent:identity.eventName,
           githubActor:identity.actor,
-          githubRepository:identity.repository
+          githubRepository:identity.repository,
+          githubRepositoryId:identity.repositoryId,
+          githubRepositoryOwner:identity.repositoryOwner,
+          githubRepositoryOwnerId:identity.repositoryOwnerId,
+          githubRef:identity.ref,
+          githubWorkflowRef:identity.workflowRef,
+          githubWorkflowSha:identity.workflowSha,
+          githubRunnerEnvironment:identity.runnerEnvironment
         })}
       ) as result
     `;
