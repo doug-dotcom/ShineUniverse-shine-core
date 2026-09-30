@@ -1,6 +1,6 @@
 # Foundation Layer 70 — Independent promotion-trust verification
 
-**Status:** IMPLEMENTED — CI and production verification pending  
+**Status:** LIVE — CI green, independent verifier deployed and healthy production recovery independently confirmed  
 **Scope:** use owner evidence only as a trigger for a fresh Foundation-owned recovery verdict
 
 Layer 69 lets Shine Core explain what it observed.
@@ -127,6 +127,10 @@ Incident recovery remains governed by fresh Layer-64/65 canonical evidence.
 
 ## Acceptance coverage
 
+Full Foundation CI run `36686775843` completed successfully with both Foundation jobs green and persistence `197/197` complete. Layer 70 apply/tests passed and all downstream Shine Defence checks remained green.
+
+The original Layer-70 build was interrupted before its branch update completed. Its exact commit survived as an orphan, was transplanted onto the newer shared main without force-pushing, and the full suite was then rerun successfully.
+
 CI proves:
 
 - owner can report resolved while independent truth remains impaired;
@@ -141,6 +145,72 @@ CI proves:
 - owner/runtime/Gateway/Defence cannot run verification;
 - browser roles cannot call the independent evaluator;
 - verification history is append-only.
+
+## Production proof
+
+Layer 70 is deployed in the Shine Foundation Supabase project.
+
+The migration already existed when this room attempted promotion, recorded as:
+
+`foundation_layer_070_independent_promotion_trust_verification`
+
+at version timestamp `20260930075252`. Rather than retrying DDL against an existing table, the live schema/functions were verified directly against the tested contract.
+
+Current independent production evaluation:
+
+- verification state: **recovered**
+- reason: `independent-promotion-recovery-confirmed`
+- canonical recovery observed: **true**
+- canonical source truth PASS: **true**
+- promotion closure CLOSED/current/integrity verified: **true**
+- promoted release available: **true**
+- live observation NORMAL/fresh/matching: **true**
+- promotion-trust incident lifecycle NORMAL: **true**
+- active incidents: **0**
+- watches: **0**
+- owner evidence used as canonical input: **false**
+- owner outcome accepted as promotion trust: **false**
+- incident closure performed by verifier: **false**
+- authoritative truth mutated: **false**
+
+Current promoted release remains:
+
+`foundation:layer-58:1a8148a8`
+
+with promoted-release SHA-256:
+
+`ed4e6f4d7234161a6261fc98d58fd3bfd05ca35045fabfdc57dbf8c5ac51040f`
+
+Production contains **0 Layer-70 verification rows**, because there is currently no real Layer-69 owner evidence packet to consume.
+
+A runner call using a nonexistent evidence-return ID correctly returned:
+
+- status: **not-applicable**
+- reason: `promoted-release-owner-evidence-not-found`
+- independent verification: **true**
+- source evidence used as trigger only: **true**
+- owner outcome accepted as promotion trust: **false**
+- incident closure performed: **false**
+- authoritative truth mutation: **false**
+
+Privilege proof:
+
+- Foundation runtime may read/evaluate independent recovery: **yes**
+- service role may evaluate and run verification: **yes**
+- Shine Core owner may run verification: **no**
+- Foundation runtime may run verification: **no**
+- Gateway may run verification: **no**
+- Shine Defence may run verification: **no**
+- service role direct proof-ledger INSERT: **no**
+- Shine Core direct proof-ledger SELECT: **no**
+- anonymous/authenticated evaluator access: **no**
+
+Supabase advisors:
+
+- no Layer-70-specific security finding;
+- no Layer-70 unindexed foreign-key finding;
+- the three Layer-70 proof-ledger indexes currently appear as `unused_index` INFO because production has zero verification rows;
+- the remaining unindexed foreign-key INFO belongs to concurrent GitHub-OIDC replay-alert work, not Layer 70.
 
 ## Invariant
 
