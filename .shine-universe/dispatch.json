@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "request_id": "universe-go-0026",
+  "request_id": "universe-go-0027",
   "pass": 1,
   "scope": "core",
   "dispatch_group": "shine-core",
@@ -9,5 +9,5 @@
     "Concierge",
     "Defence"
   ],
-  "note": "One governed Shine Universe core pass from Chat Control."
+  "note": "One Shine end-to-end pass: exercise a real user journey across the governed core, including dependency failure, recovery, and truthful readiness."
 }
