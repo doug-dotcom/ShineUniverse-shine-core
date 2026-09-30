@@ -99,14 +99,15 @@ Coverage and health are deliberately separate. A system can have 100% proof cove
 
 ## Authority boundary
 
-Reader access:
+Declared reader access:
 
 - Foundation runtime;
 - service role.
 
+Foundation Gateway is already a member of `foundation_runtime`, so it can read this internal audit only through that established inheritance. Layer 78 grants Gateway no direct EXECUTE privilege.
+
 Denied:
 
-- Gateway;
 - Shine Core owner;
 - Shine Defence runtime;
 - browser roles.
