@@ -1,0 +1,54 @@
+{
+  "contract": "shine-foundation/promoted-release-case-audit-observation-v1",
+  "version": "1.0.0",
+  "layer": 73,
+  "purpose": "Continuously record Layer-72 promotion-trust case-audit state so semantic change, missing/stale observation evidence and live-vs-observed drift are durable and visible.",
+  "source": "foundation.get_foundation_promoted_release_case_audit_v1",
+  "ledger": "foundation.foundation_promoted_release_case_audit_observations",
+  "currentView": "foundation.current_foundation_promoted_release_case_audit_observation",
+  "recorder": "foundation.record_foundation_promoted_release_case_audit_observation_v1",
+  "summary": "foundation.get_foundation_promoted_release_case_audit_observation_summary_v1",
+  "auditStates": [
+    "idle",
+    "active-work",
+    "historical",
+    "gap",
+    "invalid"
+  ],
+  "summaryStates": [
+    "normal",
+    "gap",
+    "invalid",
+    "drift",
+    "unknown"
+  ],
+  "hostedObserver": {
+    "engine": "pg_cron",
+    "jobName": "shine-foundation-promoted-release-case-audit-observation-5m",
+    "cadence": "4,9,14,19,24,29,34,39,44,49,54,59 * * * *",
+    "defaultFreshnessSeconds": 600,
+    "layer72CaseLimit": 100,
+    "handoffGraceSeconds": 180
+  },
+  "invariants": {
+    "everyHostedCheckWritesAppendOnlyHeartbeat": true,
+    "semanticFingerprintIgnoresEvaluatedAt": true,
+    "semanticFingerprintIgnoresActiveIncidentAge": true,
+    "semanticFingerprintIgnoresVolatileIncidentSummary": true,
+    "caseChainContentRemainsFingerprintInput": true,
+    "changedFromPreviousExplicit": true,
+    "liveMismatchVisibleAsDrift": true,
+    "staleOrMissingObservationFailsVisible": true,
+    "gapAndInvalidRemainDistinct": true,
+    "directLedgerInsertDeniedToServiceRole": true,
+    "recorderServiceRoleOnly": true,
+    "foundationRuntimeReadOnly": true,
+    "gatewayReadInheritedViaFoundationRuntime": true,
+    "ownerDenied": true,
+    "defenceDenied": true,
+    "browserRolesDenied": true,
+    "automaticRepair": false,
+    "mutatesAuthoritativeTruth": false,
+    "mutatesIncidentHistory": false
+  }
+}
