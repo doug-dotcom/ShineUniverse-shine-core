@@ -1,6 +1,6 @@
 {
   "contract": "shine-defence/github-actions-oidc-verifier-v1",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "purpose": "Single canonical GitHub Actions OIDC verification boundary for Foundation and Shine Defence runtime ingestion paths.",
   "issuer": "https://token.actions.githubusercontent.com",
   "signing": {
@@ -17,21 +17,36 @@
       "exp",
       "iat",
       "repository",
+      "repository_id",
+      "repository_owner",
+      "repository_owner_id",
       "ref",
+      "ref_type",
       "workflow_ref",
+      "workflow_sha",
+      "runner_environment",
       "event_name",
       "run_id",
-      "run_attempt"
+      "run_attempt",
+      "sub"
     ],
     "clockSkewSeconds": 30,
     "repositoryFormat": "owner/repository",
     "policyBound": [
       "audience",
-      "repository/ref/workflow when supplied",
-      "allowed event names"
+      "repository/repository_id when supplied",
+      "repository owner name/id",
+      "ref/ref_type",
+      "workflow ref",
+      "runner environment",
+      "allowed event names",
+      "repository-ref subject shape"
     ],
     "maxTokenAgeSeconds": 600,
-    "runIdentity": "run_id + run_attempt are mandatory decimal strings and feed the replay-binding layer."
+    "runIdentity": "run_id + run_attempt are mandatory decimal strings and feed the replay-binding layer.",
+    "immutableRepositoryPrincipal": "repository_id + repository_owner_id",
+    "subjectCompatibility": "Accept exact legacy repo:<owner>/<repo>:ref:<ref> or exact immutable repo:<owner>@<ownerId>/<repo>@<repoId>:ref:<ref>.",
+    "workflowRevision": "workflow_sha is validated separately from sha and returned as the workflow revision."
   },
   "consumers": [
     "foundation/runtime/defence-reattest/index.ts",
@@ -48,6 +63,10 @@
     "Audience, workflow, repository/ref and event restrictions remain consumer policy and are never weakened by the shared verifier.",
     "Tokens older than the bounded issued-at freshness window are rejected even if their expiry claim has not yet elapsed.",
     "run_id and run_attempt are mandatory verified claims before any replay-binding decision is made.",
+    "repository_id and repository_owner_id are mandatory signed claims and may be pinned independently of mutable repository names.",
+    "Only the expected branch ref type and GitHub-hosted runner class are accepted by current Defence consumers.",
+    "The signed subject must exactly match either GitHub's legacy repository-ref subject or its immutable repository-ref subject.",
+    "workflow_sha is preserved from GitHub's dedicated signed claim; payload.sha is not substituted for workflow_sha.",
     "The verifier returns bounded identity metadata only; it does not return the raw token."
   ]
 }
