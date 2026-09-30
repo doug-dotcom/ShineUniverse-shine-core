@@ -1,5 +1,42 @@
 begin;
 
+insert into foundation.foundation_promoted_release_case_audit_incident_events(
+  event_id,incident_key,environment,domain,event_type,source_state,severity,
+  reason_code,evidence_fingerprint,case_audit_observation_id,
+  detection_started_at,persistence_threshold_seconds,persistence_seconds,
+  snapshot,occurred_at,evidence_ref
+)
+values(
+  '92000000-0000-4000-8000-000000000001'::uuid,
+  'production:promoted_release_case_audit','production',
+  'promoted_release_case_audit','opened','gap','critical',
+  'promotion-case-audit-gap',repeat('1',64),null,
+  now()-interval '30 minutes',300,1200,'{"test":"layer92"}'::jsonb,
+  now()-interval '20 minutes','test:layer92:case-audit-incident'
+);
+
+do $l92_seed_layer76$
+declare i integer;
+begin
+  for i in 1..5 loop
+    insert into foundation.case_audit_safe_response_exec_events(
+      event_id,environment,incident_event_id,action_key,cause_class,
+      policy_fingerprint,event_type,reason_code,decision_snapshot,
+      incident_snapshot,before_snapshot,action_result,after_snapshot,requested_at
+    )
+    values(
+      ('92000000-0000-4000-8000-'||lpad((100+i)::text,12,'0'))::uuid,
+      'production','92000000-0000-4000-8000-000000000001'::uuid,
+      'record-fresh-promotion-case-audit-observation','observer-freshness',
+      repeat(i::text,64),'executed','test-layer92-layer76',
+      '{}'::jsonb,'{}'::jsonb,'{}'::jsonb,
+      jsonb_build_object('status','recorded','test','layer92','chain',i),
+      '{}'::jsonb,now()-interval '25 minutes'
+    );
+  end loop;
+end;
+$l92_seed_layer76$;
+
 -- Five successful Layer-81 targets provide the FK spine for five Layer-86 claims.
 do $l92_seed_layer81$
 declare i integer;
@@ -14,12 +51,7 @@ begin
     values(
       ('92000000-0000-4000-8000-'||lpad((300+i)::text,12,'0'))::uuid,
       'production',
-      (
-        select event_id
-        from foundation.case_audit_safe_response_exec_events
-        order by event_sequence
-        limit 1
-      ),
+      ('92000000-0000-4000-8000-'||lpad((100+i)::text,12,'0'))::uuid,
       null,
       'run-independent-verification','verification-omission',
       repeat((i+1)::text,64),'executed',
