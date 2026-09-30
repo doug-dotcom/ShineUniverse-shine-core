@@ -1,6 +1,6 @@
 # Foundation Layer 81 — Bounded overdue-verification executor
 
-**Status:** IMPLEMENTED — CI and production verification pending  
+**Status:** LIVE — CI green and production verification complete  
 **Scope:** execute exactly one Layer-80-admitted independent verification without opening any broader repair or re-execution path
 
 Layer 80 can say:
@@ -157,6 +157,39 @@ Layer 81 does not:
 - auto-select or batch targets;
 - grant broader execution authority.
 
+## Production proof
+
+Layer 81 is deployed in the Shine Foundation Supabase project as migration:
+
+`20260930125254 — foundation_layer_081_bounded_overdue_verification_executor`
+
+Live production verification confirms:
+
+- executor ledger, executor and summary functions exist;
+- `service_role` can execute Layer 81;
+- `service_role` **cannot** execute the Layer-77 proof writer directly;
+- Foundation runtime, Gateway, Shine Core and Shine Defence cannot execute Layer 81;
+- service role cannot insert executor-ledger rows directly;
+- a real service-role call for a nonexistent target returns `not-applicable` / `target-not-found` without creating a ledger event;
+- current production executor ledger count: **0**;
+- current summary: **0 executed / 0 denied / 0 failed**;
+- summary explicitly reports direct Layer-77 service-role bypass as **false**;
+- Foundation runtime can read the summary;
+- Gateway can read only through existing `foundation_runtime` membership and receives no direct summary grant;
+- Shine Core and Shine Defence cannot read the summary;
+- no Layer-81-specific Supabase security advisor finding is present.
+
+CI proof:
+
+- full Foundation persistence/Defence chain: **445 steps green**;
+- contract job: green;
+- separate Defence workflow: green;
+- real-chain Layer-81 test proved an overdue successful Layer-76 receipt can create exactly one Layer-77 verification proof through Layer 81 after direct Layer-77 service-role access is revoked;
+- replay returns the first Layer-81 execution;
+- within-grace and unsuccessful Layer-76 targets are denied;
+- Layer-76 execution count and durable target-evidence count remain unchanged.
+
 ## Invariant
+
 
 > One admitted omission may trigger one bounded verification. Nothing else comes along for the ride.
