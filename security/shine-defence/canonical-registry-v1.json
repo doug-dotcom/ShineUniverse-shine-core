@@ -637,7 +637,7 @@
       "id": "release-attestation-authority-sync-db",
       "path": "foundation/postgres/defence-attestation-authority-sync-v1.sql",
       "version": "1.0.0",
-      "blobSha": "b50123c43626691bed00d963c9db4c89b2d3134d"
+      "blobSha": "6f20109da10d6842ce086df957bd768b5f11bdd5"
     }
   ]
 }
