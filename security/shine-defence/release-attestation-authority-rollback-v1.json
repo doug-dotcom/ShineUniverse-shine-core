@@ -1,0 +1,39 @@
+{
+  "contract": "shine-defence/release-attestation-authority-rollback-v1",
+  "version": "1.0.0",
+  "purpose": "Permit a previously trusted release-attestation authority to be reactivated only through explicit, byte-pinned rollback authorization.",
+  "receipt": {
+    "directory": "security/shine-defence/release-attestation-authority-rollbacks",
+    "contract": "shine-defence/release-attestation-authority-rollback-receipt-v1",
+    "version": "1.0.0",
+    "status": "approved"
+  },
+  "requiredBindings": [
+    "failedAuthoritySha",
+    "restoreAuthoritySha",
+    "restoreWorkflowBlobSha",
+    "restoreFromSequence",
+    "reviewerId",
+    "approvedAt",
+    "summary"
+  ],
+  "requiredReviewControls": [
+    "incidentConfirmed",
+    "restoreAuthorityReviewed",
+    "oidcCompatibilityReviewed",
+    "consumerCompatibilityReviewed"
+  ],
+  "rules": [
+    "Rollback never rewrites or truncates authority lineage; it appends a new rollback activation.",
+    "The restore authority must have appeared earlier in the validated lineage and must reuse that earlier entry's exact workflow blob SHA.",
+    "The rollback receipt binds the currently active failed authority, the prior authority being restored, its original lineage sequence and its exact workflow blob.",
+    "All required rollback review controls are explicitly true and approval occurs no later than reactivation.",
+    "The reviewer id is explicit and may not use the reserved shine-defence-core machine authority.",
+    "The receipt is referenced by exact repository path and Git blob SHA; receipt-byte changes invalidate the rollback entry.",
+    "A rollback activation does not erase the failed generation. Future forward promotions continue from the rollback activation as the current predecessor."
+  ],
+  "limitations": [
+    "Rollback authorization proves recorded approval and byte identity; it does not independently prove the real-world identity of the named reviewer.",
+    "Reactivation restores a previously trusted authority workflow; it does not roll back unrelated application or Foundation state."
+  ]
+}
