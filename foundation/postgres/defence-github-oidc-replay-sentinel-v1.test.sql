@@ -156,4 +156,20 @@ begin
 end;
 $$;
 
+do $binding_fk_index_test$
+begin
+  if not exists (
+    select 1
+    from pg_indexes
+    where schemaname='foundation'
+      and tablename='github_oidc_replay_alert_events'
+      and indexname='github_oidc_replay_alert_events_binding_id_idx'
+      and indexdef ilike '%(binding_id)%'
+  ) then
+    raise exception 'OIDC replay alert binding foreign key lacks covering index';
+  end if;
+end;
+$binding_fk_index_test$;
+
+
 rollback;

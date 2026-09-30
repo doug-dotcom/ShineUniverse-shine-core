@@ -558,8 +558,8 @@
     {
       "id": "github-oidc-replay-sentinel-db",
       "path": "foundation/postgres/defence-github-oidc-replay-sentinel-v1.sql",
-      "version": "1.0.0",
-      "blobSha": "e48c4bf482be9b4d3f731a0ae7efcaae8f84dca2"
+      "version": "1.1.0",
+      "blobSha": "9ba175ac07867bbc640362b700f821c644167bb0"
     },
     {
       "id": "github-oidc-replay-runtime-read-db",
@@ -618,8 +618,8 @@
     {
       "id": "rollback-readiness-runtime",
       "path": "foundation/runtime/defence-rollback-readiness/index.ts",
-      "version": "1.0.0",
-      "blobSha": "8a1c4ebe6ec0b68741b7eee80b7f0fe3003a4c73"
+      "version": "1.1.0",
+      "blobSha": "6d58b9fce5571dbd76c27f7cd4177bb49612b0ca"
     },
     {
       "id": "release-attestation-authority-lineage",
