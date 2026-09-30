@@ -433,6 +433,8 @@ jobs:
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-case-audit-verification-reconciliation-executor-v1.test.sql
       - name: Apply Foundation reconciliation-executor reconciliation
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-case-audit-reconciliation-execution-reconciliation-v1.sql
+      - name: Apply Foundation reconciliation-executor Layer-82 FK index
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-case-audit-reconciliation-execution-reconciliation-index-v1.sql
       - name: Run Foundation reconciliation-executor reconciliation tests
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-case-audit-reconciliation-execution-reconciliation-v1.test.sql
       - name: Apply Shine Defence Sentinel
