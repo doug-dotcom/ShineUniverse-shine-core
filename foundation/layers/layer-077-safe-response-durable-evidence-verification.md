@@ -1,6 +1,6 @@
 # Foundation Layer 77 — Safe-response durable evidence verification
 
-**Status:** IMPLEMENTED — CI and production verification pending  
+**Status:** LIVE — CI green and production verification complete  
 **Scope:** independently prove that a successful Layer-76 receipt is backed by the durable evidence it claims to have created
 
 Layer 76 records that a bounded safe target returned successfully.
@@ -137,6 +137,23 @@ CI proves:
 - service role cannot directly insert verification history;
 - runtime/Gateway/owner/Defence cannot run verification;
 - verification history is append-only.
+
+## Production proof
+
+Layer 77 is deployed in the Shine Foundation Supabase project as migration:
+
+`20260930114924 — foundation_layer_077_case_audit_safe_response_verification`
+
+Live verification confirms:
+
+- verification ledger and all three Layer-77 functions exist;
+- service role can run the bounded verifier;
+- Foundation runtime can independently evaluate/read but cannot write verification proofs;
+- Gateway, Shine Core and Shine Defence cannot run verification;
+- service role cannot directly insert verification rows;
+- a nonexistent execution ID returns `not-found / not-applicable` without mutation;
+- production currently contains no Layer-76 successful execution receipts, so the Layer-77 summary is truthfully empty: 0 verified, 0 missing, 0 mismatch;
+- Supabase security advisors report no Layer-77-specific finding.
 
 ## Invariant
 

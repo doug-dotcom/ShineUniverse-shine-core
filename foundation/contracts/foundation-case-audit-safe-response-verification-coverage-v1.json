@@ -1,0 +1,56 @@
+{
+  "contract": "shine-foundation/case-audit-safe-response-verification-coverage-v1",
+  "version": "1.0.0",
+  "layer": 78,
+  "purpose": "Continuously audit whether every successful Layer-76 safe-response execution receipt has exactly one structurally valid Layer-77 verification proof, distinguishing normal grace-period latency from overdue or failed verification coverage.",
+  "function": "foundation.get_case_audit_safe_response_verification_coverage_v1",
+  "sourceLedgers": [
+    "foundation.case_audit_safe_response_exec_events",
+    "foundation.case_audit_safe_response_verifications"
+  ],
+  "states": [
+    "idle",
+    "normal",
+    "pending",
+    "gap",
+    "invalid"
+  ],
+  "itemStates": [
+    "verified",
+    "pending",
+    "unverified",
+    "missing",
+    "mismatch",
+    "invalid"
+  ],
+  "invariants": {
+    "onlyExecutedLayer76ReceiptsRequireVerification": true,
+    "deniedAndFailedExecutionsExcluded": true,
+    "verificationGracePeriodExplicit": true,
+    "overdueUnverifiedReceiptsAreGaps": true,
+    "missingDurableEvidenceIsGap": true,
+    "mismatchedDurableEvidenceIsGap": true,
+    "verificationProofSha256Recomputed": true,
+    "proofColumnsMustMatchProofDocument": true,
+    "proofActionResultMustMatchExecutionReceipt": true,
+    "invalidProofDominatesOverallState": true,
+    "readOnlyAudit": true,
+    "targetReexecuted": false,
+    "historyRewritePerformed": false,
+    "releaseTruthMutationPerformed": false,
+    "incidentHistoryMutationPerformed": false,
+    "mutationPerformed": false,
+    "proofContractAndSchemaMustMatch": true,
+    "malformedProofFlagsClassifyInvalidWithoutThrowing": true,
+    "noAuthorityOrMutationFlagsMustRemainFalse": true,
+    "gatewayReadOccursOnlyViaEstablishedFoundationRuntimeInheritance": true,
+    "gatewayReceivesNoDirectCoverageGrant": true,
+    "ownerCannotReadCoverage": true,
+    "defenceCannotReadCoverage": true,
+    "browserRolesDenied": true
+  },
+  "readerRoles": [
+    "foundation_runtime",
+    "service_role"
+  ]
+}
