@@ -133,7 +133,7 @@ begin
   if v->>'available'<>'false'
      or v->>'state'<>'hold'
      or v->>'reasonCode'<>'promotion-closure-no-longer-current'
-     or v->'promotedRelease' is not null then
+     or v->'promotedRelease' <> 'null'::jsonb then
     raise exception 'Layer 61 stale closure must fail closed: %',v;
   end if;
 end;
