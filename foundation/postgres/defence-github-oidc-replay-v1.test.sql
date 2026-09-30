@@ -153,6 +153,32 @@ end;
 $$;
 
 
+do $authority_sync_test$
+declare
+  v jsonb;
+begin
+  select foundation.bind_github_oidc_operation_v1(
+    'doug-dotcom/ShineUniverse-shine-core',
+    'refs/heads/main',
+    'doug-dotcom/ShineUniverse-shine-core/.github/workflows/shine-defence-authority-state.yml@refs/heads/main',
+    '777777777',
+    '1',
+    'push',
+    'shine-defence-authority-state',
+    'attestation-authority-sync',
+    'authority:1:7bfd7fe685b4b2da814ac53dafdbfac2350591c8',
+    '{"contract":"shine-defence/attestation-authority-activation-v1","schemaVersion":"1.0.0"}'::jsonb
+  ) into v;
+
+  if v->>'status'<>'accepted-new'
+     or v->>'audience'<>'shine-defence-authority-state'
+     or v->>'operation'<>'attestation-authority-sync' then
+    raise exception 'authority-state sync purpose was not accepted: %',v;
+  end if;
+end;
+$authority_sync_test$;
+
+
 insert into foundation.defence_estate_targets(
   target_id,display_name,provider,provider_project_ref,environment_ref,service_ref,
   target_role,required_for_estate,allowed_runtime_states,lifecycle,metadata

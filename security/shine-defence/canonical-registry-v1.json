@@ -534,14 +534,20 @@
     {
       "id": "github-oidc-operation-replay",
       "path": "security/shine-defence/github-oidc-operation-replay-v1.json",
-      "version": "1.0.0",
-      "blobSha": "161081bf5e0037edf426815cbb30f81287542330"
+      "version": "1.1.0",
+      "blobSha": "e6dd2a063910b867dbc77a26aeeb84713066b178"
     },
     {
       "id": "github-oidc-operation-replay-runtime",
       "path": "foundation/runtime/_shared/github-oidc-operation-v1.mjs",
       "version": "1.0.0",
       "blobSha": "34432b10b5defefafec41c066cf2d50b1fb4d381"
+    },
+    {
+      "id": "github-oidc-operation-replay-db",
+      "path": "foundation/postgres/defence-github-oidc-replay-v1.sql",
+      "version": "1.1.0",
+      "blobSha": "6068d5d849ec2bd5b9d3a5bda1917792ea81d274"
     },
     {
       "id": "github-oidc-replay-sentinel",
