@@ -273,3 +273,6 @@ Deployment age comes from the exact latest observation. Pending-candidate age co
 
 
 An extension policy existing in Core does **not** automatically certify an app. Each app still needs local, testable evidence before claiming that profile.
+
+
+Shine Defence release-head and rollback attestation authority is centralised through `.github/workflows/shine-defence-release-attestation-v1.yml`. App repositories call that reusable workflow by immutable Core commit SHA, allowing OIDC `job_workflow_ref` / `job_workflow_sha` claims to identify the authority-bearing workflow independently of the caller workflow revision.
