@@ -176,7 +176,7 @@ begin
     raise exception 'authority-state sync purpose was not accepted: %',v;
   end if;
 end;
-$;
+$authority_sync_test$;
 
 
 insert into foundation.defence_estate_targets(
