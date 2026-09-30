@@ -26,8 +26,9 @@ insert into foundation.foundation_promoted_release_case_audit_observations(
 values(
   '77000000-0000-4000-8000-000000000010'::uuid,
   'production','idle',true,'normal',null,'not-required',
-  0,0,0,0,0,0,repeat('b',64),false,
-  '{"overallState":"idle","test":"layer77"}'::jsonb,now()-interval '2 minutes'
+  0,0,0,0,0,0,
+  foundation.foundation_promoted_release_case_audit_semantic_fingerprint_v1('{"overallState":"idle","test":"layer77"}'::jsonb),
+  false,'{"overallState":"idle","test":"layer77"}'::jsonb,now()-interval '2 minutes'
 );
 
 -- Promotion-trust incident needed by the durable Layer-67 handoff rows.
@@ -121,7 +122,8 @@ begin
       'schemaVersion','1.0.0','environment','production',
       'status','recorded-heartbeat',
       'observationId','77000000-0000-4000-8000-000000000010',
-      'semanticFingerprint',repeat('b',64)
+      'semanticFingerprint',
+        foundation.foundation_promoted_release_case_audit_semantic_fingerprint_v1('{"overallState":"idle","test":"layer77"}'::jsonb)
     ),
     '{}'::jsonb,now()-interval '1 minute'
   );
