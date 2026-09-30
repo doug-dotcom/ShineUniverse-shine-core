@@ -1,6 +1,6 @@
 # Foundation Layer 73 — Continuous promotion-trust case audit
 
-**Status:** IMPLEMENTED — CI and production verification pending  
+**Status:** LIVE — CI green, five-minute case-audit observer active and production heartbeat verified  
 **Scope:** turn the Layer-72 on-demand case audit into durable five-minute operational evidence
 
 Layer 72 answers:
@@ -96,6 +96,8 @@ The service role has no direct INSERT on the observation ledger.
 
 ## Acceptance coverage
 
+Full Foundation CI run `36692428928` completed successfully. Foundation contracts passed and persistence completed **203/203** with the Layer-73 apply/tests green and all downstream Shine Defence checks remaining green.
+
 CI proves:
 
 - first idle observation is a semantic change;
@@ -107,6 +109,63 @@ CI proves:
 - stale observation becomes unknown;
 - direct ledger mutation is append-only rejected;
 - recorder/read privileges follow the existing Foundation runtime role graph.
+
+## Production proof
+
+Layer 73 is deployed in the Shine Foundation Supabase project through:
+
+- `foundation_layer_073_promoted_release_case_audit_observation`
+- `foundation_layer_073_promoted_release_case_audit_observation_hosted`
+
+The hosted job is active:
+
+`shine-foundation-promoted-release-case-audit-observation-5m`
+
+Schedule:
+
+`4,9,14,19,24,29,34,39,44,49,54,59 * * * *`
+
+Current production observer state:
+
+- summary state: **normal**
+- reason: `promotion-case-audit-current`
+- live audit state: **idle**
+- structural integrity pass: **true**
+- incident state: **normal**
+- active incident handoff state: **not-required**
+- cases: **0**
+- invalid cases: **0**
+- observation fresh: **true**
+- observation matches live: **true**
+- recommended action: **none**
+
+Current semantic fingerprint:
+
+`f93cdd15fb315d5f730cc28a0744f60ee16e834060a91b9ecde1b2f949722df0`
+
+A subsequent explicit production heartbeat produced:
+
+- status: `recorded-heartbeat`
+- audit state: **idle**
+- structural integrity pass: **true**
+- changed from previous: **false**
+- semantic fingerprint unchanged
+
+That proves timestamp movement alone does not create false semantic churn.
+
+Production privilege proof:
+
+- Foundation runtime can read ledger: **yes**
+- Foundation runtime can read summary: **yes**
+- Foundation runtime can record: **no**
+- service role can record: **yes**
+- service role direct ledger INSERT: **no**
+- Gateway can read summary through existing `foundation_runtime` membership: **yes**
+- Shine Core owner can read summary: **no**
+- Shine Defence runtime can read summary: **no**
+- anonymous/authenticated roles can read summary: **no**
+
+Supabase advisors show no Layer-73-specific security finding and no Layer-73 unindexed foreign-key finding. Existing estate-wide advisor notices remain unrelated to this observer.
 
 ## Invariant
 
