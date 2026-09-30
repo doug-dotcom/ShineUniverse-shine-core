@@ -434,3 +434,7 @@ jobs:
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-github-oidc-replay-runtime-read-v1.sql
       - name: Run Shine Defence GitHub OIDC replay runtime read policy tests
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-github-oidc-replay-runtime-read-v1.test.sql
+      - name: Apply Shine Defence immutable GitHub OIDC principal binding
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-github-oidc-principal-binding-v1.sql
+      - name: Run Shine Defence immutable GitHub OIDC principal binding tests
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-github-oidc-principal-binding-v1.test.sql
