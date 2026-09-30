@@ -121,7 +121,8 @@ test('OIDC discovery cannot redirect JWKS trust to another origin',async()=>{
     now:()=>fixedNow
   });
   const key=await makeKey('kid-1');
-  await assert.rejects(()=>verifier.verify(signJwt(basePayload(),key),policy),/OIDC jwks_uri origin mismatch/);
+  const token=await signJwt(basePayload(),key);
+  await assert.rejects(()=>verifier.verify(token,policy),/OIDC jwks_uri origin mismatch/);
 });
 
 test('all Foundation OIDC consumers delegate cryptography to the shared verifier',()=>{
