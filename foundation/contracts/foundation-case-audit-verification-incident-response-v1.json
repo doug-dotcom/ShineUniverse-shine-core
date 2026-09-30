@@ -1,0 +1,65 @@
+{
+  "contract": "shine-foundation/case-audit-verification-incident-response-v1",
+  "version": "1.0.0",
+  "layer": 80,
+  "purpose": "Classify Layer-79 verification-coverage incident causes and admit only bounded read-only diagnosis or Layer-77 evidence verification, while explicitly denying safe-response reexecution, evidence fabrication/repair, verification-proof mutation, incident-history suppression and release-truth mutation.",
+  "causeReader": "foundation.get_case_audit_verify_incident_cause_v1",
+  "evaluator": "foundation.evaluate_case_audit_verify_incident_response_v1",
+  "plan": "foundation.get_case_audit_verify_incident_response_plan_v1",
+  "sourceIncident": "foundation.get_case_audit_verify_incident_summary_v1",
+  "sourceCoverage": "foundation.get_case_audit_safe_response_verification_coverage_v1",
+  "boundedVerifier": "foundation.run_case_audit_safe_response_verification_v1",
+  "causeClasses": [
+    "none",
+    "verification-proof-integrity",
+    "verification-omission",
+    "durable-evidence-missing",
+    "durable-evidence-mismatch",
+    "verification-coverage-gap",
+    "unknown"
+  ],
+  "allowedActions": {
+    "inspect-verification-coverage": "read-only",
+    "inspect-unverified-executions": "read-only-when-relevant",
+    "inspect-durable-evidence-chain": "read-only-when-relevant",
+    "inspect-verification-proof": "read-only-when-relevant",
+    "run-independent-verification": "layer-77-bounded-verifier-when-verification-omission"
+  },
+  "prohibitedActions": [
+    "rerun-safe-response",
+    "manufacture-durable-evidence",
+    "repair-durable-evidence",
+    "rewrite-verification-proof",
+    "delete-verification-proof",
+    "repair-verification-ledger",
+    "suppress-verification-coverage-incident",
+    "delete-verification-coverage-incident-history",
+    "mutate-release-truth"
+  ],
+  "readerRoles": [
+    "foundation_runtime",
+    "service_role"
+  ],
+  "invariants": {
+    "causeUsesCurrentLayer79IncidentAndLayer78Coverage": true,
+    "invalidProofCauseHasPriority": true,
+    "unverifiedExecutionCanAdmitBoundedLayer77Verifier": true,
+    "knownMissingEvidenceDoesNotAdmitReverification": true,
+    "knownMismatchDoesNotAdmitReverification": true,
+    "responsePolicyNeverExecutesAction": true,
+    "noAutomaticVerification": true,
+    "noAutomaticRepair": true,
+    "noVerificationProofRewrite": true,
+    "noHistoryRewrite": true,
+    "noAuthorityExpansion": true,
+    "safeResponseReexecutionProhibited": true,
+    "evidenceFabricationOrRepairProhibited": true,
+    "releaseTruthMutationProhibited": true,
+    "unknownActionsFailClosed": true,
+    "gatewayReadInheritedViaFoundationRuntime": true,
+    "gatewayReceivesNoDirectGrant": true,
+    "ownerDenied": true,
+    "defenceDenied": true,
+    "browserRolesDenied": true
+  }
+}
