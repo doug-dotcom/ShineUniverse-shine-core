@@ -1,5 +1,6 @@
 import postgres from 'npm:postgres@3.4.9';
 import {verifyGithubActionsOidc} from '../_shared/github-actions-oidc-v1.mjs';
+import {bindGithubOidcOperation,oidcReplayConflict} from '../_shared/github-oidc-operation-v1.mjs';
 
 const AUDIENCE='shine-defence-rollback-readiness';
 const EXPECTED_WORKFLOW_PATH='.github/workflows/shine-defence-release-head.yml';
@@ -72,6 +73,17 @@ Deno.serve(async(req:Request)=>{
       if(!(await verifyTargetBinding(body.targetId,identity.repository))){
         return jsonResponse(401,{error:'rollback-oidc-source-mismatch'});
       }
+      const claimBinding=await bindGithubOidcOperation({
+        sql,
+        identity,
+        audience:AUDIENCE,
+        operation:'rollback-claim',
+        targetKey:String(body.targetId),
+        request:body
+      });
+      if(oidcReplayConflict(claimBinding)){
+        return jsonResponse(409,{error:'oidc-replay-conflict',binding:claimBinding});
+      }
       const rows=await sql`
         select foundation.get_defence_rollback_claim_v1(${body.targetId}) as claim
       `;
@@ -80,7 +92,8 @@ Deno.serve(async(req:Request)=>{
       return jsonResponse(200,{
         status:'ok',
         contract:'shine-defence/rollback-readiness-claim-response-v1',
-        claim
+        claim,
+        oidcBinding:{status:claimBinding.status,bindingId:claimBinding.bindingId}
       });
     }
 
@@ -101,6 +114,18 @@ Deno.serve(async(req:Request)=>{
 
     if(!(await verifyTargetBinding(submission.targetId,identity.repository))){
       return jsonResponse(401,{error:'rollback-oidc-source-mismatch'});
+    }
+
+    const attestBinding=await bindGithubOidcOperation({
+      sql,
+      identity,
+      audience:AUDIENCE,
+      operation:'rollback-attest',
+      targetKey:String(submission.targetId),
+      request:body
+    });
+    if(oidcReplayConflict(attestBinding)){
+      return jsonResponse(409,{error:'oidc-replay-conflict',binding:attestBinding});
     }
 
     const observedAt=new Date();
@@ -147,7 +172,8 @@ Deno.serve(async(req:Request)=>{
     return jsonResponse(200,{
       status:'accepted',
       contract:'shine-defence/rollback-source-attestation-response-v1',
-      result
+      result,
+      oidcBinding:{status:attestBinding.status,bindingId:attestBinding.bindingId}
     });
   }catch(error){
     const message=error instanceof Error?error.message:'rollback-readiness-error';
