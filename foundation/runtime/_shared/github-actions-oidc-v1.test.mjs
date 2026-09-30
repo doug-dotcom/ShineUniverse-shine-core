@@ -108,6 +108,15 @@ test('shared verifier fails closed after refresh and enforces consumer claim pol
   const expired=await signJwt({...basePayload(),exp:nowSeconds-60},key);
   await assert.rejects(()=>verifier.verify(expired,policy),/OIDC token expired/);
 
+  const stale=await signJwt({...basePayload(),iat:nowSeconds-700,nbf:nowSeconds-700,exp:nowSeconds+60},key);
+  await assert.rejects(()=>verifier.verify(stale,policy),/OIDC token too old/);
+
+  const missingIssuedAt=await signJwt(Object.fromEntries(Object.entries(basePayload()).filter(([k])=>k!=='iat')),key);
+  await assert.rejects(()=>verifier.verify(missingIssuedAt,policy),/OIDC issued-at claim missing/);
+
+  const missingRunId=await signJwt({...basePayload(),run_id:''},key);
+  await assert.rejects(()=>verifier.verify(missingRunId,policy),/OIDC run id claim invalid/);
+
   const unknownKid=await signJwt(basePayload(),key,{kid:'kid-unknown'});
   const before=jwksFetches;
   await assert.rejects(()=>verifier.verify(unknownKid,policy),/OIDC signing key not found after refresh/);
@@ -140,6 +149,8 @@ test('all Foundation OIDC consumers delegate cryptography to the shared verifier
     const source=readFileSync(root+path,'utf8');
     assert.match(source,/from '\.\.\/_shared\/github-actions-oidc-v1\.mjs'/,path+' must import the shared verifier');
     assert.match(source,/verifyGithubActionsOidc\(auth\.slice\(7\),OIDC_POLICY\)/,path+' must apply an explicit local claim policy');
+    assert.match(source,/github-oidc-operation-v1\.mjs/,path+' must import the shared OIDC replay binder');
+    assert.match(source,/bindGithubOidcOperation\(/,path+' must bind verified run identity to request semantics');
     assert.doesNotMatch(source,/token\.actions\.githubusercontent\.com/,path+' must not own issuer discovery');
     assert.doesNotMatch(source,/crypto\.subtle\.verify/,path+' must not implement JWT signature verification');
     assert.doesNotMatch(source,/getJwks|oidcMetadataPromise|jwksPromise/,path+' must not own JWKS caching');
