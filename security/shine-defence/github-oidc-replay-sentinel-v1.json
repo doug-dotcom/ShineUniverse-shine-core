@@ -1,0 +1,35 @@
+{
+  "contract": "shine-defence/github-oidc-replay-sentinel-v1",
+  "version": "1.0.0",
+  "purpose": "Escalate changed-payload GitHub OIDC replay conflicts into durable Defence control-plane alerts and full-estate fail state.",
+  "sources": [
+    "foundation.github_oidc_operation_bindings",
+    "foundation.github_oidc_operation_events"
+  ],
+  "persistence": {
+    "alertTable": "foundation.github_oidc_replay_alert_events",
+    "escalationTrigger": "foundation.escalate_github_oidc_replay_conflict_v1",
+    "summary": "foundation.get_defence_github_oidc_replay_summary_v1",
+    "fullEstateSummary": "foundation.get_defence_full_estate_summary_v1"
+  },
+  "windowSeconds": 86400,
+  "severityRules": {
+    "accepted-new": "none",
+    "replayed-exact": "audit-only",
+    "rejected-conflict": "fail"
+  },
+  "rules": [
+    "Every rejected-conflict event is copied exactly once into the append-only replay alert ledger.",
+    "Historical conflicts are never deleted or rewritten.",
+    "The current replay Sentinel state is fail when at least one conflict exists inside the configured lookback window.",
+    "Exact retries are visible in counters but never escalated as conflicts.",
+    "Full-estate Defence state fails while the replay Sentinel is fail.",
+    "The default active attention window is 24 hours; history remains queryable after the active window closes.",
+    "Existing replay conflicts are backfilled when the Sentinel is installed."
+  ],
+  "nonClaims": [
+    "An exact retry is not evidence of an attack.",
+    "A conflict identifies incompatible use of one verified OIDC operation identity; it does not independently identify an attacker.",
+    "A conflict leaving the active 24-hour window does not erase its historical alert."
+  ]
+}

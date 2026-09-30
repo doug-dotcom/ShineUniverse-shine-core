@@ -542,6 +542,18 @@
       "path": "foundation/runtime/_shared/github-oidc-operation-v1.mjs",
       "version": "1.0.0",
       "blobSha": "34432b10b5defefafec41c066cf2d50b1fb4d381"
+    },
+    {
+      "id": "github-oidc-replay-sentinel",
+      "path": "security/shine-defence/github-oidc-replay-sentinel-v1.json",
+      "version": "1.0.0",
+      "blobSha": "a41c86c1800aeda78d05376d8f11d2907865e0a9"
+    },
+    {
+      "id": "github-oidc-replay-sentinel-db",
+      "path": "foundation/postgres/defence-github-oidc-replay-sentinel-v1.sql",
+      "version": "1.0.0",
+      "blobSha": "e48c4bf482be9b4d3f731a0ae7efcaae8f84dca2"
     }
   ]
 }
