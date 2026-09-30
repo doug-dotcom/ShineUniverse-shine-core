@@ -1,0 +1,40 @@
+{
+  "contract": "shine-foundation/promoted-release-observation-v1",
+  "version": "1.0.0",
+  "layer": 64,
+  "purpose": "Make loss or restoration of consumer-visible Foundation promotion trust durable and operationally visible after CI without granting automatic repair authority.",
+  "source": "foundation.get_foundation_promoted_release_v1",
+  "ledger": "foundation.foundation_promoted_release_observations",
+  "currentView": "foundation.current_foundation_promoted_release_observation",
+  "recorder": "foundation.record_foundation_promoted_release_observation_v1",
+  "summary": "foundation.get_foundation_promoted_release_observation_summary_v1",
+  "states": [
+    "promoted",
+    "hold"
+  ],
+  "summaryStates": [
+    "normal",
+    "hold",
+    "drift",
+    "unknown"
+  ],
+  "hostedObserver": {
+    "engine": "pg_cron",
+    "jobName": "shine-foundation-promoted-release-observation-5m",
+    "cadence": "0,5,10,15,20,25,30,35,40,45,50,55 * * * *",
+    "defaultFreshnessSeconds": 600
+  },
+  "rules": {
+    "everyHostedCheckWritesAppendOnlyHeartbeat": true,
+    "semanticFingerprintIgnoresEvaluatedAt": true,
+    "changedFromPreviousIsExplicit": true,
+    "liveStateComparedToLatestObservation": true,
+    "liveMismatchIsVisibleAsDrift": true,
+    "staleObservationFailsVisible": true,
+    "holdCarriesNoPromotedReleaseIdentity": true,
+    "directLedgerInsertDeniedToServiceRole": true,
+    "automaticRepair": false,
+    "runtimeReadinessClaimed": false,
+    "mutatesAuthoritativeTruth": false
+  }
+}
