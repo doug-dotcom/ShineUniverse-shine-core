@@ -1,6 +1,6 @@
 # Foundation Layer 81 — Bounded overdue verification executor
 
-**Status:** IMPLEMENTED — CI and production verification pending  
+**Status:** LIVE — CI green and production verification complete  
 **Scope:** execute the single bounded action Layer 80 may admit: independent verification of one overdue Layer-76 receipt
 
 Layer 80 can decide that an overdue successful execution is missing only its independent Layer-77 proof.
@@ -160,6 +160,28 @@ CI uses real Layer-76 and Layer-73 rows and proves:
 - executor history is append-only;
 - read/execute role boundaries remain intact.
 
+## Production proof
+
+Layer 81 is deployed in the Shine Foundation Supabase project as migration:
+
+`20260930125254 — foundation_layer_081_bounded_overdue_verification_executor`
+
+Live production verification confirms:
+
+- executor ledger, executor and summary functions exist;
+- `service_role` can call Layer 81;
+- direct `service_role` EXECUTE on the Layer-77 verifier is **revoked**;
+- Foundation runtime, Gateway, Shine Core and Shine Defence cannot execute Layer 81;
+- service role cannot directly INSERT Layer-81 executor events;
+- Foundation runtime can read the summary;
+- Gateway reads the summary only through existing `foundation_runtime` membership;
+- a nonexistent target returns `not-applicable / target-not-found`;
+- that nonexistent-target check creates no Layer-81 event and no Layer-77 proof;
+- production currently has zero Layer-81 execution events;
+- the live summary reports `directLayer77ServiceRoleBypassAllowed=false`;
+- Supabase security advisors report no Layer-81-specific finding.
+
 ## Invariant
+
 
 > Layer 81 may complete missing verification. It may never manufacture the evidence being verified.
