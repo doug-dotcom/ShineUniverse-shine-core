@@ -576,8 +576,8 @@
     {
       "id": "release-attestation-authority",
       "path": "security/shine-defence/release-attestation-authority-v1.json",
-      "version": "1.0.0",
-      "blobSha": "503ea2698fcafa21b7a998eef81a834f734987cd"
+      "version": "1.1.0",
+      "blobSha": "1df105dcd6adb1ddabe38ec7360f5f3cb363a936"
     },
     {
       "id": "release-attestation-authority-workflow",
