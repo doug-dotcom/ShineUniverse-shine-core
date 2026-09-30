@@ -4,6 +4,7 @@ import {readFileSync} from 'node:fs';
 import {webcrypto} from 'node:crypto';
 import {fileURLToPath} from 'node:url';
 import {createGithubActionsOidcVerifier,GITHUB_ACTIONS_OIDC_ISSUER} from './github-actions-oidc-v1.mjs';
+import {SHINE_DEFENCE_RELEASE_ATTESTATION_AUTHORITY,SHINE_DEFENCE_RELEASE_ATTESTATION_AUTHORITY_REF,SHINE_DEFENCE_RELEASE_ATTESTATION_AUTHORITY_SHA,SHINE_DEFENCE_RELEASE_ATTESTATION_AUTHORITY_VERSION} from './shine-defence-release-attestation-authority-v1.mjs';
 
 const fixedNow=Date.parse('2026-09-30T03:30:00Z');
 const nowSeconds=Math.floor(fixedNow/1000);
@@ -218,17 +219,29 @@ test('all Foundation OIDC consumers delegate cryptography to the shared verifier
   }
 });
 
-test('dynamic release consumers bind signed immutable repository ids to Foundation target metadata',()=>{
+test('dynamic release consumers bind signed immutable repository ids to Foundation target metadata and one shared authority pin',()=>{
   const root=fileURLToPath(new URL('../../../',import.meta.url));
+  const authority=JSON.parse(readFileSync(root+'security/shine-defence/release-attestation-authority-v1.json','utf8'));
+  assert.equal(authority.runtimeBinding.path,'foundation/runtime/_shared/shine-defence-release-attestation-authority-v1.mjs');
+  assert.equal(authority.runtimeBinding.version,SHINE_DEFENCE_RELEASE_ATTESTATION_AUTHORITY_VERSION);
+  assert.equal(authority.reusableWorkflow.repository,SHINE_DEFENCE_RELEASE_ATTESTATION_AUTHORITY.repository);
+  assert.equal(authority.reusableWorkflow.repositoryId,SHINE_DEFENCE_RELEASE_ATTESTATION_AUTHORITY.repositoryId);
+  assert.equal(authority.reusableWorkflow.path,SHINE_DEFENCE_RELEASE_ATTESTATION_AUTHORITY.workflowPath);
+  assert.equal(authority.reusableWorkflow.authoritySha,SHINE_DEFENCE_RELEASE_ATTESTATION_AUTHORITY_SHA);
+  assert.equal(authority.enforcement.requiredJobWorkflowRef,SHINE_DEFENCE_RELEASE_ATTESTATION_AUTHORITY_REF);
+  assert.equal(authority.enforcement.requiredJobWorkflowSha,SHINE_DEFENCE_RELEASE_ATTESTATION_AUTHORITY_SHA);
+
   const release=readFileSync(root+'foundation/runtime/defence-release-head-ingest/index.ts','utf8');
   const rollback=readFileSync(root+'foundation/runtime/defence-rollback-readiness/index.ts','utf8');
   for(const [name,source] of [['release-head',release],['rollback',rollback]]){
     assert.match(source,/sourceRepositoryId/,name+' must load immutable repository id from target metadata');
     assert.match(source,/sourceRepositoryOwnerId/,name+' must load immutable owner id from target metadata');
-    assert.match(source,/identity\.repositoryId/,name+' must compare the signed repository id');
-    assert.match(source,/identity\.repositoryOwnerId/,name+' must compare the signed owner id');
-    assert.match(source,/EXPECTED_JOB_WORKFLOW_REF='doug-dotcom\/ShineUniverse-shine-core\/\.github\/workflows\/shine-defence-release-attestation-v1\.yml@7bfd7fe685b4b2da814ac53dafdbfac2350591c8'/,name+' must pin exact Core reusable authority ref');
-    assert.match(source,/EXPECTED_JOB_WORKFLOW_SHA='7bfd7fe685b4b2da814ac53dafdbfac2350591c8'/,name+' must pin exact Core reusable authority SHA');
+    assert.match(source,/identity\\.repositoryId/,name+' must compare the signed repository id');
+    assert.match(source,/identity\\.repositoryOwnerId/,name+' must compare the signed owner id');
+    assert.match(source,/shine-defence-release-attestation-authority-v1\\.mjs/,name+' must import the shared Core authority pin');
+    assert.match(source,/expectedJobWorkflowRef:SHINE_DEFENCE_RELEASE_ATTESTATION_AUTHORITY_REF/,name+' must consume the shared authority ref');
+    assert.match(source,/expectedJobWorkflowSha:SHINE_DEFENCE_RELEASE_ATTESTATION_AUTHORITY_SHA/,name+' must consume the shared authority sha');
+    assert.doesNotMatch(source,/EXPECTED_JOB_WORKFLOW_REF|EXPECTED_JOB_WORKFLOW_SHA/,name+' must not own a local reusable-workflow pin');
   }
 });
 
