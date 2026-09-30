@@ -1,13 +1,14 @@
 {
   "releaseAdmissionContract": "shine-defence/release-admission-v1",
-  "schemaVersion": "1.0.0",
+  "schemaVersion": "1.1.0",
   "scope": "railway-serving-releases",
   "authority": {
     "servingRuntime": "foundation.current_defence_runtime_provenance",
     "healthEvidence": "foundation.defence_health_probe_results",
     "sourceWatch": "foundation.current_defence_release_source_heads",
     "transitionEvidence": "foundation.defence_railway_transition_events",
-    "canonicalHistory": "foundation.defence_release_admission_events"
+    "canonicalHistory": "foundation.defence_release_admission_events",
+    "attestationAuthority": "foundation.current_defence_attestation_authority"
   },
   "principles": [
     "provider SUCCESS alone never makes a release canonical",
@@ -15,7 +16,8 @@
     "only health evidence recorded after the candidate first served counts toward admission",
     "source-watch identity must be fresh but may legitimately be ahead of the serving commit",
     "a newer successful serving proof supersedes older candidate transition failures",
-    "rollback intelligence recommends a target but never triggers provider rollback automatically"
+    "rollback intelligence recommends a target but never triggers provider rollback automatically",
+    "time freshness never makes source-watch evidence admissible after its signed reusable-workflow authority is no longer current"
   ],
   "admission": {
     "continuousMinimumPassingSamples": 3,
@@ -23,7 +25,14 @@
     "requireZeroFailuresWithinAdmissionSampleWindow": true,
     "requireFreshServingProvenance": true,
     "requireFreshSourceWatch": true,
-    "requireRegisteredRepositoryAndBranchMatch": true
+    "requireRegisteredRepositoryAndBranchMatch": true,
+    "requireCurrentAttestationAuthority": true,
+    "attestationAuthorityEvidence": [
+      "metadata.githubJobWorkflowSha",
+      "metadata.githubJobWorkflowRef"
+    ],
+    "authorityMismatchDecision": "hold",
+    "authorityMismatchReasonCode": "source-watch-authority-stale"
   },
   "states": [
     "canonical",
