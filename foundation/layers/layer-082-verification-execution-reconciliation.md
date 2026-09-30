@@ -1,6 +1,6 @@
 # Foundation Layer 82 — Verification execution reconciliation
 
-**Status:** IMPLEMENTED — CI and production verification pending  
+**Status:** LIVE — CI green and production verification complete  
 **Scope:** independently prove that a successful Layer-81 execution receipt is backed by the Layer-77 proof and durable evidence it claims
 
 Layer 81 can legitimately say:
@@ -190,6 +190,29 @@ It also proves:
 - reconciliation history is append-only;
 - service role cannot insert reconciliation rows directly.
 
+## Production proof
+
+Layer 82 is deployed in the Shine Foundation Supabase project as migration:
+
+`20260930131341 — foundation_layer_082_verification_execution_reconciliation`
+
+Live production verification confirms:
+
+- reconciliation ledger, evaluator, runner and summary functions exist;
+- current production reconciliation count: **0**;
+- current production problem count: **0**;
+- service role can run reconciliation;
+- Foundation runtime and Gateway cannot run reconciliation;
+- Foundation runtime can independently evaluate outcomes and read the summary;
+- Gateway can read the summary only through existing `foundation_runtime` membership;
+- Shine Core, Shine Defence and browser roles cannot read the reconciliation control;
+- service role cannot directly INSERT reconciliation rows;
+- a nonexistent Layer-81 event returns `not-applicable / event-not-found`;
+- that nonexistent-event check performs no verification rerun and creates no reconciliation receipt;
+- production remains at zero reconciliations after the harmless negative test;
+- Supabase security advisors report no Layer-82-specific finding.
+
 ## Invariant
+
 
 > An executor receipt is evidence of a claim. Reconciliation is evidence that the claim still agrees with reality.
