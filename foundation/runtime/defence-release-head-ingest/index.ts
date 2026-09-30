@@ -1,5 +1,6 @@
 import postgres from 'npm:postgres@3.4.9';
 import {verifyGithubActionsOidc} from '../_shared/github-actions-oidc-v1.mjs';
+import {bindGithubOidcOperation,oidcReplayConflict} from '../_shared/github-oidc-operation-v1.mjs';
 
 const AUDIENCE='shine-defence-release-head';
 const EXPECTED_WORKFLOW_PATH='.github/workflows/shine-defence-release-head.yml';
@@ -97,6 +98,18 @@ Deno.serve(async(req:Request)=>{
         observation.changedFileCount>10000
       ){
         return jsonResponse(400,{error:'invalid-release-head-observation'});
+      }
+
+      const oidcBinding=await bindGithubOidcOperation({
+        sql,
+        identity,
+        audience:AUDIENCE,
+        operation:'release-head-snapshot',
+        targetKey:String(observation.targetId),
+        request:body
+      });
+      if(oidcReplayConflict(oidcBinding)){
+        return jsonResponse(409,{error:'oidc-replay-conflict',binding:oidcBinding});
       }
 
       const evidenceRef=[
