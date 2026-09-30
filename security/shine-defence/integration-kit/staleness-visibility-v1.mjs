@@ -20,13 +20,23 @@ export function ageAt(timestamp,asOf){
 }
 const na=()=>({timestamp:null,ageHours:null,ageDays:null,band:'not_applicable'});
 const unknown=()=>({timestamp:null,ageHours:null,ageDays:null,band:'unknown'});
+function visibleAt(timestamp,asOf){
+  if(!timestamp)return false;
+  const t=Date.parse(timestamp),n=Date.parse(asOf);
+  if(!Number.isFinite(t)||!Number.isFinite(n))fail('invalid staleness timestamp');
+  return t<=n;
+}
 
 export function buildStaleness({commandCentre,ledger,candidates,decisions,asOf,readReview}){
   const apps=new Map((ledger.apps||[]).map(a=>[a.id,a]));
-  const pending=new Map((candidates.candidates||[]).filter(c=>c.status==='pending_review').map(c=>[c.appId,c]));
+  const pending=new Map(
+    (candidates.candidates||[])
+      .filter(c=>c.status==='pending_review'&&visibleAt(c.observedAt,asOf))
+      .map(c=>[c.appId,c])
+  );
   const acceptedByApp=new Map();
   for(const d of decisions.decisions||[]){
-    if(d.outcome!=='accepted')continue;
+    if(d.outcome!=='accepted'||!visibleAt(d.decidedAt,asOf))continue;
     const old=acceptedByApp.get(d.appId);
     if(!old||d.decidedAt>old.decidedAt)acceptedByApp.set(d.appId,d);
   }
@@ -35,7 +45,9 @@ export function buildStaleness({commandCentre,ledger,candidates,decisions,asOf,r
     const app=apps.get(item.appId);
     const candidate=pending.get(item.appId);
     const decision=acceptedByApp.get(item.appId);
-    const deployment=item.deployment?.observedAt?ageAt(item.deployment.observedAt,asOf):unknown();
+    const deployment=item.deployment?.observedAt&&visibleAt(item.deployment.observedAt,asOf)
+      ?ageAt(item.deployment.observedAt,asOf)
+      :unknown();
     const candidateAge=candidate?ageAt(candidate.observedAt,asOf):na();
 
     let reviewAge=na();
@@ -44,13 +56,17 @@ export function buildStaleness({commandCentre,ledger,candidates,decisions,asOf,r
       const release=item.deployment?.releaseCommitSha;
       const id=release?item.appId+'-'+release.slice(0,12):null;
       const review=id?readReview(id):null;
-      reviewAge=review?.lastActivityAt?ageAt(review.lastActivityAt,asOf):unknown();
+      reviewAge=review?.lastActivityAt&&visibleAt(review.lastActivityAt,asOf)
+        ?ageAt(review.lastActivityAt,asOf)
+        :unknown();
     }
     else if(item.reviewProgress?.state==='evidence_accepted'||item.reviewProgress?.state==='candidate_intake_ready'){
       const release=item.deployment?.releaseCommitSha;
       const id=release?item.appId+'-'+release.slice(0,12):null;
       const review=id?readReview(id):null;
-      reviewAge=review?.humanAcceptance?.reviewedAt?ageAt(review.humanAcceptance.reviewedAt,asOf):unknown();
+      reviewAge=review?.humanAcceptance?.reviewedAt&&visibleAt(review.humanAcceptance.reviewedAt,asOf)
+        ?ageAt(review.humanAcceptance.reviewedAt,asOf)
+        :unknown();
     }
 
     let certification=unknown();
@@ -69,20 +85,37 @@ function candidateMatch(decision,candidates,app){
 function selfTest(){
   const cc={items:[
     {appId:'a',repository:'o/a',deployment:{observedAt:'2026-09-27T00:00:00.000Z',releaseCommitSha:'b'.repeat(40)},reviewProgress:{state:'not_started'}},
-    {appId:'b',repository:'o/b',deployment:{observedAt:'2026-09-20T00:00:00.000Z',releaseCommitSha:'d'.repeat(40)},reviewProgress:{state:'in_progress'}}
+    {appId:'b',repository:'o/b',deployment:{observedAt:'2026-09-20T00:00:00.000Z',releaseCommitSha:'d'.repeat(40)},reviewProgress:{state:'in_progress'}},
+    {appId:'c',repository:'o/c',deployment:{observedAt:'2026-09-28T00:00:00.000Z',releaseCommitSha:'f'.repeat(40)},reviewProgress:{state:'in_progress'}}
   ]};
-  const ledger={apps:[{id:'a',reviewCommitSha:'a'.repeat(40),profileBlobSha:'1'.repeat(40)},{id:'b',reviewCommitSha:'c'.repeat(40),profileBlobSha:'2'.repeat(40)}]};
+  const ledger={apps:[
+    {id:'a',reviewCommitSha:'a'.repeat(40),profileBlobSha:'1'.repeat(40)},
+    {id:'b',reviewCommitSha:'c'.repeat(40),profileBlobSha:'2'.repeat(40)},
+    {id:'c',reviewCommitSha:'f'.repeat(40),profileBlobSha:'3'.repeat(40)}
+  ]};
   const candidates={candidates:[
     {candidateId:'a-old',appId:'a',releaseCommitSha:'a'.repeat(40),profileBlobSha:'1'.repeat(40),status:'accepted',observedAt:'2026-09-26T00:00:00.000Z'},
-    {candidateId:'b-pending',appId:'b',releaseCommitSha:'e'.repeat(40),profileBlobSha:'2'.repeat(40),status:'pending_review',observedAt:'2026-09-26T12:00:00.000Z'}
+    {candidateId:'b-pending',appId:'b',releaseCommitSha:'e'.repeat(40),profileBlobSha:'2'.repeat(40),status:'pending_review',observedAt:'2026-09-26T12:00:00.000Z'},
+    {candidateId:'c-pending',appId:'c',releaseCommitSha:'f'.repeat(40),profileBlobSha:'3'.repeat(40),status:'pending_review',observedAt:'2026-09-28T00:00:00.000Z'}
   ]};
-  const decisions={decisions:[{candidateId:'a-old',appId:'a',outcome:'accepted',decidedAt:'2026-09-26T01:00:00.000Z'}]};
-  const r=buildStaleness({commandCentre:cc,ledger,candidates,decisions,asOf:'2026-09-27T12:00:00.000Z',readReview:id=>id.startsWith('b-')?{lastActivityAt:'2026-09-24T12:00:00.000Z'}:null});
-  const a=r.items.find(x=>x.appId==='a'),b=r.items.find(x=>x.appId==='b');
+  const decisions={decisions:[
+    {candidateId:'a-old',appId:'a',outcome:'accepted',decidedAt:'2026-09-26T01:00:00.000Z'},
+    {candidateId:'a-old',appId:'a',outcome:'accepted',decidedAt:'2026-09-28T01:00:00.000Z'}
+  ]};
+  const r=buildStaleness({
+    commandCentre:cc,ledger,candidates,decisions,asOf:'2026-09-27T12:00:00.000Z',
+    readReview:id=>id.startsWith('b-')
+      ?{lastActivityAt:'2026-09-24T12:00:00.000Z'}
+      :id.startsWith('c-')
+        ?{lastActivityAt:'2026-09-28T01:00:00.000Z'}
+        :null
+  });
+  const a=r.items.find(x=>x.appId==='a'),b=r.items.find(x=>x.appId==='b'),cItem=r.items.find(x=>x.appId==='c');
   if(a.deploymentObservation.band!=='current'||a.certification.band!=='ageing'||a.humanReview.band!=='unknown')fail('self-test: app a ages');
   if(b.deploymentObservation.band!=='stale'||b.pendingCandidate.band!=='ageing'||b.humanReview.band!=='ageing'||b.humanReview.ageDays!==3||b.certification.band!=='unknown')fail('self-test: app b ages');
+  if(cItem.deploymentObservation.band!=='unknown'||cItem.pendingCandidate.band!=='not_applicable'||cItem.humanReview.band!=='unknown'||cItem.certification.band!=='unknown')fail('self-test: future evidence leaked into historical snapshot');
   let blocked=false;try{ageAt('2026-09-28T00:00:00.000Z','2026-09-27T00:00:00.000Z')}catch{blocked=true}if(!blocked)fail('self-test: future timestamp accepted');
-  console.log('SHINE DEFENCE STALENESS VISIBILITY SELF-TEST: PASS current/ageing/stale/unknown/not-applicable semantics, explicit review activity and future fail-closed');
+  console.log('SHINE DEFENCE STALENESS VISIBILITY SELF-TEST: PASS current/ageing/stale/unknown/not-applicable semantics, historical evidence visibility and direct future fail-closed');
 }
 async function main(){
   if(process.argv.includes('--self-test'))return selfTest();
