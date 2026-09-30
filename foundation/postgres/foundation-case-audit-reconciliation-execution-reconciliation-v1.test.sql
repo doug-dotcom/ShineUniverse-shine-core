@@ -646,4 +646,15 @@ begin
 end;
 $l87_append_only$;
 
+
+do $l87_indexes$
+begin
+  if to_regclass(
+       'foundation.case_audit_verify_reconcile_exec_reconcile_layer82_idx'
+     ) is null then
+    raise exception 'Layer 87 Layer-82 FK index missing';
+  end if;
+end;
+$l87_indexes$;
+
 rollback;
