@@ -1,0 +1,50 @@
+{
+  "contract": "shine-wellness/concierge-health-minimal-v1",
+  "version": "1.0.0",
+  "purpose": "Minimum-necessary logistics envelope for Shine Wellness handoffs to Concierge.",
+  "clientId": "shine.wellness",
+  "conciergePurpose": "wellness-care-logistics",
+  "allowedActions": [
+    "appointment-book",
+    "appointment-reschedule",
+    "appointment-cancel",
+    "referral-follow-up",
+    "provider-contact",
+    "document-request",
+    "reminder"
+  ],
+  "allowedData": [
+    "opaque Wellness canonical record reference",
+    "opaque permission-decision reference",
+    "logistics action code",
+    "practitioner/provider/service/support-person display and contact details",
+    "requested/due timing and timezone",
+    "location logistics",
+    "preferred contact channel",
+    "opaque source record references"
+  ],
+  "prohibitedData": [
+    "diagnosis or condition payloads",
+    "medication history",
+    "pathology or imaging values",
+    "symptoms or clinical observations",
+    "treatment notes",
+    "AI interpretation text",
+    "free-form clinical summaries",
+    "arbitrary Wellness table rows"
+  ],
+  "rules": [
+    "Unknown top-level and nested fields are rejected rather than ignored.",
+    "Every source record reference is opaque; Concierge must not dereference Wellness tables directly.",
+    "The canonical record id must be included in sourceRecordIds.",
+    "A permission-decision reference is mandatory.",
+    "Wellness plans may use only the wellness-care-logistics Concierge purpose.",
+    "All planned Wellness capability inputs are validated before the first specialist invocation."
+  ],
+  "nonClaims": [
+    "This contract does not grant Vault access.",
+    "This contract does not grant Project L health-memory access.",
+    "This contract does not authorize clinical interpretation.",
+    "This contract does not certify any provider or specialist action as medically appropriate."
+  ]
+}

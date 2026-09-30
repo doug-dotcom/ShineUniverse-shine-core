@@ -1,3 +1,4 @@
+import {projectWellnessHealthMinimalHandoff,WELLNESS_CONCIERGE_PURPOSE} from './wellness-concierge-health-minimal-v1.mjs';
 const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const CLIENT=/^[a-z0-9][a-z0-9._:-]*$/;
 const TOKEN=/^[a-z0-9][a-z0-9._:-]*$/;
@@ -54,6 +55,7 @@ export function createConciergePlanService({adapters,clock=()=>new Date().toISOS
     if(!envelope||envelope.conciergePlan!=='shine-concierge/plan-v1'||
        envelope.schemaVersion!=='1.0.0'||!UUID.test(envelope.requestId??'')||
        !CLIENT.test(envelope.clientId??'')||!TOKEN.test(envelope.purpose??'')||
+       (envelope.clientId==='shine.wellness'&&envelope.purpose!==WELLNESS_CONCIERGE_PURPOSE)||
        !Array.isArray(capabilities)||capabilities.length<1||capabilities.length>20||
        capabilities.some(c=>!TOKEN.test(c??''))||
        new Set(capabilities).size!==capabilities.length||
@@ -162,6 +164,31 @@ export function createConciergeExecuteService({adapters,clock=()=>new Date().toI
     }
 
     const steps=Array.isArray(gate?.plan?.steps)?gate.plan.steps:[];
+    let executionInputs=inputs??{};
+    if(envelope.clientId==='shine.wellness'){
+      if(String(gate?.plan?.purpose??'')!==WELLNESS_CONCIERGE_PURPOSE){
+        return response(kind,envelope,'invalid','concierge-wellness-purpose-invalid');
+      }
+      const plannedCapabilities=[...new Set(
+        steps.map(step=>String(step?.capabilityId??'')).filter(Boolean)
+      )];
+      const suppliedCapabilities=Object.keys(executionInputs);
+      if(
+        suppliedCapabilities.some(id=>!plannedCapabilities.includes(id))||
+        plannedCapabilities.some(id=>!Object.prototype.hasOwnProperty.call(executionInputs,id))
+      ){
+        return response(kind,envelope,'invalid','concierge-wellness-input-set-invalid');
+      }
+      const projected={};
+      for(const capabilityId of plannedCapabilities){
+        const minimal=projectWellnessHealthMinimalHandoff(executionInputs[capabilityId]);
+        if(!minimal){
+          return response(kind,envelope,'invalid','concierge-wellness-health-minimal-input-invalid');
+        }
+        projected[capabilityId]=minimal;
+      }
+      executionInputs=projected;
+    }
     let resumeState=null;
     try{
       resumeState=await adapters.getConciergeResumeState({
@@ -179,7 +206,7 @@ export function createConciergeExecuteService({adapters,clock=()=>new Date().toI
     for(const step of steps){
       const capabilityId=String(step?.capabilityId??'');
       const stepId=String(step?.stepId??'');
-      const input=inputs?.[capabilityId]??{};
+      const input=executionInputs?.[capabilityId]??{};
       const checkpoint=checkpointByStep.get(stepId);
       if(checkpoint){
         results.push({
