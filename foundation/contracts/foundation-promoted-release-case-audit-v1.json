@@ -51,6 +51,9 @@
     "mutatesAuthoritativeTruth": false,
     "mutatesIncidentHistory": false,
     "grantsApproval": false,
-    "grantsExecutionAuthority": false
+    "grantsExecutionAuthority": false,
+    "gatewayReadOccursOnlyViaEstablishedFoundationRuntimeInheritance": true,
+    "gatewayReceivesNoDirectAuditGrant": true,
+    "defenceCannotReadInternalAudit": true
   }
 }

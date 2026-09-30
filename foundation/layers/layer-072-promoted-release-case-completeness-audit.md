@@ -92,15 +92,16 @@ instead of disappearing merely because it is no longer current.
 
 Layer 72 is internal read-only control-plane evidence.
 
-Readers:
+Direct readers:
 
 - `foundation_runtime`
 - `service_role`
 
+The existing Foundation role graph grants `foundation_runtime` to `foundation_gateway`. Gateway therefore inherits this **read-only** audit capability through that established runtime role. Layer 72 grants no direct Gateway EXECUTE privilege and adds no mutation capability.
+
 Denied:
 
 - Shine Core owner;
-- Foundation Gateway;
 - Shine Defence runtime;
 - browser roles.
 
@@ -118,7 +119,8 @@ CI proves:
 - completed verification becomes terminal verified;
 - hashes/bindings verify across the complete chain;
 - a corrupt historical handoff makes the audit invalid;
-- internal audit access remains Foundation-only.
+- internal audit access remains inside the existing Foundation runtime/control-plane boundary;
+- Gateway access is inherited only through its pre-existing `foundation_runtime` membership, not a new direct grant.
 
 ## Invariant
 

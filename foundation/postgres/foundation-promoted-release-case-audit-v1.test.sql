@@ -338,10 +338,13 @@ begin
        'foundation.get_foundation_promoted_release_case_audit_v1(text,integer,timestamptz,integer)',
        'EXECUTE'
      )
-     or has_function_privilege(
+     or not has_function_privilege(
        'foundation_gateway',
        'foundation.get_foundation_promoted_release_case_audit_v1(text,integer,timestamptz,integer)',
        'EXECUTE'
+     )
+     or not pg_has_role(
+       'foundation_gateway','foundation_runtime','MEMBER'
      )
      or has_function_privilege(
        'shine_defence_runtime',
