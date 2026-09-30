@@ -105,7 +105,23 @@ Foundation runtime may read the independent evaluator and verification summary, 
 
 Gateway, Shine Core, Shine Defence and browser roles cannot run verification.
 
+## Layer 81 access closure
+
+Layer 77 originally granted `service_role` direct access to the proof writer, as recorded in the Layer-77 production proof below.
+
+Layer 81 later closes that direct path.
+
+Current stack behaviour after Layer 81:
+
+- `service_role` cannot call `foundation.run_case_audit_safe_response_verification_v1(...)` directly;
+- the only service-role verification entrypoint is `foundation.execute_case_audit_overdue_verification_v1(...)`;
+- Layer 81 enforces Layer-79 incident state, Layer-80 admission, exact target identity, verification grace and proof absence before invoking Layer 77;
+- Layer 77 itself remains the immutable proof writer and replay authority.
+
+This preserves the historical Layer-77 deployment facts while tightening the current authority boundary.
+
 ## Deliberate non-actions
+
 
 Layer 77 does not:
 
