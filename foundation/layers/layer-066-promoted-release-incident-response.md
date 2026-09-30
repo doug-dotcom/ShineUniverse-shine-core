@@ -1,6 +1,6 @@
 # Foundation Layer 66 — Promoted-release incident response policy
 
-**Status:** IMPLEMENTED — CI and production verification pending  
+**Status:** LIVE — CI green, production cause/response policy verified and authority delegation proven  
 **Scope:** classify promotion-trust incident causes and define safe next actions without creating a second release-mutation authority
 
 Layer 65 makes persistent loss of promoted-release trust an operational incident.
@@ -85,6 +85,8 @@ returns:
 
 ## Acceptance coverage
 
+Full Foundation CI run `36677194160` completed successfully. Both Foundation jobs passed, the Layer-66 response-policy tests passed, and every downstream Shine Defence acceptance step remained green.
+
 CI proves:
 
 - healthy trust is classified as no cause;
@@ -99,6 +101,51 @@ CI proves:
 - history suppression remains denied;
 - runtime can read/evaluate plans;
 - browser roles cannot.
+
+## Production proof
+
+Layer 66 is deployed in the Shine Foundation Supabase project.
+
+Current production state is healthy:
+
+- promotion-trust incident state: **normal**
+- trust state: **normal**
+- cause class: **none**
+- source domain: **none**
+- next evidence action: **none**
+- authority expansion: **false**
+- automatic repair allowed: **false**
+
+The production response plan contains all 13 declared local/delegated/denied actions.
+
+Healthy baseline behaviour is deliberately quiet:
+
+- inspect promoted-release trust: **admit / read-only**
+- inspect canonical source truth: **not applicable**
+- inspect promotion closure: **not applicable**
+- fresh promoted-release observation: **not applicable**
+
+Hard fail-closed proof:
+
+- invented/unknown action: **deny / prohibited**
+- automatic authoritative truth repair: **deny / prohibited**
+- incident-history suppression/deletion: **deny / prohibited**
+
+Release-truth authority remains delegated to:
+
+`foundation.evaluate_control_plane_incident_response_v1`
+
+Layer 66 does not create a second repair authority and cannot upgrade a Layer-38 decision.
+
+Production privilege proof:
+
+- Foundation runtime can read cause classification: **yes**
+- Foundation runtime can evaluate response actions: **yes**
+- Foundation runtime can read response plan: **yes**
+- anonymous response-plan access: **no**
+- authenticated response-plan access: **no**
+
+Supabase advisors show no Layer-66-specific security or performance finding. New estate-wide advisor findings observed during this layer belong to concurrent GitHub-OIDC/Defence work; the existing promoted-release incident observation index is also currently reported unused because the production Layer-65 incident ledger remains empty.
 
 ## Invariant
 
