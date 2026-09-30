@@ -41,6 +41,9 @@ create index github_oidc_replay_alert_events_time_idx
 create index github_oidc_replay_alert_events_target_idx
   on foundation.github_oidc_replay_alert_events(target_key,observed_at desc);
 
+create index github_oidc_replay_alert_events_binding_id_idx
+  on foundation.github_oidc_replay_alert_events(binding_id);
+
 create trigger github_oidc_replay_alert_events_append_only
 before update or delete on foundation.github_oidc_replay_alert_events
 for each row execute function foundation.reject_append_only_mutation();
