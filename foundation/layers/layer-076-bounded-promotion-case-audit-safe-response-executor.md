@@ -95,7 +95,7 @@ Those action keys are rejected before policy dispatch.
 
 Ledger:
 
-`foundation.foundation_promoted_release_case_audit_response_execution_events`
+`foundation.case_audit_safe_response_exec_events`
 
 Each attempt records:
 
@@ -118,6 +118,16 @@ Lifecycle:
 - failed
 
 The same incident/action/policy fingerprint replays to the existing receipt instead of dispatching twice.
+
+### Identifier convergence
+
+The original Layer-76 draft used a 64-character table identifier. PostgreSQL identifiers are limited to 63 bytes and silently truncated it.
+
+Layer 76 therefore standardises the physical ledger name to:
+
+`foundation.case_audit_safe_response_exec_events`
+
+Fresh databases create that name directly. Existing production uses an idempotent convergence migration that renames the already-created table plus its identity sequence, constraints, indexes and append-only trigger so fresh CI and production expose the same canonical schema names.
 
 ## Authority boundary
 

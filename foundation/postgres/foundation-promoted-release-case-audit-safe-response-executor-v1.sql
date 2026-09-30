@@ -54,14 +54,20 @@ revoke all on function foundation.foundation_promoted_release_case_audit_respons
        shine_core_control_plane,shine_defence_runtime,service_role;
 
 
-create table foundation.foundation_promoted_release_case_audit_response_execution_events (
-  event_sequence bigint generated always as identity primary key,
-  event_id uuid not null unique default gen_random_uuid(),
+create table foundation.case_audit_safe_response_exec_events (
+  event_sequence bigint generated always as identity
+    constraint case_audit_safe_response_exec_events_pkey primary key,
+  event_id uuid not null
+    constraint case_audit_safe_response_exec_events_event_id_key unique
+    default gen_random_uuid(),
   environment text not null
+    constraint case_audit_safe_response_exec_events_environment_check
     check (environment ~ '^[a-z0-9][a-z0-9._-]*$'),
   incident_event_id uuid not null
+    constraint case_audit_safe_response_exec_events_incident_event_id_fkey
     references foundation.foundation_promoted_release_case_audit_incident_events(event_id),
   action_key text not null
+    constraint case_audit_safe_response_exec_events_action_key_check
     check (
       action_key in (
         'record-fresh-promotion-case-audit-observation',
@@ -69,62 +75,73 @@ create table foundation.foundation_promoted_release_case_audit_response_executio
       )
     ),
   cause_class text not null
+    constraint case_audit_safe_response_exec_events_cause_class_check
     check (cause_class ~ '^[a-z0-9][a-z0-9._-]*$'),
   policy_fingerprint text not null
+    constraint case_audit_safe_response_exec_events_policy_fingerprint_check
     check (policy_fingerprint ~ '^[a-f0-9]{64}$'),
   event_type text not null
+    constraint case_audit_safe_response_exec_events_event_type_check
     check (event_type in ('executed','denied','failed')),
   reason_code text not null
+    constraint case_audit_safe_response_exec_events_reason_code_check
     check (reason_code ~ '^[a-z0-9][a-z0-9._:-]*$'),
   decision_snapshot jsonb not null
+    constraint case_audit_safe_response_exec_events_decision_snapshot_check
     check (jsonb_typeof(decision_snapshot)='object'),
   incident_snapshot jsonb not null
+    constraint case_audit_safe_response_exec_events_incident_snapshot_check
     check (jsonb_typeof(incident_snapshot)='object'),
   before_snapshot jsonb not null
+    constraint case_audit_safe_response_exec_events_before_snapshot_check
     check (jsonb_typeof(before_snapshot)='object'),
-  action_result jsonb,
-  after_snapshot jsonb,
+  action_result jsonb
+    constraint case_audit_safe_response_exec_events_action_result_check
+    check (action_result is null or jsonb_typeof(action_result)='object'),
+  after_snapshot jsonb
+    constraint case_audit_safe_response_exec_events_after_snapshot_check
+    check (after_snapshot is null or jsonb_typeof(after_snapshot)='object'),
   error_detail text,
   requested_at timestamptz not null,
   recorded_at timestamptz not null default now(),
-  check (action_result is null or jsonb_typeof(action_result)='object'),
-  check (after_snapshot is null or jsonb_typeof(after_snapshot)='object'),
-  check (
-    (event_type='executed' and action_result is not null and error_detail is null)
-    or (event_type='denied' and action_result is null and error_detail is null)
-    or (event_type='failed' and action_result is null and error_detail is not null)
-  ),
-  unique(incident_event_id,action_key,policy_fingerprint)
+  constraint case_audit_safe_response_exec_events_shape_check
+    check (
+      (event_type='executed' and action_result is not null and error_detail is null)
+      or (event_type='denied' and action_result is null and error_detail is null)
+      or (event_type='failed' and action_result is null and error_detail is not null)
+    ),
+  constraint case_audit_safe_response_exec_scope_key
+    unique(incident_event_id,action_key,policy_fingerprint)
 );
 
-alter table foundation.foundation_promoted_release_case_audit_response_execution_events
+alter table foundation.case_audit_safe_response_exec_events
   enable row level security;
 
 create policy foundation_runtime_case_audit_response_execution_select
-on foundation.foundation_promoted_release_case_audit_response_execution_events
+on foundation.case_audit_safe_response_exec_events
 for select
 to foundation_runtime
 using (true);
 
-revoke all on foundation.foundation_promoted_release_case_audit_response_execution_events
+revoke all on foundation.case_audit_safe_response_exec_events
   from public,anon,authenticated,foundation_gateway,shine_core_control_plane,
        shine_defence_runtime,service_role;
-grant select on foundation.foundation_promoted_release_case_audit_response_execution_events
+grant select on foundation.case_audit_safe_response_exec_events
   to foundation_runtime,service_role;
 
-create index foundation_promoted_release_case_audit_response_execution_incident_idx
-  on foundation.foundation_promoted_release_case_audit_response_execution_events(
+create index case_audit_safe_response_exec_incident_idx
+  on foundation.case_audit_safe_response_exec_events(
     incident_event_id,requested_at desc,event_sequence desc
   );
 
-create index foundation_promoted_release_case_audit_response_execution_action_idx
-  on foundation.foundation_promoted_release_case_audit_response_execution_events(
+create index case_audit_safe_response_exec_action_idx
+  on foundation.case_audit_safe_response_exec_events(
     action_key,requested_at desc,event_sequence desc
   );
 
-create trigger foundation_promoted_release_case_audit_response_execution_append_only
+create trigger case_audit_safe_response_exec_append_only
 before update or delete
-on foundation.foundation_promoted_release_case_audit_response_execution_events
+on foundation.case_audit_safe_response_exec_events
 for each row execute function foundation.reject_append_only_mutation();
 
 
@@ -148,7 +165,7 @@ declare
   v_incident_event_id uuid;
   v_current_event foundation.foundation_promoted_release_case_audit_incident_events%rowtype;
   v_policy_fingerprint text;
-  v_existing foundation.foundation_promoted_release_case_audit_response_execution_events%rowtype;
+  v_existing foundation.case_audit_safe_response_exec_events%rowtype;
   v_action_result jsonb;
   v_event_id uuid;
   v_reason text;
@@ -214,7 +231,7 @@ begin
     );
 
   select * into v_existing
-  from foundation.foundation_promoted_release_case_audit_response_execution_events
+  from foundation.case_audit_safe_response_exec_events
   where incident_event_id=v_incident_event_id
     and action_key=p_action_key
     and policy_fingerprint=v_policy_fingerprint;
@@ -269,7 +286,7 @@ begin
     v_event_id := gen_random_uuid();
     v_reason := 'promotion-case-audit-safe-response-policy-not-admitted';
 
-    insert into foundation.foundation_promoted_release_case_audit_response_execution_events(
+    insert into foundation.case_audit_safe_response_exec_events(
       event_id,environment,incident_event_id,action_key,cause_class,
       policy_fingerprint,event_type,reason_code,decision_snapshot,
       incident_snapshot,before_snapshot,requested_at
@@ -332,7 +349,7 @@ begin
 
     v_event_id := gen_random_uuid();
 
-    insert into foundation.foundation_promoted_release_case_audit_response_execution_events(
+    insert into foundation.case_audit_safe_response_exec_events(
       event_id,environment,incident_event_id,action_key,cause_class,
       policy_fingerprint,event_type,reason_code,decision_snapshot,
       incident_snapshot,before_snapshot,action_result,after_snapshot,requested_at
@@ -376,7 +393,7 @@ begin
     v_error := sqlerrm;
     v_event_id := gen_random_uuid();
 
-    insert into foundation.foundation_promoted_release_case_audit_response_execution_events(
+    insert into foundation.case_audit_safe_response_exec_events(
       event_id,environment,incident_event_id,action_key,cause_class,
       policy_fingerprint,event_type,reason_code,decision_snapshot,
       incident_snapshot,before_snapshot,error_detail,requested_at
@@ -456,7 +473,7 @@ begin
     count(*) filter (where event_type='denied'),
     count(*) filter (where event_type='failed')
   into v_total,v_executed,v_denied,v_failed
-  from foundation.foundation_promoted_release_case_audit_response_execution_events
+  from foundation.case_audit_safe_response_exec_events
   where environment=p_environment;
 
   select coalesce(
@@ -480,7 +497,7 @@ begin
   into v_items
   from (
     select *
-    from foundation.foundation_promoted_release_case_audit_response_execution_events
+    from foundation.case_audit_safe_response_exec_events
     where environment=p_environment
     order by event_sequence desc
     limit p_limit

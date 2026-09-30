@@ -421,7 +421,7 @@ begin
      )
      or has_table_privilege(
        'service_role',
-       'foundation.foundation_promoted_release_case_audit_response_execution_events',
+       'foundation.case_audit_safe_response_exec_events',
        'INSERT'
      )
      or not has_function_privilege(
@@ -449,11 +449,11 @@ do $l76_append_only$
 declare id uuid;
 begin
   select event_id into id
-  from foundation.foundation_promoted_release_case_audit_response_execution_events
+  from foundation.case_audit_safe_response_exec_events
   limit 1;
 
   begin
-    update foundation.foundation_promoted_release_case_audit_response_execution_events
+    update foundation.case_audit_safe_response_exec_events
     set reason_code='mutation'
     where event_id=id;
     raise exception 'Layer 76 execution history unexpectedly mutated';

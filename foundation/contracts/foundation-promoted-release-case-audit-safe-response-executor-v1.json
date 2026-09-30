@@ -5,7 +5,7 @@
   "purpose": "Provide a policy-coupled append-only execution path for only the two non-authoritative safe Layer-75 actions: fresh case-audit evidence and the existing bounded Layer-67 handoff materialiser.",
   "executor": "foundation.execute_foundation_promoted_release_case_audit_safe_response_v1",
   "policy": "foundation.evaluate_foundation_promoted_release_case_audit_incident_response_v1",
-  "executionLedger": "foundation.foundation_promoted_release_case_audit_response_execution_events",
+  "executionLedger": "foundation.case_audit_safe_response_exec_events",
   "summary": "foundation.get_foundation_promoted_release_case_audit_safe_response_execution_summary_v1",
   "allowedActions": {
     "record-fresh-promotion-case-audit-observation": {
@@ -39,6 +39,8 @@
     "historyRewritePerformed": false,
     "releaseTruthMutationPerformed": false,
     "incidentHistoryMutationPerformed": false,
-    "automaticExecution": false
+    "automaticExecution": false,
+    "canonicalIdentifierLengthSafe": true,
+    "productionAndFreshSchemaNamesConverge": true
   }
 }
