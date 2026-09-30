@@ -129,6 +129,8 @@ Layer 76 therefore standardises the physical ledger name to:
 
 Fresh databases create that name directly. Existing production uses an idempotent convergence migration that renames the already-created table plus its identity sequence, constraints, indexes and append-only trigger so fresh CI and production expose the same canonical schema names.
 
+Because PL/pgSQL stores function source text, an already-live rename also requires the Layer-76 executor/summary functions to be replaced so their SQL text references the new canonical table. A second idempotent convergence step reapplies those already-tested function definitions after the rename.
+
 ## Authority boundary
 
 Execute:
