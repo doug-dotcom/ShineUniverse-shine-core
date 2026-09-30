@@ -2,7 +2,7 @@
 import {readFileSync} from 'node:fs';
 import {fileURLToPath} from 'node:url';
 
-export const SHINE_DEFENCE_ATTESTATION_WORKFLOW_COMPATIBILITY_VERSION='1.0.0';
+export const SHINE_DEFENCE_ATTESTATION_WORKFLOW_COMPATIBILITY_VERSION='1.1.0';
 
 const root=fileURLToPath(new URL('../../../',import.meta.url));
 const contractPath=root+'security/shine-defence/attestation-workflow-compatibility-v1.json';
@@ -11,7 +11,7 @@ const occurrences=(source,needle)=>source.split(needle).length-1;
 
 export function assessAttestationWorkflow({source,contract}){
   if(typeof source!=='string'||!source.trim()) throw new Error('workflow source required');
-  if(!contract||contract.contract!=='shine-defence/attestation-workflow-compatibility-v1'||contract.version!=='1.0.0'){
+  if(!contract||contract.contract!=='shine-defence/attestation-workflow-compatibility-v1'||contract.version!=='1.1.0'){
     throw new Error('unsupported attestation compatibility contract');
   }
 
@@ -25,14 +25,19 @@ export function assessAttestationWorkflow({source,contract}){
   const writeLines=lines.filter(line=>/^[A-Za-z0-9_-]+\s*:\s*write\s*(?:#.*)?$/.test(line));
   if(writeLines.some(line=>line!=='id-token: write')) violations.push('broader-write-permission');
 
-  if(!source.includes('\n  push:\n')||!source.includes('\n    branches: [main]\n')) violations.push('push-main-trigger');
+  if(!source.includes('\n  schedule:\n')) violations.push('schedule-trigger');
+  if(!source.includes('\n  workflow_dispatch:\n')) violations.push('workflow-dispatch-trigger');
   for(const trigger of required.forbiddenTriggers){
     if(source.includes('\n  '+trigger+':')) violations.push('forbidden-trigger:'+trigger);
   }
 
   if(!lines.includes('runs-on: '+required.runner)) violations.push('runner-pin');
   if(!lines.includes('shell: '+required.strictShell)) violations.push('strict-shell');
-  if(!lines.includes('SHINE_DEFENCE_SOURCE_BRANCH: '+required.sourceBranch)) violations.push('source-branch-binding');
+
+  const sourceBranchLine=lines.find(line=>line.startsWith('SHINE_DEFENCE_SOURCE_BRANCH: '));
+  const sourceBranch=sourceBranchLine?sourceBranchLine.slice('SHINE_DEFENCE_SOURCE_BRANCH: '.length).trim():'';
+  const sourceBranchPattern=new RegExp(required.sourceBranch.pattern);
+  if(!sourceBranch||!sourceBranchPattern.test(sourceBranch)||sourceBranch.includes('..')) violations.push('source-branch-binding');
   if(!lines.some(line=>line.startsWith('SHINE_DEFENCE_TARGET_ID: ')&&line.length>'SHINE_DEFENCE_TARGET_ID: '.length)) violations.push('target-binding');
 
   if(source.includes('secrets.')) violations.push('secret-context-reference');
@@ -48,6 +53,8 @@ export function assessAttestationWorkflow({source,contract}){
     ok:violations.length===0,
     role:contract.role,
     version:contract.version,
+    sourceBranch,
+    deploymentBranchVerificationRequired:required.sourceBranch.mustMatchDeploymentSource===true,
     keyContinuity:bounded.oidc.keyContinuity,
     tokenReferences:tokenRefs,
     oidcAudiences:[...new Set(audiences)].sort(),
@@ -61,7 +68,7 @@ function selfTest(){
     'name: Shine Defence Release Head',
     'on:',
     '  schedule:',
-    "    - cron: '0 * * * *'",
+    "    - cron: '*/5 * * * *'",
     '  workflow_dispatch:',
     '  push:',
     '    branches: [main]',
@@ -76,7 +83,7 @@ function selfTest(){
     '    runs-on: ubuntu-24.04',
     '    env:',
     '      SHINE_DEFENCE_TARGET_ID: railway:example',
-    '      SHINE_DEFENCE_SOURCE_BRANCH: main',
+    '      SHINE_DEFENCE_SOURCE_BRANCH: build/layer-001-foundation',
     '    steps:',
     '      - run: echo "audience=shine-defence-release-head"',
     '        env:',
@@ -84,11 +91,11 @@ function selfTest(){
     ''
   ].join('\n');
   const pass=assessAttestationWorkflow({source:good,contract});
-  if(!pass.ok) throw new Error('valid attestation workflow rejected: '+pass.violations.join(','));
+  if(!pass.ok||pass.sourceBranch!=='build/layer-001-foundation') throw new Error('valid attestation workflow rejected: '+pass.violations.join(','));
 
-  const bad=good.replace('contents: read','contents: write').replace('audience=shine-defence-release-head','audience=other');
+  const bad=good.replace('contents: read','contents: write').replace('audience=shine-defence-release-head','audience=other').replace('build/layer-001-foundation','../unsafe');
   const fail=assessAttestationWorkflow({source:bad,contract});
-  if(fail.ok||!fail.violations.includes('broader-write-permission')||!fail.violations.includes('oidc-audience')){
+  if(fail.ok||!fail.violations.includes('broader-write-permission')||!fail.violations.includes('oidc-audience')||!fail.violations.includes('source-branch-binding')){
     throw new Error('unsafe attestation workflow accepted');
   }
   console.log('SHINE DEFENCE ATTESTATION WORKFLOW COMPATIBILITY: PASS');
