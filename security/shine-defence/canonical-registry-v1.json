@@ -518,6 +518,18 @@
       "path": "security/shine-defence/integration-kit/attestation-workflow-compatibility-v1.mjs",
       "version": "1.1.0",
       "blobSha": "2ddf3056fd22384978827d0dcc03036287e3705d"
+    },
+    {
+      "id": "github-actions-oidc-verifier",
+      "path": "security/shine-defence/github-actions-oidc-verifier-v1.json",
+      "version": "1.0.0",
+      "blobSha": "6a0567f08f0df0cd074c6c14db4b2d3984a5dbd9"
+    },
+    {
+      "id": "github-actions-oidc-verifier-runtime",
+      "path": "foundation/runtime/_shared/github-actions-oidc-v1.mjs",
+      "version": "1.0.0",
+      "blobSha": "216b51c05e3ed57e017dd250049d6d7fcd2c1b12"
     }
   ]
 }
