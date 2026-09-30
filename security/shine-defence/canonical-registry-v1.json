@@ -631,7 +631,7 @@
       "id": "release-attestation-authority-sync-runtime",
       "path": "foundation/runtime/defence-attestation-authority-ingest/index.ts",
       "version": "1.0.0",
-      "blobSha": "96d0b484529fa509889b2ffad547bfc2329c91e9"
+      "blobSha": "666df99fc8501c387de0345293015a588640ee48"
     },
     {
       "id": "release-attestation-authority-sync-db",
