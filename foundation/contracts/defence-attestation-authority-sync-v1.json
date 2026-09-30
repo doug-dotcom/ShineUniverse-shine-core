@@ -1,0 +1,29 @@
+{
+  "contract": "shine-defence/attestation-authority-sync-v1",
+  "version": "1.0.0",
+  "purpose": "Synchronize the validated Core attestation-authority lineage tip into Foundation through a signed GitHub OIDC control-plane path.",
+  "publisher": {
+    "repository": "doug-dotcom/ShineUniverse-shine-core",
+    "repositoryId": "1072897952",
+    "repositoryOwner": "doug-dotcom",
+    "repositoryOwnerId": "225530237",
+    "branch": "main",
+    "workflowPath": ".github/workflows/shine-defence-authority-state.yml",
+    "audience": "shine-defence-authority-state"
+  },
+  "database": {
+    "historyTable": "foundation.defence_attestation_authority_activations",
+    "currentView": "foundation.current_defence_attestation_authority",
+    "recorder": "foundation.record_defence_attestation_authority_activation_v1"
+  },
+  "rules": [
+    "The publisher validates canonical authority lineage before requesting an OIDC token.",
+    "Foundation accepts only GitHub-hosted OIDC from the immutable Core repository identity, main branch and dedicated authority-state workflow.",
+    "Every non-bootstrap activation names the currently active authority SHA as predecessor.",
+    "Forward promotion may introduce only a previously unused authority SHA.",
+    "Rollback may restore only a previously recorded authority SHA at the exact original workflow blob and referenced source sequence.",
+    "Activation timestamps strictly increase.",
+    "Exact request replay is idempotent; conflicting replay is rejected by the GitHub OIDC operation binding.",
+    "The database history is append-only and the current authority is derived only from that history."
+  ]
+}
