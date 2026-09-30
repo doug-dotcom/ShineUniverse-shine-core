@@ -1,0 +1,58 @@
+{
+  "contract": "shine-foundation/case-audit-reconciliation-execution-reconciliation-coverage-v1",
+  "version": "1.0.0",
+  "layer": 88,
+  "purpose": "Audit whether every successful Layer-86 bounded reconciliation execution has exactly one structurally valid Layer-87 reconciliation receipt, separating Layer-87 receipt coverage from healthy reconciliation of the Layer-86 execution claim.",
+  "reader": "foundation.get_case_audit_reconcile_exec_reconciliation_coverage_v1",
+  "sourceLayer86Ledger": "foundation.case_audit_verify_reconcile_exec_events",
+  "sourceLayer87Ledger": "foundation.case_audit_verify_reconcile_exec_reconciliations",
+  "linkedLayer82Ledger": "foundation.case_audit_verify_exec_reconciliations",
+  "overallStates": [
+    "idle",
+    "normal",
+    "pending",
+    "gap",
+    "invalid"
+  ],
+  "itemStates": [
+    "pending",
+    "overdue",
+    "invalid-reconciliation",
+    "reconciled",
+    "missing-layer82-receipt",
+    "invalid-layer82-receipt",
+    "execution-receipt-mismatch",
+    "policy-drift",
+    "incident-drift",
+    "coverage-drift"
+  ],
+  "metrics": {
+    "coverage": "layer87ReconciliationCoveragePercent",
+    "health": "healthyLayer87ReconciliationPercent"
+  },
+  "invariants": {
+    "onlySuccessfulLayer86ExecutionsRequireLayer87Reconciliation": true,
+    "receiptCoverageSeparatedFromReconciliationHealth": true,
+    "validNegativeLayer87OutcomeCountsAsCoveredButUnhealthy": true,
+    "invalidLayer87ReceiptHasPriority": true,
+    "layer87ProofHashRecomputed": true,
+    "layer87ProofEnvelopeRevalidated": true,
+    "layer86SnapshotBoundToSourceExecution": true,
+    "linkedLayer82SnapshotRevalidated": true,
+    "readerPerformsNoLayer87Reconciliation": true,
+    "noLayer86Rerun": true,
+    "noLayer82Rerun": true,
+    "noLayer81Rerun": true,
+    "noVerificationRerun": true,
+    "noEvidenceMutation": true,
+    "noReconciliationReceiptRewrite": true,
+    "noVerificationProofRewrite": true,
+    "noReleaseTruthMutation": true,
+    "noIncidentHistoryMutation": true,
+    "gatewayReadInheritedViaFoundationRuntime": true,
+    "gatewayReceivesNoDirectGrant": true,
+    "ownerDenied": true,
+    "defenceDenied": true,
+    "browserRolesDenied": true
+  }
+}
