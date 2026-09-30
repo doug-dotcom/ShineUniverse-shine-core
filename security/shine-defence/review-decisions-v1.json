@@ -40,7 +40,7 @@
       "authority": "shine-defence-core",
       "successorCandidateId": "shine-wellness-1c22e0fc99f4",
       "summary": "Build 22 replaced the pending Build 21 Wellness candidate before human review was finalized; no review findings or authorization carry forward.",
-      "reviewChecklistBlobSha": "4c6d211430c10081dffc8928b40a6e6c94a416ba",
+      "reviewChecklistBlobSha": "7e23cb90eff17c72d4bbb83b915fc559c1d996fb",
       "reviewRegistryBlobSha": "fab8bd8429b46385df854074336f50b182ba1fbc"
     }
   ]

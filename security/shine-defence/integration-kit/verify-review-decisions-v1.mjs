@@ -17,7 +17,7 @@ const failures=[];
 
 const cleanText=(value,max)=>typeof value==='string'&&value.length>0&&value.length<=max&&!secretLike.test(value);
 const SHA=/^[a-f0-9]{40}$/;
-const gitBlobSha=bytes=>createHash('sha1').update(Buffer.from('blob '+bytes.length+'\\0')).update(bytes).digest('hex');
+const gitBlobSha=bytes=>createHash('sha1').update(Buffer.from('blob '+bytes.length+'\0')).update(bytes).digest('hex');
 
 if(queue.ledger!=='shine-defence/review-candidates-v1'||queue.version!=='1.0.0'||!Array.isArray(queue.candidates)){
   failures.push('unsupported review candidate queue');
