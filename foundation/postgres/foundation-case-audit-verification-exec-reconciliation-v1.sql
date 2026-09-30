@@ -277,6 +277,8 @@ begin
         is not distinct from v_target.policy_fingerprint
       and v_exec.target_snapshot->'executionRequestedAt'
         is not distinct from to_jsonb(v_target.requested_at)
+      and v_exec.target_snapshot->'verificationAbsent'='true'::jsonb
+      and nullif(v_exec.target_snapshot->>'verificationId','') is null
       and v_exec.decision_snapshot->>'decision'='admit'
       and v_exec.decision_snapshot->>'requiredControl'
         ='layer-77-bounded-verifier'
