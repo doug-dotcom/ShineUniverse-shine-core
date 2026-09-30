@@ -1,6 +1,6 @@
 {
   "contract": "shine-defence/release-attestation-authority-v1",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "purpose": "Centralize the authority-bearing release-head and rollback attestation job in Shine Core so app callers cannot silently change attestation logic.",
   "reusableWorkflow": {
     "repository": "doug-dotcom/ShineUniverse-shine-core",
@@ -45,7 +45,9 @@
     "Release-head and rollback OIDC tokens without the exact pinned Core reusable workflow authority are rejected.",
     "Authority-gated runtime consumers import one shared immutable authority binding; they do not duplicate the authority ref or SHA locally.",
     "Every active authority is the final entry in the append-only authority lineage and its workflow blob is proven against repository history.",
-    "Every successor authority after the bootstrap generation has an explicit approved promotion receipt bound to the predecessor, successor and exact workflow blob."
+    "Every successor authority after the bootstrap generation has an explicit approved promotion receipt bound to the predecessor, successor and exact workflow blob.",
+    "A failed authority generation can be rolled back only by appending an explicit rollback activation to a previously trusted authority with its original workflow bytes.",
+    "Rollback never rewrites lineage or silently reuses a prior SHA as a forward promotion."
   ],
   "enforcement": {
     "mode": "mandatory",
@@ -57,7 +59,7 @@
     "requiredJobWorkflowSha": "7bfd7fe685b4b2da814ac53dafdbfac2350591c8",
     "failureMode": "401 unauthorized",
     "runtimeBindingPath": "foundation/runtime/_shared/shine-defence-release-attestation-authority-v1.mjs",
-    "rotationRule": "For sequence 2+, create and review an immutable promotion receipt first; append a successor lineage entry that pins that receipt by Git blob SHA; only then rotate the shared runtime binding and this contract. CI fails closed on missing approval, incomplete review controls, receipt tamper, broken predecessor linkage, workflow-blob mismatch or runtime/contract divergence."
+    "rotationRule": "For forward changes, require an approved byte-pinned promotion receipt before appending a promotion activation. For emergency reactivation, require an approved byte-pinned rollback receipt that restores a prior lineage authority with its original workflow blob. Only then rotate the shared runtime binding and this contract; CI fails closed on unauthorized replay, altered rollback bytes, receipt tamper or runtime/contract divergence."
   },
   "runtimeBinding": {
     "path": "foundation/runtime/_shared/shine-defence-release-attestation-authority-v1.mjs",
@@ -75,5 +77,11 @@
     "receiptDirectory": "security/shine-defence/release-attestation-authority-promotions",
     "bootstrapSequence": 1,
     "successorRequirement": "explicit-approved-byte-pinned-receipt"
+  },
+  "rollbackGate": {
+    "contractPath": "security/shine-defence/release-attestation-authority-rollback-v1.json",
+    "receiptDirectory": "security/shine-defence/release-attestation-authority-rollbacks",
+    "mode": "append-only-reactivation",
+    "restoreRequirement": "previously-trusted-authority-with-original-workflow-blob"
   }
 }
