@@ -157,6 +157,54 @@ begin
               = 'false'::jsonb
           and x.reconciliation_proof->'mutationPerformed'
               = 'false'::jsonb
+          and (
+            (
+              x.reconciliation_state='reconciled'
+              and x.verification_id is not null
+              and x.proof_integrity_valid is true
+              and x.receipt_matches_proof is true
+              and x.current_evaluation_matches is true
+              and (
+                x.coverage_target_visible=false
+                or x.coverage_target_matches is true
+              )
+            )
+            or
+            (
+              x.reconciliation_state='missing-proof'
+              and x.verification_id is null
+            )
+            or
+            (
+              x.reconciliation_state='receipt-mismatch'
+              and x.verification_id is not null
+              and x.receipt_matches_proof is false
+            )
+            or
+            (
+              x.reconciliation_state='invalid-proof'
+              and x.verification_id is not null
+              and x.proof_integrity_valid is false
+            )
+            or
+            (
+              x.reconciliation_state='evidence-drift'
+              and x.verification_id is not null
+              and x.proof_integrity_valid is true
+              and x.receipt_matches_proof is true
+              and x.current_evaluation_matches is false
+            )
+            or
+            (
+              x.reconciliation_state='coverage-drift'
+              and x.verification_id is not null
+              and x.proof_integrity_valid is true
+              and x.receipt_matches_proof is true
+              and x.current_evaluation_matches is true
+              and x.coverage_target_visible=true
+              and x.coverage_target_matches is false
+            )
+          )
       end as reconciliation_proof_integrity_valid
     from successful_exec x
   ),
