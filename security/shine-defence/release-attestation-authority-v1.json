@@ -1,6 +1,6 @@
 {
   "contract": "shine-defence/release-attestation-authority-v1",
-  "version": "1.6.0",
+  "version": "1.7.0",
   "purpose": "Centralize the authority-bearing release-head and rollback attestation job in Shine Core so app callers cannot silently change attestation logic.",
   "reusableWorkflow": {
     "repository": "doug-dotcom/ShineUniverse-shine-core",
@@ -49,7 +49,9 @@
     "A failed authority generation can be rolled back only by appending an explicit rollback activation to a previously trusted authority with its original workflow bytes.",
     "Rollback never rewrites lineage or silently reuses a prior SHA as a forward promotion.",
     "A successful authority-state synchronization immediately changes which reusable-workflow authority deployed consumers accept; no Edge Function redeploy is required.",
-    "Missing active authority state fails closed even when the GitHub OIDC token is otherwise cryptographically valid."
+    "Missing active authority state fails closed even when the GitHub OIDC token is otherwise cryptographically valid.",
+    "A matching reusable-workflow authority is not admissible when the latest signed Core-to-Foundation authority-sync heartbeat is missing, stale or mismatched.",
+    "Release-head and rollback ingestion require a fresh authority-sync receipt for the currently active authority, bounded to 5400 seconds."
   ],
   "enforcement": {
     "mode": "mandatory",
@@ -59,11 +61,13 @@
     ],
     "requiredJobWorkflowRef": "doug-dotcom/ShineUniverse-shine-core/.github/workflows/shine-defence-release-attestation-v1.yml@7bfd7fe685b4b2da814ac53dafdbfac2350591c8",
     "requiredJobWorkflowSha": "7bfd7fe685b4b2da814ac53dafdbfac2350591c8",
-    "failureMode": "401 unauthorized on missing or mismatched live authority",
+    "failureMode": "401 unauthorized on missing/mismatched live authority or stale/missing authority-sync heartbeat",
     "runtimeBindingPath": "foundation/runtime/_shared/shine-defence-release-attestation-authority-v1.mjs",
-    "rotationRule": "For forward changes, validate and synchronize the approved lineage successor into Foundation before callers use it; for emergency rollback, synchronize the approved historical reactivation first. Deployed release-head and rollback consumers then follow Foundation's current authority immediately without redeployment, while CI still requires canonical contract/runtime lineage parity.",
+    "rotationRule": "For forward changes or rollback, synchronize the approved lineage state into Foundation first and keep the signed authority-sync heartbeat fresh. Deployed release-head and rollback consumers accept the live authority only while the current heartbeat remains PASS within 5400 seconds; stale or missing synchronization fails closed until Core reasserts authority state.",
     "liveAuthorityView": "foundation.current_defence_attestation_authority",
-    "liveAuthorityVerifierPath": "foundation/runtime/_shared/shine-defence-active-authority-v1.mjs"
+    "liveAuthorityVerifierPath": "foundation/runtime/_shared/shine-defence-active-authority-v1.mjs",
+    "heartbeatSummary": "foundation.get_defence_attestation_authority_sync_summary_v1",
+    "heartbeatMaxAgeSeconds": 5400
   },
   "runtimeBinding": {
     "path": "foundation/runtime/_shared/shine-defence-release-attestation-authority-v1.mjs",
