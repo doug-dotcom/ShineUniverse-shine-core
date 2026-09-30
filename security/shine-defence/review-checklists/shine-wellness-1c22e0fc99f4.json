@@ -13,9 +13,9 @@
     "certifier"
   ],
   "candidateObservedAt": "2026-09-30T04:05:50.000Z",
-  "generatedAt": "2026-09-30T06:17:00.000Z",
+  "generatedAt": "2026-09-30T06:36:00.000Z",
   "registryVersion": "1.0.0",
-  "registryBlobSha": "810c08a8c8faf7ad187c518a61984692dc6fe617",
+  "registryBlobSha": "ab18ec8db06f740470a0ec7e9468faf78af698a6",
   "candidateEvidence": [
     {
       "evidenceId": "E1",

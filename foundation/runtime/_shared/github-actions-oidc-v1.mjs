@@ -11,6 +11,8 @@ const cleanString=(value,max=1024)=>typeof value==='string'&&value.length>0&&val
 const repositoryClaim=value=>typeof value==='string'&&/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(value);
 const workflowPath=value=>typeof value==='string'&&/^\.github\/workflows\/[A-Za-z0-9_.-]+\.ya?ml$/.test(value);
 const branchName=value=>typeof value==='string'&&/^[A-Za-z0-9._/-]{1,128}$/.test(value)&&!value.includes('..');
+const numericId=value=>typeof value==='string'&&/^[0-9]{1,20}$/.test(value);
+const sha40=value=>typeof value==='string'&&/^[a-f0-9]{40}$/i.test(value);
 
 const base64urlBytes=value=>{
   if(typeof value!=='string'||!/^[A-Za-z0-9_-]*$/.test(value)) throw oidcError('token encoding invalid');
@@ -44,6 +46,12 @@ const validatePolicy=policy=>{
     if(!policy.expectedWorkflow||!workflowPath(policy.expectedWorkflow.path)||!branchName(policy.expectedWorkflow.branch)) throw oidcError('verification workflow policy invalid');
   }
   if(policy.expectedWorkflowRef!==undefined&&policy.expectedWorkflow!==undefined) throw oidcError('verification workflow policy ambiguous');
+  if(policy.expectedRepositoryId!==undefined&&!numericId(String(policy.expectedRepositoryId))) throw oidcError('verification repository id policy invalid');
+  if(policy.expectedRepositoryOwner!==undefined&&!cleanString(policy.expectedRepositoryOwner,128)) throw oidcError('verification repository owner policy invalid');
+  if(policy.expectedRepositoryOwnerId!==undefined&&!numericId(String(policy.expectedRepositoryOwnerId))) throw oidcError('verification repository owner id policy invalid');
+  if(policy.expectedRefType!==undefined&&!['branch','tag'].includes(policy.expectedRefType)) throw oidcError('verification ref type policy invalid');
+  if(policy.expectedRunnerEnvironment!==undefined&&!['github-hosted','self-hosted'].includes(policy.expectedRunnerEnvironment)) throw oidcError('verification runner environment policy invalid');
+  if(policy.subjectMode!==undefined&&policy.subjectMode!=='repository-ref') throw oidcError('verification subject policy invalid');
   if(policy.maxTokenAgeSeconds!==undefined&&(!Number.isInteger(policy.maxTokenAgeSeconds)||policy.maxTokenAgeSeconds<60||policy.maxTokenAgeSeconds>3600)) throw oidcError('verification freshness policy invalid');
 };
 
@@ -141,12 +149,25 @@ export function createGithubActionsOidcVerifier({
     const maxTokenAgeSeconds=policy.maxTokenAgeSeconds??DEFAULT_MAX_TOKEN_AGE_SECONDS;
     if(payload.iat<nowSeconds-maxTokenAgeSeconds-CLOCK_SKEW_SECONDS) throw oidcError('token too old');
     if(!repositoryClaim(payload.repository)) throw oidcError('repository claim invalid');
+    if(!numericId(String(payload.repository_id??''))) throw oidcError('repository id claim invalid');
+    if(!cleanString(payload.repository_owner,128)) throw oidcError('repository owner claim invalid');
+    if(!numericId(String(payload.repository_owner_id??''))) throw oidcError('repository owner id claim invalid');
+    if(String(payload.repository).split('/')[0]!==String(payload.repository_owner)) throw oidcError('repository owner mismatch');
     if(!/^[0-9]{1,32}$/.test(String(payload.run_id??''))) throw oidcError('run id claim invalid');
     if(!/^[0-9]{1,16}$/.test(String(payload.run_attempt??''))) throw oidcError('run attempt claim invalid');
     if(!cleanString(payload.ref,256)||!cleanString(payload.workflow_ref,1024)) throw oidcError('workflow claims missing');
+    if(!['branch','tag'].includes(String(payload.ref_type??''))) throw oidcError('ref type claim invalid');
+    if(!['github-hosted','self-hosted'].includes(String(payload.runner_environment??''))) throw oidcError('runner environment claim invalid');
+    if(!sha40(String(payload.workflow_sha??''))) throw oidcError('workflow sha claim invalid');
+    if(!cleanString(payload.sub,1024)) throw oidcError('subject claim invalid');
     if(!policy.allowedEvents.includes(String(payload.event_name))) throw oidcError('event not allowed');
     if(policy.expectedRepository!==undefined&&payload.repository!==policy.expectedRepository) throw oidcError('repository mismatch');
+    if(policy.expectedRepositoryId!==undefined&&String(payload.repository_id)!==String(policy.expectedRepositoryId)) throw oidcError('repository id mismatch');
+    if(policy.expectedRepositoryOwner!==undefined&&payload.repository_owner!==policy.expectedRepositoryOwner) throw oidcError('repository owner mismatch');
+    if(policy.expectedRepositoryOwnerId!==undefined&&String(payload.repository_owner_id)!==String(policy.expectedRepositoryOwnerId)) throw oidcError('repository owner id mismatch');
     if(policy.expectedRef!==undefined&&payload.ref!==policy.expectedRef) throw oidcError('ref mismatch');
+    if(policy.expectedRefType!==undefined&&payload.ref_type!==policy.expectedRefType) throw oidcError('ref type mismatch');
+    if(policy.expectedRunnerEnvironment!==undefined&&payload.runner_environment!==policy.expectedRunnerEnvironment) throw oidcError('runner environment mismatch');
 
     let expectedWorkflowRef=policy.expectedWorkflowRef;
     if(policy.expectedWorkflow){
@@ -154,19 +175,32 @@ export function createGithubActionsOidcVerifier({
     }
     if(expectedWorkflowRef!==undefined&&payload.workflow_ref!==expectedWorkflowRef) throw oidcError('workflow mismatch');
 
+    if(policy.subjectMode==='repository-ref'){
+      const [owner,repositoryName]=String(payload.repository).split('/');
+      const legacy='repo:'+payload.repository+':ref:'+payload.ref;
+      const immutable='repo:'+owner+'@'+payload.repository_owner_id+'/'+repositoryName+'@'+payload.repository_id+':ref:'+payload.ref;
+      if(payload.sub!==legacy&&payload.sub!==immutable) throw oidcError('subject mismatch');
+    }
+
     const sha=String(payload.sha??'');
     return {
       kid:String(header.kid),
       repository:String(payload.repository),
+      repositoryId:String(payload.repository_id),
+      repositoryOwner:String(payload.repository_owner),
+      repositoryOwnerId:String(payload.repository_owner_id),
       ref:String(payload.ref),
+      refType:String(payload.ref_type),
       workflowRef:String(payload.workflow_ref),
       runId:String(payload.run_id??''),
       runAttempt:String(payload.run_attempt??''),
       eventName:String(payload.event_name),
       actor:String(payload.actor??''),
+      actorId:String(payload.actor_id??''),
+      runnerEnvironment:String(payload.runner_environment),
       sha,
-      workflowSha:sha,
-      subject:String(payload.sub??''),
+      workflowSha:String(payload.workflow_sha),
+      subject:String(payload.sub),
       issuedAt:payload.iat
     };
   };
@@ -178,4 +212,4 @@ const defaultVerifier=createGithubActionsOidcVerifier();
 
 export const verifyGithubActionsOidc=(token,policy)=>defaultVerifier.verify(token,policy);
 export const GITHUB_ACTIONS_OIDC_ISSUER=EXPECTED_ISSUER;
-export const GITHUB_ACTIONS_OIDC_VERIFIER_VERSION='1.1.0';
+export const GITHUB_ACTIONS_OIDC_VERIFIER_VERSION='1.2.0';

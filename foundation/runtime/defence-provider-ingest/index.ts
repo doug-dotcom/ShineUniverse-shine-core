@@ -9,7 +9,13 @@ const EXPECTED_WORKFLOW_REF='doug-dotcom/ShineUniverse-shine-core/.github/workfl
 const OIDC_POLICY={
   audience:AUDIENCE,
   expectedRepository:EXPECTED_REPOSITORY,
+  expectedRepositoryId:'1072897952',
+  expectedRepositoryOwner:'doug-dotcom',
+  expectedRepositoryOwnerId:'225530237',
   expectedRef:EXPECTED_REF,
+  expectedRefType:'branch',
+  expectedRunnerEnvironment:'github-hosted',
+  subjectMode:'repository-ref',
   expectedWorkflowRef:EXPECTED_WORKFLOW_REF,
   allowedEvents:["schedule","workflow_dispatch","push"]
 };
@@ -132,6 +138,14 @@ Deno.serve(async(req:Request)=>{
               collector:'shine-defence/estate-provider-collector-v1',
               githubRunId:identity.runId,
               githubRunAttempt:identity.runAttempt,
+          githubRepository:identity.repository,
+          githubRepositoryId:identity.repositoryId,
+          githubRepositoryOwner:identity.repositoryOwner,
+          githubRepositoryOwnerId:identity.repositoryOwnerId,
+          githubRef:identity.ref,
+          githubWorkflowRef:identity.workflowRef,
+          githubWorkflowSha:identity.workflowSha,
+          githubRunnerEnvironment:identity.runnerEnvironment,
               githubEvent:identity.eventName
             })}
           )

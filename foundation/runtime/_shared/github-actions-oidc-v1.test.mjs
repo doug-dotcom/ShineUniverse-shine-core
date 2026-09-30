@@ -34,12 +34,19 @@ const basePayload=()=>({
   nbf:nowSeconds-10,
   iat:nowSeconds-10,
   repository:'doug-dotcom/example',
+  repository_id:'456789',
+  repository_owner:'doug-dotcom',
+  repository_owner_id:'225530237',
   ref:'refs/heads/main',
+  ref_type:'branch',
   workflow_ref:'doug-dotcom/example/.github/workflows/shine-defence-release-head.yml@refs/heads/main',
   event_name:'schedule',
+  runner_environment:'github-hosted',
+  workflow_sha:'b'.repeat(40),
   run_id:'1234',
   run_attempt:'2',
   actor:'doug-dotcom',
+  actor_id:'225530237',
   sha:'a'.repeat(40),
   sub:'repo:doug-dotcom/example:ref:refs/heads/main'
 });
@@ -48,6 +55,11 @@ const policy={
   audience:'shine-defence-release-head',
   expectedRef:'refs/heads/main',
   expectedWorkflow:{path:'.github/workflows/shine-defence-release-head.yml',branch:'main'},
+  expectedRepositoryOwner:'doug-dotcom',
+  expectedRepositoryOwnerId:'225530237',
+  expectedRefType:'branch',
+  expectedRunnerEnvironment:'github-hosted',
+  subjectMode:'repository-ref',
   allowedEvents:['schedule','workflow_dispatch','push']
 };
 
@@ -74,6 +86,10 @@ test('shared verifier accepts current key and refreshes immediately on signing-k
   const firstIdentity=await verifier.verify(firstToken,policy);
   assert.equal(firstIdentity.kid,'kid-1');
   assert.equal(firstIdentity.repository,'doug-dotcom/example');
+  assert.equal(firstIdentity.repositoryId,'456789');
+  assert.equal(firstIdentity.repositoryOwnerId,'225530237');
+  assert.equal(firstIdentity.workflowSha,'b'.repeat(40));
+  assert.equal(firstIdentity.runnerEnvironment,'github-hosted');
   assert.equal(jwksFetches,1);
   assert.equal(metadataFetches,1);
 
@@ -104,6 +120,26 @@ test('shared verifier fails closed after refresh and enforces consumer claim pol
 
   const wrongWorkflow=await signJwt({...basePayload(),workflow_ref:'doug-dotcom/example/.github/workflows/other.yml@refs/heads/main'},key);
   await assert.rejects(()=>verifier.verify(wrongWorkflow,policy),/OIDC workflow mismatch/);
+
+  const wrongRepositoryId=await signJwt({...basePayload(),repository_id:'999'},key);
+  await assert.rejects(()=>verifier.verify(wrongRepositoryId,{...policy,expectedRepositoryId:'456789'}),/OIDC repository id mismatch/);
+
+  const selfHosted=await signJwt({...basePayload(),runner_environment:'self-hosted'},key);
+  await assert.rejects(()=>verifier.verify(selfHosted,policy),/OIDC runner environment mismatch/);
+
+  const badRefType=await signJwt({...basePayload(),ref_type:'tag'},key);
+  await assert.rejects(()=>verifier.verify(badRefType,policy),/OIDC ref type mismatch/);
+
+  const badWorkflowSha=await signJwt({...basePayload(),workflow_sha:'not-a-sha'},key);
+  await assert.rejects(()=>verifier.verify(badWorkflowSha,policy),/OIDC workflow sha claim invalid/);
+
+  const badSubject=await signJwt({...basePayload(),sub:'repo:doug-dotcom/other:ref:refs/heads/main'},key);
+  await assert.rejects(()=>verifier.verify(badSubject,policy),/OIDC subject mismatch/);
+
+  const immutablePayload={...basePayload(),sub:'repo:doug-dotcom@225530237/example@456789:ref:refs/heads/main'};
+  const immutableIdentity=await verifier.verify(await signJwt(immutablePayload,key),policy);
+  assert.equal(immutableIdentity.subject,immutablePayload.sub);
+
 
   const expired=await signJwt({...basePayload(),exp:nowSeconds-60},key);
   await assert.rejects(()=>verifier.verify(expired,policy),/OIDC token expired/);
@@ -151,8 +187,37 @@ test('all Foundation OIDC consumers delegate cryptography to the shared verifier
     assert.match(source,/verifyGithubActionsOidc\(auth\.slice\(7\),OIDC_POLICY\)/,path+' must apply an explicit local claim policy');
     assert.match(source,/github-oidc-operation-v1\.mjs/,path+' must import the shared OIDC replay binder');
     assert.match(source,/bindGithubOidcOperation\(/,path+' must bind verified run identity to request semantics');
+    assert.match(source,/expectedRepositoryOwner:'doug-dotcom'/,path+' must pin the repository owner name');
+    assert.match(source,/expectedRepositoryOwnerId:'225530237'/,path+' must pin the immutable repository owner id');
+    assert.match(source,/expectedRefType:'branch'/,path+' must restrict OIDC to branch refs');
+    assert.match(source,/expectedRunnerEnvironment:'github-hosted'/,path+' must reject self-hosted runner tokens');
+    assert.match(source,/subjectMode:'repository-ref'/,path+' must enforce repository-ref subject semantics');
     assert.doesNotMatch(source,/token\.actions\.githubusercontent\.com/,path+' must not own issuer discovery');
     assert.doesNotMatch(source,/crypto\.subtle\.verify/,path+' must not implement JWT signature verification');
     assert.doesNotMatch(source,/getJwks|oidcMetadataPromise|jwksPromise/,path+' must not own JWKS caching');
+  }
+});
+
+test('dynamic release consumers bind signed immutable repository ids to Foundation target metadata',()=>{
+  const root=fileURLToPath(new URL('../../../',import.meta.url));
+  const release=readFileSync(root+'foundation/runtime/defence-release-head-ingest/index.ts','utf8');
+  const rollback=readFileSync(root+'foundation/runtime/defence-rollback-readiness/index.ts','utf8');
+  for(const [name,source] of [['release-head',release],['rollback',rollback]]){
+    assert.match(source,/sourceRepositoryId/,name+' must load immutable repository id from target metadata');
+    assert.match(source,/sourceRepositoryOwnerId/,name+' must load immutable owner id from target metadata');
+    assert.match(source,/identity\.repositoryId/,name+' must compare the signed repository id');
+    assert.match(source,/identity\.repositoryOwnerId/,name+' must compare the signed owner id');
+  }
+});
+
+test('fixed Core OIDC consumers pin the immutable Core repository id',()=>{
+  const root=fileURLToPath(new URL('../../../',import.meta.url));
+  for(const path of [
+    'foundation/runtime/defence-provider-ingest/index.ts',
+    'foundation/runtime/deployment-receipt-ingest/index.ts',
+    'foundation/runtime/defence-reattest/index.ts'
+  ]){
+    const source=readFileSync(root+path,'utf8');
+    assert.match(source,/expectedRepositoryId:'1072897952'/,path+' must pin Core repository id');
   }
 });
