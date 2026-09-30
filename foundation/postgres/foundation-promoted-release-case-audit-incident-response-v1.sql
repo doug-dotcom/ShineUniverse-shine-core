@@ -257,8 +257,8 @@ begin
     'authorityExpansion',false,
     'automaticRepairAllowed',false,
     'historyRewriteAllowed',false,
-    'mutatesAuthoritativeTruth',v_action_class='authoritative-mutation',
-    'mutatesIncidentHistory',v_action_class='history-mutation',
+    'mutatesAuthoritativeTruth',coalesce(v_action_class='authoritative-mutation',false),
+    'mutatesIncidentHistory',coalesce(v_action_class='history-mutation',false),
     'executesAction',false,
     'cause',v_cause
   );

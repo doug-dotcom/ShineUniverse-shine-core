@@ -63,8 +63,11 @@ begin
     );
 
   if unknown_action->>'decision'<>'deny'
-     or unknown_action->>'requiredControl'<>'prohibited' then
-    raise exception 'Layer 75 unknown action must fail closed: %',unknown_action;
+     or unknown_action->>'requiredControl'<>'prohibited'
+     or unknown_action->>'mutatesAuthoritativeTruth'<>'false'
+     or unknown_action->>'mutatesIncidentHistory'<>'false'
+     or unknown_action->>'executesAction'<>'false' then
+    raise exception 'Layer 75 unknown action must fail closed explicitly: %',unknown_action;
   end if;
 end;
 $l75_normal$;
