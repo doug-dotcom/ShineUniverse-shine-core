@@ -242,10 +242,26 @@ begin
        'foundation.get_case_audit_safe_response_verification_coverage_v1(text,timestamptz,integer,integer)',
        'EXECUTE'
      )
-     or has_function_privilege(
+     or not has_function_privilege(
        'foundation_gateway',
        'foundation.get_case_audit_safe_response_verification_coverage_v1(text,timestamptz,integer,integer)',
        'EXECUTE'
+     )
+     or not pg_has_role(
+       'foundation_gateway','foundation_runtime','MEMBER'
+     )
+     or exists(
+       select 1
+       from pg_proc p
+       join pg_namespace n on n.oid=p.pronamespace
+       cross join lateral aclexplode(
+         coalesce(p.proacl,acldefault('f',p.proowner))
+       ) a
+       join pg_roles r on r.oid=a.grantee
+       where n.nspname='foundation'
+         and p.proname='get_case_audit_safe_response_verification_coverage_v1'
+         and r.rolname='foundation_gateway'
+         and a.privilege_type='EXECUTE'
      )
      or has_function_privilege(
        'shine_core_control_plane',
