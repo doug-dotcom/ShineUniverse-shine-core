@@ -1,0 +1,56 @@
+{
+  "contract": "shine-foundation/case-audit-safe-response-evidence-verification-v1",
+  "version": "1.0.0",
+  "layer": 77,
+  "purpose": "Independently prove that each successful Layer-76 safe-response execution receipt is backed by the durable Layer-73 observation or Layer-67 owner-handoff evidence it claims to have produced, without re-running the target or mutating trust/history.",
+  "evaluator": "foundation.evaluate_case_audit_safe_response_execution_v1",
+  "runner": "foundation.run_case_audit_safe_response_verification_v1",
+  "summary": "foundation.get_case_audit_safe_response_verification_summary_v1",
+  "ledger": "foundation.case_audit_safe_response_verifications",
+  "sourceLedger": "foundation.case_audit_safe_response_exec_events",
+  "verificationStates": [
+    "verified",
+    "missing",
+    "mismatch"
+  ],
+  "actionEvidenceBindings": {
+    "record-fresh-promotion-case-audit-observation": {
+      "durableLedger": "foundation.foundation_promoted_release_case_audit_observations",
+      "identityField": "observationId",
+      "fingerprintField": "semanticFingerprint",
+      "recomputeStoredSnapshotSemanticFingerprint": true
+    },
+    "materialise-current-owner-handoff": {
+      "durableLedger": "foundation.foundation_promoted_release_owner_handoffs",
+      "identityField": "handoffId",
+      "fingerprintField": "handoffSha256",
+      "recomputeStoredDocumentSha256": true
+    }
+  },
+  "invariants": {
+    "onlySuccessfulExecutionReceiptsAreVerifiable": true,
+    "durableEvidenceReadIsIndependentOfExecutionReceipt": true,
+    "actionTargetIsNeverReexecuted": true,
+    "observationIdMustResolve": true,
+    "observationSemanticFingerprintMustMatch": true,
+    "handoffIdMustResolve": true,
+    "handoffReceiptFieldsMustMatchDurableRow": true,
+    "handoffStoredDocumentSha256IsRecomputed": true,
+    "missingEvidenceIsPreserved": true,
+    "mismatchedEvidenceIsPreserved": true,
+    "oneImmutableVerificationPerExecutionReceipt": true,
+    "replayReturnsExistingVerification": true,
+    "serviceRoleUsesBoundedRunnerNotDirectInsert": true,
+    "foundationRuntimeCannotRunVerification": true,
+    "gatewayCannotRunVerification": true,
+    "ownerCannotRunVerification": true,
+    "defenceCannotRunVerification": true,
+    "historyRewritePerformed": false,
+    "releaseTruthMutationPerformed": false,
+    "incidentHistoryMutationPerformed": false,
+    "approvalGranted": false,
+    "executionAuthorityGranted": false,
+    "mutationPerformed": false,
+    "observationStoredSnapshotFingerprintIsRecomputed": true
+  }
+}
