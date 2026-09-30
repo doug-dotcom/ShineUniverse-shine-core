@@ -309,8 +309,6 @@ begin
      or v_existing.deployment_ref is distinct from p_deployment_ref
      or v_existing.version_ref is distinct from p_version_ref
      or v_existing.artifact_ref is distinct from p_artifact_ref
-     or v_existing.observed_at is distinct from p_observed_at
-     or v_existing.valid_until is distinct from p_valid_until
      or v_existing.evidence_kind is distinct from p_evidence_kind
      or v_existing.metadata is distinct from p_metadata then
     raise exception 'estate-observation-evidence-conflict'
