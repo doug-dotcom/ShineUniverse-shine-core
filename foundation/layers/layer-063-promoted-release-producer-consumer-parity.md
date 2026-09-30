@@ -1,6 +1,6 @@
 # Foundation Layer 63 — Producer/consumer contract parity
 
-**Status:** IMPLEMENTED — CI verification pending  
+**Status:** LIVE — end-to-end producer/consumer parity enforced in Foundation CI  
 **Scope:** prove the actual PostgreSQL producer and pinned JavaScript consumer contract agree end to end
 
 Layer 62 pinned the promoted-release schema and consumer validator.
@@ -38,6 +38,25 @@ The verifier therefore tests producer behaviour without changing persistent test
 ## CI position
 
 The gate runs after Layer 60 and Layer 61 are installed and tested. Node 22 is explicitly provisioned in the persistence job rather than relying on runner defaults.
+
+## Verification
+
+Full Foundation CI run `36665824833` completed successfully.
+
+The parity step:
+
+`Verify promoted release producer-consumer parity`
+
+passed after the real Layer-60 and Layer-61 SQL functions were installed in the persistence database.
+
+Verified paths:
+
+- current closure → actual SQL response → pinned Layer-62 validator: **PASS**
+- stale closure → actual SQL hold response → pinned Layer-62 validator: **PASS**
+- no persistent parity-test database mutation: **PASS**
+- all downstream Shine Defence acceptance steps after the parity gate: **PASS**
+
+Layer 63 changes no production database state. It strengthens the release contract at CI time so producer/consumer drift cannot merge unnoticed.
 
 ## Invariant
 
