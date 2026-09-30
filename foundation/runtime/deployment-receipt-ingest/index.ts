@@ -117,7 +117,6 @@ Deno.serve(async(req:Request)=>{
           githubRef:identity.ref,
           githubWorkflowRef:identity.workflowRef,
           githubWorkflowSha:identity.workflowSha,
-          githubWorkflowSha:identity.workflowSha,
           rollback:receipt.rollback
         })}
       ) as result
