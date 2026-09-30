@@ -157,6 +157,20 @@ Deno.serve(async(req:Request)=>{
       activation.authoritySha.toLowerCase()
     ].join(':');
 
+    const activationMetadata:any={
+      lineageSequence:activation.lineageSequence,
+      publisherCommitSha:String(body.publisherCommitSha).toLowerCase(),
+      lineageBlobSha:String(body.lineageBlobSha).toLowerCase(),
+      authorityContractBlobSha:String(body.authorityContractBlobSha).toLowerCase(),
+      promotionReceipt:activation.promotionReceipt,
+      rollbackReceipt:activation.rollbackReceipt,
+      githubRunId:identity.runId,
+      githubRunAttempt:identity.runAttempt,
+      githubActor:identity.actor,
+      githubWorkflowRef:identity.workflowRef,
+      githubWorkflowSha:identity.workflowSha
+    };
+
     const rows=await sql`
       select foundation.record_defence_attestation_authority_activation_v1(
         ${activation.authoritySha.toLowerCase()},
@@ -167,19 +181,7 @@ Deno.serve(async(req:Request)=>{
         ${String(activation.predecessorAuthoritySha).toLowerCase()},
         ${activation.restoreFromSequence},
         ${evidenceRef},
-        ${sql.json({
-          lineageSequence:activation.lineageSequence,
-          publisherCommitSha:String(body.publisherCommitSha).toLowerCase(),
-          lineageBlobSha:String(body.lineageBlobSha).toLowerCase(),
-          authorityContractBlobSha:String(body.authorityContractBlobSha).toLowerCase(),
-          promotionReceipt:activation.promotionReceipt,
-          rollbackReceipt:activation.rollbackReceipt,
-          githubRunId:identity.runId,
-          githubRunAttempt:identity.runAttempt,
-          githubActor:identity.actor,
-          githubWorkflowRef:identity.workflowRef,
-          githubWorkflowSha:identity.workflowSha
-        })}
+        ${sql.json(activationMetadata)}
       ) as result
     `;
 
