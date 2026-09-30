@@ -1,6 +1,6 @@
 # Foundation Layer 59 — Canonical source-of-truth closure
 
-**Status:** IMPLEMENTED; production verification required after CI  
+**Status:** LIVE — control deployed and production source-truth verified; immutable release identity remains Layer 58 while runtime readiness is not bindable  
 **Scope:** make “green means green” distinguish build success from canonical production truth
 
 Layer 59 adds one boring rule:
@@ -60,6 +60,8 @@ Layer 59 therefore adds a reusable release/promotion gate without creating autom
 
 ## Acceptance coverage
 
+CI run `36661933604` passed both `foundation-contracts` and the full persistence job on the current Layer-59 head.
+
 CI proves:
 
 - structurally closed source truth passes even when runtime identity health is degraded;
@@ -88,6 +90,20 @@ After repair, registry, binding and release ledger all project:
 `foundation:layer-58:1a8148a8`
 
 The release projection is **DEGRADED**, not FAIL, because the remaining condition is the separate runtime/readiness health path rather than source-of-truth divergence.
+
+Layer 59 itself is deployed in production. Its canonical source-truth reader reports **PASS** with all 15 checks true and evidence fingerprint `3e7ce8f50385b3fadddddc247d3573bf`.
+
+The production immutable release identity intentionally remains `foundation:layer-58:1a8148a8`. Current readiness is not bindable, so Layer 59 does not fabricate a new release binding or advance the Universe registry beyond the real immutable binding.
+
+Post-deployment function privileges are fail-closed:
+
+- `anon`: no reader execution;
+- `authenticated`: no reader execution;
+- `foundation_runtime`: reader only;
+- `service_role`: reader + assertion;
+- both SECURITY DEFINER functions have an empty `search_path`.
+
+Supabase advisors reported no Layer-59-specific finding. Existing estate-wide RLS/info and unused-index findings remain separate work; the existing `pg_net`-in-`public` warning is also unchanged.
 
 ## Closure invariant
 
