@@ -1,6 +1,6 @@
 {
   "contract": "shine-defence/release-attestation-authority-v1",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "purpose": "Centralize the authority-bearing release-head and rollback attestation job in Shine Core so app callers cannot silently change attestation logic.",
   "reusableWorkflow": {
     "repository": "doug-dotcom/ShineUniverse-shine-core",
@@ -42,7 +42,8 @@
     "The authority workflow is referenced by immutable Core commit SHA, never a branch or mutable tag.",
     "Caller repository identity remains independently verified; reusable workflow authority does not replace repository binding.",
     "A future central workflow revision receives a new SHA and must be deliberately promoted before it can exercise authority.",
-    "Release-head and rollback OIDC tokens without the exact pinned Core reusable workflow authority are rejected."
+    "Release-head and rollback OIDC tokens without the exact pinned Core reusable workflow authority are rejected.",
+    "Authority-gated runtime consumers import one shared immutable authority binding; they do not duplicate the authority ref or SHA locally."
   ],
   "enforcement": {
     "mode": "mandatory",
@@ -52,6 +53,13 @@
     ],
     "requiredJobWorkflowRef": "doug-dotcom/ShineUniverse-shine-core/.github/workflows/shine-defence-release-attestation-v1.yml@7bfd7fe685b4b2da814ac53dafdbfac2350591c8",
     "requiredJobWorkflowSha": "7bfd7fe685b4b2da814ac53dafdbfac2350591c8",
-    "failureMode": "401 unauthorized"
+    "failureMode": "401 unauthorized",
+    "runtimeBindingPath": "foundation/runtime/_shared/shine-defence-release-attestation-authority-v1.mjs",
+    "rotationRule": "Rotate the shared runtime binding and this contract together; CI rejects contract/runtime divergence before merge."
+  },
+  "runtimeBinding": {
+    "path": "foundation/runtime/_shared/shine-defence-release-attestation-authority-v1.mjs",
+    "version": "1.0.0",
+    "role": "Single runtime source of truth for the immutable Core reusable-workflow authority ref and SHA."
   }
 }
