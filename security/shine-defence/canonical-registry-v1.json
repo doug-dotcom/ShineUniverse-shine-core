@@ -595,7 +595,7 @@
       "id": "release-attestation-authority-lineage-verifier",
       "path": "security/shine-defence/integration-kit/verify-release-attestation-authority-lineage-v1.mjs",
       "version": "1.0.0",
-      "blobSha": "bbb459f72e695a01a4a7521f3da62739b8830156"
+      "blobSha": "7537b6db08bfc3f26e066a518ce4db63cb13079d"
     },
     {
       "id": "release-attestation-authority-workflow",
