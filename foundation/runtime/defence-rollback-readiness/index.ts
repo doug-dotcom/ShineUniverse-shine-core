@@ -36,7 +36,6 @@ const clean=(value:unknown,max=512)=>typeof value==='string'&&value.length>0&&va
 const sha40=(value:unknown)=>typeof value==='string'&&/^[a-f0-9]{40}$/i.test(value);
 const targetId=(value:unknown)=>typeof value==='string'&&/^railway:[a-z0-9][a-z0-9-]*$/.test(value);
 const repository=(value:unknown)=>typeof value==='string'&&/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(value);
-const uuid=(value:unknown)=>typeof value==='string'&&/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
 
 const jsonResponse=(status:number,body:unknown)=>new Response(JSON.stringify(body),{
   status,
@@ -120,7 +119,6 @@ Deno.serve(async(req:Request)=>{
       !targetId(submission.targetId)||
       !sha40(submission.rollbackCommitSha)||
       !sha40(submission.canonicalCommitSha)||
-      !uuid(submission.admissionEventId)||
       typeof submission.sourceAvailable!=='boolean'||
       typeof submission.canonicalSourceAvailable!=='boolean'
     ){
@@ -151,15 +149,13 @@ Deno.serve(async(req:Request)=>{
       identity.runId,
       identity.runAttempt,
       submission.targetId,
-      String(submission.admissionEventId).toLowerCase(),
       String(submission.rollbackCommitSha).toLowerCase()
     ].join(':');
 
     const rows=await sql`
-      select foundation.record_defence_rollback_source_attestation_v3(
+      select foundation.record_defence_rollback_source_attestation_v4(
         ${submission.targetId},
         ${identity.repository},
-        ${String(submission.admissionEventId).toLowerCase()}::uuid,
         ${String(submission.rollbackCommitSha).toLowerCase()},
         ${String(submission.canonicalCommitSha).toLowerCase()},
         ${submission.sourceAvailable},
@@ -168,8 +164,7 @@ Deno.serve(async(req:Request)=>{
         ${validUntil.toISOString()}::timestamptz,
         ${evidenceRef},
         ${sql.json({
-          collector:'shine-defence/rollback-readiness-v3',
-          admissionEventId:String(submission.admissionEventId).toLowerCase(),
+          collector:'shine-defence/rollback-readiness-v4',
           githubRunId:identity.runId,
           githubRunAttempt:identity.runAttempt,
           githubEvent:identity.eventName,

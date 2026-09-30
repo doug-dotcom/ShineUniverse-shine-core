@@ -158,8 +158,7 @@ jobs:
           emit('has_anchor','true');
           emit('rollback_commit',claim.rollbackCommitSha);
           emit('canonical_commit',claim.canonicalCommitSha);
-          emit('admission_event_id',claim.admissionEventId);
-          console.log('Rollback anchor claimed:',claim.rollbackCommitSha,'Admission event:',claim.admissionEventId);
+          console.log('Rollback anchor claimed:',claim.rollbackCommitSha);
           NODE
 
       - name: Verify rollback and canonical source commits
@@ -168,7 +167,6 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
           ROLLBACK_COMMIT: ${{ steps.rollback.outputs.rollback_commit }}
           CANONICAL_COMMIT: ${{ steps.rollback.outputs.canonical_commit }}
-          ADMISSION_EVENT_ID: ${{ steps.rollback.outputs.admission_event_id }}
         run: |
           node <<'NODE'
           (async()=>{
@@ -199,7 +197,6 @@ jobs:
                 targetId:process.env.SHINE_DEFENCE_TARGET_ID,
                 rollbackCommitSha:process.env.ROLLBACK_COMMIT,
                 canonicalCommitSha:process.env.CANONICAL_COMMIT,
-                admissionEventId:process.env.ADMISSION_EVENT_ID,
                 sourceAvailable:rollbackAvailable,
                 canonicalSourceAvailable:canonicalAvailable
               }
