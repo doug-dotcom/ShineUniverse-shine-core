@@ -384,6 +384,8 @@ jobs:
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-promoted-release-case-audit-safe-response-executor-v1.sql
       - name: Converge Foundation Layer 76 execution ledger identifiers
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-promoted-release-case-audit-safe-response-executor-identifiers-v1.sql
+      - name: Converge Foundation Layer 76 function identifiers
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-promoted-release-case-audit-safe-response-function-name-convergence-v2.sql
       - name: Refresh Foundation Layer 76 stored function identifiers
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-promoted-release-case-audit-safe-response-executor-functions-v1.sql
       - name: Run Foundation bounded case-audit safe response executor tests
