@@ -418,3 +418,7 @@ jobs:
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-github-oidc-replay-v1.sql
       - name: Run Shine Defence GitHub OIDC replay guard acceptance tests
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-github-oidc-replay-v1.test.sql
+      - name: Apply Shine Defence GitHub OIDC replay Sentinel
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-github-oidc-replay-sentinel-v1.sql
+      - name: Run Shine Defence GitHub OIDC replay Sentinel acceptance tests
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-github-oidc-replay-sentinel-v1.test.sql
