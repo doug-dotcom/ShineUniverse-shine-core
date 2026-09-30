@@ -1,6 +1,6 @@
 # Foundation Layer 91 — Bounded Layer-87 reconciliation executor
 
-**Status:** IMPLEMENTED — CI and production verification pending  
+**Status:** LIVE — CI green and production verification complete  
 **Scope:** execute the single bounded action Layer 90 may admit: independent Layer-87 reconciliation of one overdue successful Layer-86 execution
 
 Layer 90 can identify a pure omission where a successful Layer-86 execution is old enough to require Layer-87 reconciliation, no Layer-87 receipt exists, and the Layer-89 incident lifecycle is active.
@@ -81,6 +81,33 @@ CI proves:
 ## Deliberate split implementation
 
 Layer 91 is intentionally split into schema, runtime and summary SQL files so each control boundary remains small and independently reviewable while CI applies them as one ordered layer.
+
+## Production proof
+
+Layer 91 is deployed in the Shine Foundation Supabase project as migration:
+
+`20260930230816 — foundation_layer_091_bounded_layer87_reconciliation_executor`
+
+Pull request **#119** passed the complete Foundation + Concierge and Shine Defence workflows before merge.
+
+Live production verification confirms:
+
+- Layer-91 ledger, executor, policy fingerprint and summary exist;
+- current Layer-91 execution count: **0**;
+- current Layer-87 reconciliation count: **0**;
+- current Layer-86 execution count: **0**;
+- direct `service_role` EXECUTE on the Layer-87 reconciler is **revoked**;
+- `service_role` can execute Layer 91;
+- Foundation runtime, Gateway, Shine Core, Shine Defence and browser roles cannot execute Layer 91;
+- `service_role` cannot directly INSERT Layer-91 ledger rows;
+- Foundation runtime can read the summary;
+- Gateway can read the summary only through existing `foundation_runtime` membership;
+- Layer-88 production coverage remains **idle**;
+- Layer-89 production incident state remains **normal**;
+- a nonexistent Layer-86 target, invoked under `service_role`, returns `not-applicable / target-not-found`;
+- that negative probe creates no Layer-91 event and no Layer-87 reconciliation;
+- Supabase security advisors report **0 findings** after deployment;
+- the two new Layer-91 indexes are reported as unused, which is expected while the production ledger is empty.
 
 ## Invariant
 
