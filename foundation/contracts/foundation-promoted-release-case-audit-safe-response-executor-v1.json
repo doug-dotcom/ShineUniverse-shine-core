@@ -1,0 +1,44 @@
+{
+  "contract": "shine-foundation/promoted-release-case-audit-safe-response-executor-v1",
+  "version": "1.0.0",
+  "layer": 76,
+  "purpose": "Provide a policy-coupled append-only execution path for only the two non-authoritative safe Layer-75 actions: fresh case-audit evidence and the existing bounded Layer-67 handoff materialiser.",
+  "executor": "foundation.execute_foundation_promoted_release_case_audit_safe_response_v1",
+  "policy": "foundation.evaluate_foundation_promoted_release_case_audit_incident_response_v1",
+  "executionLedger": "foundation.foundation_promoted_release_case_audit_response_execution_events",
+  "summary": "foundation.get_foundation_promoted_release_case_audit_safe_response_execution_summary_v1",
+  "allowedActions": {
+    "record-fresh-promotion-case-audit-observation": {
+      "requiredControl": "evidence-only",
+      "target": "foundation.record_foundation_promoted_release_case_audit_observation_v1"
+    },
+    "materialise-current-owner-handoff": {
+      "requiredControl": "layer-67-bounded-generator",
+      "target": "foundation.generate_foundation_promoted_release_owner_handoff_v1"
+    }
+  },
+  "invariants": {
+    "noArbitraryActionPayload": true,
+    "noArbitrarySqlExecution": true,
+    "onlyTwoActionKeysAccepted": true,
+    "liveLayer75DecisionRevalidated": true,
+    "currentLayer74IncidentRequired": true,
+    "incidentEvidenceFingerprintMustMatch": true,
+    "semanticPolicyFingerprint": true,
+    "oneExecutionReceiptPerIncidentActionPolicyFingerprint": true,
+    "semanticReplayReturnsExistingReceipt": true,
+    "policyDenialDoesNotDispatchTarget": true,
+    "actionTargetFailureIsRecorded": true,
+    "serviceRoleUsesBoundedExecutor": true,
+    "serviceRoleCannotDirectInsertExecutionLedger": true,
+    "runtimeCannotExecute": true,
+    "gatewayCannotExecute": true,
+    "ownerCannotExecute": true,
+    "defenceCannotExecute": true,
+    "executionHistoryAppendOnly": true,
+    "historyRewritePerformed": false,
+    "releaseTruthMutationPerformed": false,
+    "incidentHistoryMutationPerformed": false,
+    "automaticExecution": false
+  }
+}
