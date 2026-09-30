@@ -220,6 +220,8 @@ jobs:
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/readiness-publication-assurance-v1.test.sql
       - name: Apply Foundation immutable release identity binding
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-release-identity-binding-v1.sql
+      - name: Apply Foundation release identity re-attestation continuity
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-release-identity-reattestation-continuity-v1.sql
       - name: Run Foundation immutable release identity binding tests
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-release-identity-binding-v1.test.sql
       - name: Apply Foundation release projection reconciliation

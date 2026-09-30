@@ -255,6 +255,71 @@ end;
 $layer35_security$;
 
 
+-- A new trusted publication attestation for the SAME immutable deployment receipt
+-- must refresh proof without invalidating or rewriting the historical release binding.
+insert into foundation.service_deployment_receipt_publications(
+  publication_id,publication_key,receipt_id,service_id,environment,provider,
+  runtime_version,artifact_sha256,source_ref,provider_evidence_ref,
+  publication_outcome,submitted_by,transport,transport_run_id,
+  transport_run_attempt,transport_event,transport_repository,transport_ref,
+  transport_workflow_ref,transport_workflow_sha,rollback,metadata,published_at
+)
+values (
+  '35000000-0000-4000-8000-000000000102'::uuid,
+  'github-oidc:350001:1:35000000-0000-4000-8000-000000000100',
+  '35000000-0000-4000-8000-000000000100'::uuid,
+  'foundation.gateway','production','supabase-edge',
+  'layer35-c',
+  repeat('c',64),
+  'github://doug-dotcom/ShineUniverse-shine-core/commit/cccccccccccccccccccccccccccccccccccccccc',
+  'test:layer35:provider:c:reattest',
+  'replayed-existing',
+  'github-actions-oidc',
+  'github-oidc',
+  '350001','1','push',
+  'doug-dotcom/ShineUniverse-shine-core',
+  'refs/heads/main',
+  'doug-dotcom/ShineUniverse-shine-core/.github/workflows/publish-foundation-deployment-receipt.yml@refs/heads/main',
+  repeat('4',40),
+  false,
+  '{"test":true,"reattestation":true}'::jsonb,
+  now()+interval '10 seconds'
+);
+
+do $layer35_reattestation_continuity$
+declare
+  v_health jsonb;
+  v_replay jsonb;
+begin
+  v_health:=foundation.get_foundation_release_identity_health_v1('production');
+
+  if v_health->>'state'<>'pass'
+     or v_health->>'matchesCurrentDeployment'<>'true'
+     or v_health->>'matchesCurrentPublication'<>'true'
+     or v_health->>'publicationRotatedSinceBinding'<>'true'
+     or v_health#>>'{binding,publicationId}'<>
+        '35000000-0000-4000-8000-000000000101'
+     or v_health#>>'{current,publicationId}'<>
+        '35000000-0000-4000-8000-000000000102' then
+    raise exception 'Equivalent publication re-attestation must preserve release identity health: %',v_health;
+  end if;
+
+  v_replay:=foundation.bind_foundation_release_identity_v1(
+    35,'layer35-test','{"reattestationReplay":true}'::jsonb
+  );
+
+  if v_replay->>'status'<>'replayed-existing'
+     or v_replay->>'publicationId'<>
+        '35000000-0000-4000-8000-000000000101'
+     or v_replay#>>'{health,current,publicationId}'<>
+        '35000000-0000-4000-8000-000000000102'
+     or v_replay#>>'{health,publicationRotatedSinceBinding}'<>'true' then
+    raise exception 'Binder replay must preserve bind-time provenance across equivalent re-attestation: %',v_replay;
+  end if;
+end;
+$layer35_reattestation_continuity$;
+
+
 -- New canonical deployment truth without a corresponding publication must invalidate
 -- the previous immutable binding rather than leaving stale green metadata.
 insert into foundation.service_deployment_expectations(

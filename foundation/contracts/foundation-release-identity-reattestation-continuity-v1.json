@@ -1,0 +1,23 @@
+{
+  "contract": "shine-foundation/release-identity-reattestation-continuity-v1",
+  "version": "1.0.0",
+  "layer": 64,
+  "correctsLayer": 35,
+  "purpose": "Prevent trusted re-attestation of an unchanged immutable deployment receipt from falsely invalidating Foundation release identity.",
+  "historicalBindingProvenance": "foundation.foundation_release_identity_bindings.publication_id",
+  "currentProofSource": "foundation.get_deployment_receipt_publication_health_v1",
+  "healthReader": "foundation.get_foundation_release_identity_health_v1",
+  "binder": "foundation.bind_foundation_release_identity_v1",
+  "rules": {
+    "bindTimePublicationIdRemainsImmutable": true,
+    "currentPublicationIdMayRotate": true,
+    "sameDeploymentReceiptRequired": true,
+    "sameSourceRefRequired": true,
+    "sameRuntimeVersionRequired": true,
+    "sameArtifactSha256Required": true,
+    "samePublicationAssuranceRequired": true,
+    "deploymentIdentityChangeStillFailsClosed": true,
+    "untrustedOrMissingPublicationStillFailsClosed": true,
+    "binderReplayDoesNotRewriteHistoricalBinding": true
+  }
+}

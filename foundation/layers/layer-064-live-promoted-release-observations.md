@@ -91,6 +91,25 @@ CI proves:
 - direct ledger mutation is append-only rejected;
 - recorder/read privileges are least-privilege.
 
+## Production discovery — re-attestation continuity
+
+While Layer 64 was being verified, production moved from **promoted** to **hold**.
+
+The observer work exposed a real older invariant conflict:
+
+- Layer 33 explicitly permits a distinct trusted GitHub-OIDC run to re-attest the same immutable deployment receipt;
+- the Foundation gateway deployment receipt, source commit, runtime version and artifact SHA had not changed;
+- Layer 35 nevertheless required the current publication event ID to equal the publication event ID captured at bind time;
+- a fresh trusted re-attestation therefore made release identity health fail and opened a real control-plane incident.
+
+Layer 64 corrects that contradiction without weakening deployment identity.
+
+The bind-time publication ID remains immutable historical provenance. A later publication event may satisfy current health only when it attests the exact same deployment receipt, source ref, runtime version, artifact SHA and publication assurance.
+
+A changed deployment identity still fails closed.
+
+The binder also replays the existing historical binding across equivalent re-attestation instead of attempting to rewrite provenance or raising a false release conflict.
+
 ## Invariant
 
 > CI proves the promotion contract. Layer 64 proves whether that same consumer trust is still true now, and says so durably without gaining authority to fix it.

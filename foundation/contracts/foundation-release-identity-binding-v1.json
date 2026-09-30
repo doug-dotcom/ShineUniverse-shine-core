@@ -1,8 +1,8 @@
 {
   "contract": "shine-foundation/foundation-release-identity-binding-v1",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "layer": 35,
-  "purpose": "Bind a verified Foundation layer to immutable deployment and publication identity so registry release truth cannot remain green across source/runtime drift.",
+  "purpose": "Bind a verified Foundation layer to immutable deployment identity plus bind-time publication provenance, while allowing later trusted re-attestation events for the exact same deployment receipt.",
   "canonicalService": "foundation.gateway",
   "ledger": "foundation.foundation_release_identity_bindings",
   "currentView": "foundation.current_foundation_release_identity",
@@ -14,10 +14,10 @@
     "runtimeVersion",
     "artifactSha256",
     "deploymentReceiptId",
-    "publicationId",
     "publicationAssurance"
   ],
   "evidenceAtBind": [
+    "publicationId",
     "readinessStateAtBind",
     "readinessFingerprintAtBind"
   ],
@@ -42,11 +42,16 @@
     "healthReadableBy": [
       "foundation_runtime",
       "service_role"
-    ]
+    ],
+    "publicationIdIsBindTimeProvenance": true,
+    "equivalentTrustedReattestationMayRotatePublicationId": true,
+    "equivalentReattestationRequiresSameDeploymentReceipt": true,
+    "equivalentReattestationRequiresSameSourceRuntimeArtifactAssurance": true,
+    "bindingReplayIgnoresEquivalentPublicationEventRotation": true
   },
   "releaseRefFormat": "foundation:layer-<layer>:<first-8-lowercase-source-commit-sha>",
   "operationalMeaning": {
-    "pass": "The immutable binding still matches current canonical deployment truth and current publication proof.",
+    "pass": "The immutable deployment identity still matches current canonical deployment truth and a current trusted publication attests that same deployment receipt; the publication event ID itself may have rotated.",
     "degraded": "Release identity still matches but publication assurance has degraded.",
     "unknown": "Required deployment/publication identity evidence is missing.",
     "fail": "The binding no longer matches current deployment or publication identity."
