@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "request_id": "universe-go-0028",
+  "request_id": "universe-go-0029",
   "pass": 1,
   "scope": "core",
   "dispatch_group": "shine-core",
@@ -9,5 +9,5 @@
     "Concierge",
     "Defence"
   ],
-  "note": "One Shine end-to-end pass: preserve handoff fidelity across service boundaries, retries, and recovery; prevent duplicate actions, context drift, and contradictory readiness."
+  "note": "One Shine end-to-end pass focused on recovery convergence: retries and partial failures must settle on one current state, without duplicate side effects or stale readiness replacing newer truth."
 }
