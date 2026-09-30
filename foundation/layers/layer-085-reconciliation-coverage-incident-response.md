@@ -1,6 +1,6 @@
 # Foundation Layer 85 — Reconciliation coverage incident response policy
 
-**Status:** IMPLEMENTED — CI and production verification pending  
+**Status:** LIVE — CI green and production verification complete  
 **Scope:** govern what Foundation may do in response to a Layer-84 reconciliation-coverage incident
 
 Layer 84 can tell Foundation that reconciliation coverage has become a persistent operational problem.
@@ -152,6 +152,35 @@ Layer 85:
 - changes no release truth;
 - grants no approval;
 - grants no execution authority.
+
+## Production proof
+
+Layer 85 is deployed in the Shine Foundation Supabase project.
+
+Migration history contains two identical idempotent policy entries:
+
+- `20260930140421 — foundation_layer_085_reconciliation_coverage_incident_response`
+- `20260930140430 — foundation_layer_085_reconciliation_coverage_incident_response`
+
+The second entry reapplied only `CREATE OR REPLACE FUNCTION` and privilege statements. It did not create operational evidence or mutate Layer-81, Layer-82 or Layer-84 ledgers.
+
+Live production verification confirms:
+
+- current Layer-84 incident state: **normal**;
+- current Layer-83 coverage state: **idle**;
+- current cause class: **none**;
+- next evidence action: **none**;
+- `inspect-reconciliation-coverage`: **admit / read-only**;
+- `run-independent-reconciliation`: **not-applicable** on healthy production;
+- `rerun-layer81`: **deny / prohibited**;
+- `mutate-release-truth`: **deny / prohibited**;
+- policy evaluation changed Layer-81 execution count: **0 → 0**;
+- policy evaluation changed Layer-82 reconciliation count: **0 → 0**;
+- policy evaluation changed Layer-84 incident-event count: **0 → 0**;
+- Foundation runtime and service role can read the policy;
+- Gateway can read only through existing `foundation_runtime` inheritance and receives no direct grant;
+- Shine Core, Shine Defence and browser roles cannot read the policy;
+- Supabase advisors report no Layer-85-specific security or performance finding.
 
 ## Invariant
 
