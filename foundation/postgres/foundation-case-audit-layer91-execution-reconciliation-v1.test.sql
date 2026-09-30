@@ -83,7 +83,7 @@ begin
       ('92000000-0000-4000-8000-'||lpad((300+i)::text,12,'0'))::uuid,
       null,
       'run-independent-reconciliation','reconciliation-omission',
-      repeat((i+5)::text,64),'executed',
+      repeat(to_hex(i+5),64),'executed',
       'case-audit-overdue-reconciliation-layer82-ran',
       '{}'::jsonb,'{}'::jsonb,'{}'::jsonb,'{}'::jsonb,
       jsonb_build_object('status','recorded','test','layer92','chain',i),
