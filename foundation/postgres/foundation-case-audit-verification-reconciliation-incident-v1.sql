@@ -185,17 +185,17 @@ grant select on foundation.current_case_audit_verify_reconcile_incidents
   to foundation_runtime,service_role;
 
 
-create view foundation.current_case_audit_verify_watches
+create view foundation.current_case_audit_verify_reconcile_watches
 with (security_invoker=true)
 as
 select *
 from foundation.current_case_audit_verify_reconcile_incident_state
 where event_type='detected';
 
-revoke all on foundation.current_case_audit_verify_watches
+revoke all on foundation.current_case_audit_verify_reconcile_watches
   from public,anon,authenticated,foundation_gateway,shine_core_control_plane,
        shine_defence_runtime;
-grant select on foundation.current_case_audit_verify_watches
+grant select on foundation.current_case_audit_verify_reconcile_watches
   to foundation_runtime,service_role;
 
 
@@ -368,7 +368,7 @@ begin
   where environment=p_environment;
 
   select count(*) into v_watch_count
-  from foundation.current_case_audit_verify_watches
+  from foundation.current_case_audit_verify_reconcile_watches
   where environment=p_environment;
 
   return jsonb_build_object(
@@ -518,7 +518,7 @@ begin
   where environment=p_environment;
 
   select count(*) into v_watch_count
-  from foundation.current_case_audit_verify_watches
+  from foundation.current_case_audit_verify_reconcile_watches
   where environment=p_environment;
 
   v_state := case
