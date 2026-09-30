@@ -157,6 +157,9 @@ test('shared verifier fails closed after refresh and enforces consumer claim pol
   const wrongJobWorkflow=await signJwt({...reusablePayload,job_workflow_sha:'c'.repeat(40)},key);
   await assert.rejects(()=>verifier.verify(wrongJobWorkflow,reusablePolicy),/OIDC job workflow sha mismatch/);
 
+  const missingReusableAuthority=await signJwt(basePayload(),key);
+  await assert.rejects(()=>verifier.verify(missingReusableAuthority,reusablePolicy),/OIDC job workflow ref mismatch/);
+
 
   const expired=await signJwt({...basePayload(),exp:nowSeconds-60},key);
   await assert.rejects(()=>verifier.verify(expired,policy),/OIDC token expired/);
@@ -224,6 +227,8 @@ test('dynamic release consumers bind signed immutable repository ids to Foundati
     assert.match(source,/sourceRepositoryOwnerId/,name+' must load immutable owner id from target metadata');
     assert.match(source,/identity\.repositoryId/,name+' must compare the signed repository id');
     assert.match(source,/identity\.repositoryOwnerId/,name+' must compare the signed owner id');
+    assert.match(source,/EXPECTED_JOB_WORKFLOW_REF='doug-dotcom\/ShineUniverse-shine-core\/\.github\/workflows\/shine-defence-release-attestation-v1\.yml@7bfd7fe685b4b2da814ac53dafdbfac2350591c8'/,name+' must pin exact Core reusable authority ref');
+    assert.match(source,/EXPECTED_JOB_WORKFLOW_SHA='7bfd7fe685b4b2da814ac53dafdbfac2350591c8'/,name+' must pin exact Core reusable authority SHA');
   }
 });
 
