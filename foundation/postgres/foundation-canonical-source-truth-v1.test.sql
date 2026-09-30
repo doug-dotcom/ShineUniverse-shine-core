@@ -280,11 +280,6 @@ reset role;
 do $layer59_privileges$
 begin
   if has_function_privilege(
-       'public',
-       'foundation.get_foundation_canonical_source_truth_v1(text,timestamptz)',
-       'EXECUTE'
-     )
-     or has_function_privilege(
        'anon',
        'foundation.get_foundation_canonical_source_truth_v1(text,timestamptz)',
        'EXECUTE'
