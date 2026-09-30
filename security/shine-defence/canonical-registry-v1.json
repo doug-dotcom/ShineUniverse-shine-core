@@ -571,7 +571,7 @@
       "id": "github-oidc-immutable-principal-db",
       "path": "foundation/postgres/defence-github-oidc-principal-binding-v1.sql",
       "version": "1.0.0",
-      "blobSha": "4b7c4c39afabe19d421cff7b23b176434a59636f"
+      "blobSha": "ce54496464e579c121447f6cf785e77d44b10cfa"
     }
   ]
 }
