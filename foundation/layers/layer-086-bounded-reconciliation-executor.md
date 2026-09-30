@@ -1,6 +1,6 @@
 # Foundation Layer 86 — Bounded overdue reconciliation executor
 
-**Status:** IMPLEMENTED — CI and production verification pending  
+**Status:** LIVE — CI green and production verification complete  
 **Scope:** execute the single bounded action Layer 85 may admit: independent Layer-82 reconciliation of one overdue Layer-81 execution
 
 Layer 85 can decide that a successful Layer-81 execution is missing only its Layer-82 reconciliation receipt.
@@ -69,6 +69,30 @@ CI uses real Layer-76 evidence, real Layer-77 verification and the real Layer-82
 - direct service-role Layer-82 bypass revoked;
 - direct Layer-86 ledger insert denied;
 - append-only and role boundaries hold.
+
+## Production proof
+
+Layer 86 is deployed in the Shine Foundation Supabase project as migration:
+
+`20260930150854 — foundation_layer_086_bounded_overdue_reconciliation_executor`
+
+Live production verification confirms:
+
+- Layer-86 executor, ledger and summary exist;
+- current Layer-86 execution count: **0**;
+- current Layer-82 reconciliation count: **0**;
+- current Layer-81 execution count: **0**;
+- direct `service_role` EXECUTE on the Layer-82 reconciler is **revoked**;
+- `service_role` can execute Layer 86;
+- Foundation runtime, Gateway, Shine Core, Shine Defence and browser roles cannot execute Layer 86;
+- service role cannot directly INSERT Layer-86 ledger rows;
+- Foundation runtime can read the summary;
+- Gateway reads the summary only through existing `foundation_runtime` membership and receives no direct summary grant;
+- a nonexistent Layer-81 target returns `not-applicable / target-not-found`;
+- that harmless negative probe creates no Layer-86 event and no Layer-82 reconciliation;
+- production remains at Layer-83 **idle** and Layer-84 **normal** after the probe;
+- Supabase security advisors report no Layer-86-specific finding;
+- performance advisors currently report the two new Layer-86 indexes as unused, which is expected while the production ledger is empty.
 
 ## Invariant
 
