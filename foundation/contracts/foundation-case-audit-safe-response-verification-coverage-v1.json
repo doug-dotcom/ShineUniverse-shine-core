@@ -39,6 +39,9 @@
     "historyRewritePerformed": false,
     "releaseTruthMutationPerformed": false,
     "incidentHistoryMutationPerformed": false,
-    "mutationPerformed": false
+    "mutationPerformed": false,
+    "proofContractAndSchemaMustMatch": true,
+    "malformedProofFlagsClassifyInvalidWithoutThrowing": true,
+    "noAuthorityOrMutationFlagsMustRemainFalse": true
   }
 }
