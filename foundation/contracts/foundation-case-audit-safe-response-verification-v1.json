@@ -51,6 +51,9 @@
     "approvalGranted": false,
     "executionAuthorityGranted": false,
     "mutationPerformed": false,
-    "observationStoredSnapshotFingerprintIsRecomputed": true
-  }
+    "observationStoredSnapshotFingerprintIsRecomputed": true,
+    "directServiceRoleRunnerAccessAfterLayer81": false,
+    "layer81EnforcesLayer80AdmissionBeforeRunner": true
+  },
+  "currentServiceRoleEntryPointAfterLayer81": "foundation.execute_case_audit_overdue_verification_v1"
 }

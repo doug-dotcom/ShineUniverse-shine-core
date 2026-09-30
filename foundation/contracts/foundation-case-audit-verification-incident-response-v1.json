@@ -60,6 +60,8 @@
     "gatewayReceivesNoDirectGrant": true,
     "ownerDenied": true,
     "defenceDenied": true,
-    "browserRolesDenied": true
-  }
+    "browserRolesDenied": true,
+    "layer81IsSoleServiceRoleExecutionPathForAdmittedVerification": true
+  },
+  "boundedExecutionEntryPointAfterLayer81": "foundation.execute_case_audit_overdue_verification_v1"
 }
