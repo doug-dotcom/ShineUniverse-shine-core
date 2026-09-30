@@ -261,7 +261,7 @@ grant execute on function foundation.get_defence_github_oidc_replay_summary_v1(
 create or replace function foundation.get_defence_full_estate_summary_v1()
 returns jsonb
 language plpgsql
-stable
+volatile
 security definer
 set search_path = pg_catalog, foundation
 as $full_estate_replay$
@@ -276,6 +276,7 @@ declare
   v_ladder jsonb;
   v_oidc_replay jsonb;
   v_state text;
+  v_evaluated_at timestamptz := clock_timestamp();
 begin
   v_estate := foundation.get_defence_estate_summary_v1();
   v_supabase := foundation.get_defence_supabase_runtime_receipt_summary_v1();
@@ -285,7 +286,7 @@ begin
   v_admission := foundation.get_defence_release_admission_summary_v1();
   v_rollback := foundation.get_defence_rollback_readiness_summary_v1();
   v_ladder := foundation.get_defence_rollback_ladder_v1();
-  v_oidc_replay := foundation.get_defence_github_oidc_replay_summary_v1(now(),86400);
+  v_oidc_replay := foundation.get_defence_github_oidc_replay_summary_v1(v_evaluated_at,86400);
 
   v_state := case
     when v_oidc_replay->>'state'='fail'
@@ -318,7 +319,7 @@ begin
     'rollbackReadiness',v_rollback,
     'rollbackLadder',v_ladder,
     'githubOidcReplay',v_oidc_replay,
-    'evaluatedAt',now()
+    'evaluatedAt',v_evaluated_at
   );
 end;
 $full_estate_replay$;
