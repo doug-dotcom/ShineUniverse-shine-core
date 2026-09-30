@@ -1,0 +1,25 @@
+{
+  "contract": "shine-defence/attestation-authority-sync-heartbeat-v1",
+  "version": "1.0.0",
+  "purpose": "Persist successful Core-to-Foundation attestation-authority synchronisation receipts and surface stale or mismatched authority sync as Defence estate warning state.",
+  "publisher": {
+    "cadence": "hourly",
+    "workflow": ".github/workflows/shine-defence-authority-state.yml",
+    "audience": "shine-defence-authority-state",
+    "operation": "attestation-authority-sync"
+  },
+  "receipt": {
+    "table": "foundation.defence_attestation_authority_sync_receipts",
+    "recorder": "foundation.record_defence_attestation_authority_sync_receipt_v1",
+    "summary": "foundation.get_defence_attestation_authority_sync_summary_v1",
+    "maxAgeSeconds": 5400
+  },
+  "invariants": [
+    "Every successful authority-state publication records one append-only sync receipt after Foundation has validated or applied the authority state.",
+    "The receipt authority SHA, ref, workflow blob and lineage sequence must equal Foundation's current active authority at receipt time.",
+    "Scheduled heartbeats re-assert unchanged authority state and produce fresh receipts without duplicating authority activation history.",
+    "Authority activation and its sync receipt are atomic for promotion and rollback publications.",
+    "Missing, stale or authority-mismatched sync receipt is surfaced as warning in the full Defence estate summary.",
+    "Sync receipt history is not writable by public application roles."
+  ]
+}
