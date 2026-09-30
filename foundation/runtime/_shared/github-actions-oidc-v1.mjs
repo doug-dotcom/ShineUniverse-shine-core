@@ -52,6 +52,8 @@ const validatePolicy=policy=>{
   if(policy.expectedRefType!==undefined&&!['branch','tag'].includes(policy.expectedRefType)) throw oidcError('verification ref type policy invalid');
   if(policy.expectedRunnerEnvironment!==undefined&&!['github-hosted','self-hosted'].includes(policy.expectedRunnerEnvironment)) throw oidcError('verification runner environment policy invalid');
   if(policy.subjectMode!==undefined&&policy.subjectMode!=='repository-ref') throw oidcError('verification subject policy invalid');
+  if(policy.expectedJobWorkflowRef!==undefined&&!cleanString(policy.expectedJobWorkflowRef,1024)) throw oidcError('verification job workflow ref policy invalid');
+  if(policy.expectedJobWorkflowSha!==undefined&&!sha40(String(policy.expectedJobWorkflowSha))) throw oidcError('verification job workflow sha policy invalid');
   if(policy.maxTokenAgeSeconds!==undefined&&(!Number.isInteger(policy.maxTokenAgeSeconds)||policy.maxTokenAgeSeconds<60||policy.maxTokenAgeSeconds>3600)) throw oidcError('verification freshness policy invalid');
 };
 
@@ -159,6 +161,8 @@ export function createGithubActionsOidcVerifier({
     if(!['branch','tag'].includes(String(payload.ref_type??''))) throw oidcError('ref type claim invalid');
     if(!['github-hosted','self-hosted'].includes(String(payload.runner_environment??''))) throw oidcError('runner environment claim invalid');
     if(!sha40(String(payload.workflow_sha??''))) throw oidcError('workflow sha claim invalid');
+    if(payload.job_workflow_ref!==undefined&&!cleanString(payload.job_workflow_ref,1024)) throw oidcError('job workflow ref claim invalid');
+    if(payload.job_workflow_sha!==undefined&&!sha40(String(payload.job_workflow_sha))) throw oidcError('job workflow sha claim invalid');
     if(!cleanString(payload.sub,1024)) throw oidcError('subject claim invalid');
     if(!policy.allowedEvents.includes(String(payload.event_name))) throw oidcError('event not allowed');
     if(policy.expectedRepository!==undefined&&payload.repository!==policy.expectedRepository) throw oidcError('repository mismatch');
@@ -168,6 +172,8 @@ export function createGithubActionsOidcVerifier({
     if(policy.expectedRef!==undefined&&payload.ref!==policy.expectedRef) throw oidcError('ref mismatch');
     if(policy.expectedRefType!==undefined&&payload.ref_type!==policy.expectedRefType) throw oidcError('ref type mismatch');
     if(policy.expectedRunnerEnvironment!==undefined&&payload.runner_environment!==policy.expectedRunnerEnvironment) throw oidcError('runner environment mismatch');
+    if(policy.expectedJobWorkflowRef!==undefined&&payload.job_workflow_ref!==policy.expectedJobWorkflowRef) throw oidcError('job workflow ref mismatch');
+    if(policy.expectedJobWorkflowSha!==undefined&&payload.job_workflow_sha!==policy.expectedJobWorkflowSha) throw oidcError('job workflow sha mismatch');
 
     let expectedWorkflowRef=policy.expectedWorkflowRef;
     if(policy.expectedWorkflow){
@@ -192,6 +198,8 @@ export function createGithubActionsOidcVerifier({
       ref:String(payload.ref),
       refType:String(payload.ref_type),
       workflowRef:String(payload.workflow_ref),
+      jobWorkflowRef:payload.job_workflow_ref===undefined?'':String(payload.job_workflow_ref),
+      jobWorkflowSha:payload.job_workflow_sha===undefined?'':String(payload.job_workflow_sha),
       runId:String(payload.run_id??''),
       runAttempt:String(payload.run_attempt??''),
       eventName:String(payload.event_name),
@@ -212,4 +220,4 @@ const defaultVerifier=createGithubActionsOidcVerifier();
 
 export const verifyGithubActionsOidc=(token,policy)=>defaultVerifier.verify(token,policy);
 export const GITHUB_ACTIONS_OIDC_ISSUER=EXPECTED_ISSUER;
-export const GITHUB_ACTIONS_OIDC_VERIFIER_VERSION='1.2.0';
+export const GITHUB_ACTIONS_OIDC_VERIFIER_VERSION='1.3.0';
