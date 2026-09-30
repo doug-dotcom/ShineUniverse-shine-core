@@ -1,0 +1,155 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "shine-foundation/promoted-release-response-v1",
+  "title": "Shine Foundation Promoted Release Response v1",
+  "schemaVersion": "1.0.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "foundationPromotedReleaseResponse",
+    "schemaVersion",
+    "environment",
+    "evaluatedAt",
+    "available",
+    "state",
+    "reasonCode",
+    "promotionClosureState",
+    "promotedRelease",
+    "runtimeReadinessClaimed",
+    "mutatesAuthoritativeTruth"
+  ],
+  "properties": {
+    "foundationPromotedReleaseResponse": {
+      "const": "shine-foundation/promoted-release-response-v1"
+    },
+    "schemaVersion": {
+      "const": "1.0.0"
+    },
+    "environment": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]*$"
+    },
+    "evaluatedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "available": {
+      "type": "boolean"
+    },
+    "state": {
+      "enum": ["promoted", "hold"]
+    },
+    "reasonCode": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 160
+    },
+    "promotionClosureState": {
+      "enum": ["closed", "open", "stale", "invalid", "blocked"]
+    },
+    "promotedRelease": {
+      "oneOf": [
+        {"$ref": "#/$defs/promotedRelease"},
+        {"type": "null"}
+      ]
+    },
+    "promotedReleaseSha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "runtimeReadinessClaimed": {
+      "const": false
+    },
+    "mutatesAuthoritativeTruth": {
+      "const": false
+    }
+  },
+  "oneOf": [
+    {
+      "properties": {
+        "available": {"const": true},
+        "state": {"const": "promoted"},
+        "reasonCode": {"const": "promotion-closure-current"},
+        "promotionClosureState": {"const": "closed"},
+        "promotedRelease": {"$ref": "#/$defs/promotedRelease"}
+      },
+      "required": ["promotedReleaseSha256"]
+    },
+    {
+      "properties": {
+        "available": {"const": false},
+        "state": {"const": "hold"},
+        "promotedRelease": {"type": "null"}
+      },
+      "not": {
+        "required": ["promotedReleaseSha256"]
+      }
+    }
+  ],
+  "$defs": {
+    "promotedRelease": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "bindingId",
+        "releaseRef",
+        "foundationLayer",
+        "sourceRef",
+        "sourceCommitSha",
+        "runtimeVersion",
+        "artifactSha256",
+        "closureId",
+        "closureSha256",
+        "canonicalSourceTruthFingerprint",
+        "closedAt"
+      ],
+      "properties": {
+        "bindingId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "releaseRef": {
+          "type": "string",
+          "pattern": "^foundation:layer-[0-9]+:[a-f0-9]{8}$"
+        },
+        "foundationLayer": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "sourceRef": {
+          "type": "string",
+          "pattern": "^github://[^/]+/[^/]+/commit/[a-fA-F0-9]{40}$"
+        },
+        "sourceCommitSha": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{40}$"
+        },
+        "runtimeVersion": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "artifactSha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "closureId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "closureSha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "canonicalSourceTruthFingerprint": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{32}$"
+        },
+        "closedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    }
+  }
+}

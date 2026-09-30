@@ -41,6 +41,9 @@
     "The consumer projection carries its own deterministic SHA-256 fingerprint.",
     "Consumer assertions are read-only and grant no release mutation authority.",
     "Runtime readiness is not implied by promotion closure.",
-    "New production code may not read the raw current binding outside the explicit control-plane allowlist."
-  ]
+    "New production code may not read the raw current binding outside the explicit control-plane allowlist.",
+    "Consumers validate the promoted-release response against the pinned v1 contract before trusting its release identity."
+  ],
+  "responseSchema": "foundation/schemas/promoted-release-response-v1.schema.json",
+  "consumerValidator": "foundation/integration-kit/promoted-release-response-v1.mjs"
 }

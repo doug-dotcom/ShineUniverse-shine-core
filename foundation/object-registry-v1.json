@@ -1,6 +1,6 @@
 {
   "registry": "shine-foundation/object-registry-v1",
-  "version": "1.7.0",
+  "version": "1.8.0",
   "foundationContract": "shine-foundation/foundation-v1",
   "repository": "doug-dotcom/ShineUniverse-shine-core",
   "entries": [
@@ -93,6 +93,12 @@
       "path": "foundation/schemas/identity-claim-response-v1.schema.json",
       "version": "1.0.0",
       "blobSha": "ed4827f1a47debfeccc58e33d1f392af2a49c988"
+    },
+    {
+      "id": "promoted-release-response",
+      "path": "foundation/schemas/promoted-release-response-v1.schema.json",
+      "version": "1.0.0",
+      "blobSha": "5d67cfd13f4f300d9702970063142670c95c1c2a"
     }
   ],
   "rule": "A registered schema may only change through an explicit version/registry update; consumers should pin the schema version they implement."
