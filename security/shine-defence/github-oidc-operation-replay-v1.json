@@ -1,6 +1,6 @@
 {
   "contract": "shine-defence/github-oidc-operation-replay-v1",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "purpose": "Bind a verified GitHub Actions run/attempt, audience, operation and logical target to one semantic request digest so exact retries remain safe and changed-payload replays fail closed.",
   "identityKey": [
     "repository",
@@ -33,6 +33,9 @@
     "shine-defence-reattest": [
       "reattest-claim",
       "reattest-attest"
+    ],
+    "shine-defence-authority-state": [
+      "attestation-authority-sync"
     ]
   },
   "persistence": {
@@ -46,13 +49,15 @@
     "release-head evidence",
     "rollback source evidence",
     "provider estate evidence",
-    "re-attestation evidence"
+    "re-attestation evidence",
+    "attestation authority-state synchronization"
   ],
   "invariants": [
     "The replay binder runs only after cryptographic GitHub OIDC verification.",
     "Cross-audience and cross-operation reuse is accepted only for the explicitly allowed purpose map.",
     "The first semantic request owns the identity key permanently.",
     "Bindings and replay/conflict events are append-only and not writable by public application roles.",
-    "Exact retry does not create duplicate provider evidence."
+    "Exact retry does not create duplicate provider evidence.",
+    "The authority-state publisher may bind only shine-defence-authority-state / attestation-authority-sync."
   ]
 }
