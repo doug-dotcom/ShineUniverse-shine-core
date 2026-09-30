@@ -45,6 +45,7 @@ declare
   v_bound integer;
   v_duplicate_ids integer;
   v_wrong_owner integer;
+  v_identity_mismatch integer;
 begin
   select count(*) into v_required
   from foundation.defence_estate_targets
@@ -84,17 +85,42 @@ begin
       or metadata->>'sourceRepositoryOwnerId' is distinct from '225530237'
     );
 
+  select count(*) into v_identity_mismatch
+  from foundation.defence_estate_targets t
+  join (
+    values
+      ('railway:daash','1373763946'),
+      ('railway:dive','1361439227'),
+      ('railway:dnd','1384280308'),
+      ('railway:fiona','1357712835'),
+      ('railway:fish','1384278684'),
+      ('railway:my-money','1378329747'),
+      ('railway:project-l','1240491225'),
+      ('railway:punt49','1359524189'),
+      ('railway:recovery-companion','1354993812'),
+      ('railway:rivers','1377780406'),
+      ('railway:shine-ai','1386493862'),
+      ('railway:ski','1359646182'),
+      ('railway:translate','1368992845'),
+      ('railway:travel','1361434212')
+  ) expected(target_id,repository_id) using(target_id)
+  where t.provider='railway'
+    and t.lifecycle='active'
+    and t.required_for_estate
+    and t.metadata->>'sourceRepositoryId' is distinct from expected.repository_id;
+
   return jsonb_build_object(
     'defenceOidcPrincipalBindingSummary','shine-defence/github-oidc-principal-binding-summary-v1',
     'schemaVersion','1.0.0',
     'state',case
-      when v_required=14 and v_bound=14 and v_duplicate_ids=0 and v_wrong_owner=0 then 'pass'
+      when v_required=14 and v_bound=14 and v_duplicate_ids=0 and v_wrong_owner=0 and v_identity_mismatch=0 then 'pass'
       else 'fail'
     end,
     'requiredTargets',v_required,
     'boundTargets',v_bound,
     'duplicateRepositoryIds',v_duplicate_ids,
     'wrongOwnerTargets',v_wrong_owner,
+    'repositoryIdMismatches',v_identity_mismatch,
     'owner','doug-dotcom',
     'ownerId','225530237'
   );
