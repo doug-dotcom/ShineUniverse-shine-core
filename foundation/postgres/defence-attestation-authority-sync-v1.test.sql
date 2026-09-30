@@ -58,7 +58,7 @@ begin
     repeat('d',40),
     null,
     'test:authority-sync:wrong-predecessor',
-    '{}'::jsonb
+    jsonb_build_object('lineageSequence',3)
   ) into v;
 
   if v->>'status'<>'rejected'
@@ -81,7 +81,7 @@ begin
     repeat('e',40),
     null,
     'test:authority-sync:promotion-replay-bootstrap',
-    '{}'::jsonb
+    jsonb_build_object('lineageSequence',3)
   ) into v;
 
   if v->>'status'<>'rejected'
@@ -104,7 +104,7 @@ begin
     repeat('e',40),
     1,
     'test:authority-sync:rollback-wrong-blob',
-    '{}'::jsonb
+    jsonb_build_object('lineageSequence',3)
   ) into v;
 
   if v->>'status'<>'rejected'
