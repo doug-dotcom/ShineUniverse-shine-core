@@ -1,6 +1,6 @@
 # Foundation Layer 78 — Safe-response verification coverage audit
 
-**Status:** IMPLEMENTED — CI and production verification pending  
+**Status:** LIVE — CI green and production verification complete  
 **Scope:** make Layer-77 verification coverage measurable across every successful Layer-76 execution
 
 Layer 77 can independently verify one execution receipt.
@@ -114,6 +114,32 @@ Denied:
 
 Layer 78 has no writer, executor or repair path.
 
+## Production proof
+
+Layer 78 is deployed in the Shine Foundation Supabase project as migration:
+
+`20260930120521 — foundation_layer_078_case_audit_safe_response_verification_coverage`
+
+Live production verification confirms:
+
+- the coverage reader exists and executes successfully;
+- current production state is **idle** because there are no successful Layer-76 execution receipts yet;
+- execution count: **0**;
+- verification-required count: **0**;
+- verification proof count: **0**;
+- problem count: **0**;
+- verification coverage: **100%**;
+- healthy verification: **100%**;
+- proof integrity is recomputed: **true**;
+- target re-execution: **false**;
+- mutation performed: **false**;
+- Foundation runtime and service role can read;
+- Gateway can read only via its established `foundation_runtime` membership;
+- Gateway has no direct EXECUTE grant;
+- Shine Core, Shine Defence and browser roles cannot read;
+- Supabase security advisors report no Layer-78-specific finding.
+
 ## Invariant
+
 
 > Verification is not complete because a verifier exists. It is complete only when every successful execution has a valid independent proof.
