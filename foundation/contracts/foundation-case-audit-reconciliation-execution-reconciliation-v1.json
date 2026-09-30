@@ -47,6 +47,10 @@
     "gatewayReceivesNoDirectGrant": true,
     "ownerDenied": true,
     "defenceDenied": true,
-    "browserRolesDenied": true
-  }
+    "browserRolesDenied": true,
+    "layer82ReconciliationForeignKeyIndexed": true
+  },
+  "supportingIndexes": [
+    "foundation.case_audit_verify_reconcile_exec_reconcile_layer82_idx"
+  ]
 }
