@@ -135,6 +135,7 @@ CI proves:
 - Foundation runtime can read current owner work;
 - browser roles cannot;
 - handoff history is append-only.
+- the owner-service foreign key has a dedicated covering index;
 
 ## Invariant
 
