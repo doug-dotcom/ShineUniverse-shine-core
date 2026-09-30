@@ -1,6 +1,6 @@
 {
   "contract": "shine-defence/release-attestation-authority-v1",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "purpose": "Centralize the authority-bearing release-head and rollback attestation job in Shine Core so app callers cannot silently change attestation logic.",
   "reusableWorkflow": {
     "repository": "doug-dotcom/ShineUniverse-shine-core",
@@ -44,7 +44,8 @@
     "A future central workflow revision receives a new SHA and must be deliberately promoted before it can exercise authority.",
     "Release-head and rollback OIDC tokens without the exact pinned Core reusable workflow authority are rejected.",
     "Authority-gated runtime consumers import one shared immutable authority binding; they do not duplicate the authority ref or SHA locally.",
-    "Every active authority is the final entry in the append-only authority lineage and its workflow blob is proven against repository history."
+    "Every active authority is the final entry in the append-only authority lineage and its workflow blob is proven against repository history.",
+    "Every successor authority after the bootstrap generation has an explicit approved promotion receipt bound to the predecessor, successor and exact workflow blob."
   ],
   "enforcement": {
     "mode": "mandatory",
@@ -56,7 +57,7 @@
     "requiredJobWorkflowSha": "7bfd7fe685b4b2da814ac53dafdbfac2350591c8",
     "failureMode": "401 unauthorized",
     "runtimeBindingPath": "foundation/runtime/_shared/shine-defence-release-attestation-authority-v1.mjs",
-    "rotationRule": "Append and validate a successor lineage entry first, then rotate the shared runtime binding and this contract together; CI rejects missing predecessor linkage, workflow-blob mismatch or contract/runtime divergence."
+    "rotationRule": "For sequence 2+, create and review an immutable promotion receipt first; append a successor lineage entry that pins that receipt by Git blob SHA; only then rotate the shared runtime binding and this contract. CI fails closed on missing approval, incomplete review controls, receipt tamper, broken predecessor linkage, workflow-blob mismatch or runtime/contract divergence."
   },
   "runtimeBinding": {
     "path": "foundation/runtime/_shared/shine-defence-release-attestation-authority-v1.mjs",
@@ -68,5 +69,11 @@
     "verifierPath": "security/shine-defence/integration-kit/verify-release-attestation-authority-lineage-v1.mjs",
     "mode": "append-only-predecessor-chain",
     "workflowBlobProof": "git-history"
+  },
+  "promotionGate": {
+    "contractPath": "security/shine-defence/release-attestation-authority-promotion-v1.json",
+    "receiptDirectory": "security/shine-defence/release-attestation-authority-promotions",
+    "bootstrapSequence": 1,
+    "successorRequirement": "explicit-approved-byte-pinned-receipt"
   }
 }

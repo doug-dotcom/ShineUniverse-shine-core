@@ -1,0 +1,38 @@
+{
+  "contract": "shine-defence/release-attestation-authority-promotion-v1",
+  "version": "1.0.0",
+  "purpose": "Require explicit bounded human promotion evidence before any successor release-attestation authority becomes active.",
+  "receipt": {
+    "directory": "security/shine-defence/release-attestation-authority-promotions",
+    "contract": "shine-defence/release-attestation-authority-promotion-receipt-v1",
+    "version": "1.0.0",
+    "status": "approved"
+  },
+  "requiredBindings": [
+    "predecessorAuthoritySha",
+    "successorAuthoritySha",
+    "successorWorkflowBlobSha",
+    "reviewerId",
+    "approvedAt",
+    "summary"
+  ],
+  "requiredReviewControls": [
+    "workflowDiffReviewed",
+    "oidcClaimCompatibilityReviewed",
+    "rollbackReadinessReviewed",
+    "consumerMigrationReviewed"
+  ],
+  "rules": [
+    "The bootstrap sequence-1 authority predates this control and has no promotion receipt.",
+    "Every lineage entry after sequence 1 references exactly one immutable promotion receipt by repository path and Git blob SHA.",
+    "The receipt binds the immediate predecessor authority SHA, successor authority SHA and successor workflow blob SHA.",
+    "All required review controls are explicitly true; missing or false controls fail closed.",
+    "The reviewer id and review summary are explicit bounded human-authored fields and may not use the reserved shine-defence-core machine authority.",
+    "approvedAt must be valid and no later than the lineage activatedAt timestamp.",
+    "Changing a receipt changes its Git blob fingerprint and invalidates the lineage until the exact replacement is deliberately rebound."
+  ],
+  "limitations": [
+    "A repository receipt proves explicit recorded authorization and byte identity; it does not independently prove the real-world identity of the named reviewer.",
+    "This control supplements repository branch/ruleset protections rather than replacing them."
+  ]
+}

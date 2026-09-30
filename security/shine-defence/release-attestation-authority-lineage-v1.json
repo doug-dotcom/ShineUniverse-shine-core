@@ -1,6 +1,6 @@
 {
   "contract": "shine-defence/release-attestation-authority-lineage-v1",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "purpose": "Append-only audit lineage for immutable Shine Defence release-attestation authority rotations.",
   "workflow": {
     "repository": "doug-dotcom/ShineUniverse-shine-core",
@@ -14,14 +14,23 @@
       "workflowBlobSha": "71218df29b79919af76115b9180a6afbbd8dbf79",
       "activatedAt": "2026-09-30T06:58:39.000Z",
       "predecessorAuthoritySha": null,
-      "reason": "Initial central reusable release-attestation authority."
+      "reason": "Initial central reusable release-attestation authority.",
+      "promotionReceipt": null
     }
   ],
   "rules": [
     "Entries are append-only and sequence numbers are contiguous from 1.",
     "Each successor names the immediately preceding authority SHA.",
     "Every authority SHA must resolve to a repository commit containing the declared reusable workflow path at the recorded workflow blob SHA.",
+    "Sequence 1 is the documented bootstrap authority and has no promotion receipt.",
+    "Every successor entry after sequence 1 must reference one approved authority-promotion receipt by exact path and Git blob SHA.",
+    "The referenced promotion receipt must bind the immediate predecessor, successor authority SHA and successor workflow blob SHA before activation.",
     "The final lineage entry must exactly match the active shared runtime authority binding and canonical authority contract.",
-    "Authority rotation is fail-closed: a new authority cannot become active unless its lineage entry, workflow blob and runtime/contract bindings validate together."
-  ]
+    "Authority rotation is fail-closed: a new authority cannot become active unless lineage, workflow blob, promotion receipt and runtime/contract bindings validate together."
+  ],
+  "promotionGate": {
+    "contractPath": "security/shine-defence/release-attestation-authority-promotion-v1.json",
+    "receiptDirectory": "security/shine-defence/release-attestation-authority-promotions",
+    "bootstrapSequence": 1
+  }
 }
