@@ -1,0 +1,57 @@
+{
+  "contract": "shine-foundation/promoted-release-case-audit-incident-lifecycle-v1",
+  "version": "1.0.0",
+  "layer": 74,
+  "purpose": "Escalate persistent Layer-73 case-audit GAP/INVALID/DRIFT/UNKNOWN states into append-only operational incidents without granting repair authority.",
+  "source": "foundation.get_foundation_promoted_release_case_audit_observation_summary_v1",
+  "ledger": "foundation.foundation_promoted_release_case_audit_incident_events",
+  "currentStateView": "foundation.current_foundation_promoted_release_case_audit_incident_state",
+  "activeIncidentsView": "foundation.current_foundation_promoted_release_case_audit_incidents",
+  "watchesView": "foundation.current_foundation_promoted_release_case_audit_watches",
+  "sentinel": "foundation.run_foundation_promoted_release_case_audit_incident_sentinel_v1",
+  "summary": "foundation.get_foundation_promoted_release_case_audit_incident_summary_v1",
+  "persistenceThresholdSeconds": 300,
+  "sourceStates": [
+    "normal",
+    "gap",
+    "invalid",
+    "drift",
+    "unknown"
+  ],
+  "lifecycle": [
+    "detected",
+    "opened",
+    "changed",
+    "recovered"
+  ],
+  "severityMapping": {
+    "gap": "critical",
+    "invalid": "critical",
+    "drift": "warning",
+    "unknown": "warning",
+    "normal": "non-incident"
+  },
+  "hostedSentinel": {
+    "engine": "pg_cron",
+    "jobName": "shine-foundation-promoted-release-case-audit-incident-5m",
+    "cadence": "0,5,10,15,20,25,30,35,40,45,50,55 * * * *",
+    "observationMaxAgeSeconds": 600
+  },
+  "invariants": {
+    "firstBadSampleCreatesWatch": true,
+    "persistenceRequiredBeforeOpen": true,
+    "materialEvidenceChangeAppendsChangedEvent": true,
+    "unchangedOpenEvidenceDoesNotAppendNoise": true,
+    "normalRecoversWatchOrIncident": true,
+    "directIncidentInsertDeniedToServiceRole": true,
+    "transitionHelperOwnerPrivate": true,
+    "foundationRuntimeReadOnly": true,
+    "gatewayReadInheritedViaFoundationRuntime": true,
+    "ownerDenied": true,
+    "defenceDenied": true,
+    "browserRolesDenied": true,
+    "automaticRepair": false,
+    "mutatesAuthoritativeTruth": false,
+    "mutatesIncidentHistory": false
+  }
+}
