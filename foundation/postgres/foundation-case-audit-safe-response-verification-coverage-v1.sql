@@ -50,6 +50,7 @@ begin
       v.reason_code as verification_reason_code,
       v.durable_evidence_id,
       v.durable_evidence_fingerprint,
+      v.durable_evidence_snapshot,
       v.execution_action_result,
       v.verification_proof,
       v.verification_proof_sha256,
@@ -85,6 +86,8 @@ begin
                 is not distinct from x.action_key
           and x.verification_proof->>'executionPolicyFingerprint'
                 is not distinct from x.policy_fingerprint
+          and x.verification_proof->'executionRequestedAt'
+                is not distinct from to_jsonb(x.requested_at)
           and x.verification_proof->>'verificationState'
                 is not distinct from x.verification_state
           and x.verification_proof->>'reasonCode'
@@ -93,6 +96,14 @@ begin
                 is not distinct from x.durable_evidence_id::text
           and x.verification_proof->>'durableEvidenceFingerprint'
                 is not distinct from x.durable_evidence_fingerprint
+          and nullif(
+                x.verification_proof->'durableEvidence',
+                'null'::jsonb
+              ) is not distinct from x.durable_evidence_snapshot
+          and x.verification_proof->'executionActionResult'
+                is not distinct from x.action_result
+          and x.verification_proof->'verifiedAt'
+                is not distinct from to_jsonb(x.verified_at)
           and x.verification_proof->>'foundationCaseAuditSafeResponseVerificationProof'
                 is not distinct from
                 'shine-foundation/case-audit-safe-response-verification-proof-v1'
