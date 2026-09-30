@@ -1,6 +1,6 @@
 # Foundation Layer 60 — Immutable promotion-closure receipts
 
-**Status:** IMPLEMENTED — CI and production promotion pending  
+**Status:** LIVE — CI green, production closure receipted and hosted recorder active  
 **Scope:** make canonical source-truth closure a durable release fact rather than a one-time successful query
 
 Layer 59 answers:
@@ -126,6 +126,8 @@ Layer 60 never converts one dimension into the other.
 
 ## Acceptance coverage
 
+Full Foundation CI run `36663521170` completed successfully. Layer-60 apply/tests passed and every downstream Shine Defence acceptance step remained green.
+
 CI proves:
 
 - PASS Layer-59 truth records one closure receipt;
@@ -140,6 +142,45 @@ CI proves:
 - runtime cannot record or assert closure;
 - service role cannot bypass the recorder with direct ledger INSERT;
 - browser/API roles cannot read closure status.
+
+## Production proof
+
+Layer 60 is deployed in the Shine Foundation Supabase project.
+
+The first real production closure receipt was recorded for the existing immutable binding:
+
+- release: `foundation:layer-58:1a8148a8`
+- binding ID: `187d5232-83b5-4c2f-acc6-62da7a9a9515`
+- closure ID: `df864db1-abe4-4a28-b784-7a1d7b83dc5d`
+- canonical source-truth fingerprint: `3e7ce8f50385b3fadddddc247d3573bf`
+- closure SHA-256: `38b479bb951e69e53438b8cf13637b4c67dba5f7965f6d520f90344721bc2b87`
+- closure state: **closed**
+- receipt integrity: **verified**
+- receipt current: **true**
+- runtime readiness claimed: **false**
+- authoritative truth mutation: **false**
+
+The service-role assertion passes.
+
+Hosted job:
+
+`shine-foundation-promotion-closure-5m`
+
+is active on the staggered five-minute cadence.
+
+Production privilege proof:
+
+- Foundation runtime can read closure status: **yes**
+- Foundation runtime can record closure: **no**
+- Foundation runtime can assert closure: **no**
+- service role can record closure: **yes**
+- service role can assert closure: **yes**
+- service role direct ledger INSERT: **no**
+- anonymous/authenticated closure read: **no**
+
+Supabase security-advisor counts are unchanged from Layer 59 and show no Layer-60-specific finding. Performance-advisor counts are also unchanged.
+
+The immutable Foundation release remains Layer 58 because current runtime readiness is still not bindable. Layer 60 closes source-truth promotion evidence without inventing a Layer-60 runtime release.
 
 ## Invariant
 
