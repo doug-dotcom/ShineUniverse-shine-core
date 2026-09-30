@@ -38,7 +38,8 @@ Verification requires:
 - the durable row exists in the same environment;
 - the action-result contract is correct;
 - the result status is a Layer-73 record status;
-- the result semantic fingerprint exactly matches the stored observation fingerprint.
+- the result semantic fingerprint exactly matches the stored observation fingerprint;
+- the semantic fingerprint is recomputed from the stored observation snapshot and must match the stored fingerprint.
 
 ## Handoff proof
 
