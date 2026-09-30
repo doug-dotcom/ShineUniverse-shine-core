@@ -1,6 +1,6 @@
 # Foundation Layer 72 — Promotion-trust case completeness audit
 
-**Status:** IMPLEMENTED — CI and production verification pending  
+**Status:** LIVE — corrected CI green, production case audit deployed and structurally clean  
 **Scope:** audit the entire Layers 65–71 case chain for structural gaps, invalid bindings and legitimate waiting states
 
 Layers 65–71 now provide every stage of a governed promotion-trust case.
@@ -109,6 +109,14 @@ The audit cannot mutate trust, incident history, approval state or execution aut
 
 ## Acceptance coverage
 
+The first Layer-72 run exposed one privilege-model mismatch in the test: `foundation_gateway` inherits `foundation_runtime` by long-standing design, so Gateway can inherit this read-only audit function even though Layer 72 grants it no direct EXECUTE privilege.
+
+The layer documentation, contract and test were corrected to reflect the real role graph rather than weakening or changing it.
+
+The response-plan binding was also hardened before final verification so acknowledgement and owner evidence must bind the exact Layer-67 semantic plan fingerprint instead of passing through a duplicate field-name comparison.
+
+Corrected full Foundation CI run `36690675293` completed successfully with both Foundation jobs green. Layer-72 apply/tests passed, persistence completed the full chain, and all downstream Shine Defence checks remained green.
+
 CI proves:
 
 - healthy empty production shape is idle;
@@ -121,6 +129,44 @@ CI proves:
 - a corrupt historical handoff makes the audit invalid;
 - internal audit access remains inside the existing Foundation runtime/control-plane boundary;
 - Gateway access is inherited only through its pre-existing `foundation_runtime` membership, not a new direct grant.
+
+## Production proof
+
+Layer 72 is deployed in the Shine Foundation Supabase project as:
+
+`foundation_layer_072_promoted_release_case_audit`
+
+Current production audit:
+
+- overall state: **idle**
+- structural integrity pass: **true**
+- incident state: **normal**
+- active incident handoff state: **not-required**
+- cases: **0**
+- invalid cases: **0**
+- active cases: **0**
+- pending cases: **0**
+- terminal cases: **0**
+- historical cases: **0**
+- handoff grace: **180 seconds**
+- mutates authoritative truth: **false**
+- mutates incident history: **false**
+- grants approval: **false**
+- grants execution authority: **false**
+
+This is the correct healthy baseline. No synthetic incident or historical case was created in production merely to populate the audit.
+
+Privilege proof:
+
+- Foundation runtime can read audit: **yes**
+- service role can read audit: **yes**
+- Gateway can read audit through its pre-existing `foundation_runtime` membership: **yes**
+- Gateway receives a direct Layer-72 grant: **no**
+- Shine Core owner can read internal audit: **no**
+- Shine Defence runtime can read internal audit: **no**
+- anonymous/authenticated roles can read internal audit: **no**
+
+Supabase advisors show no Layer-72-specific security or performance finding. Layer 72 adds one read-only function and no table or index; existing estate-wide advisory notices remain unrelated.
 
 ## Invariant
 
