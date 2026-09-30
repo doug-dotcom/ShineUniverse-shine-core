@@ -85,6 +85,8 @@ jobs:
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/identity-federation-v1.sql
       - name: Apply app connection registry
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/app-connection-registry-v1.sql
+      - name: Register Shine Wellness identity
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/wellness-app-registration-v1.sql
       - name: Apply identity federation v2
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/identity-federation-v2.sql
       - name: Apply identity claim v1
@@ -119,6 +121,8 @@ jobs:
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/identity-federation-v1.test.sql
       - name: Run app connection registry acceptance tests
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/app-connection-registry-v1.test.sql
+      - name: Run Shine Wellness registration acceptance tests
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/wellness-app-registration-v1.test.sql
       - name: Run identity federation v2 acceptance tests
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/identity-federation-v2.test.sql
       - name: Run identity claim acceptance tests

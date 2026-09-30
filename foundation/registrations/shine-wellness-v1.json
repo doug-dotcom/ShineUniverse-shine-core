@@ -1,0 +1,19 @@
+{
+  "manifest": "shine-foundation/app-manifest-v1",
+  "schemaVersion": "1.0.0",
+  "appId": "shine.wellness",
+  "name": "Shine Wellness",
+  "version": "0.1.0",
+  "primaryPurpose": "Person-centred health organiser, translator, historian and bridge that turns records, measurements, medications, care and wellbeing into one understandable longitudinal story.",
+  "supportedModes": [
+    "standalone",
+    "connected",
+    "universe-enhanced"
+  ],
+  "foundation": {
+    "contract": "shine-foundation/foundation-v1",
+    "standalonePrimaryPurposeAvailable": true,
+    "requestedScopes": [],
+    "onFoundationUnavailable": "continue-standalone"
+  }
+}
