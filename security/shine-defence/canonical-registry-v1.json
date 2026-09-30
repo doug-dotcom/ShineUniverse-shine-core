@@ -522,14 +522,14 @@
     {
       "id": "github-actions-oidc-verifier",
       "path": "security/shine-defence/github-actions-oidc-verifier-v1.json",
-      "version": "1.2.0",
-      "blobSha": "7d392b029bab2b3bcbba3977cfc3a02d91c53c98"
+      "version": "1.3.0",
+      "blobSha": "7719bdeaf25f856ac5e05832e6dd4a7bff9c2bff"
     },
     {
       "id": "github-actions-oidc-verifier-runtime",
       "path": "foundation/runtime/_shared/github-actions-oidc-v1.mjs",
-      "version": "1.2.0",
-      "blobSha": "100b452ba13dac51302b72478099fa90763413ae"
+      "version": "1.3.0",
+      "blobSha": "b3aacc69807ef3491172a7215a66969b84a968ad"
     },
     {
       "id": "github-oidc-operation-replay",
@@ -572,6 +572,18 @@
       "path": "foundation/postgres/defence-github-oidc-principal-binding-v1.sql",
       "version": "1.0.0",
       "blobSha": "71ea48d71c667be4fd9d3b1ad267451a8c69e12c"
+    },
+    {
+      "id": "release-attestation-authority",
+      "path": "security/shine-defence/release-attestation-authority-v1.json",
+      "version": "1.0.0",
+      "blobSha": "503ea2698fcafa21b7a998eef81a834f734987cd"
+    },
+    {
+      "id": "release-attestation-authority-workflow",
+      "path": ".github/workflows/shine-defence-release-attestation-v1.yml",
+      "version": "1.0.0",
+      "blobSha": "71218df29b79919af76115b9180a6afbbd8dbf79"
     }
   ]
 }
