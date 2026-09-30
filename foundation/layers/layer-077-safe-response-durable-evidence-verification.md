@@ -155,5 +155,6 @@ Live verification confirms:
 - production currently contains no Layer-76 successful execution receipts, so the Layer-77 summary is truthfully empty: 0 verified, 0 missing, 0 mismatch;
 - Supabase security advisors report no Layer-77-specific finding.
 
+## Invariant
 
 > An execution receipt may claim success. Only durable evidence makes that success independently believable.
