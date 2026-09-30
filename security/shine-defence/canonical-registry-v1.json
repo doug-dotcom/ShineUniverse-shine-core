@@ -506,6 +506,18 @@
       "path": "security/shine-defence/integration-kit/timeline-snapshot-planner-v1.mjs",
       "version": "1.1.1",
       "blobSha": "9228aa28340b6276a12f4d12903a5fc241cf0983"
+    },
+    {
+      "id": "attestation-workflow-compatibility",
+      "path": "security/shine-defence/attestation-workflow-compatibility-v1.json",
+      "version": "1.0.0",
+      "blobSha": "af8cddaf285ae07c92284eabdcd00a026d3a6882"
+    },
+    {
+      "id": "attestation-workflow-compatibility-helper",
+      "path": "security/shine-defence/integration-kit/attestation-workflow-compatibility-v1.mjs",
+      "version": "1.0.0",
+      "blobSha": "84cf6b8bfa9e66b04b2ca45b4e50b13e6b498419"
     }
   ]
 }

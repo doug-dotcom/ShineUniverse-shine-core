@@ -47,6 +47,8 @@ Reusable Defence policies live under `security/shine-defence/policies/`. They de
 
 `security/shine-defence/canonical-registry-v1.json` is the machine-readable authority for reviewed Defence artefacts. It pins each contract, policy and integration-kit release to its version and exact Git blob SHA. Core CI runs `verify-registry-v1.mjs` and fails if a registered artefact changes without an explicit registry update.
 
+`security/shine-defence/attestation-workflow-compatibility-v1.json` now defines the single cross-app exception for Defence release-attestation workflows. Product CI stays fail-closed; a workflow receives the Defence exception only when it keeps `contents: read`, the narrow `id-token: write` OIDC permission, the pinned runner and strict shell, a `main` source binding, no `secrets.*` context, and only bounded read-only `GITHUB_TOKEN` use. GitHub signing-key continuity is handled by resolving the current issuer JWKS `kid` during verification rather than pinning a long-lived signing key in each app. The companion verifier is `security/shine-defence/integration-kit/attestation-workflow-compatibility-v1.mjs`.
+
 `security/shine-defence/ecosystem-profile-ledger-v1.json` records the exact reviewed **app commit**, Defence-profile blob/version, and canonical policies that profile claimed. It is deliberately a review snapshot: later app commits do not inherit certification automatically.
 
 ### Release-claim freshness
