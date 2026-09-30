@@ -1,0 +1,147 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {webcrypto} from 'node:crypto';
+import {fileURLToPath} from 'node:url';
+import {createGithubActionsOidcVerifier,GITHUB_ACTIONS_OIDC_ISSUER} from './github-actions-oidc-v1.mjs';
+
+const fixedNow=Date.parse('2026-09-30T03:30:00Z');
+const nowSeconds=Math.floor(fixedNow/1000);
+const b64=value=>Buffer.from(typeof value==='string'?value:JSON.stringify(value)).toString('base64url');
+
+async function makeKey(kid){
+  const pair=await webcrypto.subtle.generateKey(
+    {name:'RSASSA-PKCS1-v1_5',modulusLength:2048,publicExponent:new Uint8Array([1,0,1]),hash:'SHA-256'},
+    true,
+    ['sign','verify']
+  );
+  const jwk=await webcrypto.subtle.exportKey('jwk',pair.publicKey);
+  return {pair,jwk:{...jwk,kid,use:'sig',alg:'RS256'}};
+}
+
+async function signJwt(payload,key,{kid=key.jwk.kid,alg='RS256'}={}){
+  const header=b64({alg,kid,typ:'JWT'});
+  const body=b64(payload);
+  const input=header+'.'+body;
+  const signature=await webcrypto.subtle.sign({name:'RSASSA-PKCS1-v1_5'},key.pair.privateKey,Buffer.from(input));
+  return input+'.'+Buffer.from(signature).toString('base64url');
+}
+
+const basePayload=()=>({
+  iss:GITHUB_ACTIONS_OIDC_ISSUER,
+  aud:'shine-defence-release-head',
+  exp:nowSeconds+600,
+  nbf:nowSeconds-10,
+  iat:nowSeconds-10,
+  repository:'doug-dotcom/example',
+  ref:'refs/heads/main',
+  workflow_ref:'doug-dotcom/example/.github/workflows/shine-defence-release-head.yml@refs/heads/main',
+  event_name:'schedule',
+  run_id:'1234',
+  run_attempt:'2',
+  actor:'doug-dotcom',
+  sha:'a'.repeat(40),
+  sub:'repo:doug-dotcom/example:ref:refs/heads/main'
+});
+
+const policy={
+  audience:'shine-defence-release-head',
+  expectedRef:'refs/heads/main',
+  expectedWorkflow:{path:'.github/workflows/shine-defence-release-head.yml',branch:'main'},
+  allowedEvents:['schedule','workflow_dispatch','push']
+};
+
+test('shared verifier accepts current key and refreshes immediately on signing-key rotation',async()=>{
+  const first=await makeKey('kid-1');
+  const second=await makeKey('kid-2');
+  let keys=[first.jwk];
+  let metadataFetches=0;
+  let jwksFetches=0;
+  const fetchImpl=async url=>{
+    if(String(url).endsWith('/.well-known/openid-configuration')){
+      metadataFetches++;
+      return {ok:true,json:async()=>({issuer:GITHUB_ACTIONS_OIDC_ISSUER,jwks_uri:GITHUB_ACTIONS_OIDC_ISSUER+'/.well-known/jwks'})};
+    }
+    if(String(url)===GITHUB_ACTIONS_OIDC_ISSUER+'/.well-known/jwks'){
+      jwksFetches++;
+      return {ok:true,json:async()=>({keys})};
+    }
+    throw new Error('unexpected fetch '+url);
+  };
+  const verifier=createGithubActionsOidcVerifier({fetchImpl,cryptoImpl:webcrypto,now:()=>fixedNow,jwksTtlMs:300000});
+
+  const firstToken=await signJwt(basePayload(),first);
+  const firstIdentity=await verifier.verify(firstToken,policy);
+  assert.equal(firstIdentity.kid,'kid-1');
+  assert.equal(firstIdentity.repository,'doug-dotcom/example');
+  assert.equal(jwksFetches,1);
+  assert.equal(metadataFetches,1);
+
+  await verifier.verify(firstToken,policy);
+  assert.equal(jwksFetches,1,'fresh JWKS should be reused');
+
+  keys=[second.jwk];
+  const secondToken=await signJwt(basePayload(),second);
+  const secondIdentity=await verifier.verify(secondToken,policy);
+  assert.equal(secondIdentity.kid,'kid-2');
+  assert.equal(jwksFetches,2,'unknown kid should force one immediate JWKS refresh');
+  assert.equal(metadataFetches,1,'JWKS rotation should not require metadata rediscovery');
+});
+
+test('shared verifier fails closed after refresh and enforces consumer claim policy',async()=>{
+  const key=await makeKey('kid-current');
+  let jwksFetches=0;
+  const fetchImpl=async url=>{
+    if(String(url).endsWith('/.well-known/openid-configuration')) return {ok:true,json:async()=>({issuer:GITHUB_ACTIONS_OIDC_ISSUER,jwks_uri:GITHUB_ACTIONS_OIDC_ISSUER+'/.well-known/jwks'})};
+    jwksFetches++;
+    return {ok:true,json:async()=>({keys:[key.jwk]})};
+  };
+  const verifier=createGithubActionsOidcVerifier({fetchImpl,cryptoImpl:webcrypto,now:()=>fixedNow,jwksTtlMs:300000});
+  await verifier.verify(await signJwt(basePayload(),key),policy);
+
+  const wrongAudience=await signJwt({...basePayload(),aud:'some-other-audience'},key);
+  await assert.rejects(()=>verifier.verify(wrongAudience,policy),/OIDC audience mismatch/);
+
+  const wrongWorkflow=await signJwt({...basePayload(),workflow_ref:'doug-dotcom/example/.github/workflows/other.yml@refs/heads/main'},key);
+  await assert.rejects(()=>verifier.verify(wrongWorkflow,policy),/OIDC workflow mismatch/);
+
+  const expired=await signJwt({...basePayload(),exp:nowSeconds-60},key);
+  await assert.rejects(()=>verifier.verify(expired,policy),/OIDC token expired/);
+
+  const unknownKid=await signJwt(basePayload(),key,{kid:'kid-unknown'});
+  const before=jwksFetches;
+  await assert.rejects(()=>verifier.verify(unknownKid,policy),/OIDC signing key not found after refresh/);
+  assert.equal(jwksFetches,before+1,'unknown kid must refresh exactly once before rejection');
+});
+
+test('OIDC discovery cannot redirect JWKS trust to another origin',async()=>{
+  const verifier=createGithubActionsOidcVerifier({
+    fetchImpl:async()=>({ok:true,json:async()=>({issuer:GITHUB_ACTIONS_OIDC_ISSUER,jwks_uri:'https://evil.example/jwks'})}),
+    cryptoImpl:webcrypto,
+    now:()=>fixedNow
+  });
+  const key=await makeKey('kid-1');
+  const token=await signJwt(basePayload(),key);
+  await assert.rejects(()=>verifier.verify(token,policy),/OIDC jwks_uri origin mismatch/);
+});
+
+test('all Foundation OIDC consumers delegate cryptography to the shared verifier',()=>{
+  const root=fileURLToPath(new URL('../../../',import.meta.url));
+  const consumers=[
+    'foundation/runtime/defence-reattest/index.ts',
+    'foundation/runtime/defence-provider-ingest/index.ts',
+    'foundation/runtime/deployment-receipt-ingest/index.ts',
+    'foundation/runtime/defence-rollback-readiness/index.ts',
+    'foundation/runtime/defence-release-head-ingest/index.ts'
+  ];
+  const contract=JSON.parse(readFileSync(root+'security/shine-defence/github-actions-oidc-verifier-v1.json','utf8'));
+  assert.deepEqual(contract.consumers,consumers);
+  for(const path of consumers){
+    const source=readFileSync(root+path,'utf8');
+    assert.match(source,/from '\.\.\/_shared\/github-actions-oidc-v1\.mjs'/,path+' must import the shared verifier');
+    assert.match(source,/verifyGithubActionsOidc\(auth\.slice\(7\),OIDC_POLICY\)/,path+' must apply an explicit local claim policy');
+    assert.doesNotMatch(source,/token\.actions\.githubusercontent\.com/,path+' must not own issuer discovery');
+    assert.doesNotMatch(source,/crypto\.subtle\.verify/,path+' must not implement JWT signature verification');
+    assert.doesNotMatch(source,/getJwks|oidcMetadataPromise|jwksPromise/,path+' must not own JWKS caching');
+  }
+});

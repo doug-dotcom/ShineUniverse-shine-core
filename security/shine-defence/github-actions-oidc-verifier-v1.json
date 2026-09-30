@@ -1,0 +1,46 @@
+{
+  "contract": "shine-defence/github-actions-oidc-verifier-v1",
+  "version": "1.0.0",
+  "purpose": "Single canonical GitHub Actions OIDC verification boundary for Foundation and Shine Defence runtime ingestion paths.",
+  "issuer": "https://token.actions.githubusercontent.com",
+  "signing": {
+    "algorithm": "RS256",
+    "keyDiscovery": "OIDC discovery document -> same-origin JWKS",
+    "keySelection": "kid",
+    "cacheTtlSeconds": 300,
+    "rotationRule": "On an unknown kid, refresh JWKS once immediately before rejecting the token."
+  },
+  "claims": {
+    "required": [
+      "iss",
+      "aud",
+      "exp",
+      "repository",
+      "ref",
+      "workflow_ref",
+      "event_name"
+    ],
+    "clockSkewSeconds": 30,
+    "repositoryFormat": "owner/repository",
+    "policyBound": [
+      "audience",
+      "repository/ref/workflow when supplied",
+      "allowed event names"
+    ]
+  },
+  "consumers": [
+    "foundation/runtime/defence-reattest/index.ts",
+    "foundation/runtime/defence-provider-ingest/index.ts",
+    "foundation/runtime/deployment-receipt-ingest/index.ts",
+    "foundation/runtime/defence-rollback-readiness/index.ts",
+    "foundation/runtime/defence-release-head-ingest/index.ts"
+  ],
+  "invariants": [
+    "Consumer functions do not implement JWT signature verification or JWKS fetching independently.",
+    "JWKS discovery cannot escape the GitHub Actions issuer origin.",
+    "Unknown signing keys trigger one forced refresh so normal GitHub signing-key rotation does not require a deployment.",
+    "An unknown key after refresh fails closed.",
+    "Audience, workflow, repository/ref and event restrictions remain consumer policy and are never weakened by the shared verifier.",
+    "The verifier returns bounded identity metadata only; it does not return the raw token."
+  ]
+}
