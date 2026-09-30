@@ -80,6 +80,9 @@ create index case_audit_verify_reconcile_target_idx
     target_execution_event_id,reconciled_at desc,reconciliation_sequence desc
   );
 
+create index case_audit_verify_reconcile_verification_idx
+  on foundation.case_audit_verify_exec_reconciliations(verification_id);
+
 create index case_audit_verify_reconcile_state_idx
   on foundation.case_audit_verify_exec_reconciliations(
     reconciliation_state,reconciled_at desc,reconciliation_sequence desc
