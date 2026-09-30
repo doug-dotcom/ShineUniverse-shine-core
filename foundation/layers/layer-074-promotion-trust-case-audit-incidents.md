@@ -1,6 +1,6 @@
 # Foundation Layer 74 — Promotion-trust case-audit incidents
 
-**Status:** IMPLEMENTED — CI and production verification pending  
+**Status:** LIVE — CI green, hosted structural-audit sentinel active and healthy production baseline verified  
 **Scope:** escalate persistent structural audit failures without auto-repairing the case chain
 
 Layer 73 continuously records whether the complete promotion-trust case chain is structurally sound.
@@ -105,6 +105,8 @@ Layer 74 never repairs or rewrites the case chain.
 
 ## Acceptance coverage
 
+Full Foundation CI run `36694446563` completed successfully. Foundation contracts passed and persistence completed **205/205**, including Layer-74 apply/tests and all downstream Shine Defence checks.
+
 CI proves:
 
 - NORMAL creates no event;
@@ -117,6 +119,58 @@ CI proves:
 - incident history is append-only;
 - service role can run only the bounded sentinel;
 - Foundation runtime/Gateway read-only role graph remains intact.
+
+## Production proof
+
+Layer 74 is deployed in the Shine Foundation Supabase project through:
+
+- `foundation_layer_074_promoted_release_case_audit_incident_lifecycle`
+- `foundation_layer_074_promoted_release_case_audit_incident_hosted`
+
+Hosted sentinel:
+
+`shine-foundation-promoted-release-case-audit-incident-5m`
+
+Schedule:
+
+`0,5,10,15,20,25,30,35,40,45,50,55 * * * *`
+
+A production sentinel run against the current healthy Layer-73 baseline produced:
+
+- case-audit state: **normal**
+- reason: `promotion-case-audit-current`
+- observation fresh: **true**
+- observation matches live: **true**
+- event created: **false**
+- watch count: **0**
+- active incident count: **0**
+- automatic repair: **false**
+- mutates authoritative truth: **false**
+- mutates incident history: **false**
+
+Current Layer-74 summary:
+
+- incident state: **normal**
+- watches: **0**
+- active incidents: **0**
+- current event: **none**
+- recommended action: **none**
+
+Production privilege proof:
+
+- Foundation runtime can read incident ledger: **yes**
+- Foundation runtime can read summary: **yes**
+- Foundation runtime can run sentinel: **no**
+- service role can run sentinel: **yes**
+- service role direct incident INSERT: **no**
+- Gateway can read summary through existing `foundation_runtime` membership: **yes**
+- Shine Core owner can read summary: **no**
+- Shine Defence runtime can read summary: **no**
+- anonymous/authenticated roles can read summary: **no**
+
+Supabase advisors show no Layer-74-specific security finding and no Layer-74 unindexed foreign-key finding.
+
+The Layer-74 incident→observation index currently appears as `unused_index` INFO because production has zero case-audit incident events. It is retained for the FK/query path once a real incident occurs.
 
 ## Invariant
 
