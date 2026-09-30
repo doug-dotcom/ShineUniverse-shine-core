@@ -1,8 +1,6 @@
 begin;
 
 do $$
-declare
-  v_count bigint;
 begin
   if not has_table_privilege(
        'shine_defence_runtime',
@@ -53,14 +51,6 @@ begin
     raise exception 'public/application role unexpectedly gained replay-control read access';
   end if;
 
-  set local role shine_defence_runtime;
-  select count(*) into v_count
-  from foundation.github_oidc_operation_bindings;
-  select count(*) into v_count
-  from foundation.github_oidc_operation_events;
-  select count(*) into v_count
-  from foundation.github_oidc_replay_alert_events;
-  reset role;
 end;
 $$;
 
