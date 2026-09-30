@@ -220,6 +220,19 @@ test('all Foundation OIDC consumers delegate cryptography to the shared verifier
   }
 });
 
+test('authority-state sync is hourly, receipt-backed and atomic for authority mutations',()=>{
+  const root=fileURLToPath(new URL('../../../',import.meta.url));
+  const source=readFileSync(root+'foundation/runtime/defence-attestation-authority-ingest/index.ts','utf8');
+  const workflow=readFileSync(root+'.github/workflows/shine-defence-authority-state.yml','utf8');
+
+  assert.match(source,/allowedEvents:\['push','workflow_dispatch','schedule'\]/);
+  assert.match(source,/record_defence_attestation_authority_sync_receipt_v1/);
+  assert.match(source,/get_defence_attestation_authority_sync_summary_v1/);
+  assert.match(source,/sql\.begin\(/,'promotion/rollback sync must use one database transaction');
+  assert.match(workflow,/schedule:\s*\n\s*- cron: '17 \* \* \* \*'/);
+  assert.match(workflow,/audience=shine-defence-authority-state/);
+});
+
 test('dynamic release consumers bind signed immutable repository ids to Foundation target metadata and one shared authority pin',()=>{
   const root=fileURLToPath(new URL('../../../',import.meta.url));
   const authority=JSON.parse(readFileSync(root+'security/shine-defence/release-attestation-authority-v1.json','utf8'));

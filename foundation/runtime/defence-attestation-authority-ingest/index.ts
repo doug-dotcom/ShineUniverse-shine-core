@@ -14,7 +14,7 @@ const OIDC_POLICY={
   expectedRunnerEnvironment:'github-hosted',
   subjectMode:'repository-ref',
   expectedWorkflow:{path:'.github/workflows/shine-defence-authority-state.yml',branch:'main'},
-  allowedEvents:['push','workflow_dispatch']
+  allowedEvents:['push','workflow_dispatch','schedule']
 };
 const MAX_BODY_BYTES=48*1024;
 
@@ -82,6 +82,55 @@ function validateActivation(value:any):Activation{
   return value as Activation;
 }
 
+
+async function recordSyncReceipt(client:any,{
+  activation,body,identity,binding,outcome,observedAt
+}:{
+  activation:Activation;
+  body:any;
+  identity:any;
+  binding:any;
+  outcome:'asserted-current'|'recorded'|'replayed';
+  observedAt:Date;
+}){
+  const evidenceRef=[
+    'github-oidc','authority-sync-receipt',
+    identity.runId,identity.runAttempt,
+    String(activation.lineageSequence),
+    activation.authoritySha.toLowerCase()
+  ].join(':');
+
+  const rows=await client`
+    select foundation.record_defence_attestation_authority_sync_receipt_v1(
+      ${activation.lineageSequence},
+      ${activation.authoritySha.toLowerCase()},
+      ${activation.authorityRef},
+      ${activation.workflowBlobSha.toLowerCase()},
+      ${String(body.publisherCommitSha).toLowerCase()},
+      ${String(body.lineageBlobSha).toLowerCase()},
+      ${String(body.authorityContractBlobSha).toLowerCase()},
+      ${outcome},
+      ${identity.runId},
+      ${identity.runAttempt},
+      ${identity.eventName},
+      ${observedAt.toISOString()}::timestamptz,
+      ${evidenceRef},
+      ${client.json({
+        oidcBindingId:binding.bindingId,
+        githubActor:identity.actor,
+        githubWorkflowRef:identity.workflowRef,
+        githubWorkflowSha:identity.workflowSha
+      })}
+    ) as result
+  `;
+  const receipt=rows[0]?.result??null;
+  if(!receipt) throw new Error('authority-sync-receipt-result-missing');
+  if(receipt.status==='rejected'){
+    throw new Error('authority-sync-receipt-rejected:'+String(receipt.reasonCode||'unknown'));
+  }
+  return receipt;
+}
+
 Deno.serve(async(req:Request)=>{
   try{
     if(req.method!=='POST') return jsonResponse(405,{error:'method-not-allowed'});
@@ -142,11 +191,22 @@ Deno.serve(async(req:Request)=>{
       ){
         return jsonResponse(409,{error:'bootstrap-authority-state-mismatch'});
       }
+
+      const observedAt=new Date();
+      const syncReceipt=await recordSyncReceipt(sql,{
+        activation,body,identity,binding,outcome:'asserted-current',observedAt
+      });
+      const summaryRows=await sql`
+        select foundation.get_defence_attestation_authority_sync_summary_v1() as summary
+      `;
+
       return jsonResponse(200,{
         status:'asserted-current',
         contract:'shine-defence/attestation-authority-sync-response-v1',
         activationSequence:1,
         authoritySha:current.authority_sha,
+        syncReceipt,
+        syncSummary:summaryRows[0]?.summary??null,
         oidcBinding:{status:binding.status,bindingId:binding.bindingId}
       });
     }
@@ -171,34 +231,50 @@ Deno.serve(async(req:Request)=>{
       githubWorkflowSha:identity.workflowSha
     };
 
-    const rows=await sql`
-      select foundation.record_defence_attestation_authority_activation_v1(
-        ${activation.authoritySha.toLowerCase()},
-        ${activation.authorityRef},
-        ${activation.workflowBlobSha.toLowerCase()},
-        ${activation.activationKind},
-        ${new Date(activation.activatedAt).toISOString()}::timestamptz,
-        ${String(activation.predecessorAuthoritySha).toLowerCase()},
-        ${activation.restoreFromSequence},
-        ${evidenceRef},
-        ${sql.json(activationMetadata)}
-      ) as result
-    `;
+    let result:any=null;
+    let syncReceipt:any=null;
+    const observedAt=new Date();
 
-    const result=rows[0]?.result??null;
-    if(!result) return jsonResponse(500,{error:'authority-sync-result-missing'});
-    if(result.status==='rejected'){
+    await sql.begin(async(tx:any)=>{
+      const rows=await tx`
+        select foundation.record_defence_attestation_authority_activation_v1(
+          ${activation.authoritySha.toLowerCase()},
+          ${activation.authorityRef},
+          ${activation.workflowBlobSha.toLowerCase()},
+          ${activation.activationKind},
+          ${new Date(activation.activatedAt).toISOString()}::timestamptz,
+          ${String(activation.predecessorAuthoritySha).toLowerCase()},
+          ${activation.restoreFromSequence},
+          ${evidenceRef},
+          ${tx.json(activationMetadata)}
+        ) as result
+      `;
+
+      result=rows[0]?.result??null;
+      if(!result) throw new Error('authority-sync-result-missing');
+      if(result.status==='rejected') return;
+
+      const receiptOutcome=result.status==='recorded'?'recorded':'replayed';
+      syncReceipt=await recordSyncReceipt(tx,{
+        activation,body,identity,binding,outcome:receiptOutcome,observedAt
+      });
+    });
+
+    if(result?.status==='rejected'){
       return jsonResponse(409,{error:'authority-sync-state-conflict',result});
     }
 
-    const parityRows=await sql`
-      select foundation.get_defence_release_authority_parity_summary_v1() as parity
-    `;
+    const [parityRows,summaryRows]=await Promise.all([
+      sql`select foundation.get_defence_release_authority_parity_summary_v1() as parity`,
+      sql`select foundation.get_defence_attestation_authority_sync_summary_v1() as summary`
+    ]);
 
     return jsonResponse(200,{
       status:'accepted',
       contract:'shine-defence/attestation-authority-sync-response-v1',
       result,
+      syncReceipt,
+      syncSummary:summaryRows[0]?.summary??null,
       parity:parityRows[0]?.parity??null,
       oidcBinding:{status:binding.status,bindingId:binding.bindingId}
     });

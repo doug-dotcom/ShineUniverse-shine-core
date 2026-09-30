@@ -467,6 +467,10 @@ jobs:
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-attestation-authority-sync-v1.sql
       - name: Run Shine Defence signed attestation authority synchronization tests
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-attestation-authority-sync-v1.test.sql
+      - name: Apply Shine Defence authority sync heartbeat receipts
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-attestation-authority-sync-heartbeat-v1.sql
+      - name: Run Shine Defence authority sync heartbeat receipt tests
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-attestation-authority-sync-heartbeat-v1.test.sql
       - name: Apply Shine Defence release transition coverage
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-release-transition-coverage-v1.sql
       - name: Run Shine Defence release transition coverage acceptance tests
@@ -527,3 +531,7 @@ jobs:
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-release-authority-evidence-parity-v1.sql
       - name: Run Shine Defence release authority-evidence parity tests
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-release-authority-evidence-parity-v1.test.sql
+      - name: Integrate Shine Defence authority sync heartbeat into full estate
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-attestation-authority-sync-heartbeat-integration-v1.sql
+      - name: Run Shine Defence authority sync heartbeat full-estate tests
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-attestation-authority-sync-heartbeat-integration-v1.test.sql
