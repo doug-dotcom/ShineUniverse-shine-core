@@ -1,6 +1,6 @@
 {
   "contract": "shine-defence/release-attestation-authority-v1",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "purpose": "Centralize the authority-bearing release-head and rollback attestation job in Shine Core so app callers cannot silently change attestation logic.",
   "reusableWorkflow": {
     "repository": "doug-dotcom/ShineUniverse-shine-core",
@@ -16,7 +16,8 @@
       "id-token": "write"
     },
     "runner": "ubuntu-24.04",
-    "strictShell": "bash --noprofile --norc -euo pipefail {0}"
+    "strictShell": "bash --noprofile --norc -euo pipefail {0}",
+    "authoritySha": "7bfd7fe685b4b2da814ac53dafdbfac2350591c8"
   },
   "oidc": {
     "callerClaimsRemainRequired": [
@@ -40,6 +41,17 @@
     "App-local callers may choose only registered target and source-branch inputs; they do not own the attestation implementation.",
     "The authority workflow is referenced by immutable Core commit SHA, never a branch or mutable tag.",
     "Caller repository identity remains independently verified; reusable workflow authority does not replace repository binding.",
-    "A future central workflow revision receives a new SHA and must be deliberately promoted before it can exercise authority."
-  ]
+    "A future central workflow revision receives a new SHA and must be deliberately promoted before it can exercise authority.",
+    "Release-head and rollback OIDC tokens without the exact pinned Core reusable workflow authority are rejected."
+  ],
+  "enforcement": {
+    "mode": "mandatory",
+    "consumers": [
+      "foundation/runtime/defence-release-head-ingest/index.ts",
+      "foundation/runtime/defence-rollback-readiness/index.ts"
+    ],
+    "requiredJobWorkflowRef": "doug-dotcom/ShineUniverse-shine-core/.github/workflows/shine-defence-release-attestation-v1.yml@7bfd7fe685b4b2da814ac53dafdbfac2350591c8",
+    "requiredJobWorkflowSha": "7bfd7fe685b4b2da814ac53dafdbfac2350591c8",
+    "failureMode": "401 unauthorized"
+  }
 }
