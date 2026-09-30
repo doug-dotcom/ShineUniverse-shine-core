@@ -1,6 +1,6 @@
 # Foundation Layer 67 — Promoted-release owner handoff
 
-**Status:** IMPLEMENTED — CI and production verification pending  
+**Status:** LIVE — CI green, production owner-work materialiser active and healthy baseline verified  
 **Scope:** convert persistent promotion-trust incidents into immutable Shine Core work ownership without creating execution authority
 
 Layer 65 creates a persistent incident.
@@ -120,6 +120,10 @@ This keeps observation, incident evaluation and ownership as separate controls.
 
 ## Acceptance coverage
 
+Initial full Foundation CI run `36678295779` completed successfully and proved the Layer-67 handoff lifecycle across the full Foundation/Defence persistence chain.
+
+The first production advisor sweep then found one Layer-67 INFO issue: `owner_service_id` had no dedicated covering index. The missing index was added immediately and the full Foundation run `36678585689` completed successfully with the handoff migration, FK index and Layer-67 tests all green.
+
 CI proves:
 
 - healthy state creates no handoff;
@@ -136,6 +140,51 @@ CI proves:
 - browser roles cannot;
 - handoff history is append-only.
 - the owner-service foreign key has a dedicated covering index;
+
+## Production proof
+
+Layer 67 is deployed in the Shine Foundation Supabase project.
+
+Current production is healthy, so the generator correctly returns:
+
+- status: **not-applicable**
+- reason: `promoted-release-incident-not-active`
+- approval granted: **false**
+- execution authority granted: **false**
+- executes action: **false**
+
+Current owner-work summary:
+
+- incident state: **normal**
+- trust state: **normal**
+- active promotion-trust incidents: **0**
+- current owner handoffs: **0**
+- owner service: `foundation.gateway`
+- owner component: `shine-core`
+
+Hosted materialiser:
+
+`shine-foundation-promoted-release-owner-handoff-5m`
+
+is active at:
+
+`3,8,13,18,23,28,33,38,43,48,53,58 * * * *`
+
+Production privilege proof:
+
+- Foundation runtime ledger read: **yes**
+- Foundation runtime status read: **yes**
+- Foundation runtime summary read: **yes**
+- Foundation runtime handoff generation: **no**
+- service role generation: **yes**
+- service role direct ledger INSERT: **no**
+- anonymous/authenticated summary read: **no**
+
+Advisor hardening:
+
+- the Layer-67 unindexed foreign-key finding for `owner_service_id` was removed by the dedicated covering index;
+- no Layer-67-specific security finding is present;
+- the three Layer-67 indexes currently appear under `unused_index` INFO because the healthy production baseline has created zero handoff rows. They are retained for the incident, owner-routing and environment/time query paths when owner work exists.
 
 ## Invariant
 
