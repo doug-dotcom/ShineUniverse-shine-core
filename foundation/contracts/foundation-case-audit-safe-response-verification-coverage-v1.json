@@ -42,6 +42,15 @@
     "mutationPerformed": false,
     "proofContractAndSchemaMustMatch": true,
     "malformedProofFlagsClassifyInvalidWithoutThrowing": true,
-    "noAuthorityOrMutationFlagsMustRemainFalse": true
-  }
+    "noAuthorityOrMutationFlagsMustRemainFalse": true,
+    "gatewayReadOccursOnlyViaEstablishedFoundationRuntimeInheritance": true,
+    "gatewayReceivesNoDirectCoverageGrant": true,
+    "ownerCannotReadCoverage": true,
+    "defenceCannotReadCoverage": true,
+    "browserRolesDenied": true
+  },
+  "readerRoles": [
+    "foundation_runtime",
+    "service_role"
+  ]
 }
