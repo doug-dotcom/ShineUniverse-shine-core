@@ -260,7 +260,44 @@ begin
         = 'false'::jsonb;
 
     v_receipt_match :=
-      v_exec.action_result->>
+      v_exec.action_key='run-independent-verification'
+      and v_exec.reason_code='case-audit-overdue-verification-layer77-ran'
+      and foundation.case_audit_verify_exec_policy_fp_v1(
+            v_exec.decision_snapshot,
+            v_exec.incident_snapshot,
+            v_exec.target_snapshot
+          ) is not distinct from v_exec.policy_fingerprint
+      and v_exec.target_snapshot->>'executionEventId'
+        is not distinct from v_target.event_id::text
+      and v_exec.target_snapshot->>'incidentEventId'
+        is not distinct from v_target.incident_event_id::text
+      and v_exec.target_snapshot->>'actionKey'
+        is not distinct from v_target.action_key
+      and v_exec.target_snapshot->>'executionPolicyFingerprint'
+        is not distinct from v_target.policy_fingerprint
+      and v_exec.target_snapshot->'executionRequestedAt'
+        is not distinct from to_jsonb(v_target.requested_at)
+      and v_exec.decision_snapshot->>'decision'='admit'
+      and v_exec.decision_snapshot->>'requiredControl'
+        ='layer-77-bounded-verifier'
+      and v_exec.decision_snapshot->>'causeClass'='verification-omission'
+      and v_exec.decision_snapshot->'authorityExpansion'='false'::jsonb
+      and v_exec.decision_snapshot->'automaticVerificationAllowed'='false'::jsonb
+      and v_exec.decision_snapshot->'automaticRepairAllowed'='false'::jsonb
+      and v_exec.decision_snapshot->'verificationProofRewriteAllowed'='false'::jsonb
+      and v_exec.decision_snapshot->'historyRewriteAllowed'='false'::jsonb
+      and v_exec.decision_snapshot->'executesAction'='false'::jsonb
+      and v_exec.decision_snapshot->'rerunsSafeResponse'='false'::jsonb
+      and v_exec.decision_snapshot->'mutatesVerificationProof'='false'::jsonb
+      and v_exec.decision_snapshot->'mutatesAuthoritativeTruth'='false'::jsonb
+      and v_exec.decision_snapshot->'mutatesIncidentHistory'='false'::jsonb
+      and v_exec.before_coverage->>
+            'foundationCaseAuditSafeResponseVerificationCoverage'
+        ='shine-foundation/case-audit-safe-response-verification-coverage-v1'
+      and v_exec.after_coverage->>
+            'foundationCaseAuditSafeResponseVerificationCoverage'
+        ='shine-foundation/case-audit-safe-response-verification-coverage-v1'
+      and v_exec.action_result->>
           'foundationCaseAuditSafeResponseVerification'
         is not distinct from
           'shine-foundation/case-audit-safe-response-verification-response-v1'
