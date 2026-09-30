@@ -236,9 +236,9 @@ test('dynamic release consumers bind signed immutable repository ids to Foundati
   for(const [name,source] of [['release-head',release],['rollback',rollback]]){
     assert.match(source,/sourceRepositoryId/,name+' must load immutable repository id from target metadata');
     assert.match(source,/sourceRepositoryOwnerId/,name+' must load immutable owner id from target metadata');
-    assert.match(source,/identity\\.repositoryId/,name+' must compare the signed repository id');
-    assert.match(source,/identity\\.repositoryOwnerId/,name+' must compare the signed owner id');
-    assert.match(source,/shine-defence-release-attestation-authority-v1\\.mjs/,name+' must import the shared Core authority pin');
+    assert.match(source,/identity\.repositoryId/,name+' must compare the signed repository id');
+    assert.match(source,/identity\.repositoryOwnerId/,name+' must compare the signed owner id');
+    assert.match(source,/shine-defence-release-attestation-authority-v1\.mjs/,name+' must import the shared Core authority pin');
     assert.match(source,/expectedJobWorkflowRef:SHINE_DEFENCE_RELEASE_ATTESTATION_AUTHORITY_REF/,name+' must consume the shared authority ref');
     assert.match(source,/expectedJobWorkflowSha:SHINE_DEFENCE_RELEASE_ATTESTATION_AUTHORITY_SHA/,name+' must consume the shared authority sha');
     assert.doesNotMatch(source,/EXPECTED_JOB_WORKFLOW_REF|EXPECTED_JOB_WORKFLOW_SHA/,name+' must not own a local reusable-workflow pin');
