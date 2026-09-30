@@ -359,6 +359,12 @@ declare
   source_target foundation.case_audit_verify_exec_events%rowtype;
   source_exec foundation.case_audit_verify_reconcile_exec_events%rowtype; e jsonb;
 begin
+  -- Test-only: allow a second successful Layer-81 event for the same Layer-76
+  -- target so Layer 87 can prove it detects a Layer-86 success claim whose exact
+  -- Layer-81 event has no Layer-82 receipt. Transaction rollback restores the
+  -- production uniqueness invariant.
+  drop index foundation.case_audit_verify_exec_target_once_idx;
+
   select * into source_target from foundation.case_audit_verify_exec_events
   where event_id='87000000-0000-4000-8000-000000000301'::uuid;
 
