@@ -10,7 +10,8 @@ begin
      or (v->>'requiredTargets')::integer<>14
      or (v->>'boundTargets')::integer<>14
      or (v->>'duplicateRepositoryIds')::integer<>0
-     or (v->>'wrongOwnerTargets')::integer<>0 then
+     or (v->>'wrongOwnerTargets')::integer<>0
+     or (v->>'repositoryIdMismatches')::integer<>0 then
     raise exception 'OIDC principal binding summary not fully bound: %',v;
   end if;
 
