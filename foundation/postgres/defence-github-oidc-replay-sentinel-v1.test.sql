@@ -156,7 +156,7 @@ begin
 end;
 $$;
 
-do $
+do $binding_fk_index_test$
 begin
   if not exists (
     select 1
@@ -169,7 +169,7 @@ begin
     raise exception 'OIDC replay alert binding foreign key lacks covering index';
   end if;
 end;
-$;
+$binding_fk_index_test$;
 
 
 rollback;
