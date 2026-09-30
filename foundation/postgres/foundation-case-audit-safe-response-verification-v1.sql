@@ -533,7 +533,7 @@ begin
     v_evaluation->>'reasonCode',
     v_evidence_id,
     nullif(v_evaluation->>'durableEvidenceFingerprint',''),
-    v_evaluation->'durableEvidence',
+    nullif(v_evaluation->'durableEvidence','null'::jsonb),
     v_exec.action_result,
     v_proof,
     v_proof_hash,
