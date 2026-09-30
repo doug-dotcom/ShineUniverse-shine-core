@@ -576,14 +576,20 @@
     {
       "id": "release-attestation-authority",
       "path": "security/shine-defence/release-attestation-authority-v1.json",
-      "version": "1.4.0",
-      "blobSha": "c20c9dcd073f938c7092d9674843fad452c99774"
+      "version": "1.5.0",
+      "blobSha": "21a2dc19f53d702ecc1d456c9f83546b596f0dd2"
     },
     {
       "id": "release-attestation-authority-promotion",
       "path": "security/shine-defence/release-attestation-authority-promotion-v1.json",
       "version": "1.0.0",
       "blobSha": "c0c83d68844c6f81485d0c183cf68f849eab64c9"
+    },
+    {
+      "id": "release-attestation-authority-rollback",
+      "path": "security/shine-defence/release-attestation-authority-rollback-v1.json",
+      "version": "1.0.0",
+      "blobSha": "258998c980c1807d9239d1be974ec94015a5afb6"
     },
     {
       "id": "release-attestation-authority-runtime",
@@ -594,14 +600,14 @@
     {
       "id": "release-attestation-authority-lineage",
       "path": "security/shine-defence/release-attestation-authority-lineage-v1.json",
-      "version": "1.1.0",
-      "blobSha": "c327206a354a31b75f0f853865e7545b02ac77de"
+      "version": "1.2.0",
+      "blobSha": "d15ac13ab143db71916e9ec73dd3471f0a0c9749"
     },
     {
       "id": "release-attestation-authority-lineage-verifier",
       "path": "security/shine-defence/integration-kit/verify-release-attestation-authority-lineage-v1.mjs",
-      "version": "1.1.0",
-      "blobSha": "5122f4c899458ade3862483f5733c164d861212a"
+      "version": "1.2.0",
+      "blobSha": "c8a00a42615605c1bbc256c86def9e5fab044402"
     },
     {
       "id": "release-attestation-authority-workflow",
