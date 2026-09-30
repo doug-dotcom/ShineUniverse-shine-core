@@ -4,7 +4,7 @@
 --   2) re-run the idempotent Layer-67 current-owner-handoff materialiser.
 -- No arbitrary payload, SQL, history rewrite or release-truth mutation is accepted.
 
-create or replace function foundation.foundation_promoted_release_case_audit_response_policy_fingerprint_v1(
+create or replace function foundation.case_audit_safe_response_policy_fingerprint_v1(
   p_decision jsonb,
   p_incident jsonb
 )
@@ -48,7 +48,7 @@ as $layer76_policy_fingerprint$
   );
 $layer76_policy_fingerprint$;
 
-revoke all on function foundation.foundation_promoted_release_case_audit_response_policy_fingerprint_v1(
+revoke all on function foundation.case_audit_safe_response_policy_fingerprint_v1(
   jsonb,jsonb
 ) from public,anon,authenticated,foundation_runtime,foundation_gateway,
        shine_core_control_plane,shine_defence_runtime,service_role;
@@ -226,7 +226,7 @@ begin
   end if;
 
   v_policy_fingerprint :=
-    foundation.foundation_promoted_release_case_audit_response_policy_fingerprint_v1(
+    foundation.case_audit_safe_response_policy_fingerprint_v1(
       v_decision,v_incident
     );
 
@@ -442,7 +442,7 @@ grant execute on function foundation.execute_foundation_promoted_release_case_au
 ) to service_role;
 
 
-create or replace function foundation.get_foundation_promoted_release_case_audit_safe_response_execution_summary_v1(
+create or replace function foundation.get_case_audit_safe_response_exec_summary_v1(
   p_environment text default 'production',
   p_limit integer default 25
 )
@@ -524,10 +524,10 @@ begin
 end;
 $layer76_summary$;
 
-revoke all on function foundation.get_foundation_promoted_release_case_audit_safe_response_execution_summary_v1(
+revoke all on function foundation.get_case_audit_safe_response_exec_summary_v1(
   text,integer
 ) from public,anon,authenticated,foundation_gateway,shine_core_control_plane,
        shine_defence_runtime;
-grant execute on function foundation.get_foundation_promoted_release_case_audit_safe_response_execution_summary_v1(
+grant execute on function foundation.get_case_audit_safe_response_exec_summary_v1(
   text,integer
 ) to foundation_runtime,service_role;
