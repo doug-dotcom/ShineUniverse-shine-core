@@ -66,6 +66,18 @@
       "summary": "A docs-truth correction replaced the earlier Build 23 candidate before human review was finalized; no findings or authorization carry forward.",
       "reviewChecklistBlobSha": "a2e372ba1e17c03442ab7f45404cb04d160ea43b",
       "reviewRegistryBlobSha": "4bd0164fd7023ce600445a5ccc8421ca13a03df3"
+    },
+    {
+      "decisionId": "shine-wellness-5517724b222f-superseded",
+      "candidateId": "shine-wellness-5517724b222f",
+      "appId": "shine-wellness",
+      "outcome": "superseded",
+      "decidedAt": "2026-09-30T08:27:40.000Z",
+      "authority": "shine-defence-core",
+      "successorCandidateId": "shine-wellness-2188898b4cc3",
+      "summary": "Build 24 replaced the pending Build 23 Wellness candidate before human review was finalized; no findings or authorization carry forward.",
+      "reviewChecklistBlobSha": "539362a74162fd6f46d0702e25434e05d920b957",
+      "reviewRegistryBlobSha": "cf5a2368c56a9bcafb562f5af5b8d0cbd65378b7"
     }
   ]
 }

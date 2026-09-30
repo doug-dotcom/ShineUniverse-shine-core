@@ -178,7 +178,7 @@
         "baseline",
         "certifier"
       ],
-      "status": "pending_review",
+      "status": "superseded",
       "observedAt": "2026-09-30T07:53:58.000Z",
       "evidence": [
         {
@@ -187,6 +187,31 @@
           "reference": "actions/runs/36686254398",
           "checkedAt": "2026-09-30T07:53:58.000Z",
           "summary": "Final Build 23 Wellness release passed the Shine Defence baseline, 23 of 23 test files, 120 of 120 tests, TypeScript and the Next production build."
+        }
+      ],
+      "supersededByCandidateId": "shine-wellness-2188898b4cc3"
+    },
+    {
+      "candidateId": "shine-wellness-2188898b4cc3",
+      "appId": "shine-wellness",
+      "repository": "doug-dotcom/Shine--wellness",
+      "releaseCommitSha": "2188898b4cc380ad9e286a56dd3048cbf52bef1e",
+      "profilePath": "security/shine-defence/profile.json",
+      "profileBlobSha": "5d4342c31cb261c5953eaabb094ed650994665ee",
+      "profileVersion": "1.0.0",
+      "policies": [
+        "baseline",
+        "certifier"
+      ],
+      "status": "pending_review",
+      "observedAt": "2026-09-30T08:27:31.000Z",
+      "evidence": [
+        {
+          "source": "github",
+          "kind": "ci_success",
+          "reference": "actions/runs/36689659156",
+          "checkedAt": "2026-09-30T08:27:31.000Z",
+          "summary": "Build 24 Wellness release passed the Shine Defence baseline, 24 of 24 test files, 128 of 128 tests, TypeScript and the Next production build."
         }
       ]
     }
