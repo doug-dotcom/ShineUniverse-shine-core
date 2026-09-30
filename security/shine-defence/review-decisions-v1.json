@@ -42,6 +42,18 @@
       "summary": "Build 22 replaced the pending Build 21 Wellness candidate before human review was finalized; no review findings or authorization carry forward.",
       "reviewChecklistBlobSha": "7e23cb90eff17c72d4bbb83b915fc559c1d996fb",
       "reviewRegistryBlobSha": "fab8bd8429b46385df854074336f50b182ba1fbc"
+    },
+    {
+      "decisionId": "shine-wellness-1c22e0fc99f4-superseded",
+      "candidateId": "shine-wellness-1c22e0fc99f4",
+      "appId": "shine-wellness",
+      "outcome": "superseded",
+      "decidedAt": "2026-09-30T07:50:00.000Z",
+      "authority": "shine-defence-core",
+      "successorCandidateId": "shine-wellness-b5d4e8dd3f64",
+      "summary": "Build 23 replaced the pending Build 22 Wellness candidate before human review was finalized; no findings or authorization carry forward.",
+      "reviewChecklistBlobSha": "b160c68cbaf55442750d35f3b8bb094ba4c50911",
+      "reviewRegistryBlobSha": "4bd0164fd7023ce600445a5ccc8421ca13a03df3"
     }
   ]
 }
