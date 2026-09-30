@@ -62,6 +62,12 @@ Ledger:
 
 Only one Layer-87 reconciliation exists per successful Layer-86 execution. Replay returns the first immutable receipt.
 
+## Supporting index
+
+Layer-87 receipts retain a foreign key to the exact Layer-82 reconciliation they verified. The covering Layer-82 FK index keeps that referential-integrity path indexed as the ledger grows:
+
+`foundation.case_audit_verify_reconcile_exec_reconcile_layer82_idx`
+
 ## Authority boundary
 
 Runner:
