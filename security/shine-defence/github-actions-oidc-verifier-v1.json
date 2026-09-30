@@ -1,6 +1,6 @@
 {
   "contract": "shine-defence/github-actions-oidc-verifier-v1",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "purpose": "Single canonical GitHub Actions OIDC verification boundary for Foundation and Shine Defence runtime ingestion paths.",
   "issuer": "https://token.actions.githubusercontent.com",
   "signing": {
@@ -58,7 +58,8 @@
     "foundation/runtime/defence-provider-ingest/index.ts",
     "foundation/runtime/deployment-receipt-ingest/index.ts",
     "foundation/runtime/defence-rollback-readiness/index.ts",
-    "foundation/runtime/defence-release-head-ingest/index.ts"
+    "foundation/runtime/defence-release-head-ingest/index.ts",
+    "foundation/runtime/defence-attestation-authority-ingest/index.ts"
   ],
   "invariants": [
     "Consumer functions do not implement JWT signature verification or JWKS fetching independently.",
@@ -73,6 +74,7 @@
     "The signed subject must exactly match either GitHub's legacy repository-ref subject or its immutable repository-ref subject.",
     "workflow_sha is preserved from GitHub's dedicated signed claim; payload.sha is not substituted for workflow_sha.",
     "Reusable-workflow authority can be pinned independently with job_workflow_ref and job_workflow_sha without weakening caller repository checks.",
-    "The verifier returns bounded identity metadata only; it does not return the raw token."
+    "The verifier returns bounded identity metadata only; it does not return the raw token.",
+    "The authority-state synchronization endpoint uses the same verifier and replay binding as every other privileged GitHub OIDC ingestion path."
   ]
 }

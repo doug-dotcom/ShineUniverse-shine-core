@@ -198,7 +198,8 @@ test('all Foundation OIDC consumers delegate cryptography to the shared verifier
     'foundation/runtime/defence-provider-ingest/index.ts',
     'foundation/runtime/deployment-receipt-ingest/index.ts',
     'foundation/runtime/defence-rollback-readiness/index.ts',
-    'foundation/runtime/defence-release-head-ingest/index.ts'
+    'foundation/runtime/defence-release-head-ingest/index.ts',
+    'foundation/runtime/defence-attestation-authority-ingest/index.ts'
   ];
   const contract=JSON.parse(readFileSync(root+'security/shine-defence/github-actions-oidc-verifier-v1.json','utf8'));
   assert.deepEqual(contract.consumers,consumers);
@@ -250,7 +251,8 @@ test('fixed Core OIDC consumers pin the immutable Core repository id',()=>{
   for(const path of [
     'foundation/runtime/defence-provider-ingest/index.ts',
     'foundation/runtime/deployment-receipt-ingest/index.ts',
-    'foundation/runtime/defence-reattest/index.ts'
+    'foundation/runtime/defence-reattest/index.ts',
+    'foundation/runtime/defence-attestation-authority-ingest/index.ts'
   ]){
     const source=readFileSync(root+path,'utf8');
     assert.match(source,/expectedRepositoryId:'1072897952'/,path+' must pin Core repository id');
