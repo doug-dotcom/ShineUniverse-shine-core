@@ -1,5 +1,6 @@
 import postgres from 'npm:postgres@3.4.9';
 import {verifyGithubActionsOidc} from '../_shared/github-actions-oidc-v1.mjs';
+import {bindGithubOidcOperation,oidcReplayConflict} from '../_shared/github-oidc-operation-v1.mjs';
 
 const AUDIENCE='shine-foundation-deployment-receipt';
 const EXPECTED_REPOSITORY='doug-dotcom/ShineUniverse-shine-core';
@@ -71,6 +72,18 @@ Deno.serve(async(req:Request)=>{
       return jsonResponse(400,{error:'invalid-deployment-receipt'});
     }
 
+    const oidcBinding=await bindGithubOidcOperation({
+      sql,
+      identity,
+      audience:AUDIENCE,
+      operation:'deployment-receipt-publish',
+      targetKey:'foundation.gateway:production',
+      request:body
+    });
+    if(oidcReplayConflict(oidcBinding)){
+      return jsonResponse(409,{error:'oidc-replay-conflict',binding:oidcBinding});
+    }
+
     const rows=await sql`
       select foundation.submit_service_deployment_receipt_v1(
         'foundation.gateway',
@@ -112,7 +125,8 @@ Deno.serve(async(req:Request)=>{
       status:'accepted',
       contract:'shine-foundation/deployment-receipt-ingest-v1',
       receipt:result,
-      reconciliation:statusRows[0]?.status??null
+      reconciliation:statusRows[0]?.status??null,
+      oidcBinding:{status:oidcBinding.status,bindingId:oidcBinding.bindingId}
     });
   }catch(error){
     const message=error instanceof Error?error.message:'deployment-receipt-ingest-error';
