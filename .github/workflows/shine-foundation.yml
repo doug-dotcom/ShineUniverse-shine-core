@@ -356,6 +356,10 @@ jobs:
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-promoted-release-owner-evidence-v1.sql
       - name: Run Foundation promoted release owner evidence return tests
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-promoted-release-owner-evidence-v1.test.sql
+      - name: Apply Foundation independent promotion-trust verification
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-promoted-release-independent-verification-v1.sql
+      - name: Run Foundation independent promotion-trust verification tests
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-promoted-release-independent-verification-v1.test.sql
       - name: Apply Shine Defence Sentinel
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-sentinel-v1.sql
       - name: Run Shine Defence Sentinel acceptance tests
