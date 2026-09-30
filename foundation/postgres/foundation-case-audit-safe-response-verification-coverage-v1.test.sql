@@ -27,12 +27,19 @@ declare
   reason_code text;
   durable_id uuid;
   durable_fp text;
+  durable_snapshot jsonb;
+  execution_requested_at timestamptz;
+  verification_recorded_at timestamptz;
 begin
   -- Six successful Layer-76 receipts:
   -- 1 verified, 2 pending, 3 overdue, 4 missing, 5 mismatch, 6 invalid proof.
   for i in 1..6 loop
     exec_id:=('78000000-0000-4000-8000-'||lpad((100+i)::text,12,'0'))::uuid;
     policy_fp:=repeat(i::text,64);
+    execution_requested_at:=case
+      when i=2 then now()-interval '1 minute'
+      else now()-interval '10 minutes'
+    end;
     action_result:=jsonb_build_object(
       'foundationPromotedReleaseCaseAuditObservationRecord',
         'shine-foundation/promoted-release-case-audit-observation-record-v1',
@@ -54,10 +61,7 @@ begin
       'record-fresh-promotion-case-audit-observation','observer-freshness',
       policy_fp,'executed','test-layer78-executed',
       '{}'::jsonb,'{}'::jsonb,'{}'::jsonb,action_result,'{}'::jsonb,
-      case
-        when i=2 then now()-interval '1 minute'
-        else now()-interval '10 minutes'
-      end
+      execution_requested_at
     );
 
     if i in (1,4,5,6) then
@@ -81,6 +85,11 @@ begin
         when i=4 then null
         else repeat('b',64)
       end;
+      durable_snapshot:=case
+        when durable_id is null then null
+        else '{"test":"layer78"}'::jsonb
+      end;
+      verification_recorded_at:=now()-interval '30 seconds';
 
       proof:=jsonb_build_object(
         'foundationCaseAuditSafeResponseVerificationProof',
@@ -91,10 +100,13 @@ begin
         'incidentEventId','78000000-0000-4000-8000-000000000001',
         'actionKey','record-fresh-promotion-case-audit-observation',
         'executionPolicyFingerprint',policy_fp,
+        'executionRequestedAt',execution_requested_at,
         'verificationState',verification_state,
         'reasonCode',reason_code,
         'durableEvidenceId',durable_id,
         'durableEvidenceFingerprint',durable_fp,
+        'durableEvidence',durable_snapshot,
+        'executionActionResult',action_result,
         'independentDurableEvidenceRead',true,
         'targetReexecuted',false,
         'historyRewritePerformed',false,
@@ -103,7 +115,7 @@ begin
         'approvalGranted',false,
         'executionAuthorityGranted',false,
         'mutationPerformed',false,
-        'verifiedAt',now()-interval '30 seconds'
+        'verifiedAt',verification_recorded_at
       );
 
       proof_hash:=encode(
@@ -124,10 +136,9 @@ begin
         '78000000-0000-4000-8000-000000000001'::uuid,
         'record-fresh-promotion-case-audit-observation',
         policy_fp,verification_state,reason_code,durable_id,durable_fp,
-        case when durable_id is null then null else '{"test":"layer78"}'::jsonb end,
-        action_result,proof,
+        durable_snapshot,action_result,proof,
         case when i=6 then repeat('f',64) else proof_hash end,
-        now()-interval '30 seconds'
+        verification_recorded_at
       );
     end if;
   end loop;
