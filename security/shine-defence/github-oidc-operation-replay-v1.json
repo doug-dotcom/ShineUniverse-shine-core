@@ -1,0 +1,58 @@
+{
+  "contract": "shine-defence/github-oidc-operation-replay-v1",
+  "version": "1.0.0",
+  "purpose": "Bind a verified GitHub Actions run/attempt, audience, operation and logical target to one semantic request digest so exact retries remain safe and changed-payload replays fail closed.",
+  "identityKey": [
+    "repository",
+    "runId",
+    "runAttempt",
+    "audience",
+    "operation",
+    "targetKey"
+  ],
+  "requestDigest": "SHA-256 over PostgreSQL jsonb canonical text form",
+  "outcomes": [
+    "accepted-new",
+    "replayed-exact",
+    "rejected-conflict"
+  ],
+  "allowedPurposes": {
+    "shine-defence-provider-ingest": [
+      "provider-snapshot"
+    ],
+    "shine-foundation-deployment-receipt": [
+      "deployment-receipt-publish"
+    ],
+    "shine-defence-release-head": [
+      "release-head-snapshot"
+    ],
+    "shine-defence-rollback-readiness": [
+      "rollback-claim",
+      "rollback-attest"
+    ],
+    "shine-defence-reattest": [
+      "reattest-claim",
+      "reattest-attest"
+    ]
+  },
+  "persistence": {
+    "bindingTable": "foundation.github_oidc_operation_bindings",
+    "eventTable": "foundation.github_oidc_operation_events",
+    "binder": "foundation.bind_github_oidc_operation_v1"
+  },
+  "retryRule": "An exact semantic retry under the same verified identity is permitted and recorded as replayed-exact. Rebinding the same identity to a different request digest, ref, workflow_ref or event_name is rejected-conflict.",
+  "destinationIdempotency": [
+    "deployment receipt publication",
+    "release-head evidence",
+    "rollback source evidence",
+    "provider estate evidence",
+    "re-attestation evidence"
+  ],
+  "invariants": [
+    "The replay binder runs only after cryptographic GitHub OIDC verification.",
+    "Cross-audience and cross-operation reuse is accepted only for the explicitly allowed purpose map.",
+    "The first semantic request owns the identity key permanently.",
+    "Bindings and replay/conflict events are append-only and not writable by public application roles.",
+    "Exact retry does not create duplicate provider evidence."
+  ]
+}
