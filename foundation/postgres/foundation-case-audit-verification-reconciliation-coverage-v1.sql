@@ -121,16 +121,24 @@ begin
           and x.reconciliation_proof->'layer81ActionResult'
               is not distinct from x.layer81_action_result
           and x.layer81_action_result is not distinct from x.action_result
-          and x.reconciliation_proof->'proofIntegrityValid'
-              is not distinct from to_jsonb(x.proof_integrity_valid)
-          and x.reconciliation_proof->'receiptMatchesProof'
-              is not distinct from to_jsonb(x.receipt_matches_proof)
-          and x.reconciliation_proof->'currentEvaluationMatches'
-              is not distinct from to_jsonb(x.current_evaluation_matches)
+          and nullif(
+                x.reconciliation_proof->'proofIntegrityValid',
+                'null'::jsonb
+              ) is not distinct from to_jsonb(x.proof_integrity_valid)
+          and nullif(
+                x.reconciliation_proof->'receiptMatchesProof',
+                'null'::jsonb
+              ) is not distinct from to_jsonb(x.receipt_matches_proof)
+          and nullif(
+                x.reconciliation_proof->'currentEvaluationMatches',
+                'null'::jsonb
+              ) is not distinct from to_jsonb(x.current_evaluation_matches)
           and x.reconciliation_proof->'coverageTargetVisible'
               is not distinct from to_jsonb(x.coverage_target_visible)
-          and x.reconciliation_proof->'coverageTargetMatches'
-              is not distinct from to_jsonb(x.coverage_target_matches)
+          and nullif(
+                x.reconciliation_proof->'coverageTargetMatches',
+                'null'::jsonb
+              ) is not distinct from to_jsonb(x.coverage_target_matches)
           and x.reconciliation_proof->'reconciledAt'
               is not distinct from to_jsonb(x.reconciled_at)
           and x.reconciliation_proof->'verificationRerunPerformed'
