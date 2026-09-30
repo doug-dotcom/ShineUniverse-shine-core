@@ -97,6 +97,11 @@ begin
         'durableEvidenceFingerprint',durable_fp,
         'independentDurableEvidenceRead',true,
         'targetReexecuted',false,
+        'historyRewritePerformed',false,
+        'releaseTruthMutationPerformed',false,
+        'incidentHistoryMutationPerformed',false,
+        'approvalGranted',false,
+        'executionAuthorityGranted',false,
         'mutationPerformed',false,
         'verifiedAt',now()-interval '30 seconds'
       );
