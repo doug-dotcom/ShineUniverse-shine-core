@@ -1,0 +1,46 @@
+{
+  "contract": "shine-foundation/promoted-release-consumer-v1",
+  "version": "1.0.0",
+  "layer": 61,
+  "purpose": "Expose one consumer-safe Foundation release projection that exists only when the exact immutable binding has a current integrity-verified Layer-60 promotion-closure receipt.",
+  "reader": "foundation.get_foundation_promoted_release_v1",
+  "assertion": "foundation.assert_foundation_promoted_release_v1",
+  "consumerRoles": [
+    "foundation_runtime",
+    "shine_defence_runtime",
+    "service_role"
+  ],
+  "browserRolesDenied": [
+    "anon",
+    "authenticated"
+  ],
+  "promotedReleaseFields": [
+    "bindingId",
+    "releaseRef",
+    "foundationLayer",
+    "sourceRef",
+    "sourceCommitSha",
+    "runtimeVersion",
+    "artifactSha256",
+    "closureId",
+    "closureSha256",
+    "canonicalSourceTruthFingerprint",
+    "closedAt"
+  ],
+  "ciBoundaryVerifier": "foundation/integration-kit/verify-promoted-release-consumer-boundary-v1.mjs",
+  "rawBindingControlPlaneAllowlist": [
+    "foundation/postgres/foundation-release-identity-binding-v1.sql",
+    "foundation/postgres/foundation-readiness-drift-v1.sql",
+    "foundation/postgres/foundation-scoped-remediation-executor-v1.sql",
+    "foundation/postgres/foundation-release-projection-reconciliation-v1.sql"
+  ],
+  "invariants": [
+    "A raw immutable binding is transition evidence, not a consumer-ready release.",
+    "A downstream promoted release exists only while Layer-60 closure is closed, current and integrity verified.",
+    "A stale, invalid, open or blocked closure produces no promoted release payload.",
+    "The consumer projection carries its own deterministic SHA-256 fingerprint.",
+    "Consumer assertions are read-only and grant no release mutation authority.",
+    "Runtime readiness is not implied by promotion closure.",
+    "New production code may not read the raw current binding outside the explicit control-plane allowlist."
+  ]
+}
