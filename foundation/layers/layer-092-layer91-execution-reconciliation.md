@@ -1,6 +1,6 @@
 # Foundation Layer 92 — Layer-91 execution reconciliation
 
-**Status:** IMPLEMENTED — CI and production verification pending  
+**Status:** LIVE — CI green and production verification complete  
 **Scope:** independently reconcile each successful Layer-91 bounded Layer-87 reconciliation execution against durable Layer-87 truth
 
 Layer 91 closes the direct service-role bypass into Layer 87.
@@ -70,6 +70,31 @@ CI proves:
 - replay returns the existing receipt;
 - direct service-role ledger insert is denied;
 - role and append-only boundaries hold.
+
+## Production proof
+
+Layer 92 is deployed in the Shine Foundation Supabase project as migration:
+
+`20260930235834 — foundation_layer_092_layer91_execution_reconciliation`
+
+Pull request **#120** passed the complete Foundation + Concierge and Shine Defence workflows after CI caught and corrected one fixture-only fingerprint-width error. The runtime design was unchanged by that correction.
+
+Live production verification confirms:
+
+- Layer-92 ledger, evaluator, reconciler and summary exist;
+- current Layer-91 execution count: **0**;
+- current Layer-87 reconciliation count: **0**;
+- current Layer-92 reconciliation count: **0**;
+- `service_role` can invoke the Layer-92 reconciler but cannot directly INSERT Layer-92 ledger rows;
+- Foundation runtime, Gateway, Shine Core, Shine Defence, anon and authenticated cannot reconcile;
+- Foundation runtime can read the Layer-92 summary;
+- Gateway reads the summary only through existing `foundation_runtime` membership;
+- a nonexistent Layer-91 target invoked under `service_role` returns `not-applicable / case-audit-layer91-event-not-found`;
+- that negative probe performs no Layer-87/86/82/81 or verification rerun and no mutation;
+- all three new Layer-92 indexes are reported unused, which is expected while the production ledger is empty;
+- Supabase reports no Layer-92-specific security finding.
+
+A separate migration landed after Layer 92 and currently produces one project-wide INFO security advisor notice for `public.grant_protocol` having RLS enabled without a policy. That finding is not caused by Layer 92 and is deliberately not altered by this layer.
 
 ## Invariant
 
