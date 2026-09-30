@@ -1,6 +1,6 @@
 # Foundation Layer 83 — Reconciliation coverage audit
 
-**Status:** IMPLEMENTED — CI and production verification pending  
+**Status:** LIVE — CI green and production verification complete  
 **Scope:** prove that every successful Layer-81 execution eventually receives one valid Layer-82 reconciliation receipt
 
 Layer 82 can independently reconcile one successful Layer-81 execution.
@@ -158,6 +158,33 @@ CI proves:
 - Gateway read remains inherited only;
 - Core, Defence and browser roles remain denied.
 
+## Production proof
+
+Layer 83 is deployed in the Shine Foundation Supabase project as migration:
+
+`20260930133108 — foundation_layer_083_reconciliation_coverage_audit`
+
+Live production verification confirms:
+
+- the Layer-83 coverage reader exists and executes successfully;
+- current production state: **idle**;
+- successful Layer-81 executions: **0**;
+- reconciliation-required count: **0**;
+- reconciliation receipt count: **0**;
+- problem count: **0**;
+- reconciliation coverage: **100%**;
+- healthy reconciliation: **100%**;
+- reconciliation-proof integrity recomputation: **true**;
+- verification rerun: **false**;
+- Layer-81 rerun: **false**;
+- mutation performed: **false**;
+- Foundation runtime and service role can read;
+- Gateway can read only through existing `foundation_runtime` membership;
+- Gateway has no direct EXECUTE grant;
+- Shine Core, Shine Defence and browser roles cannot read;
+- Supabase security advisors report no Layer-83-specific finding.
+
 ## Invariant
+
 
 > Reconciliation is not complete because Layer 82 exists. It is complete only when every successful Layer-81 execution has a valid reconciliation receipt.
