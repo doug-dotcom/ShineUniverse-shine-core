@@ -1,77 +1,119 @@
 {
   "contract": "shine-defence/release-source-watch-v1",
-  "schemaVersion": "1.0.0",
+  "schemaVersion": "1.1.0",
   "cadenceMinutes": 5,
   "sources": [
     {
       "targetId": "railway:daash",
       "repository": "doug-dotcom/Shine-DaAsh",
-      "branch": "main"
+      "branch": "main",
+      "repositoryId": "1373763946",
+      "repositoryOwner": "doug-dotcom",
+      "repositoryOwnerId": "225530237"
     },
     {
       "targetId": "railway:dive",
       "repository": "doug-dotcom/shine-dive-",
-      "branch": "codex/dive-foundation"
+      "branch": "codex/dive-foundation",
+      "repositoryId": "1361439227",
+      "repositoryOwner": "doug-dotcom",
+      "repositoryOwnerId": "225530237"
     },
     {
       "targetId": "railway:dnd",
       "repository": "doug-dotcom/shine-D-D",
-      "branch": "build/layer-001-foundation"
+      "branch": "build/layer-001-foundation",
+      "repositoryId": "1384280308",
+      "repositoryOwner": "doug-dotcom",
+      "repositoryOwnerId": "225530237"
     },
     {
       "targetId": "railway:fiona",
       "repository": "doug-dotcom/Fiona-Finance",
-      "branch": "main"
+      "branch": "main",
+      "repositoryId": "1357712835",
+      "repositoryOwner": "doug-dotcom",
+      "repositoryOwnerId": "225530237"
     },
     {
       "targetId": "railway:fish",
       "repository": "doug-dotcom/shine-fish",
-      "branch": "build/first-app"
+      "branch": "build/first-app",
+      "repositoryId": "1384278684",
+      "repositoryOwner": "doug-dotcom",
+      "repositoryOwnerId": "225530237"
     },
     {
       "targetId": "railway:my-money",
       "repository": "doug-dotcom/shine-my-money-",
-      "branch": "main"
+      "branch": "main",
+      "repositoryId": "1378329747",
+      "repositoryOwner": "doug-dotcom",
+      "repositoryOwnerId": "225530237"
     },
     {
       "targetId": "railway:project-l",
       "repository": "doug-dotcom/Project-L-Modular",
-      "branch": "main"
+      "branch": "main",
+      "repositoryId": "1240491225",
+      "repositoryOwner": "doug-dotcom",
+      "repositoryOwnerId": "225530237"
     },
     {
       "targetId": "railway:punt49",
       "repository": "doug-dotcom/Punt-49",
-      "branch": "main"
+      "branch": "main",
+      "repositoryId": "1359524189",
+      "repositoryOwner": "doug-dotcom",
+      "repositoryOwnerId": "225530237"
     },
     {
       "targetId": "railway:recovery-companion",
       "repository": "doug-dotcom/Project-RC",
-      "branch": "main"
+      "branch": "main",
+      "repositoryId": "1354993812",
+      "repositoryOwner": "doug-dotcom",
+      "repositoryOwnerId": "225530237"
     },
     {
       "targetId": "railway:rivers",
       "repository": "doug-dotcom/shine-music",
-      "branch": "main"
+      "branch": "main",
+      "repositoryId": "1377780406",
+      "repositoryOwner": "doug-dotcom",
+      "repositoryOwnerId": "225530237"
     },
     {
       "targetId": "railway:shine-ai",
       "repository": "doug-dotcom/Shine-Ai",
-      "branch": "main"
+      "branch": "main",
+      "repositoryId": "1386493862",
+      "repositoryOwner": "doug-dotcom",
+      "repositoryOwnerId": "225530237"
     },
     {
       "targetId": "railway:ski",
       "repository": "doug-dotcom/Shine-Ski",
-      "branch": "main"
+      "branch": "main",
+      "repositoryId": "1359646182",
+      "repositoryOwner": "doug-dotcom",
+      "repositoryOwnerId": "225530237"
     },
     {
       "targetId": "railway:translate",
       "repository": "doug-dotcom/shine-translate",
-      "branch": "main"
+      "branch": "main",
+      "repositoryId": "1368992845",
+      "repositoryOwner": "doug-dotcom",
+      "repositoryOwnerId": "225530237"
     },
     {
       "targetId": "railway:travel",
       "repository": "doug-dotcom/shine-travel",
-      "branch": "main"
+      "branch": "main",
+      "repositoryId": "1361434212",
+      "repositoryOwner": "doug-dotcom",
+      "repositoryOwnerId": "225530237"
     }
   ]
 }
