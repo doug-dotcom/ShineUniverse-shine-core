@@ -1,0 +1,56 @@
+{
+  "contract": "shine-foundation/promoted-release-case-audit-incident-response-policy-v1",
+  "version": "1.0.0",
+  "layer": 75,
+  "purpose": "Classify case-audit incident causes and provide a deterministic response plan that can materialise missing current work through Layer 67 but never rewrites history or expands release-truth authority.",
+  "causeReader": "foundation.get_foundation_promoted_release_case_audit_incident_cause_v1",
+  "evaluator": "foundation.evaluate_foundation_promoted_release_case_audit_incident_response_v1",
+  "responsePlan": "foundation.get_foundation_promoted_release_case_audit_incident_response_plan_v1",
+  "caseGapMaterialiser": "foundation.generate_foundation_promoted_release_owner_handoff_v1",
+  "releaseTruthAuthority": "foundation.evaluate_control_plane_incident_response_v1",
+  "causeClasses": [
+    "none",
+    "case-chain-gap",
+    "case-chain-integrity",
+    "observer-drift",
+    "observer-freshness",
+    "unknown"
+  ],
+  "localActions": {
+    "inspect-promotion-case-audit": "read-only",
+    "inspect-promotion-case-history": "read-only",
+    "record-fresh-promotion-case-audit-observation": "evidence-only",
+    "materialise-current-owner-handoff": "layer-67-bounded-generator"
+  },
+  "delegatedLayer38Actions": [
+    "request-release-reattestation",
+    "propose-registry-repair",
+    "propose-release-ledger-repair",
+    "apply-registry-repair",
+    "apply-release-ledger-repair",
+    "rebind-release-identity"
+  ],
+  "alwaysDeniedActions": [
+    "auto-repair-case-chain",
+    "rewrite-case-chain-history",
+    "delete-case-chain-history",
+    "suppress-case-audit-incident",
+    "delete-case-audit-incident-history"
+  ],
+  "invariants": {
+    "incidentSeverityNeverExpandsAuthority": true,
+    "missingCurrentHandoffMayUseExistingBoundedLayer67Generator": true,
+    "integrityFailureCannotBeRepairedByNewHandoff": true,
+    "historicalEvidenceCannotBeRewritten": true,
+    "authoritativeActionsDelegateToLayer38": true,
+    "delegatedDecisionIsNeverUpgraded": true,
+    "observerRefreshIsEvidenceOnly": true,
+    "policyExecutesNoAction": true,
+    "automaticRepairAlwaysDenied": true,
+    "unknownActionFailsClosed": true,
+    "gatewayReadInheritedViaFoundationRuntime": true,
+    "ownerDenied": true,
+    "defenceDenied": true,
+    "browserRolesDenied": true
+  }
+}

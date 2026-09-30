@@ -376,6 +376,10 @@ jobs:
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-promoted-release-case-audit-incident-v1.sql
       - name: Run Foundation promotion-trust case audit incident lifecycle tests
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-promoted-release-case-audit-incident-v1.test.sql
+      - name: Apply Foundation promotion-trust case audit incident response policy
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-promoted-release-case-audit-incident-response-v1.sql
+      - name: Run Foundation promotion-trust case audit incident response policy tests
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-promoted-release-case-audit-incident-response-v1.test.sql
       - name: Apply Shine Defence Sentinel
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-sentinel-v1.sql
       - name: Run Shine Defence Sentinel acceptance tests
