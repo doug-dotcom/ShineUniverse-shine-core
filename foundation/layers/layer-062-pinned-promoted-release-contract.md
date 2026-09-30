@@ -1,6 +1,6 @@
 # Foundation Layer 62 — Pinned promoted-release contract
 
-**Status:** IMPLEMENTED — CI verification pending  
+**Status:** LIVE — canonical schema pinned, consumer validator green and production payload verified  
 **Scope:** freeze the Layer-61 promoted-release wire contract so downstream consumers cannot reinterpret promotion completion
 
 Layer 61 makes one consumer-safe release projection.
@@ -95,6 +95,10 @@ The Layer-61 consumer contract now declares:
 
 ## Acceptance coverage
 
+Full Foundation CI run `36665199189` completed successfully.
+
+The contract job passed the object-registry verifier, the Layer-61 raw-binding boundary and all Layer-62 validator tests. The full persistence chain also completed successfully through every downstream Shine Defence acceptance step.
+
 Foundation contract CI runs Node tests covering:
 
 - schema identity matches validator identity;
@@ -108,6 +112,28 @@ Foundation contract CI runs Node tests covering:
 - promoted-release fingerprint omission is rejected.
 
 The existing object-registry verifier separately proves the schema file itself has not drifted from its registered Git blob.
+
+## Production proof
+
+The canonical schema is pinned in object-registry v1.8.0 to Git blob:
+
+`5d67cfd13f4f300d9702970063142670c95c1c2a`
+
+The live production promoted-release response was checked against the Layer-62 contract invariants and returned:
+
+- contract ID: `shine-foundation/promoted-release-response-v1`
+- schema version: `1.0.0`
+- state: **promoted**
+- available: **true**
+- promotion closure: **closed**
+- release: `foundation:layer-58:1a8148a8`
+- source commit: `1a8148a8eb748a19ac03107d9e9ec7313297384b`
+- promoted-release SHA-256: `ed4e6f4d7234161a6261fc98d58fd3bfd05ca35045fabfdc57dbf8c5ac51040f`
+- runtime readiness claimed: **false**
+- authoritative truth mutation: **false**
+- live contract-shape check: **PASS**
+
+Layer 62 does not alter production database state. It freezes the already-live Layer-61 interface at the repository/consumer-contract boundary.
 
 ## Invariant
 
