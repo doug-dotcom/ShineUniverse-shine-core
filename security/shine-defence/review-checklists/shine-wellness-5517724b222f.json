@@ -1,0 +1,130 @@
+{
+  "checklist": "shine-defence/review-checklist-v1",
+  "version": "1.0.0",
+  "candidateId": "shine-wellness-5517724b222f",
+  "appId": "shine-wellness",
+  "repository": "doug-dotcom/Shine--wellness",
+  "releaseCommitSha": "5517724b222f63dfbb7fce25e79c8eb8e8af6128",
+  "profilePath": "security/shine-defence/profile.json",
+  "profileBlobSha": "5d4342c31cb261c5953eaabb094ed650994665ee",
+  "profileVersion": "1.0.0",
+  "policies": [
+    "baseline",
+    "certifier"
+  ],
+  "candidateObservedAt": "2026-09-30T07:53:58.000Z",
+  "generatedAt": "2026-09-30T07:54:20.000Z",
+  "registryVersion": "1.0.0",
+  "registryBlobSha": "4bd0164fd7023ce600445a5ccc8421ca13a03df3",
+  "candidateEvidence": [
+    {
+      "evidenceId": "E1",
+      "source": "github",
+      "kind": "ci_success",
+      "reference": "actions/runs/36686254398",
+      "checkedAt": "2026-09-30T07:53:58.000Z",
+      "summary": "Final Build 23 Wellness release passed the Shine Defence baseline, 23 of 23 test files, 120 of 120 tests, TypeScript and the Next production build."
+    }
+  ],
+  "policyReviews": [
+    {
+      "policyId": "baseline",
+      "canonicalPath": "security/shine-defence/baseline-v1.json",
+      "canonicalVersion": "1.0.0",
+      "canonicalBlobSha": "963402a4a4df916583c46aaec59cf0cd2028157d",
+      "requirements": [
+        {
+          "itemId": "baseline:SD-001",
+          "requirement": "Application/package publishing boundary is explicit",
+          "required": true,
+          "state": "unreviewed",
+          "evidenceRefs": [],
+          "reviewerNotes": ""
+        },
+        {
+          "itemId": "baseline:SD-002",
+          "requirement": "Supported runtime is declared",
+          "required": true,
+          "state": "unreviewed",
+          "evidenceRefs": [],
+          "reviewerNotes": ""
+        },
+        {
+          "itemId": "baseline:SD-003",
+          "requirement": "Unexpected HTTP methods are rejected",
+          "required": true,
+          "state": "unreviewed",
+          "evidenceRefs": [],
+          "reviewerNotes": ""
+        },
+        {
+          "itemId": "baseline:SD-004",
+          "requirement": "Baseline browser security headers are emitted",
+          "required": true,
+          "state": "unreviewed",
+          "evidenceRefs": [],
+          "reviewerNotes": ""
+        },
+        {
+          "itemId": "baseline:SD-005",
+          "requirement": "Static file paths are constrained to the application root",
+          "required": true,
+          "state": "unreviewed",
+          "evidenceRefs": [],
+          "reviewerNotes": ""
+        },
+        {
+          "itemId": "baseline:SD-006",
+          "requirement": "Remote data fetches use deadlines and response-size limits",
+          "required": true,
+          "state": "unreviewed",
+          "evidenceRefs": [],
+          "reviewerNotes": ""
+        },
+        {
+          "itemId": "baseline:SD-007",
+          "requirement": "Untrusted local file imports have format-specific parser protections and size limits",
+          "required": true,
+          "state": "unreviewed",
+          "evidenceRefs": [],
+          "reviewerNotes": ""
+        },
+        {
+          "itemId": "baseline:SD-008",
+          "requirement": "External new-tab links isolate the opener",
+          "required": true,
+          "state": "unreviewed",
+          "evidenceRefs": [],
+          "reviewerNotes": ""
+        },
+        {
+          "itemId": "baseline:SD-009",
+          "requirement": "Application source is checked for obvious committed secret material",
+          "required": true,
+          "state": "unreviewed",
+          "evidenceRefs": [],
+          "reviewerNotes": ""
+        }
+      ]
+    },
+    {
+      "policyId": "certifier",
+      "canonicalPath": "security/shine-defence/integration-kit/certifier-v1.mjs",
+      "canonicalVersion": "1.1.0",
+      "canonicalBlobSha": "ccb28b1c373ad4fad1a3064559e1f1741b32b5b0",
+      "requirements": [
+        {
+          "itemId": "certifier:ARTEFACT",
+          "requirement": "Verify canonical artefact security/shine-defence/integration-kit/certifier-v1.mjs version 1.1.0 / blob ccb28b1c373ad4fad1a3064559e1f1741b32b5b0 is correctly pinned and the candidate release provides appropriate app-specific evidence for its use.",
+          "required": true,
+          "state": "unreviewed",
+          "evidenceRefs": [],
+          "reviewerNotes": ""
+        }
+      ]
+    }
+  ],
+  "humanAuthorization": {
+    "status": "pending"
+  }
+}
