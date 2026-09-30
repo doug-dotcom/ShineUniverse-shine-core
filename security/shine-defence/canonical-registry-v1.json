@@ -522,14 +522,14 @@
     {
       "id": "github-actions-oidc-verifier",
       "path": "security/shine-defence/github-actions-oidc-verifier-v1.json",
-      "version": "1.1.0",
-      "blobSha": "c627f23efb6af446dcd098fccbb63dee6a89c48b"
+      "version": "1.2.0",
+      "blobSha": "7d392b029bab2b3bcbba3977cfc3a02d91c53c98"
     },
     {
       "id": "github-actions-oidc-verifier-runtime",
       "path": "foundation/runtime/_shared/github-actions-oidc-v1.mjs",
-      "version": "1.1.0",
-      "blobSha": "8565e6885c08fceff939f5e364a315960a2afe1c"
+      "version": "1.2.0",
+      "blobSha": "100b452ba13dac51302b72478099fa90763413ae"
     },
     {
       "id": "github-oidc-operation-replay",
@@ -560,6 +560,18 @@
       "path": "foundation/postgres/defence-github-oidc-replay-runtime-read-v1.sql",
       "version": "1.0.0",
       "blobSha": "0c7be93a7ab2f806a7d70f9b5d7587ae9fd13969"
+    },
+    {
+      "id": "github-oidc-immutable-principal",
+      "path": "security/shine-defence/github-oidc-immutable-principal-v1.json",
+      "version": "1.0.0",
+      "blobSha": "e925ad0a4568817070ddb348d100d010156e3ce7"
+    },
+    {
+      "id": "github-oidc-immutable-principal-db",
+      "path": "foundation/postgres/defence-github-oidc-principal-binding-v1.sql",
+      "version": "1.0.0",
+      "blobSha": "4b7c4c39afabe19d421cff7b23b176434a59636f"
     }
   ]
 }
