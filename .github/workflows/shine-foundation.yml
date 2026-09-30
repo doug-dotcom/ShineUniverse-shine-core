@@ -342,6 +342,10 @@ jobs:
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-promoted-release-incident-response-v1.sql
       - name: Run Foundation promoted release incident response policy tests
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-promoted-release-incident-response-v1.test.sql
+      - name: Apply Foundation promoted release owner handoff
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-promoted-release-owner-handoff-v1.sql
+      - name: Run Foundation promoted release owner handoff tests
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-promoted-release-owner-handoff-v1.test.sql
       - name: Apply Shine Defence Sentinel
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-sentinel-v1.sql
       - name: Run Shine Defence Sentinel acceptance tests

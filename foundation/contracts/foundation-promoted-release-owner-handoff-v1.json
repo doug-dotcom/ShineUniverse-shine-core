@@ -1,0 +1,41 @@
+{
+  "contract": "shine-foundation/promoted-release-owner-handoff-v1",
+  "version": "1.0.0",
+  "layer": 67,
+  "purpose": "Convert a persistent promoted-release trust incident and its Layer-66 response plan into an immutable Shine Core owner work packet without granting approval or execution authority.",
+  "incidentSource": "foundation.get_foundation_promoted_release_incident_summary_v1",
+  "causeSource": "foundation.get_foundation_promoted_release_incident_cause_v1",
+  "responsePlanSource": "foundation.get_foundation_promoted_release_incident_response_plan_v1",
+  "handoffLedger": "foundation.foundation_promoted_release_owner_handoffs",
+  "generator": "foundation.generate_foundation_promoted_release_owner_handoff_v1",
+  "statusReader": "foundation.get_foundation_promoted_release_owner_handoff_status_v1",
+  "summaryReader": "foundation.get_foundation_promoted_release_owner_handoff_summary_v1",
+  "ownerRoute": {
+    "serviceId": "foundation.gateway",
+    "ownerComponentSource": "foundation.service_registry",
+    "expectedCurrentOwnerComponent": "shine-core"
+  },
+  "hostedGenerator": {
+    "engine": "pg_cron",
+    "jobName": "shine-foundation-promoted-release-owner-handoff-5m",
+    "cadence": "3,8,13,18,23,28,33,38,43,48,53,58 * * * *"
+  },
+  "invariants": {
+    "onlyPersistentWarningOrCriticalIncidentCreatesHandoff": true,
+    "currentOpenedOrChangedIncidentEventRequired": true,
+    "handoffBindsIncidentEvidenceFingerprint": true,
+    "handoffBindsSemanticResponsePlanFingerprint": true,
+    "evaluatedAtDoesNotChangePlanFingerprint": true,
+    "routingUsesActiveServiceRegistryOwner": true,
+    "replayIsIdempotent": true,
+    "incidentRecoveryMakesHandoffStale": true,
+    "incidentChangeMakesPriorHandoffStale": true,
+    "responsePlanChangeMakesHandoffStale": true,
+    "ownerRouteChangeMakesHandoffStale": true,
+    "directLedgerInsertDeniedToServiceRole": true,
+    "approvalGranted": false,
+    "executionAuthorityGranted": false,
+    "executesAction": false,
+    "automaticRepair": false
+  }
+}
