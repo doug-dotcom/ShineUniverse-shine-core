@@ -1,7 +1,7 @@
 -- Foundation Layer 23: hosted automatic health collector wiring.
 -- Supabase-hosted only: pg_net + pg_cron invoke the public Foundation Gateway health endpoint.
 
-create extension if not exists pg_net;
+create extension if not exists pg_net with schema extensions;
 
 create or replace function foundation.enqueue_service_health_probe_v1(
   p_service_id text,
