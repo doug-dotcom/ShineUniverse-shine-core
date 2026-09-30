@@ -1,5 +1,6 @@
 import postgres from 'npm:postgres@3.4.9';
 import {verifyGithubActionsOidc} from '../_shared/github-actions-oidc-v1.mjs';
+import {bindGithubOidcOperation,oidcReplayConflict,oidcExactReplay} from '../_shared/github-oidc-operation-v1.mjs';
 
 const AUDIENCE='shine-defence-reattest';
 const EXPECTED_REPOSITORY='doug-dotcom/ShineUniverse-shine-core';
@@ -53,6 +54,17 @@ Deno.serve(async(req:Request)=>{
     const body=JSON.parse(raw||'{}');
 
     if(body?.action==='claim'){
+      const claimBinding=await bindGithubOidcOperation({
+        sql:rawSql,
+        identity,
+        audience:AUDIENCE,
+        operation:'reattest-claim',
+        targetKey:'foundation-core',
+        request:body
+      });
+      if(oidcReplayConflict(claimBinding)){
+        return jsonResponse(409,{error:'oidc-replay-conflict',binding:claimBinding});
+      }
       const force=body.force===true&&identity.eventName==='push';
       const rows=await rawSql`
         select foundation.get_defence_reattestation_work_v1(${force}) as work
@@ -60,7 +72,8 @@ Deno.serve(async(req:Request)=>{
       return jsonResponse(200,{
         status:'ok',
         contract:'shine-defence/reattestation-claim-v1',
-        work:rows[0]?.work??null
+        work:rows[0]?.work??null,
+        oidcBinding:{status:claimBinding.status,bindingId:claimBinding.bindingId}
       });
     }
 
@@ -93,6 +106,18 @@ Deno.serve(async(req:Request)=>{
       }
     }
 
+    const attestBinding=await bindGithubOidcOperation({
+      sql:rawSql,
+      identity,
+      audience:AUDIENCE,
+      operation:'reattest-attest',
+      targetKey:[submission.serviceId,submission.environment,submission.artifactSha256].join(':'),
+      request:body
+    });
+    if(oidcReplayConflict(attestBinding)){
+      return jsonResponse(409,{error:'oidc-replay-conflict',binding:attestBinding});
+    }
+
     const observedAt=new Date();
     const validUntil=new Date(observedAt.getTime()+24*60*60*1000);
     const evidenceRef=[
@@ -103,6 +128,36 @@ Deno.serve(async(req:Request)=>{
       submission.serviceId,
       submission.artifactSha256
     ].join(':');
+
+    if(oidcExactReplay(attestBinding)){
+      const existing=await rawSql`
+        select
+          event_id,state,service_id,environment,artifact_sha256,source_commit,valid_until
+        from foundation.defence_artifact_attestation_events
+        where evidence_ref=${evidenceRef}
+        limit 1
+      `;
+      const row=existing[0];
+      if(row){
+        return jsonResponse(200,{
+          status:'accepted',
+          contract:'shine-defence/reattestation-ingest-v1',
+          result:{
+            defenceReattestation:'shine-defence/reattestation-result-v1',
+            schemaVersion:'1.0.0',
+            state:row.state,
+            serviceId:row.service_id,
+            environment:row.environment,
+            artifactSha256:row.artifact_sha256,
+            sourceCommit:row.source_commit,
+            attestationEventId:row.event_id,
+            validUntil:row.valid_until,
+            replayed:true
+          },
+          oidcBinding:{status:attestBinding.status,bindingId:attestBinding.bindingId}
+        });
+      }
+    }
 
     const rows=await rawSql`
       select foundation.record_defence_reattestation_v1(
@@ -136,7 +191,8 @@ Deno.serve(async(req:Request)=>{
     return jsonResponse(200,{
       status:'accepted',
       contract:'shine-defence/reattestation-ingest-v1',
-      result:rows[0]?.result??null
+      result:rows[0]?.result??null,
+      oidcBinding:{status:attestBinding.status,bindingId:attestBinding.bindingId}
     });
   }catch(error){
     const message=error instanceof Error?error.message:'reattestation-error';
