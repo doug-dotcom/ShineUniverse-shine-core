@@ -131,6 +131,17 @@ Fresh databases create that name directly. Existing production uses an idempoten
 
 Because PL/pgSQL stores function source text, an already-live rename also requires the Layer-76 executor/summary functions to be replaced so their SQL text references the new canonical table. A second idempotent convergence step reapplies those already-tested function definitions after the rename.
 
+### Function identifier convergence
+
+The Layer-76 policy-fingerprint and execution-summary source names also exceeded PostgreSQL's 63-byte identifier limit and were being silently shortened in production.
+
+Layer 76 now uses explicit length-safe canonical function names:
+
+- `foundation.case_audit_safe_response_policy_fingerprint_v1`
+- `foundation.get_case_audit_safe_response_exec_summary_v1`
+
+Existing production functions are renamed in place before the stored executor/summary definitions are refreshed. Fresh databases create only the canonical names. CI asserts that the silently truncated legacy names do not exist.
+
 ## Authority boundary
 
 Execute:
