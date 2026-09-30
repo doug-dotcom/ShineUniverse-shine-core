@@ -30,6 +30,7 @@
   "ciBoundaryVerifier": "foundation/integration-kit/verify-promoted-release-consumer-boundary-v1.mjs",
   "rawBindingControlPlaneAllowlist": [
     "foundation/postgres/foundation-release-identity-binding-v1.sql",
+    "foundation/postgres/foundation-release-identity-reattestation-continuity-v1.sql",
     "foundation/postgres/foundation-readiness-drift-v1.sql",
     "foundation/postgres/foundation-scoped-remediation-executor-v1.sql",
     "foundation/postgres/foundation-release-projection-reconciliation-v1.sql"

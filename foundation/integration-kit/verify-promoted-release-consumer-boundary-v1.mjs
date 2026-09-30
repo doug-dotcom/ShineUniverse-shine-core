@@ -9,6 +9,7 @@ const extensions=new Set(['.sql','.mjs','.js','.ts']);
 
 const allowlist=new Set([
   'foundation/postgres/foundation-release-identity-binding-v1.sql',
+  'foundation/postgres/foundation-release-identity-reattestation-continuity-v1.sql',
   'foundation/postgres/foundation-readiness-drift-v1.sql',
   'foundation/postgres/foundation-scoped-remediation-executor-v1.sql',
   'foundation/postgres/foundation-release-projection-reconciliation-v1.sql'
