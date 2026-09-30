@@ -1,0 +1,53 @@
+{
+  "contract": "shine-foundation/case-audit-verification-reconciliation-coverage-v1",
+  "version": "1.0.0",
+  "layer": 83,
+  "purpose": "Audit whether every successful Layer-81 bounded verification execution has exactly one structurally valid Layer-82 reconciliation receipt, separating receipt coverage from healthy reconciliation outcome.",
+  "reader": "foundation.get_case_audit_verify_reconcile_coverage_v1",
+  "sourceExecutorLedger": "foundation.case_audit_verify_exec_events",
+  "sourceReconciliationLedger": "foundation.case_audit_verify_exec_reconciliations",
+  "overallStates": [
+    "idle",
+    "normal",
+    "pending",
+    "gap",
+    "invalid"
+  ],
+  "itemStates": [
+    "reconciled",
+    "pending",
+    "overdue",
+    "invalid-reconciliation",
+    "missing-proof",
+    "receipt-mismatch",
+    "invalid-proof",
+    "evidence-drift",
+    "coverage-drift"
+  ],
+  "invariants": {
+    "onlySuccessfulLayer81ExecutionsRequireReconciliation": true,
+    "deniedAndFailedLayer81ExecutionsExcluded": true,
+    "reconciliationGracePeriodExplicit": true,
+    "overdueUnreconciledExecutionsAreGaps": true,
+    "reconciliationReceiptHashRecomputed": true,
+    "reconciliationProofEnvelopeMustMatchStoredColumns": true,
+    "reconciliationProofLayer81ActionResultMustMatchExecutorReceipt": true,
+    "reconciliationStateSemanticsValidated": true,
+    "invalidReconciliationReceiptDominatesOverallState": true,
+    "negativeLayer82OutcomeCountsAsCoveredButUnhealthy": true,
+    "reconciliationCoverageSeparatedFromHealthyReconciliation": true,
+    "idleCoverageIsOneHundredPercent": true,
+    "readOnlyAudit": true,
+    "noVerificationRerun": true,
+    "noLayer81Rerun": true,
+    "noEvidenceMutation": true,
+    "noVerificationProofRewrite": true,
+    "noReleaseTruthMutation": true,
+    "noIncidentHistoryMutation": true,
+    "gatewayReadInheritedViaFoundationRuntime": true,
+    "gatewayReceivesNoDirectGrant": true,
+    "ownerDenied": true,
+    "defenceDenied": true,
+    "browserRolesDenied": true
+  }
+}
