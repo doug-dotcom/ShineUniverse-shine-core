@@ -3,9 +3,7 @@ import {execFileSync} from 'node:child_process';
 import {readFileSync} from 'node:fs';
 import {pathToFileURL} from 'node:url';
 import {
-  SHINE_DEFENCE_RELEASE_ATTESTATION_AUTHORITY,
-  SHINE_DEFENCE_RELEASE_ATTESTATION_AUTHORITY_REF,
-  SHINE_DEFENCE_RELEASE_ATTESTATION_AUTHORITY_SHA
+  SHINE_DEFENCE_RELEASE_ATTESTATION_AUTHORITY
 } from '../../../foundation/runtime/_shared/shine-defence-release-attestation-authority-v1.mjs';
 
 export const SHINE_DEFENCE_RELEASE_ATTESTATION_AUTHORITY_LINEAGE_VERIFIER_VERSION='1.0.0';
@@ -80,8 +78,8 @@ export function verifyAuthorityLineage({lineage,authority,runtime=SHINE_DEFENCE_
     const ref=expectedRef(workflow,active.authoritySha);
     if(!same(authority.enforcement?.requiredJobWorkflowRef,ref)) failures.push('authority required job workflow ref diverges from active lineage');
     if(!same(authority.enforcement?.requiredJobWorkflowSha,active.authoritySha)) failures.push('authority required job workflow SHA diverges from active lineage');
-    if(!same(SHINE_DEFENCE_RELEASE_ATTESTATION_AUTHORITY_REF,ref)) failures.push('runtime exported authority ref diverges from active lineage');
-    if(!same(SHINE_DEFENCE_RELEASE_ATTESTATION_AUTHORITY_SHA,active.authoritySha)) failures.push('runtime exported authority SHA diverges from active lineage');
+    const runtimeRef=expectedRef({repository:runtime.repository,path:runtime.workflowPath},runtime.authoritySha);
+    if(!same(runtimeRef,ref)) failures.push('runtime derived authority ref diverges from active lineage');
   }
 
   return failures;
