@@ -132,6 +132,8 @@ begin
       then p_operation in ('rollback-claim','rollback-attest')
     when 'shine-defence-reattest'
       then p_operation in ('reattest-claim','reattest-attest')
+    when 'shine-defence-authority-state'
+      then p_operation='attestation-authority-sync'
     else false
   end;
 
