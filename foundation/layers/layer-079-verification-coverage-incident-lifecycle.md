@@ -1,6 +1,6 @@
 # Foundation Layer 79 — Verification coverage incident lifecycle
 
-**Status:** IMPLEMENTED — CI and production verification pending  
+**Status:** LIVE — CI green and production verification complete  
 **Scope:** turn persistent Layer-78 verification-coverage failures into append-only operational incidents
 
 Layer 78 answers:
@@ -136,6 +136,32 @@ Layer 79 grants no authority to:
 - close another incident domain;
 - grant approval or execution authority.
 
+## Production proof
+
+Layer 79 is deployed in the Shine Foundation Supabase project as:
+
+- `20260930122801 — foundation_layer_079_case_audit_verification_incident_lifecycle`
+- `20260930122807 — foundation_layer_079_case_audit_verification_incident_hosted`
+
+Live production verification confirms:
+
+- incident ledger, sentinel and summary exist;
+- current operational state: **normal**;
+- current Layer-78 coverage state: **idle**;
+- active incidents: **0**;
+- watches: **0**;
+- verification problem count: **0**;
+- verification coverage: **100%**;
+- healthy verification: **100%**;
+- a real `service_role` sentinel execution returned no event and performed no verification, repair or target re-execution;
+- service role can run only the sentinel, not the transition helper or direct incident INSERT;
+- Foundation runtime can read the summary;
+- Gateway can read the summary only through existing `foundation_runtime` membership and cannot run the sentinel;
+- Shine Core and Shine Defence cannot read the summary or run the sentinel;
+- hosted pg_cron job `shine-foundation-case-audit-verify-incident-5m` is active as job **36** on the documented cadence;
+- Supabase security advisors report no Layer-79-specific finding.
+
 ## Invariant
+
 
 > A verification gap may become an incident. An incident never becomes permission to invent the missing proof.
