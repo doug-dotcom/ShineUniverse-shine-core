@@ -73,15 +73,15 @@ $layer65_no_incident_when_normal$;
 -- Persistent HOLD: first sample watch, second identical sample opens critical incident.
 do $layer65_hold_lifecycle$
 declare
-  observation_id uuid;
+  v_observation_id uuid;
   hold_snapshot jsonb;
   first_event jsonb;
   opened_event jsonb;
   unchanged_event jsonb;
 begin
-  select observation_id into observation_id
-  from foundation.current_foundation_promoted_release_observation
-  where environment='production';
+  select o.observation_id into v_observation_id
+  from foundation.current_foundation_promoted_release_observation o
+  where o.environment='production';
 
   hold_snapshot:=jsonb_build_object(
     'foundationPromotedReleaseObservationSummaryResponse',
@@ -99,7 +99,7 @@ begin
       'semanticFingerprint',repeat('d',64)
     ),
     'observation',jsonb_build_object(
-      'observationId',observation_id,
+      'observationId',v_observation_id,
       'state','hold',
       'reasonCode','canonical-source-truth-not-pass',
       'semanticFingerprint',repeat('d',64)
@@ -144,13 +144,13 @@ $layer65_hold_lifecycle$;
 -- Material change while open appends CHANGED and keeps the original detection clock.
 do $layer65_changed_evidence$
 declare
-  observation_id uuid;
+  v_observation_id uuid;
   changed_snapshot jsonb;
   changed_event jsonb;
 begin
-  select observation_id into observation_id
-  from foundation.current_foundation_promoted_release_observation
-  where environment='production';
+  select o.observation_id into v_observation_id
+  from foundation.current_foundation_promoted_release_observation o
+  where o.environment='production';
 
   changed_snapshot:=jsonb_build_object(
     'foundationPromotedReleaseObservationSummaryResponse',
@@ -168,7 +168,7 @@ begin
       'semanticFingerprint',repeat('e',64)
     ),
     'observation',jsonb_build_object(
-      'observationId',observation_id,
+      'observationId',v_observation_id,
       'state','promoted',
       'reasonCode','promotion-closure-current',
       'semanticFingerprint',repeat('c',64)
