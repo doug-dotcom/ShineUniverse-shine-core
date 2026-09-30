@@ -143,6 +143,7 @@ begin
      or v_decision->>'causeClass'<>'layer87-reconciliation-omission'
      or coalesce(v_decision->>'authorityExpansion','true')<>'false'
      or coalesce(v_decision->>'automaticLayer87ReconciliationAllowed','true')<>'false'
+     or coalesce(v_decision->>'automaticReconciliationAllowed','true')<>'false'
      or coalesce(v_decision->>'automaticRepairAllowed','true')<>'false'
      or coalesce(v_decision->>'layer87ReceiptRewriteAllowed','true')<>'false'
      or coalesce(v_decision->>'layer86ReceiptRewriteAllowed','true')<>'false'
