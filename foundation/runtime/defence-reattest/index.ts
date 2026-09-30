@@ -197,7 +197,6 @@ Deno.serve(async(req:Request)=>{
           githubWorkflowSha:identity.workflowSha,
           githubRunnerEnvironment:identity.runnerEnvironment,
           githubEvent:identity.eventName,
-          githubRunnerEnvironment:identity.runnerEnvironment,
           githubActor:identity.actor
         })}
       ) as result
