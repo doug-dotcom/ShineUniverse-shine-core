@@ -1,0 +1,77 @@
+{
+  "contract": "shine-foundation/case-audit-verification-reconciliation-incident-lifecycle-v1",
+  "version": "1.0.0",
+  "layer": 84,
+  "purpose": "Escalate persistent Layer-83 reconciliation-coverage GAP or INVALID states into append-only operational incident evidence without automatically reconciling executions, rerunning verification, repairing evidence, rewriting proofs or receipts, or mutating authoritative truth.",
+  "source": "foundation.get_case_audit_verify_reconcile_coverage_v1",
+  "fingerprint": "foundation.case_audit_verify_reconcile_incident_fingerprint_v1",
+  "ledger": "foundation.case_audit_verify_reconcile_incident_events",
+  "currentStateView": "foundation.current_case_audit_verify_reconcile_incident_state",
+  "activeIncidentsView": "foundation.current_case_audit_verify_reconcile_incidents",
+  "watchesView": "foundation.current_case_audit_verify_reconcile_watches",
+  "sentinel": "foundation.run_case_audit_verify_reconcile_incident_sentinel_v1",
+  "summary": "foundation.get_case_audit_verify_reconcile_incident_summary_v1",
+  "sourceStates": [
+    "idle",
+    "normal",
+    "pending",
+    "gap",
+    "invalid"
+  ],
+  "incidentStates": [
+    "detected",
+    "opened",
+    "changed",
+    "recovered"
+  ],
+  "incidentSourceStates": [
+    "gap",
+    "invalid"
+  ],
+  "nonIncidentSourceStates": [
+    "idle",
+    "normal",
+    "pending"
+  ],
+  "persistenceThresholdSeconds": 300,
+  "reconciliationGraceSeconds": 300,
+  "severityMapping": {
+    "gap": "critical",
+    "invalid": "critical",
+    "idle": "non-incident",
+    "normal": "non-incident",
+    "pending": "non-incident"
+  },
+  "hostedSentinel": {
+    "engine": "pg_cron",
+    "jobName": "shine-foundation-case-audit-verify-reconcile-incident-5m",
+    "cadence": "4,9,14,19,24,29,34,39,44,49,54,59 * * * *"
+  },
+  "readerRoles": [
+    "foundation_runtime",
+    "service_role"
+  ],
+  "invariants": {
+    "pendingWithinGraceNeverCreatesIncident": true,
+    "firstGapOrInvalidSampleCreatesWatch": true,
+    "persistenceRequiredBeforeOpen": true,
+    "unchangedOpenEvidenceDoesNotAppendNoise": true,
+    "materialEvidenceChangeAppendsChangedEvent": true,
+    "nonIncidentCoverageRecoversWatchOrIncident": true,
+    "fingerprintExcludesEvaluationTimeAndExecutionAgeNoise": true,
+    "directIncidentInsertDeniedToServiceRole": true,
+    "transitionHelperNotCallableByServiceRole": true,
+    "sentinelCallableOnlyByServiceRole": true,
+    "gatewayReadsSummaryOnlyViaFoundationRuntimeInheritance": true,
+    "gatewayReceivesNoDirectSummaryGrant": true,
+    "ownerDenied": true,
+    "defenceDenied": true,
+    "browserRolesDenied": true,
+    "automaticReconciliation": false,
+    "automaticRepair": false,
+    "layer81RerunPerformed": false,
+    "verificationRerunPerformed": false,
+    "mutatesAuthoritativeTruth": false,
+    "mutatesIncidentHistory": false
+  }
+}
