@@ -1,6 +1,6 @@
 # Foundation Layer 70 — Independent promotion-trust verification
 
-**Status:** IMPLEMENTED — CI and production verification pending  
+**Status:** LIVE — full CI green, production evaluator independently recovered and proof authority boundary verified  
 **Scope:** use owner evidence only as a trigger for a fresh Foundation-owned recovery verdict
 
 Layer 69 lets Shine Core explain what it observed.
@@ -127,6 +127,8 @@ Incident recovery remains governed by fresh Layer-64/65 canonical evidence.
 
 ## Acceptance coverage
 
+Full Foundation CI run `36686084188` completed successfully. The Layer-70 migration and verification tests passed inside the full Foundation persistence chain, and all downstream Shine Defence checks remained green.
+
 CI proves:
 
 - owner can report resolved while independent truth remains impaired;
@@ -141,6 +143,63 @@ CI proves:
 - owner/runtime/Gateway/Defence cannot run verification;
 - browser roles cannot call the independent evaluator;
 - verification history is append-only.
+
+## Production proof
+
+Layer 70 is deployed in the Shine Foundation Supabase project.
+
+The live independent evaluator currently returns:
+
+- verification state: **recovered**
+- reason: `independent-promotion-recovery-confirmed`
+- canonical source truth PASS: **true**
+- promotion closure CLOSED/current: **true**
+- promoted release available: **true**
+- live observation NORMAL/fresh/matching: **true**
+- incident lifecycle NORMAL: **true**
+- canonical recovery observed: **true**
+
+This result was produced with:
+
+- owner evidence-return rows: **0**
+- independent verification rows: **0**
+
+That is intentional and important: the evaluator can independently establish the current promotion-trust state without any owner claim being present.
+
+Current release remains:
+
+`foundation:layer-58:1a8148a8`
+
+Current promoted-release SHA-256 remains:
+
+`ed4e6f4d7234161a6261fc98d58fd3bfd05ca35045fabfdc57dbf8c5ac51040f`
+
+Current canonical source-truth fingerprint remains:
+
+`3e7ce8f50385b3fadddddc247d3573bf`
+
+Privilege proof:
+
+- service role may run evidence-triggered independent verification: **yes**
+- Shine Core owner may run it: **no**
+- Foundation runtime may run it: **no**
+- Gateway may run it: **no**
+- Shine Defence may run it: **no**
+- service role direct verification-ledger INSERT: **no**
+- Shine Core direct verification-ledger SELECT: **no**
+- anonymous independent evaluator access: **no**
+- authenticated independent evaluator access: **no**
+
+Layer 70 performs no incident closure, release mutation, rebind, approval or execution.
+
+It also makes no runtime-readiness claim. A recovered promotion-trust verdict is deliberately separate from Gateway runtime health/readiness.
+
+Supabase advisors:
+
+- no Layer-70-specific security finding;
+- no Layer-70 unindexed foreign-key finding;
+- the three new Layer-70 verification indexes currently appear as `unused_index` INFO because healthy production has zero verification rows;
+- the remaining unindexed foreign-key INFO belongs to concurrent GitHub-OIDC replay-alert work, not Layer 70.
 
 ## Invariant
 
