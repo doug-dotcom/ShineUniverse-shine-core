@@ -1,7 +1,7 @@
 import postgres from 'npm:postgres@3.4.9';
 import {verifyGithubActionsOidc} from '../_shared/github-actions-oidc-v1.mjs';
 import {bindGithubOidcOperation,oidcReplayConflict} from '../_shared/github-oidc-operation-v1.mjs';
-import {SHINE_DEFENCE_RELEASE_ATTESTATION_AUTHORITY_REF,SHINE_DEFENCE_RELEASE_ATTESTATION_AUTHORITY_SHA} from '../_shared/shine-defence-release-attestation-authority-v1.mjs';
+import {verifyLiveDefenceAttestationAuthority} from '../_shared/shine-defence-active-authority-v1.mjs';
 
 const AUDIENCE='shine-defence-rollback-readiness';
 const EXPECTED_WORKFLOW_PATH='.github/workflows/shine-defence-release-head.yml';
@@ -15,8 +15,6 @@ const OIDC_POLICY={
   expectedRunnerEnvironment:'github-hosted',
   subjectMode:'repository-ref',
   expectedWorkflow:{path:EXPECTED_WORKFLOW_PATH,branch:EXPECTED_WORKFLOW_BRANCH},
-  expectedJobWorkflowRef:SHINE_DEFENCE_RELEASE_ATTESTATION_AUTHORITY_REF,
-  expectedJobWorkflowSha:SHINE_DEFENCE_RELEASE_ATTESTATION_AUTHORITY_SHA,
   allowedEvents:["schedule","workflow_dispatch","push"]
 };
 const MAX_BODY_BYTES=64*1024;
@@ -77,6 +75,7 @@ Deno.serve(async(req:Request)=>{
     const auth=req.headers.get('authorization')??'';
     if(!auth.startsWith('Bearer ')) return jsonResponse(401,{error:'missing-oidc-token'});
     const identity=await verifyGithubActionsOidc(auth.slice(7),OIDC_POLICY);
+    const liveAuthority=await verifyLiveDefenceAttestationAuthority({sql,identity});
 
     const raw=await req.text();
     if(raw.length>MAX_BODY_BYTES) return jsonResponse(413,{error:'body-too-large'});
@@ -179,6 +178,8 @@ Deno.serve(async(req:Request)=>{
           githubWorkflowSha:identity.workflowSha,
           githubJobWorkflowRef:identity.jobWorkflowRef||null,
           githubJobWorkflowSha:identity.jobWorkflowSha||null,
+          defenceAuthoritySequence:liveAuthority.activationSequence,
+          defenceAuthorityKind:liveAuthority.activationKind,
           githubRunnerEnvironment:identity.runnerEnvironment
         })}
       ) as result

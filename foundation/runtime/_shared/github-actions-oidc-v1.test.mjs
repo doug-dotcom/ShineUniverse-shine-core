@@ -233,7 +233,7 @@ test('authority-state sync is hourly, receipt-backed and atomic for authority mu
   assert.match(workflow,/audience=shine-defence-authority-state/);
 });
 
-test('dynamic release consumers bind signed immutable repository ids to Foundation target metadata and one shared authority pin',()=>{
+test('dynamic release consumers bind caller identity and resolve reusable-workflow authority from live Foundation state',()=>{
   const root=fileURLToPath(new URL('../../../',import.meta.url));
   const authority=JSON.parse(readFileSync(root+'security/shine-defence/release-attestation-authority-v1.json','utf8'));
   assert.equal(authority.runtimeBinding.path,'foundation/runtime/_shared/shine-defence-release-attestation-authority-v1.mjs');
@@ -244,6 +244,8 @@ test('dynamic release consumers bind signed immutable repository ids to Foundati
   assert.equal(authority.reusableWorkflow.authoritySha,SHINE_DEFENCE_RELEASE_ATTESTATION_AUTHORITY_SHA);
   assert.equal(authority.enforcement.requiredJobWorkflowRef,SHINE_DEFENCE_RELEASE_ATTESTATION_AUTHORITY_REF);
   assert.equal(authority.enforcement.requiredJobWorkflowSha,SHINE_DEFENCE_RELEASE_ATTESTATION_AUTHORITY_SHA);
+  assert.equal(authority.enforcement.liveAuthorityView,'foundation.current_defence_attestation_authority');
+  assert.equal(authority.enforcement.liveAuthorityVerifierPath,'foundation/runtime/_shared/shine-defence-active-authority-v1.mjs');
 
   const release=readFileSync(root+'foundation/runtime/defence-release-head-ingest/index.ts','utf8');
   const rollback=readFileSync(root+'foundation/runtime/defence-rollback-readiness/index.ts','utf8');
@@ -252,10 +254,10 @@ test('dynamic release consumers bind signed immutable repository ids to Foundati
     assert.match(source,/sourceRepositoryOwnerId/,name+' must load immutable owner id from target metadata');
     assert.match(source,/identity\.repositoryId/,name+' must compare the signed repository id');
     assert.match(source,/identity\.repositoryOwnerId/,name+' must compare the signed owner id');
-    assert.match(source,/shine-defence-release-attestation-authority-v1\.mjs/,name+' must import the shared Core authority pin');
-    assert.match(source,/expectedJobWorkflowRef:SHINE_DEFENCE_RELEASE_ATTESTATION_AUTHORITY_REF/,name+' must consume the shared authority ref');
-    assert.match(source,/expectedJobWorkflowSha:SHINE_DEFENCE_RELEASE_ATTESTATION_AUTHORITY_SHA/,name+' must consume the shared authority sha');
-    assert.doesNotMatch(source,/EXPECTED_JOB_WORKFLOW_REF|EXPECTED_JOB_WORKFLOW_SHA/,name+' must not own a local reusable-workflow pin');
+    assert.match(source,/shine-defence-active-authority-v1\.mjs/,name+' must import the live authority verifier');
+    assert.match(source,/verifyLiveDefenceAttestationAuthority\(\{sql,identity\}\)/,name+' must verify the signed reusable-workflow authority against Foundation state');
+    assert.doesNotMatch(source,/shine-defence-release-attestation-authority-v1\.mjs/,name+' must not import the compiled authority pin');
+    assert.doesNotMatch(source,/expectedJobWorkflowRef|expectedJobWorkflowSha|SHINE_DEFENCE_RELEASE_ATTESTATION_AUTHORITY_(?:REF|SHA)/,name+' must not compile a reusable-workflow authority into OIDC policy');
   }
 });
 

@@ -582,8 +582,8 @@
     {
       "id": "release-attestation-authority",
       "path": "security/shine-defence/release-attestation-authority-v1.json",
-      "version": "1.5.0",
-      "blobSha": "21a2dc19f53d702ecc1d456c9f83546b596f0dd2"
+      "version": "1.6.0",
+      "blobSha": "c7ccb96ad5f340907c51c60b52f51ccb33492d35"
     },
     {
       "id": "release-attestation-authority-promotion",
@@ -602,6 +602,24 @@
       "path": "foundation/runtime/_shared/shine-defence-release-attestation-authority-v1.mjs",
       "version": "1.0.0",
       "blobSha": "6dca0277460dedd4e0bc0a9fb73a73e3c1ba3ae6"
+    },
+    {
+      "id": "release-attestation-live-authority-verifier",
+      "path": "foundation/runtime/_shared/shine-defence-active-authority-v1.mjs",
+      "version": "1.0.0",
+      "blobSha": "9e7d689ff13e312db5ded982ac87cc34fc96c41f"
+    },
+    {
+      "id": "release-head-ingest-runtime",
+      "path": "foundation/runtime/defence-release-head-ingest/index.ts",
+      "version": "1.0.0",
+      "blobSha": "953d5450c3d4ad5c06369f803daa40d1cfcb266c"
+    },
+    {
+      "id": "rollback-readiness-runtime",
+      "path": "foundation/runtime/defence-rollback-readiness/index.ts",
+      "version": "1.0.0",
+      "blobSha": "8a1c4ebe6ec0b68741b7eee80b7f0fe3003a4c73"
     },
     {
       "id": "release-attestation-authority-lineage",

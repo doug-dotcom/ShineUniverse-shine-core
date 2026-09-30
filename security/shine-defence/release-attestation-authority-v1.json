@@ -1,6 +1,6 @@
 {
   "contract": "shine-defence/release-attestation-authority-v1",
-  "version": "1.5.0",
+  "version": "1.6.0",
   "purpose": "Centralize the authority-bearing release-head and rollback attestation job in Shine Core so app callers cannot silently change attestation logic.",
   "reusableWorkflow": {
     "repository": "doug-dotcom/ShineUniverse-shine-core",
@@ -42,12 +42,14 @@
     "The authority workflow is referenced by immutable Core commit SHA, never a branch or mutable tag.",
     "Caller repository identity remains independently verified; reusable workflow authority does not replace repository binding.",
     "A future central workflow revision receives a new SHA and must be deliberately promoted before it can exercise authority.",
-    "Release-head and rollback OIDC tokens without the exact pinned Core reusable workflow authority are rejected.",
-    "Authority-gated runtime consumers import one shared immutable authority binding; they do not duplicate the authority ref or SHA locally.",
+    "Release-head and rollback OIDC tokens without the exact currently active Foundation reusable-workflow authority are rejected.",
+    "Deployed release-head and rollback consumers resolve the active authority from Foundation at request time and must not embed or import a reusable-workflow SHA.",
     "Every active authority is the final entry in the append-only authority lineage and its workflow blob is proven against repository history.",
     "Every successor authority after the bootstrap generation has an explicit approved promotion receipt bound to the predecessor, successor and exact workflow blob.",
     "A failed authority generation can be rolled back only by appending an explicit rollback activation to a previously trusted authority with its original workflow bytes.",
-    "Rollback never rewrites lineage or silently reuses a prior SHA as a forward promotion."
+    "Rollback never rewrites lineage or silently reuses a prior SHA as a forward promotion.",
+    "A successful authority-state synchronization immediately changes which reusable-workflow authority deployed consumers accept; no Edge Function redeploy is required.",
+    "Missing active authority state fails closed even when the GitHub OIDC token is otherwise cryptographically valid."
   ],
   "enforcement": {
     "mode": "mandatory",
@@ -57,14 +59,16 @@
     ],
     "requiredJobWorkflowRef": "doug-dotcom/ShineUniverse-shine-core/.github/workflows/shine-defence-release-attestation-v1.yml@7bfd7fe685b4b2da814ac53dafdbfac2350591c8",
     "requiredJobWorkflowSha": "7bfd7fe685b4b2da814ac53dafdbfac2350591c8",
-    "failureMode": "401 unauthorized",
+    "failureMode": "401 unauthorized on missing or mismatched live authority",
     "runtimeBindingPath": "foundation/runtime/_shared/shine-defence-release-attestation-authority-v1.mjs",
-    "rotationRule": "For forward changes, require an approved byte-pinned promotion receipt before appending a promotion activation. For emergency reactivation, require an approved byte-pinned rollback receipt that restores a prior lineage authority with its original workflow blob. Only then rotate the shared runtime binding and this contract; CI fails closed on unauthorized replay, altered rollback bytes, receipt tamper or runtime/contract divergence."
+    "rotationRule": "For forward changes, validate and synchronize the approved lineage successor into Foundation before callers use it; for emergency rollback, synchronize the approved historical reactivation first. Deployed release-head and rollback consumers then follow Foundation's current authority immediately without redeployment, while CI still requires canonical contract/runtime lineage parity.",
+    "liveAuthorityView": "foundation.current_defence_attestation_authority",
+    "liveAuthorityVerifierPath": "foundation/runtime/_shared/shine-defence-active-authority-v1.mjs"
   },
   "runtimeBinding": {
     "path": "foundation/runtime/_shared/shine-defence-release-attestation-authority-v1.mjs",
     "version": "1.0.0",
-    "role": "Single runtime source of truth for the immutable Core reusable-workflow authority ref and SHA."
+    "role": "Canonical repository projection of the active immutable workflow authority for lineage/contract verification; deployed release-head and rollback consumers do not use this file as their runtime authority source."
   },
   "lineage": {
     "path": "security/shine-defence/release-attestation-authority-lineage-v1.json",
