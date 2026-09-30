@@ -576,8 +576,14 @@
     {
       "id": "release-attestation-authority",
       "path": "security/shine-defence/release-attestation-authority-v1.json",
-      "version": "1.1.0",
-      "blobSha": "1df105dcd6adb1ddabe38ec7360f5f3cb363a936"
+      "version": "1.2.0",
+      "blobSha": "951e6076045958b94726c349450086eb19eeb2ea"
+    },
+    {
+      "id": "release-attestation-authority-runtime",
+      "path": "foundation/runtime/_shared/shine-defence-release-attestation-authority-v1.mjs",
+      "version": "1.0.0",
+      "blobSha": "6dca0277460dedd4e0bc0a9fb73a73e3c1ba3ae6"
     },
     {
       "id": "release-attestation-authority-workflow",
