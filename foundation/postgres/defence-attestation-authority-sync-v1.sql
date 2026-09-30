@@ -40,7 +40,14 @@ begin
   end if;
 
   if not (p_metadata ? 'lineageSequence')
-     or coalesce(p_metadata->>'lineageSequence','') !~ '^[0-9]{1,18}    'doug-dotcom/ShineUniverse-shine-core/.github/workflows/' ||
+     or coalesce(p_metadata->>'lineageSequence','') !~ '^[0-9]{1,18}$' then
+    raise exception 'invalid-attestation-authority-lineage-sequence' using errcode='22023';
+  end if;
+
+  v_lineage_sequence := (p_metadata->>'lineageSequence')::bigint;
+
+  v_expected_ref :=
+    'doug-dotcom/ShineUniverse-shine-core/.github/workflows/' ||
     'shine-defence-release-attestation-v1.yml@' ||
     lower(p_authority_sha);
 
