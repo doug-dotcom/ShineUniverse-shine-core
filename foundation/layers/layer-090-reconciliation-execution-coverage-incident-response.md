@@ -1,6 +1,6 @@
 # Foundation Layer 90 — Layer-89 incident response policy
 
-**Status:** IMPLEMENTED — CI and production verification pending  
+**Status:** LIVE — CI green and production verification complete  
 **Scope:** govern what Foundation may do in response to a persistent Layer-88 coverage incident
 
 Layer 89 makes persistent Layer-88 GAP/INVALID coverage operationally visible.
@@ -83,6 +83,32 @@ Foundation runtime and service role may read the policy. Gateway reads only thro
 ## Deliberate non-actions
 
 Layer 90 performs no Layer-87 reconciliation, no upstream rerun, no repair, no receipt/proof rewrite, no history mutation and no release-truth mutation.
+
+## Production proof
+
+Layer 90 is deployed in the Shine Foundation Supabase project as migration:
+
+`20260930225148 — foundation_layer_090_layer89_incident_response_policy`
+
+Live production verification confirms:
+
+- current Layer-89 operational state: **normal**;
+- current Layer-88 coverage state: **idle**;
+- current cause class: **none**;
+- next evidence action: **none**;
+- `inspect-layer88-coverage`: **admit / read-only**;
+- `run-independent-layer87-reconciliation`: **not-applicable** on healthy production;
+- `rerun-layer86`: **deny / prohibited**;
+- `mutate-release-truth`: **deny / prohibited**;
+- policy evaluation changed Layer-82 reconciliation count: **0 → 0**;
+- policy evaluation changed Layer-86 execution count: **0 → 0**;
+- policy evaluation changed Layer-87 reconciliation count: **0 → 0**;
+- policy evaluation changed Layer-89 incident-event count: **0 → 0**;
+- Foundation runtime and service role can read the policy;
+- Gateway reads only through existing `foundation_runtime` inheritance and receives no direct grant;
+- Shine Core, Shine Defence and browser roles cannot read the policy;
+- direct service-role Layer-87 execution remains available at Layer 90 and is intentionally left for the next bounded-executor layer to close;
+- Supabase advisors report no Layer-90-specific security or performance finding.
 
 ## Invariant
 
