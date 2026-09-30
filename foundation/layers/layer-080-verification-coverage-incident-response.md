@@ -1,6 +1,6 @@
 # Foundation Layer 80 — Verification coverage incident response policy
 
-**Status:** IMPLEMENTED — CI and production verification pending  
+**Status:** LIVE — CI green and production verification complete  
 **Scope:** govern what Foundation may do in response to a Layer-79 verification-coverage incident
 
 Layer 79 can tell Foundation that verification coverage has become a persistent operational problem.
@@ -148,6 +148,29 @@ Layer 80:
 - grants no approval;
 - grants no execution authority.
 
+## Production proof
+
+Layer 80 is deployed in the Shine Foundation Supabase project as migration:
+
+`20260930124016 — foundation_layer_080_case_audit_verification_incident_response`
+
+Live production verification confirms:
+
+- all three Layer-80 policy functions exist and execute successfully;
+- current incident state: **normal**;
+- current coverage state: **idle**;
+- current cause class: **none**;
+- next evidence action: **none**;
+- `inspect-verification-coverage`: **admit / read-only**;
+- `run-independent-verification`: **not-applicable** on healthy production;
+- `rerun-safe-response`: **deny / prohibited**;
+- `mutate-release-truth`: **deny / prohibited**;
+- Foundation runtime and service role can read the policy;
+- Gateway can read only through existing `foundation_runtime` inheritance and receives no direct grant;
+- Shine Core, Shine Defence and browser roles cannot read the policy;
+- Supabase security advisors report no Layer-80-specific finding.
+
 ## Invariant
+
 
 > The incident may select the next bounded control. It never becomes the control itself.
