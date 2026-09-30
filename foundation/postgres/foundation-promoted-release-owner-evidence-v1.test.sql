@@ -83,11 +83,23 @@ reset role;
 
 set local role shine_core_control_plane;
 
-do $l69_accept$
-declare inbox jsonb; hid uuid; response jsonb;
+do $l69_owner_flow$
+declare
+  inbox jsonb;
+  hid uuid;
+  response jsonb;
+  result jsonb;
+  replay jsonb;
+  status jsonb;
 begin
-  inbox:=foundation.get_foundation_promoted_release_owner_inbox_v1('production',25,now());
+  inbox:=foundation.get_foundation_promoted_release_owner_inbox_v1(
+    'production',25,now()
+  );
   hid:=(inbox->'items'->0->>'handoffId')::uuid;
+
+  if hid is null then
+    raise exception 'Layer 69 owner inbox did not expose current handoff';
+  end if;
 
   response:=foundation.respond_foundation_promoted_release_owner_handoff_v1(
     hid,'accepted','accepted-for-owner-evidence',null,now()
@@ -97,21 +109,6 @@ begin
      or response->>'responseState'<>'accepted' then
     raise exception 'Layer 69 prerequisite owner acceptance failed: %',response;
   end if;
-end;
-$l69_accept$;
-
-do $l69_return$
-declare
-  hid uuid;
-  result jsonb;
-  replay jsonb;
-  status jsonb;
-begin
-  hid:=(
-    foundation.get_foundation_promoted_release_owner_inbox_v1(
-      'production',25,now()
-    )->'items'->0->>'handoffId'
-  )::uuid;
 
   result:=foundation.return_foundation_promoted_release_owner_evidence_v1(
     hid,
@@ -177,7 +174,7 @@ begin
     raise exception 'Layer 69 first evidence packet must remain authoritative: %',replay;
   end if;
 end;
-$l69_return$;
+$l69_owner_flow$;
 
 reset role;
 
