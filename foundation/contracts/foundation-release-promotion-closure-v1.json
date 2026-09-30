@@ -1,0 +1,29 @@
+{
+  "contract": "shine-foundation/release-promotion-closure-v1",
+  "version": "1.0.0",
+  "layer": 60,
+  "purpose": "Represent promotion completion as immutable evidence only after Layer 59 independently proves canonical source truth for the exact current binding.",
+  "ledger": "foundation.foundation_release_promotion_closures",
+  "recorder": "foundation.record_foundation_release_promotion_closure_v1",
+  "statusReader": "foundation.get_foundation_release_promotion_closure_status_v1",
+  "assertion": "foundation.assert_foundation_release_promotion_closed_v1",
+  "hostedCadence": "every 5 minutes, staggered after projection and incident reconciliation",
+  "states": {
+    "closed": "A current integrity-verified closure receipt matches the exact Layer-59 fingerprint and immutable binding.",
+    "open": "Layer 59 passes but no closure receipt exists for the current binding/fingerprint.",
+    "stale": "A receipt exists for the binding but the current canonical source-truth fingerprint or identity fields have changed.",
+    "invalid": "The stored closure receipt fails its own SHA-256 integrity check.",
+    "blocked": "Layer 59 itself does not pass or no canonical binding can be identified."
+  },
+  "invariants": [
+    "Binding creation is not promotion closure.",
+    "Projection repair is not promotion closure.",
+    "A closure receipt can be recorded only when Layer 59 is PASS.",
+    "The receipt binds to one exact binding ID, release ref, layer, source commit, runtime version, artifact and Layer-59 fingerprint.",
+    "Changed canonical source truth automatically makes an older receipt stale.",
+    "Closure recording is append-only evidence and never mutates authoritative release truth.",
+    "Runtime readiness is not claimed by a source-truth closure receipt.",
+    "Foundation runtime may read closure status but only service_role may record or assert closure.",
+    "Service role has no direct INSERT privilege on the closure ledger."
+  ]
+}
