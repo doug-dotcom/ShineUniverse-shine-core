@@ -567,10 +567,18 @@ jobs:
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-correlated-transport-attribution-v1.sql
       - name: Run Shine Defence correlated transport-failure attribution tests
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-correlated-transport-attribution-v1.test.sql
+      - name: Apply Shine Defence on-demand sleep posture attribution
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-on-demand-sleep-posture-v1.sql
+      - name: Run Shine Defence on-demand sleep posture tests
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-on-demand-sleep-posture-v1.test.sql
       - name: Apply Shine Defence cause-aware operational attention
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-operational-attention-v1.sql
       - name: Run Shine Defence cause-aware operational attention tests
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-operational-attention-v1.test.sql
+      - name: Apply Shine Defence sleep-aware operational attention overlay
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-operational-attention-sleep-aware-v1.sql
+      - name: Run Shine Defence sleep-aware operational attention overlay tests
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-operational-attention-sleep-aware-v1.test.sql
       - name: Apply Shine Defence release transition coverage
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-release-transition-coverage-v1.sql
       - name: Run Shine Defence release transition coverage acceptance tests
