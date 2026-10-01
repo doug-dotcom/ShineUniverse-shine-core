@@ -697,7 +697,7 @@
       "id": "correlated-transport-attribution-db",
       "path": "foundation/postgres/defence-correlated-transport-attribution-v1.sql",
       "version": "1.0.0",
-      "blobSha": "c46c8ebf613074e58e8a498dda08c8c657e36150"
+      "blobSha": "ebc44e999fac638ca4c472cff5e71c206097cd43"
     },
     {
       "id": "release-attestation-authority-heartbeat-sentinel",
