@@ -1,0 +1,44 @@
+{
+  "contract": "shine-defence/transport-recurrence-sentinel-v1",
+  "version": "1.0.0",
+  "purpose": "Detect repeated same-cycle shared transport failures across the Defence health estate while preserving raw failures and keeping target-specific failures outside shared-transport recurrence qualification.",
+  "sourceOfTruth": {
+    "requestTable": "foundation.defence_health_probe_requests",
+    "resultTable": "foundation.defence_health_probe_results",
+    "estateSummary": "foundation.get_defence_estate_summary_v1"
+  },
+  "defaultWindow": {
+    "lookbackSeconds": 3600,
+    "minimumAffectedTargets": 3,
+    "minimumFailureFraction": 0.5,
+    "recurrenceThreshold": 3
+  },
+  "states": {
+    "stable": "No qualifying shared-transport cycles exist in the lookback window.",
+    "watch": "Qualifying shared-transport cycles exist but remain below the recurrence threshold.",
+    "recurrent": "The recurrence threshold has been met or exceeded."
+  },
+  "qualification": [
+    "Probe results are grouped by scheduled request minute and deduplicated to the latest result per target in that cycle.",
+    "A qualifying cycle requires at least the configured minimum number of transport-failing targets.",
+    "At least the configured fraction of observed targets in the cycle must have transport failures.",
+    "The same cycle must contain zero non-transport contract failures.",
+    "A timeout or a missing HTTP status with a non-empty error is a transport failure.",
+    "TLS-dominant cycles are reported separately when every transport failure in the qualifying cycle is a TCP/SSL handshake failure.",
+    "A later all-pass cycle can mark the latest qualifying event recovered without erasing recurrence history inside the lookback window."
+  ],
+  "invariants": [
+    "The sentinel is observation-only and never mutates probe results, health observations, estate incidents, release admission or rollback state.",
+    "Raw estate state remains authoritative and is returned unchanged.",
+    "The sentinel never overrides the full-estate state.",
+    "A cycle containing any target-specific non-transport contract failure is excluded from shared-transport recurrence qualification.",
+    "Target-specific failures remain visible through raw estate and operational-attention evidence.",
+    "No automatic retry, application restart, evidence deletion, incident suppression or health-window mutation is authorised.",
+    "Browser roles receive no EXECUTE grant."
+  ],
+  "runtime": {
+    "function": "foundation.get_defence_transport_recurrence_sentinel_v1",
+    "fullEstateField": "transportRecurrenceSentinel",
+    "fullEstateStateGate": false
+  }
+}
