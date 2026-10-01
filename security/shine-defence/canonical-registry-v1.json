@@ -709,7 +709,7 @@
       "id": "transport-recurrence-sentinel-db",
       "path": "foundation/postgres/defence-transport-recurrence-sentinel-v1.sql",
       "version": "1.0.0",
-      "blobSha": "2f39d26a3646e630becf8a56f66d7c4316afac8a"
+      "blobSha": "691095189bfc63c4f20eff9264950f35a52b753f"
     },
     {
       "id": "operational-attention",
