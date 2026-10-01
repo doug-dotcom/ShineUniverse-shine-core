@@ -7,22 +7,14 @@ declare
     'railway:daash','railway:dive','railway:fiona','railway:project-l'
   ];
   cycle_offset integer;
-  target_id text;
+  v_target_id text;
   request_id uuid;
   sentinel jsonb;
 begin
   -- Three qualifying shared transport cycles: three TLS transport failures and
   -- one passing target in each cycle.
   foreach cycle_offset in array array[0,5,10] loop
-    foreach target_id in array target_ids loop
-      select hp.target_id into target_id
-      from foundation.current_defence_health_probe_target hp
-      where hp.target_id=target_id;
-
-      if target_id is null then
-        raise exception 'Missing test target';
-      end if;
-
+    foreach v_target_id in array target_ids loop
       request_id := gen_random_uuid();
       insert into foundation.defence_health_probe_requests(
         probe_request_id,target_id,target_version,external_request_id,target_url,
@@ -34,7 +26,7 @@ begin
         'test:transport-recurrence:event:'||cycle_offset||':'||hp.target_id,
         '{}'::jsonb
       from foundation.current_defence_health_probe_target hp
-      where hp.target_id=target_id;
+      where hp.target_id=v_target_id;
 
       insert into foundation.defence_health_probe_results(
         probe_request_id,target_id,http_status,timed_out,error_message,contract_ok,
@@ -42,18 +34,18 @@ begin
       )
       values(
         request_id,
-        target_id,
-        case when target_id='railway:project-l' then 200 else null end,
-        target_id<>'railway:project-l',
+        v_target_id,
+        case when v_target_id='railway:project-l' then 200 else null end,
+        v_target_id<>'railway:project-l',
         case
-          when target_id='railway:project-l' then null
+          when v_target_id='railway:project-l' then null
           else 'Timeout of 10000 ms reached. TCP/SSL handshake time: 9300 ms'
         end,
-        target_id='railway:project-l',
+        v_target_id='railway:project-l',
         t+make_interval(mins=>cycle_offset)+interval '1 second',
         1000,
         null,
-        'test:transport-recurrence:event-result:'||cycle_offset||':'||target_id,
+        'test:transport-recurrence:event-result:'||cycle_offset||':'||v_target_id,
         '{}'::jsonb
       );
     end loop;
@@ -62,7 +54,7 @@ begin
   -- A mixed cycle has the same transport cluster plus a genuine HTTP contract
   -- failure. It must remain visible in raw evidence but must not count as a
   -- shared-transport recurrence cycle.
-  foreach target_id in array target_ids loop
+  foreach v_target_id in array target_ids loop
     request_id := gen_random_uuid();
     insert into foundation.defence_health_probe_requests(
       probe_request_id,target_id,target_version,external_request_id,target_url,
@@ -74,7 +66,7 @@ begin
       'test:transport-recurrence:mixed:'||hp.target_id,
       '{}'::jsonb
     from foundation.current_defence_health_probe_target hp
-    where hp.target_id=target_id;
+    where hp.target_id=v_target_id;
 
     insert into foundation.defence_health_probe_results(
       probe_request_id,target_id,http_status,timed_out,error_message,contract_ok,
@@ -84,19 +76,19 @@ begin
       request_id,
       target_id,
       case
-        when target_id='railway:project-l' then 503
+        when v_target_id='railway:project-l' then 503
         else null
       end,
-      target_id<>'railway:project-l',
+      v_target_id<>'railway:project-l',
       case
-        when target_id='railway:project-l' then 'health contract failed'
+        when v_target_id='railway:project-l' then 'health contract failed'
         else 'Timeout of 10000 ms reached. TCP/SSL handshake time: 9300 ms'
       end,
       false,
       t+interval '15 minutes 1 second',
       1000,
       null,
-      'test:transport-recurrence:mixed-result:'||target_id,
+      'test:transport-recurrence:mixed-result:'||v_target_id,
       '{}'::jsonb
     );
   end loop;
@@ -120,7 +112,7 @@ begin
 
   -- Full-pass recovery changes only the latest event state; recurrence history
   -- remains visible for the lookback window.
-  foreach target_id in array target_ids loop
+  foreach v_target_id in array target_ids loop
     request_id := gen_random_uuid();
     insert into foundation.defence_health_probe_requests(
       probe_request_id,target_id,target_version,external_request_id,target_url,
@@ -132,16 +124,16 @@ begin
       'test:transport-recurrence:recovery:'||hp.target_id,
       '{}'::jsonb
     from foundation.current_defence_health_probe_target hp
-    where hp.target_id=target_id;
+    where hp.target_id=v_target_id;
 
     insert into foundation.defence_health_probe_results(
       probe_request_id,target_id,http_status,timed_out,error_message,contract_ok,
       response_at,roundtrip_ms,response_sha256,evidence_ref,metadata
     )
     values(
-      request_id,target_id,200,false,null,true,
+      request_id,v_target_id,200,false,null,true,
       t+interval '20 minutes 1 second',500,null,
-      'test:transport-recurrence:recovery-result:'||target_id,
+      'test:transport-recurrence:recovery-result:'||v_target_id,
       '{}'::jsonb
     );
   end loop;
