@@ -1,6 +1,6 @@
 begin;
 
--- Deterministic Layer-98/99/100 environment for Layer-101 executor acceptance.
+-- Deterministic Layer-103/104/105 environment for Layer-106 executor acceptance.
 create or replace function foundation.get_case_audit_layer102_reconciliation_coverage_v1(
   p_environment text default 'production',
   p_as_of timestamptz default now(),
@@ -42,6 +42,8 @@ as $l106_coverage_stub$
     'layer102ProofIntegrityRecomputed',true,
     'linkedLayer97SnapshotRevalidated',true,
     'layer102ReconciliationPerformed',false,
+    'layer101RerunPerformed',false,
+    'layer97RerunPerformed',false,
     'layer96RerunPerformed',false,
     'layer92RerunPerformed',false,
     'layer91RerunPerformed',false,
@@ -102,10 +104,12 @@ as $l106_incident_stub$
       'occurredAt',p_as_of-interval '1 minute',
       'evidenceRef','test:layer106:coverage-incident'
     ),
-    'recommendedAction','investigate-layer97-reconciliation-coverage-failure',
-    'automaticLayer97Reconciliation',false,
+    'recommendedAction','investigate-layer102-reconciliation-coverage-failure',
+    'automaticLayer102Reconciliation',false,
     'automaticReconciliation',false,
     'automaticRepair',false,
+    'layer101RerunPerformed',false,
+    'layer97RerunPerformed',false,
     'layer96RerunPerformed',false,
     'layer92RerunPerformed',false,
     'layer91RerunPerformed',false,
@@ -150,7 +154,7 @@ as $l106_policy_stub$
         then 'layer-102-bounded-reconciler'
       else 'prohibited'
     end,
-    'reasonCode','case-audit-layer97-response-run-bounded-reconciliation',
+    'reasonCode','case-audit-layer102-response-run-bounded-reconciliation',
     'boundedReconciler','foundation.run_case_audit_layer101_execution_reconciliation_v1',
     'authorityExpansion',false,
     'automaticLayer102ReconciliationAllowed',false,
@@ -162,6 +166,8 @@ as $l106_policy_stub$
     'historyRewriteAllowed',false,
     'layer101RerunAllowed',false,
     'layer97RerunAllowed',false,
+    'layer96RerunAllowed',false,
+    'layer92RerunAllowed',false,
     'layer91RerunAllowed',false,
     'layer87RerunAllowed',false,
     'layer86RerunAllowed',false,
@@ -175,6 +181,8 @@ as $l106_policy_stub$
     'mutatesLayer97Receipt',false,
     'rerunsLayer101',false,
     'rerunsLayer97',false,
+    'rerunsLayer96',false,
+    'rerunsLayer92',false,
     'rerunsLayer91',false,
     'rerunsLayer87',false,
     'rerunsLayer86',false,
@@ -519,7 +527,7 @@ begin
   end if;
 
   select count(*) into l101_before
-  from foundation.case_audit_layer92_reconcile_exec_events;
+  from foundation.case_audit_layer97_reconcile_exec_events;
   select count(*) into l102_before
   from foundation.case_audit_layer101_exec_reconciliations;
   select count(*) into l92_before
@@ -537,6 +545,8 @@ begin
      or r#>>'{actionResult,status}'<>'recorded'
      or r#>>'{actionResult,reconciliationState}'<>'missing-layer97-receipt'
      or r->>'boundedLayer102ReconcilerOnly'<>'true'
+     or r->>'layer101RerunPerformed'<>'false'
+     or r->>'layer97RerunPerformed'<>'false'
      or r->>'layer96RerunPerformed'<>'false'
      or r->>'layer92RerunPerformed'<>'false'
      or r->>'layer91RerunPerformed'<>'false' then
@@ -546,7 +556,7 @@ begin
   if not exists(
     select 1
     from foundation.case_audit_layer101_exec_reconciliations
-    where layer96_event_id='10600000-0000-4000-8000-000000001011'::uuid
+    where layer101_event_id='10600000-0000-4000-8000-000000001011'::uuid
       and reconciliation_state='missing-layer97-receipt'
   ) then
     raise exception 'Layer 106 did not persist Layer-102 receipt';
@@ -596,7 +606,7 @@ begin
   end if;
 
   select count(*) into l101_after
-  from foundation.case_audit_layer92_reconcile_exec_events;
+  from foundation.case_audit_layer97_reconcile_exec_events;
   select count(*) into l102_after
   from foundation.case_audit_layer101_exec_reconciliations;
   select count(*) into l92_after
@@ -619,7 +629,11 @@ begin
      or summary->>'executedCount'<>'1'
      or summary->>'deniedCount'<>'2'
      or summary->>'failedCount'<>'0'
-     or summary->>'directLayer102ServiceRoleBypassAllowed'<>'false' then
+     or summary->>'directLayer102ServiceRoleBypassAllowed'<>'false'
+     or summary->>'layer101RerunPerformed'<>'false'
+     or summary->>'layer97RerunPerformed'<>'false'
+     or summary->>'layer96RerunPerformed'<>'false'
+     or summary->>'layer92RerunPerformed'<>'false' then
     raise exception 'Layer 106 summary invalid: %',summary;
   end if;
 end;
