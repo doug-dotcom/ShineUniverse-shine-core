@@ -1,6 +1,6 @@
 begin;
 
--- Replace the Layer-103 reader transaction-locally with deterministic snapshots.
+-- Replace the Layer-108 reader transaction-locally with deterministic snapshots.
 create or replace function foundation.get_case_audit_layer107_reconciliation_coverage_v1(
   p_environment text default 'production',
   p_as_of timestamptz default now(),
@@ -28,15 +28,15 @@ declare
   v_reconciled integer := 0;
   v_pending integer := 0;
   v_overdue integer := 0;
-  v_invalid102 integer := 0;
-  v_missing97 integer := 0;
+  v_invalid107 integer := 0;
+  v_missing102 integer := 0;
   v_exec_mismatch integer := 0;
   v_coverage_state text := 'reconciled';
   v_items jsonb := '[]'::jsonb;
 begin
   if v_reason is null then
     v_reason := case v_state
-      when 'idle' then 'case-audit-layer102-no-executions'
+      when 'idle' then 'case-audit-layer107-no-executions'
       when 'normal' then 'case-audit-layer107-covered'
       when 'pending' then 'case-audit-layer107-within-grace'
       when 'gap' then 'case-audit-layer107-overdue'
@@ -55,7 +55,7 @@ begin
     v_coverage_state := 'pending';
   elsif v_state='invalid' then
     v_receipt := 1;
-    v_invalid102 := 1;
+    v_invalid107 := 1;
     v_problem := 1;
     v_coverage_state := 'invalid-reconciliation';
   elsif v_state='gap' then
@@ -66,7 +66,7 @@ begin
       v_coverage_state := 'execution-receipt-mismatch';
     elsif v_reason='case-audit-layer106-layer102-receipt-missing' then
       v_receipt := 1;
-      v_missing97 := 1;
+      v_missing102 := 1;
       v_coverage_state := 'missing-layer102-receipt';
     else
       v_overdue := 1;
@@ -93,23 +93,23 @@ begin
         end,
         'layer107ReconciliationState',case
           when v_state='normal' then 'reconciled'
-          when v_invalid102=1 then 'reconciled'
-          when v_missing97=1 then 'missing-layer102-receipt'
+          when v_invalid107=1 then 'reconciled'
+          when v_missing102=1 then 'missing-layer102-receipt'
           when v_exec_mismatch=1 then 'execution-receipt-mismatch'
           else null
         end,
         'layer102ReconciliationId',case
-          when v_state='normal' or v_invalid102=1 or v_exec_mismatch=1
+          when v_state='normal' or v_invalid107=1 or v_exec_mismatch=1
             then '10900000-0000-4000-8000-000000000005'
           else null
         end,
         'layer102ReconciliationState',case
-          when v_state='normal' or v_invalid102=1 or v_exec_mismatch=1
+          when v_state='normal' or v_invalid107=1 or v_exec_mismatch=1
             then 'missing-layer97-receipt'
           else null
         end,
         'layer107ProofIntegrityValid',case
-          when v_invalid102=1 then false
+          when v_invalid107=1 then false
           when v_receipt=1 then true
           else null
         end
@@ -132,8 +132,8 @@ begin
     'reconciledCount',v_reconciled,
     'pendingCount',v_pending,
     'overdueCount',v_overdue,
-    'invalidLayer107ReconciliationCount',v_invalid102,
-    'missingLayer102ReceiptCount',v_missing97,
+    'invalidLayer107ReconciliationCount',v_invalid107,
+    'missingLayer102ReceiptCount',v_missing102,
     'invalidLayer102ReceiptCount',0,
     'executionReceiptMismatchCount',v_exec_mismatch,
     'policyDriftCount',0,
@@ -168,10 +168,10 @@ begin
     'layer81RerunPerformed',false,
     'verificationRerunPerformed',false,
     'evidenceMutationPerformed',false,
+    'layer107ReceiptRewritePerformed',false,
     'layer102ReceiptRewritePerformed',false,
+    'layer101ReceiptRewritePerformed',false,
     'layer97ReceiptRewritePerformed',false,
-    'layer96ReceiptRewritePerformed',false,
-    'layer92ReceiptRewritePerformed',false,
     'releaseTruthMutationPerformed',false,
     'incidentHistoryMutationPerformed',false,
     'mutationPerformed',false
