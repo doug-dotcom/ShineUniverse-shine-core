@@ -678,8 +678,8 @@
     {
       "id": "release-attestation-authority-sync-heartbeat-integration-db",
       "path": "foundation/postgres/defence-attestation-authority-sync-heartbeat-integration-v1.sql",
-      "version": "1.4.0",
-      "blobSha": "79ac5bbba77f0a0ddfe5751a32adb8e33b1b6a61"
+      "version": "1.5.0",
+      "blobSha": "9e6c170cfacbef556ee710f65fc715e62d396b66"
     },
     {
       "id": "release-attestation-authority-heartbeat-sentinel-db",
@@ -732,20 +732,50 @@
     {
       "id": "external-attestation-dispatcher-db",
       "path": "foundation/postgres/defence-external-attestation-dispatcher-v1.sql",
-      "version": "1.0.0",
-      "blobSha": "4210b4c00024e0f65dc91afb80bcc9855d343037"
+      "version": "1.1.0",
+      "blobSha": "bacb4d4f526a960868d67e4317cfc1d618356fd5"
     },
     {
       "id": "external-attestation-dispatcher-edge",
       "path": "foundation/runtime/defence-external-attestation-dispatcher/index.ts",
-      "version": "1.0.0",
-      "blobSha": "1ee5a16e87fc3fe70320a7eecbd8b17328cfe166"
+      "version": "1.1.0",
+      "blobSha": "7767dfdee819665a2da6d91676eb88aa8860d56c"
     },
     {
       "id": "external-attestation-dispatcher-cron-db",
       "path": "foundation/postgres/defence-external-attestation-dispatcher-cron-v1.sql",
       "version": "1.0.0",
       "blobSha": "b9ef83f9c81476eb149a6a5dcb661e08972f138d"
+    },
+    {
+      "id": "external-dispatcher-activation-readiness",
+      "path": "foundation/contracts/defence-external-dispatcher-activation-readiness-v1.json",
+      "version": "1.0.0",
+      "blobSha": "7d0819dc5b1cbbbd06199df3ca57080393618c58"
+    },
+    {
+      "id": "external-dispatcher-activation-readiness-db",
+      "path": "foundation/postgres/defence-external-dispatcher-activation-readiness-v1.sql",
+      "version": "1.0.0",
+      "blobSha": "0acbff7fc0a83f51b72d612360143103de2aeae7"
+    },
+    {
+      "id": "external-dispatcher-activation-readiness-edge",
+      "path": "foundation/runtime/defence-external-dispatcher-readiness/index.ts",
+      "version": "1.0.0",
+      "blobSha": "05b0a17f580570d2c85a16cd5e35a97e2774f83a"
+    },
+    {
+      "id": "external-dispatcher-activation-readiness-cron-db",
+      "path": "foundation/postgres/defence-external-dispatcher-activation-readiness-cron-v1.sql",
+      "version": "1.0.0",
+      "blobSha": "88e313c177cb4683747b5663e48ec70467ab93a3"
+    },
+    {
+      "id": "external-dispatcher-github-app-spec",
+      "path": "security/shine-defence/external-dispatcher-github-app-v1.json",
+      "version": "1.0.0",
+      "blobSha": "c542b1efb4c6becf7683d524309327515e9702ef"
     },
     {
       "id": "operational-attention",
