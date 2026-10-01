@@ -27,10 +27,10 @@ declare
   v_layer102_snapshot jsonb;
 begin
   if p_layer106_event_id is null then
-    raise exception 'case-audit-layer101-outcome-event-id-required';
+    raise exception 'case-audit-layer106-outcome-event-id-required';
   end if;
   if p_as_of is null then
-    raise exception 'case-audit-layer101-outcome-time-required';
+    raise exception 'case-audit-layer106-outcome-time-required';
   end if;
 
   select * into v_exec
@@ -44,12 +44,14 @@ begin
       'schemaVersion','1.0.0','status','not-found',
       'layer106EventId',p_layer106_event_id,
       'reconciliationState','not-applicable',
-      'reasonCode','case-audit-layer101-event-not-found',
-      'layer97RerunPerformed',false,'layer101RerunPerformed',false,
-      'layer97RerunPerformed',false,'layer91RerunPerformed',false,
-      'layer87RerunPerformed',false,'layer86RerunPerformed',false,
-      'layer82RerunPerformed',false,'layer81RerunPerformed',false,
-      'verificationRerunPerformed',false,'mutationPerformed',false
+      'reasonCode','case-audit-layer106-event-not-found',
+      'layer106RerunPerformed',false,'layer102RerunPerformed',false,
+      'layer101RerunPerformed',false,'layer97RerunPerformed',false,
+      'layer96RerunPerformed',false,'layer92RerunPerformed',false,
+      'layer91RerunPerformed',false,'layer87RerunPerformed',false,
+      'layer86RerunPerformed',false,'layer82RerunPerformed',false,
+      'layer81RerunPerformed',false,'verificationRerunPerformed',false,
+      'mutationPerformed',false
     );
   end if;
 
@@ -63,12 +65,14 @@ begin
       'environment',v_exec.environment,
       'sourceEventType',v_exec.event_type,
       'reconciliationState','not-applicable',
-      'reasonCode','case-audit-layer101-source-not-executed',
-      'layer97RerunPerformed',false,'layer101RerunPerformed',false,
-      'layer97RerunPerformed',false,'layer91RerunPerformed',false,
-      'layer87RerunPerformed',false,'layer86RerunPerformed',false,
-      'layer82RerunPerformed',false,'layer81RerunPerformed',false,
-      'verificationRerunPerformed',false,'mutationPerformed',false
+      'reasonCode','case-audit-layer106-source-not-executed',
+      'layer106RerunPerformed',false,'layer102RerunPerformed',false,
+      'layer101RerunPerformed',false,'layer97RerunPerformed',false,
+      'layer96RerunPerformed',false,'layer92RerunPerformed',false,
+      'layer91RerunPerformed',false,'layer87RerunPerformed',false,
+      'layer86RerunPerformed',false,'layer82RerunPerformed',false,
+      'layer81RerunPerformed',false,'verificationRerunPerformed',false,
+      'mutationPerformed',false
     );
   end if;
 
@@ -108,7 +112,7 @@ begin
     and v_exec.decision_snapshot->'automaticRepairAllowed'='false'::jsonb
     and v_exec.decision_snapshot->'layer102ReceiptRewriteAllowed'='false'::jsonb
     and v_exec.decision_snapshot->'layer101ReceiptRewriteAllowed'='false'::jsonb
-    and v_exec.decision_snapshot->'layer102ReceiptRewriteAllowed'='false'::jsonb
+    and v_exec.decision_snapshot->'layer97ReceiptRewriteAllowed'='false'::jsonb
     and v_exec.decision_snapshot->'historyRewriteAllowed'='false'::jsonb
     and v_exec.decision_snapshot->'layer101RerunAllowed'='false'::jsonb
     and v_exec.decision_snapshot->'layer97RerunAllowed'='false'::jsonb
@@ -136,10 +140,10 @@ begin
     and v_exec.decision_snapshot->'rerunsVerification'='false'::jsonb
     and v_exec.decision_snapshot->'mutatesAuthoritativeTruth'='false'::jsonb
     and v_exec.decision_snapshot->'mutatesIncidentHistory'='false'::jsonb
-    and v_exec.target_snapshot->>'layer96EventId'
+    and v_exec.target_snapshot->>'layer101EventId'
       is not distinct from v_target.event_id::text
-    and v_exec.target_snapshot->>'targetLayer91EventId'
-      is not distinct from v_target.target_layer91_event_id::text
+    and v_exec.target_snapshot->>'targetLayer96EventId'
+      is not distinct from v_target.target_layer96_event_id::text
     and v_exec.target_snapshot->>'coverageIncidentEventId'
       is not distinct from v_target.coverage_incident_event_id::text
     and v_exec.target_snapshot->>'actionKey' is not distinct from v_target.action_key
@@ -183,6 +187,8 @@ begin
     and v_exec.before_coverage->'layer102ReconciliationPerformed'='false'::jsonb
     and v_exec.before_coverage->'layer101RerunPerformed'='false'::jsonb
     and v_exec.before_coverage->'layer97RerunPerformed'='false'::jsonb
+    and v_exec.before_coverage->'layer96RerunPerformed'='false'::jsonb
+    and v_exec.before_coverage->'layer92RerunPerformed'='false'::jsonb
     and v_exec.before_coverage->'layer91RerunPerformed'='false'::jsonb
     and v_exec.before_coverage->'layer87RerunPerformed'='false'::jsonb
     and v_exec.before_coverage->'layer86RerunPerformed'='false'::jsonb
@@ -201,6 +207,8 @@ begin
     and v_exec.after_coverage->'layer102ReconciliationPerformed'='false'::jsonb
     and v_exec.after_coverage->'layer101RerunPerformed'='false'::jsonb
     and v_exec.after_coverage->'layer97RerunPerformed'='false'::jsonb
+    and v_exec.after_coverage->'layer96RerunPerformed'='false'::jsonb
+    and v_exec.after_coverage->'layer92RerunPerformed'='false'::jsonb
     and v_exec.after_coverage->'layer91RerunPerformed'='false'::jsonb
     and v_exec.after_coverage->'layer87RerunPerformed'='false'::jsonb
     and v_exec.after_coverage->'layer86RerunPerformed'='false'::jsonb
@@ -223,12 +231,12 @@ begin
       and v_layer102.reconciliation_proof->>'schemaVersion' is not distinct from '1.0.0'
       and v_layer102.reconciliation_proof->>'reconciliationId'
         is not distinct from v_layer102.reconciliation_id::text
-      and v_layer102.reconciliation_proof->>'layer96EventId'
+      and v_layer102.reconciliation_proof->>'layer101EventId'
         is not distinct from v_layer102.layer101_event_id::text
       and v_layer102.reconciliation_proof->>'environment'
         is not distinct from v_layer102.environment
-      and v_layer102.reconciliation_proof->>'targetLayer91EventId'
-        is not distinct from v_layer102.target_layer91_event_id::text
+      and v_layer102.reconciliation_proof->>'targetLayer96EventId'
+        is not distinct from v_layer102.target_layer96_event_id::text
       and v_layer102.reconciliation_proof->>'layer97ReconciliationId'
         is not distinct from v_layer102.layer97_reconciliation_id::text
       and v_layer102.reconciliation_proof->>'reconciliationState'
@@ -239,7 +247,7 @@ begin
         is not distinct from to_jsonb(v_layer102.policy_integrity_valid)
       and v_layer102.reconciliation_proof->'incidentBindingValid'
         is not distinct from to_jsonb(v_layer102.incident_binding_valid)
-      and nullif(v_layer102.reconciliation_proof->'layer102ProofIntegrityValid','null'::jsonb)
+      and nullif(v_layer102.reconciliation_proof->'layer97ProofIntegrityValid','null'::jsonb)
         is not distinct from to_jsonb(v_layer102.layer97_proof_integrity_valid)
       and nullif(v_layer102.reconciliation_proof->'executionReceiptMatches','null'::jsonb)
         is not distinct from to_jsonb(v_layer102.execution_receipt_matches)
@@ -247,13 +255,15 @@ begin
         is not distinct from to_jsonb(v_layer102.before_coverage_valid)
       and v_layer102.reconciliation_proof->'afterCoverageValid'
         is not distinct from to_jsonb(v_layer102.after_coverage_valid)
-      and v_layer102.reconciliation_proof->'layer106ActionResult'
+      and v_layer102.reconciliation_proof->'layer101ActionResult'
         is not distinct from v_target.action_result
-      and nullif(v_layer102.reconciliation_proof->'layer102Receipt','null'::jsonb)
+      and nullif(v_layer102.reconciliation_proof->'layer97Receipt','null'::jsonb)
         is not distinct from v_layer102.layer97_snapshot
       and v_layer102.reconciliation_proof->'reconciledAt'
         is not distinct from to_jsonb(v_layer102.reconciled_at)
       and v_layer102.reconciliation_proof->'layer97RerunPerformed'='false'::jsonb
+      and v_layer102.reconciliation_proof->'layer96RerunPerformed'='false'::jsonb
+      and v_layer102.reconciliation_proof->'layer92RerunPerformed'='false'::jsonb
       and v_layer102.reconciliation_proof->'layer91RerunPerformed'='false'::jsonb
       and v_layer102.reconciliation_proof->'layer87RerunPerformed'='false'::jsonb
       and v_layer102.reconciliation_proof->'layer86RerunPerformed'='false'::jsonb
@@ -261,18 +271,18 @@ begin
       and v_layer102.reconciliation_proof->'layer81RerunPerformed'='false'::jsonb
       and v_layer102.reconciliation_proof->'verificationRerunPerformed'='false'::jsonb
       and v_layer102.reconciliation_proof->'evidenceMutationPerformed'='false'::jsonb
-      and v_layer102.reconciliation_proof->'layer102ReceiptRewritePerformed'='false'::jsonb
-      and v_layer102.reconciliation_proof->'layer91ReceiptRewritePerformed'='false'::jsonb
-      and v_layer102.reconciliation_proof->'layer87ReceiptRewritePerformed'='false'::jsonb
+      and v_layer102.reconciliation_proof->'layer97ReceiptRewritePerformed'='false'::jsonb
+      and v_layer102.reconciliation_proof->'layer96ReceiptRewritePerformed'='false'::jsonb
+      and v_layer102.reconciliation_proof->'layer92ReceiptRewritePerformed'='false'::jsonb
       and v_layer102.reconciliation_proof->'releaseTruthMutationPerformed'='false'::jsonb
       and v_layer102.reconciliation_proof->'incidentHistoryMutationPerformed'='false'::jsonb
       and v_layer102.reconciliation_proof->'approvalGranted'='false'::jsonb
       and v_layer102.reconciliation_proof->'executionAuthorityGranted'='false'::jsonb
       and v_layer102.reconciliation_proof->'mutationPerformed'='false'::jsonb
-      and v_layer102.layer101_snapshot->>'layer96EventId'
+      and v_layer102.layer101_snapshot->>'layer101EventId'
         is not distinct from v_target.event_id::text
-      and v_layer102.layer101_snapshot->>'targetLayer91EventId'
-        is not distinct from v_target.target_layer91_event_id::text
+      and v_layer102.layer101_snapshot->>'targetLayer96EventId'
+        is not distinct from v_target.target_layer96_event_id::text
       and v_layer102.layer101_snapshot->>'coverageIncidentEventId'
         is not distinct from v_target.coverage_incident_event_id::text
       and v_layer102.layer101_snapshot->>'actionKey'
@@ -296,10 +306,10 @@ begin
       and v_exec.action_result->>'status' in ('recorded','existing')
       and v_exec.action_result->>'reconciliationId'
         is not distinct from v_layer102.reconciliation_id::text
-      and v_exec.action_result->>'layer96EventId'
+      and v_exec.action_result->>'layer101EventId'
         is not distinct from v_layer102.layer101_event_id::text
-      and v_exec.action_result->>'targetLayer91EventId'
-        is not distinct from v_layer102.target_layer91_event_id::text
+      and v_exec.action_result->>'targetLayer96EventId'
+        is not distinct from v_layer102.target_layer96_event_id::text
       and v_exec.action_result->>'layer97ReconciliationId'
         is not distinct from v_layer102.layer97_reconciliation_id::text
       and v_exec.action_result->>'reconciliationState'
@@ -319,14 +329,14 @@ begin
 
     v_layer102_snapshot := jsonb_build_object(
       'reconciliationId',v_layer102.reconciliation_id,
-      'layer96EventId',v_layer102.layer101_event_id,
-      'targetLayer91EventId',v_layer102.target_layer91_event_id,
+      'layer101EventId',v_layer102.layer101_event_id,
+      'targetLayer96EventId',v_layer102.target_layer96_event_id,
       'layer97ReconciliationId',v_layer102.layer97_reconciliation_id,
       'reconciliationState',v_layer102.reconciliation_state,
       'reasonCode',v_layer102.reason_code,
       'policyIntegrityValid',v_layer102.policy_integrity_valid,
       'incidentBindingValid',v_layer102.incident_binding_valid,
-      'layer102ProofIntegrityValid',v_layer102.layer97_proof_integrity_valid,
+      'layer97ProofIntegrityValid',v_layer102.layer97_proof_integrity_valid,
       'executionReceiptMatches',v_layer102.execution_receipt_matches,
       'beforeCoverageValid',v_layer102.before_coverage_valid,
       'afterCoverageValid',v_layer102.after_coverage_valid,
@@ -378,13 +388,15 @@ begin
     'afterCoverageValid',v_after_valid,
     'layer106ActionResult',v_exec.action_result,
     'layer102Receipt',v_layer102_snapshot,
-    'layer97RerunPerformed',false,'layer101RerunPerformed',false,
-    'layer97RerunPerformed',false,'layer91RerunPerformed',false,
-    'layer87RerunPerformed',false,'layer86RerunPerformed',false,
-    'layer82RerunPerformed',false,'layer81RerunPerformed',false,
-    'verificationRerunPerformed',false,'evidenceMutationPerformed',false,
-    'layer102ReceiptRewritePerformed',false,'layer96ReceiptRewritePerformed',false,
-    'layer102ReceiptRewritePerformed',false,'releaseTruthMutationPerformed',false,
+    'layer106RerunPerformed',false,'layer102RerunPerformed',false,
+    'layer101RerunPerformed',false,'layer97RerunPerformed',false,
+    'layer96RerunPerformed',false,'layer92RerunPerformed',false,
+    'layer91RerunPerformed',false,'layer87RerunPerformed',false,
+    'layer86RerunPerformed',false,'layer82RerunPerformed',false,
+    'layer81RerunPerformed',false,'verificationRerunPerformed',false,
+    'evidenceMutationPerformed',false,
+    'layer102ReceiptRewritePerformed',false,'layer101ReceiptRewritePerformed',false,
+    'layer97ReceiptRewritePerformed',false,'releaseTruthMutationPerformed',false,
     'incidentHistoryMutationPerformed',false,'mutationPerformed',false
   );
 end;
