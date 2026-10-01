@@ -229,7 +229,7 @@ test('authority-state sync is hourly, receipt-backed and atomic for authority mu
   assert.match(source,/record_defence_attestation_authority_sync_receipt_v1/);
   assert.match(source,/get_defence_attestation_authority_sync_summary_v1/);
   assert.match(source,/sql\.begin\(/,'promotion/rollback sync must use one database transaction');
-  assert.match(workflow,/schedule:\s*\n\s*- cron: '17 \* \* \* \*'/);
+  assert.match(workflow,/schedule:\s*\n\s*- cron: '13,43 \* \* \* \*'/);
   assert.match(workflow,/audience=shine-defence-authority-state/);
 });
 
