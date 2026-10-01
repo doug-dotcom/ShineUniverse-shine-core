@@ -1,6 +1,6 @@
 begin;
 
--- Replace the Layer-98 reader transaction-locally with deterministic snapshots.
+-- Replace the Layer-103 reader transaction-locally with deterministic snapshots.
 create or replace function foundation.get_case_audit_layer102_reconciliation_coverage_v1(
   p_environment text default 'production',
   p_as_of timestamptz default now(),
@@ -28,8 +28,8 @@ declare
   v_reconciled integer := 0;
   v_pending integer := 0;
   v_overdue integer := 0;
-  v_invalid97 integer := 0;
-  v_missing92 integer := 0;
+  v_invalid102 integer := 0;
+  v_missing97 integer := 0;
   v_exec_mismatch integer := 0;
   v_coverage_state text := 'reconciled';
   v_items jsonb := '[]'::jsonb;
@@ -55,19 +55,19 @@ begin
     v_coverage_state := 'pending';
   elsif v_state='invalid' then
     v_receipt := 1;
-    v_invalid97 := 1;
+    v_invalid102 := 1;
     v_problem := 1;
     v_coverage_state := 'invalid-reconciliation';
   elsif v_state='gap' then
     v_problem := 1;
-    if v_reason='case-audit-layer96-receipt-mismatch' then
+    if v_reason='case-audit-layer101-receipt-mismatch' then
       v_receipt := 1;
       v_exec_mismatch := 1;
       v_coverage_state := 'execution-receipt-mismatch';
-    elsif v_reason='case-audit-layer96-layer92-receipt-missing' then
+    elsif v_reason='case-audit-layer101-layer97-receipt-missing' then
       v_receipt := 1;
-      v_missing92 := 1;
-      v_coverage_state := 'missing-layer92-receipt';
+      v_missing97 := 1;
+      v_coverage_state := 'missing-layer97-receipt';
     else
       v_overdue := 1;
       v_coverage_state := 'overdue';
@@ -93,23 +93,23 @@ begin
         end,
         'layer102ReconciliationState',case
           when v_state='normal' then 'reconciled'
-          when v_invalid97=1 then 'reconciled'
-          when v_missing92=1 then 'missing-layer92-receipt'
+          when v_invalid102=1 then 'reconciled'
+          when v_missing97=1 then 'missing-layer97-receipt'
           when v_exec_mismatch=1 then 'execution-receipt-mismatch'
           else null
         end,
         'layer97ReconciliationId',case
-          when v_state='normal' or v_invalid97=1 or v_exec_mismatch=1
+          when v_state='normal' or v_invalid102=1 or v_exec_mismatch=1
             then '10400000-0000-4000-8000-000000000005'
           else null
         end,
         'layer97ReconciliationState',case
-          when v_state='normal' or v_invalid97=1 or v_exec_mismatch=1
-            then 'missing-layer87-receipt'
+          when v_state='normal' or v_invalid102=1 or v_exec_mismatch=1
+            then 'missing-layer92-receipt'
           else null
         end,
         'layer102ProofIntegrityValid',case
-          when v_invalid97=1 then false
+          when v_invalid102=1 then false
           when v_receipt=1 then true
           else null
         end
@@ -132,8 +132,8 @@ begin
     'reconciledCount',v_reconciled,
     'pendingCount',v_pending,
     'overdueCount',v_overdue,
-    'invalidLayer102ReconciliationCount',v_invalid97,
-    'missingLayer97ReceiptCount',v_missing92,
+    'invalidLayer102ReconciliationCount',v_invalid102,
+    'missingLayer97ReceiptCount',v_missing97,
     'invalidLayer97ReceiptCount',0,
     'executionReceiptMismatchCount',v_exec_mismatch,
     'policyDriftCount',0,
@@ -151,7 +151,7 @@ begin
     'visibleCount',jsonb_array_length(v_items),
     'hasMore',false,
     'items',v_items,
-    'onlySuccessfulLayer96ExecutionsRequireLayer97Reconciliation',true,
+    'onlySuccessfulLayer101ExecutionsRequireLayer102Reconciliation',true,
     'layer102ProofIntegrityRecomputed',true,
     'linkedLayer97SnapshotRevalidated',true,
     'layer102ReconciliationPerformed',false,
@@ -166,10 +166,10 @@ begin
     'layer81RerunPerformed',false,
     'verificationRerunPerformed',false,
     'evidenceMutationPerformed',false,
+    'layer102ReceiptRewritePerformed',false,
     'layer97ReceiptRewritePerformed',false,
+    'layer96ReceiptRewritePerformed',false,
     'layer92ReceiptRewritePerformed',false,
-    'layer91ReceiptRewritePerformed',false,
-    'layer87ReceiptRewritePerformed',false,
     'releaseTruthMutationPerformed',false,
     'incidentHistoryMutationPerformed',false,
     'mutationPerformed',false
@@ -226,6 +226,8 @@ begin
      or r->>'watchCount'<>'1'
      or r->>'automaticLayer102Reconciliation'<>'false'
      or r->>'automaticRepair'<>'false'
+     or r->>'layer101RerunPerformed'<>'false'
+     or r->>'layer97RerunPerformed'<>'false'
      or r->>'layer96RerunPerformed'<>'false'
      or r->>'layer92RerunPerformed'<>'false' then
     raise exception 'Layer 104 first GAP sample invalid: %',r;
@@ -263,7 +265,7 @@ begin
 
   perform set_config(
     'foundation.test_l104_reason',
-    'case-audit-layer96-receipt-mismatch',
+    'case-audit-layer101-receipt-mismatch',
     true
   );
 
@@ -275,7 +277,7 @@ begin
   );
 
   if r->>'eventType'<>'changed'
-     or r->>'reasonCode'<>'case-audit-layer96-receipt-mismatch'
+     or r->>'reasonCode'<>'case-audit-layer101-receipt-mismatch'
      or r->>'activeIncidentCount'<>'1' then
     raise exception 'Layer 104 material evidence change invalid: %',r;
   end if;
@@ -351,6 +353,8 @@ begin
      or r#>>'{incidentTransition,eventCreated}'<>'false'
      or r->>'automaticLayer102Reconciliation'<>'false'
      or r->>'automaticRepair'<>'false'
+     or r->>'layer101RerunPerformed'<>'false'
+     or r->>'layer97RerunPerformed'<>'false'
      or r->>'layer96RerunPerformed'<>'false'
      or r->>'layer92RerunPerformed'<>'false' then
     raise exception 'Layer 104 sentinel invalid: %',r;
@@ -378,6 +382,8 @@ begin
      or r->>'recommendedAction'<>'none'
      or r->>'automaticLayer102Reconciliation'<>'false'
      or r->>'automaticRepair'<>'false'
+     or r->>'layer101RerunPerformed'<>'false'
+     or r->>'layer97RerunPerformed'<>'false'
      or r->>'layer96RerunPerformed'<>'false'
      or r->>'layer92RerunPerformed'<>'false' then
     raise exception 'Layer 104 summary invalid: %',r;
