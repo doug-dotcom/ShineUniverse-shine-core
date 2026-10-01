@@ -126,7 +126,7 @@ begin
     floor(extract(epoch from (p_requested_at-v_target.requested_at)))::integer
   );
 
-  select * into v_l97
+  select * into v_l102
   from foundation.case_audit_layer101_exec_reconciliations
   where layer101_event_id=v_target.event_id;
 
