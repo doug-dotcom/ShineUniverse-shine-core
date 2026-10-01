@@ -21,6 +21,7 @@ declare
   v_oidc_replay jsonb;
   v_authority_parity jsonb;
   v_authority_sync jsonb;
+  v_authority_heartbeat_sentinel jsonb;
   v_state text;
   v_evaluated_at timestamptz := clock_timestamp();
 begin
@@ -32,6 +33,10 @@ begin
   v_authority_sync := foundation.get_defence_attestation_authority_sync_summary_v1(
     v_evaluated_at,5400
   );
+  v_authority_heartbeat_sentinel :=
+    foundation.get_defence_attestation_authority_heartbeat_sentinel_v1(
+      v_evaluated_at,3600,5400
+    );
   v_transition_coverage := foundation.get_defence_release_transition_coverage_v1();
   v_admission := foundation.get_defence_release_admission_summary_v1();
   v_rollback := foundation.get_defence_rollback_readiness_summary_v1();
@@ -50,6 +55,7 @@ begin
       or v_source_heads->>'state'='warning'
       or v_authority_parity->>'state'='warning'
       or v_authority_sync->>'state'='warning'
+      or v_authority_heartbeat_sentinel->>'state'='warning'
       or v_transition_coverage->>'state'='warning'
       or v_admission->>'state'='warning'
       or v_rollback->>'state'='warning'
@@ -60,7 +66,7 @@ begin
 
   return jsonb_build_object(
     'defenceFullEstateSummary','shine-defence/full-estate-summary-v1',
-    'schemaVersion','1.9.0',
+    'schemaVersion','1.10.0',
     'state',v_state,
     'estate',v_estate,
     'supabaseRuntimeReceipts',v_supabase,
@@ -68,6 +74,7 @@ begin
     'releaseSourceHeads',v_source_heads,
     'releaseAuthorityParity',v_authority_parity,
     'attestationAuthoritySync',v_authority_sync,
+    'attestationAuthorityHeartbeatSentinel',v_authority_heartbeat_sentinel,
     'releaseTransitionCoverage',v_transition_coverage,
     'releaseAdmission',v_admission,
     'rollbackReadiness',v_rollback,
