@@ -1,0 +1,80 @@
+{
+  "contract": "shine-defence/on-demand-revalidation-control-v1",
+  "version": "1.0.0",
+  "purpose": "Provide an append-only, single-use authorisation and execution-admission control plane for on-demand Railway revalidation without performing the external mutation itself.",
+  "request": {
+    "function": "foundation.request_defence_on_demand_revalidation_v1",
+    "requiresPosture": "revalidation_required",
+    "pins": [
+      "targetId",
+      "Railway project/environment/service IDs",
+      "source repository/branch/head SHA",
+      "serving deployment/commit",
+      "canonical deployment/commit",
+      "active attestation authority SHA/ref",
+      "sleep posture reason"
+    ]
+  },
+  "approval": {
+    "function": "foundation.approve_defence_on_demand_revalidation_v1",
+    "role": "shine_defence_on_demand_approver",
+    "methods": ["explicit-human", "external-governance"],
+    "maximumLifetimeSeconds": 900,
+    "singleUse": true,
+    "executesExternalMutation": false
+  },
+  "executionAdmission": {
+    "function": "foundation.admit_defence_on_demand_revalidation_execution_v1",
+    "role": "shine_defence_on_demand_executor",
+    "maximumLifetimeSeconds": 600,
+    "singleUse": true,
+    "requiresUnchangedFingerprint": true,
+    "sequence": [
+      "redeploy_current_source",
+      "verify_railway_deployment_success",
+      "verify_deployed_commit",
+      "enqueue_on_demand_health_probe",
+      "verify_health_contract",
+      "refresh_defence_attestations",
+      "reconcile_release_admission"
+    ]
+  },
+  "executionEvidence": {
+    "function": "foundation.record_defence_on_demand_revalidation_step_v1",
+    "orderedSteps": [
+      "redeploy_started",
+      "deployment_verified",
+      "health_probe_queued",
+      "health_verified",
+      "attestation_verified",
+      "release_reconciled",
+      "completed"
+    ],
+    "terminalFailureStep": "failed"
+  },
+  "status": {
+    "function": "foundation.get_defence_on_demand_revalidation_status_v1",
+    "states": [
+      "none",
+      "pending_approval",
+      "approval_expired",
+      "approved",
+      "admission_expired",
+      "admitted",
+      "in_progress",
+      "failed",
+      "completed"
+    ]
+  },
+  "invariants": [
+    "A request never grants approval or execution authority.",
+    "An approval never executes Railway or any health probe.",
+    "An execution admission never executes Railway; it only creates a short-lived, exact-scope execution envelope.",
+    "Approval and execution admission are single-use and fingerprint-bound.",
+    "Any change in source head, serving/canonical identity, authority, target scope or sleep posture invalidates execution admission.",
+    "The external executor must verify the deployed commit equals the approved source head before health verification.",
+    "The external executor must not mark completion without health, attestation and release-admission reconciliation evidence.",
+    "No automatic wake, redeploy, retry, rollback or evidence rewrite is authorised by this database control plane.",
+    "Browser roles receive no table access or function EXECUTE grants."
+  ]
+}

@@ -679,7 +679,7 @@
       "id": "release-attestation-authority-sync-heartbeat-integration-db",
       "path": "foundation/postgres/defence-attestation-authority-sync-heartbeat-integration-v1.sql",
       "version": "1.0.0",
-      "blobSha": "1d97aa6001c8858fd017561a0f9f72e2520daf79"
+      "blobSha": "7e1f04e113154acc899213d9fbd77e5613b6857a"
     },
     {
       "id": "release-attestation-authority-heartbeat-sentinel-db",
@@ -702,8 +702,8 @@
     {
       "id": "operational-attention",
       "path": "foundation/contracts/defence-operational-attention-v1.json",
-      "version": "1.1.0",
-      "blobSha": "5d7e1ffcc108108ddbb4c3a4441c0427c19a69a7"
+      "version": "1.2.0",
+      "blobSha": "eab52f1f39824b9dd2273455d57f1f5688d18f55"
     },
     {
       "id": "operational-attention-db",
@@ -728,6 +728,24 @@
       "path": "foundation/postgres/defence-operational-attention-sleep-aware-v1.sql",
       "version": "1.0.0",
       "blobSha": "19ffa3b3828690d4bd7b495094e5c3e72413231c"
+    },
+    {
+      "id": "on-demand-revalidation-control",
+      "path": "foundation/contracts/defence-on-demand-revalidation-control-v1.json",
+      "version": "1.0.0",
+      "blobSha": "7e1581c8ce29dafec6e0d9fff57ddebe4db316d9"
+    },
+    {
+      "id": "on-demand-revalidation-control-db",
+      "path": "foundation/postgres/defence-on-demand-revalidation-control-v1.sql",
+      "version": "1.0.0",
+      "blobSha": "f82577700b6516f8d4d3077672f9ca5c086da551"
+    },
+    {
+      "id": "operational-attention-revalidation-aware-db",
+      "path": "foundation/postgres/defence-operational-attention-revalidation-aware-v1.sql",
+      "version": "1.0.0",
+      "blobSha": "37d0a221a34298f1982dd5a71c895669ca9fd4c8"
     },
     {
       "id": "release-attestation-authority-heartbeat-sentinel",
