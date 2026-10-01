@@ -1,0 +1,51 @@
+{
+  "contract": "shine-defence/on-demand-native-git-bridge-v1",
+  "version": "1.0.0",
+  "purpose": "Prepare immutable native-Git candidates and execute admitted fast-forwards through a reusable GitHub Actions workflow and GitHub-OIDC-gated Supabase Edge bridge.",
+  "edgeFunction": "foundation/runtime/defence-on-demand-native-git-bridge/index.ts",
+  "reusableWorkflow": ".github/workflows/shine-defence-native-git-revalidation-v1.yml",
+  "audience": "shine-defence-on-demand-native-git",
+  "operations": [
+    "native-git-prepare-claim",
+    "native-git-record-candidate",
+    "native-git-execution-claim",
+    "native-git-record-fast-forward-start",
+    "native-git-record-fast-forward-result",
+    "native-git-record-failure"
+  ],
+  "candidatePreparation": [
+    "Resolve the live native_git approval scope from Supabase.",
+    "Verify caller repository and workflow identity against the current target executor profile.",
+    "Verify the watched deployment branch still equals the signed source head.",
+    "Create an isolated candidate branch from that exact base.",
+    "Add one audit-only marker inside the configured trigger path.",
+    "Commit and push the isolated candidate branch.",
+    "Record the exact candidate commit SHA and marker SHA-256 in the append-only candidate ledger."
+  ],
+  "execution": [
+    "Resolve an admitted native_git execution envelope.",
+    "Verify the watched branch still equals requiredBranchBaseSha.",
+    "Verify candidateCommitSha descends from requiredBranchBaseSha.",
+    "Record fail-closed fast-forward start evidence before mutation.",
+    "Fast-forward the watched branch without force.",
+    "Verify the watched branch now equals candidateCommitSha.",
+    "Record an append-only fast-forward receipt.",
+    "Leave Railway deployment, health, provenance, attestation and release reconciliation as downstream Defence gates."
+  ],
+  "trust": {
+    "callerRepository": "Must equal the executor profile nativeGit.repository.",
+    "callerWorkflow": "Must equal the candidate or execution wrapper path stored in the current executor profile.",
+    "reusableJobWorkflow": "Must equal the exact Core reusable workflow ref and SHA stored in the current executor profile."
+  },
+  "invariants": [
+    "The ticket carries only an approvalId or executionId; repository, branch and commit scope come from live Defence state.",
+    "Candidate preparation never updates the watched deployment branch.",
+    "Execution uses a normal fast-forward push and never force-pushes.",
+    "No workflow may change Railway service configuration, variables, domains, replicas, sleep mode or rollback state.",
+    "A caller repository cannot act on another repository's target.",
+    "A changed caller workflow or reusable workflow SHA fails closed.",
+    "A changed watched-branch head fails closed before fast-forward.",
+    "Fast-forward receipt recording requires observedAfterSha to equal the admitted candidate SHA.",
+    "No credential values are persisted or returned."
+  ]
+}
