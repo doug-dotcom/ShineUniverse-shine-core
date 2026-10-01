@@ -1,0 +1,181 @@
+name: Shine Defence On-Demand Revalidation
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'security/shine-defence/on-demand-execution-tickets/*.json'
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  execute:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve single execution ticket
+        id: ticket
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t TICKETS < <(git diff-tree --no-commit-id --name-only -r "$GITHUB_SHA" | grep '^security/shine-defence/on-demand-execution-tickets/.*\.json$' || true)
+          if [ "${#TICKETS[@]}" -ne 1 ]; then
+            echo "Expected exactly one execution ticket, found ${#TICKETS[@]}"
+            exit 1
+          fi
+          TICKET="${TICKETS[0]}"
+          node - "$TICKET" <<'NODE' >> "$GITHUB_OUTPUT"
+          const fs=require('fs');
+          const path=process.argv[2];
+          const x=JSON.parse(fs.readFileSync(path,'utf8'));
+          if(x.contract!=='shine-defence/on-demand-revalidation-execution-ticket-v1'||x.schemaVersion!=='1.0.0') throw new Error('invalid execution ticket contract');
+          if(!/^[a-f0-9]{8}-[a-f0-9]{4}-[1-5][a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i.test(x.executionId||'')) throw new Error('invalid executionId');
+          const allowed=new Set(['contract','schemaVersion','executionId']);
+          for(const k of Object.keys(x)) if(!allowed.has(k)) throw new Error('unexpected ticket field: '+k);
+          console.log('execution_id='+x.executionId);
+          NODE
+
+      - name: Acquire executor OIDC token
+        id: oidc_claim
+        shell: bash
+        run: |
+          set -euo pipefail
+          OIDC_JSON="$(curl -fsSL -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=shine-defence-on-demand-revalidation")"
+          OIDC_TOKEN="$(printf '%s' "$OIDC_JSON" | python3 -c 'import json,sys; print(json.load(sys.stdin)["value"])')"
+          echo "::add-mask::$OIDC_TOKEN"
+          printf '%s' "$OIDC_TOKEN" > /tmp/revalidation-oidc
+
+      - name: Claim admitted execution
+        id: claim
+        env:
+          EXECUTION_ID: ${{ steps.ticket.outputs.execution_id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          OIDC_TOKEN="$(cat /tmp/revalidation-oidc)"
+          HTTP_STATUS="$(curl -sS -o /tmp/revalidation-claim.json -w '%{http_code}' -X POST             -H "Authorization: Bearer $OIDC_TOKEN"             -H "Content-Type: application/json"             --data "$(node -e 'console.log(JSON.stringify({contract:"shine-defence/on-demand-revalidation-executor-gate-v1",schemaVersion:"1.0.0",action:"claim",executionId:process.env.EXECUTION_ID}))')"             https://sjpxqeyewahraxvidvcc.supabase.co/functions/v1/defence-on-demand-revalidation-executor)"
+          if [ "$HTTP_STATUS" != "200" ]; then cat /tmp/revalidation-claim.json; exit 1; fi
+          node <<'NODE' >> "$GITHUB_OUTPUT"
+          const fs=require('fs');
+          const x=JSON.parse(fs.readFileSync('/tmp/revalidation-claim.json','utf8'));
+          if(x.status!=='claimed') throw new Error('claim rejected');
+          const e=x.executionEnvelope;
+          const uuid=v=>/^[a-f0-9]{8}-[a-f0-9]{4}-[1-5][a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i.test(v||'');
+          const sha=v=>/^[a-f0-9]{40}$/i.test(v||'');
+          if(!uuid(e?.railway?.projectId)||!uuid(e?.railway?.environmentId)||!uuid(e?.railway?.serviceId)||!sha(e?.constraints?.expectedSourceHeadSha)) throw new Error('claimed envelope scope invalid');
+          console.log('project_id='+e.railway.projectId);
+          console.log('environment_id='+e.railway.environmentId);
+          console.log('service_id='+e.railway.serviceId);
+          console.log('expected_sha='+e.constraints.expectedSourceHeadSha.toLowerCase());
+          NODE
+
+      - name: Deploy latest configured source
+        id: deploy
+        env:
+          RAILWAY_TOKEN: ${{ secrets.SHINE_DEFENCE_RAILWAY_WORKSPACE_TOKEN }}
+          ENVIRONMENT_ID: ${{ steps.claim.outputs.environment_id }}
+          SERVICE_ID: ${{ steps.claim.outputs.service_id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -z "$RAILWAY_TOKEN" ]; then echo "Railway executor credential missing"; exit 1; fi
+          STARTED_AT="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          echo "started_at=$STARTED_AT" >> "$GITHUB_OUTPUT"
+          RESPONSE="$(curl -fsSL -X POST https://backboard.railway.com/graphql/v2             -H "Authorization: Bearer $RAILWAY_TOKEN"             -H "Content-Type: application/json"             --data "$(node -e 'console.log(JSON.stringify({query:"mutation ServiceInstanceDeployLatestCommit($environmentId: String!, $serviceId: String!) { serviceInstanceDeploy(environmentId: $environmentId, serviceId: $serviceId, latestCommit: true) }",variables:{environmentId:process.env.ENVIRONMENT_ID,serviceId:process.env.SERVICE_ID}}))')")"
+          node -e 'const x=JSON.parse(process.argv[1]); if(x.errors?.length) throw new Error(x.errors.map(e=>e.message).join("; ")); if(!x.data?.serviceInstanceDeploy) throw new Error("Railway source deploy not accepted");' "$RESPONSE"
+
+      - name: Verify terminal Railway deployment
+        id: verify
+        env:
+          RAILWAY_TOKEN: ${{ secrets.SHINE_DEFENCE_RAILWAY_WORKSPACE_TOKEN }}
+          PROJECT_ID: ${{ steps.claim.outputs.project_id }}
+          ENVIRONMENT_ID: ${{ steps.claim.outputs.environment_id }}
+          SERVICE_ID: ${{ steps.claim.outputs.service_id }}
+          EXPECTED_SHA: ${{ steps.claim.outputs.expected_sha }}
+          STARTED_AT: ${{ steps.deploy.outputs.started_at }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          for i in $(seq 1 36); do
+            RESPONSE="$(curl -fsSL -X POST https://backboard.railway.com/graphql/v2               -H "Authorization: Bearer $RAILWAY_TOKEN"               -H "Content-Type: application/json"               --data "$(node -e 'console.log(JSON.stringify({query:"query deployments($input: DeploymentListInput!, $first: Int) { deployments(input: $input, first: $first) { edges { node { id status createdAt url meta } } } }",variables:{input:{projectId:process.env.PROJECT_ID,serviceId:process.env.SERVICE_ID,environmentId:process.env.ENVIRONMENT_ID},first:10}}))')")"
+            MATCH="$(RESPONSE="$RESPONSE" node <<'NODE'
+          const x=JSON.parse(process.env.RESPONSE);
+          if(x.errors?.length) throw new Error(x.errors.map(e=>e.message).join('; '));
+          const expected=(process.env.EXPECTED_SHA||'').toLowerCase();
+          const started=Date.parse(process.env.STARTED_AT||0)-60000;
+          const nodes=(x.data?.deployments?.edges||[]).map(e=>e.node).filter(Boolean);
+          const d=nodes.find(d=>String(d?.meta?.commitHash||'').toLowerCase()===expected && Date.parse(d.createdAt)>=started);
+          if(d) process.stdout.write(JSON.stringify({id:d.id,status:String(d.status||'UNKNOWN').toUpperCase(),commitHash:String(d?.meta?.commitHash||'').toLowerCase()}));
+          NODE
+          )"
+            if [ -n "$MATCH" ]; then
+              STATUS="$(printf '%s' "$MATCH" | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>process.stdout.write(JSON.parse(s).status))')"
+              if [ "$STATUS" = "SUCCESS" ]; then
+                printf '%s' "$MATCH" > /tmp/revalidation-deployment.json
+                break
+              fi
+              case "$STATUS" in
+                FAILED|CRASHED|SKIPPED|REMOVED|REMOVING|NEEDS_APPROVAL)
+                  printf '%s' "$MATCH" > /tmp/revalidation-deployment.json
+                  exit 2
+                  ;;
+              esac
+            fi
+            sleep 10
+          done
+          if [ ! -s /tmp/revalidation-deployment.json ]; then
+            printf '%s' '{"id":null,"status":"TIMEOUT","commitHash":null}' > /tmp/revalidation-deployment.json
+            exit 3
+          fi
+
+      - name: Acquire result OIDC token
+        if: always() && steps.claim.outcome == 'success'
+        shell: bash
+        run: |
+          set -euo pipefail
+          OIDC_JSON="$(curl -fsSL -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=shine-defence-on-demand-revalidation")"
+          OIDC_TOKEN="$(printf '%s' "$OIDC_JSON" | python3 -c 'import json,sys; print(json.load(sys.stdin)["value"])')"
+          echo "::add-mask::$OIDC_TOKEN"
+          printf '%s' "$OIDC_TOKEN" > /tmp/revalidation-result-oidc
+
+      - name: Record Railway deployment result
+        if: always() && steps.claim.outcome == 'success'
+        env:
+          EXECUTION_ID: ${{ steps.ticket.outputs.execution_id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          OIDC_TOKEN="$(cat /tmp/revalidation-result-oidc)"
+          if [ -s /tmp/revalidation-deployment.json ]; then
+            DEPLOYMENT="$(cat /tmp/revalidation-deployment.json)"
+          else
+            DEPLOYMENT='{"id":null,"status":"TRIGGER_FAILED","commitHash":null}'
+          fi
+          BODY="$(EXECUTION_ID="$EXECUTION_ID" DEPLOYMENT="$DEPLOYMENT" node <<'NODE'
+          const d=JSON.parse(process.env.DEPLOYMENT);
+          console.log(JSON.stringify({
+            contract:'shine-defence/on-demand-revalidation-executor-gate-v1',
+            schemaVersion:'1.0.0',
+            action:'record-deployment',
+            executionId:process.env.EXECUTION_ID,
+            deploymentId:d.id??null,
+            status:d.status??'UNKNOWN',
+            commitSha:d.commitHash??null
+          }));
+          NODE
+          )"
+          HTTP_STATUS="$(curl -sS -o /tmp/revalidation-result.json -w '%{http_code}' -X POST             -H "Authorization: Bearer $OIDC_TOKEN"             -H "Content-Type: application/json"             --data "$BODY"             https://sjpxqeyewahraxvidvcc.supabase.co/functions/v1/defence-on-demand-revalidation-executor)"
+          cat /tmp/revalidation-result.json
+          if [ "$HTTP_STATUS" != "200" ]; then exit 1; fi
+
+      - name: Require verified deployment
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          [ -s /tmp/revalidation-result.json ]
+          node -e 'const x=require("/tmp/revalidation-result.json"); if(x.status!=="deployment-verified") process.exit(1);'
