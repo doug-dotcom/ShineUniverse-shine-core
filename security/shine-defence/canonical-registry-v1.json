@@ -679,7 +679,7 @@
       "id": "release-attestation-authority-sync-heartbeat-integration-db",
       "path": "foundation/postgres/defence-attestation-authority-sync-heartbeat-integration-v1.sql",
       "version": "1.0.0",
-      "blobSha": "1635bce19040ee4e34b0f8040409e66ecf2966f5"
+      "blobSha": "d625b40ddfc023be20127ee234df6202e66cd19c"
     },
     {
       "id": "release-attestation-authority-heartbeat-sentinel-db",
@@ -698,6 +698,18 @@
       "path": "foundation/postgres/defence-correlated-transport-attribution-v1.sql",
       "version": "1.0.0",
       "blobSha": "ebc44e999fac638ca4c472cff5e71c206097cd43"
+    },
+    {
+      "id": "operational-attention",
+      "path": "foundation/contracts/defence-operational-attention-v1.json",
+      "version": "1.0.0",
+      "blobSha": "2558d093055835bada05d2b8b2ac3aa0d6b60f52"
+    },
+    {
+      "id": "operational-attention-db",
+      "path": "foundation/postgres/defence-operational-attention-v1.sql",
+      "version": "1.0.0",
+      "blobSha": "8ce2d060068ac4c885b39b5c8c40f5279556c7b5"
     },
     {
       "id": "release-attestation-authority-heartbeat-sentinel",
