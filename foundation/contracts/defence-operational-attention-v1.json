@@ -1,7 +1,7 @@
 {
   "contract": "shine-defence/operational-attention-v1",
-  "version": "1.1.0",
-  "purpose": "Project live Defence runtime health and incident evidence into cause-aware operational attention, including explicit on-demand sleep semantics, without changing raw health, incident, admission or estate state.",
+  "version": "1.2.0",
+  "purpose": "Project live Defence runtime health, incident, on-demand sleep and explicit revalidation-control state into cause-aware operational attention without changing raw health, incident, admission or estate state.",
   "sourceOfTruth": {
     "estateSummary": "foundation.get_defence_estate_summary_v1",
     "healthObservations": "foundation.defence_health_observations",
@@ -36,7 +36,10 @@
     "Non-health estate problems remain separate operational attention and are never relabelled as transport failures.",
     "The projection never changes raw estate state, health observations, incident state, release admission, rollback recommendation or source truth.",
     "A stale on-demand sleep-aware target is expected sleep only when the exact canonical serving identity is unchanged, prior passing proof is reusable, the latest transition is sleeping, source identity and authority are current, and source head is not ahead.",
-    "An on-demand target with source-ahead, changed serving identity, stale/mismatched source authority, blocking transition evidence or non-reusable prior proof is revalidation-required rather than benign sleep."
+    "An on-demand target with source-ahead, changed serving identity, stale/mismatched source authority, blocking transition evidence or non-reusable prior proof is revalidation-required rather than benign sleep.",
+    "A revalidation-required on-demand target with no request maps to request_on_demand_revalidation.",
+    "A live revalidation request maps to explicit approval, approved state maps to execution admission, and admitted/in-progress state maps to the exact bounded execution next step.",
+    "The operational projection never treats request or approval as proof that Railway mutation occurred."
   ],
   "invariants": [
     "Raw health evidence is immutable and preserved.",
@@ -46,10 +49,13 @@
     "This runtime operational attention projection remains separate from the human review/certification attention queue.",
     "Browser roles receive no EXECUTE grant.",
     "Expected sleep never changes raw estate state or the underlying release-admission decision.",
-    "No automatic wake or on-demand revalidation is executed by the attention projection."
+    "No automatic wake or on-demand revalidation is executed by the attention projection.",
+    "Revalidation request, approval and execution admission state never override raw estate or release-admission truth.",
+    "External Railway mutation remains non-automatic and must use a single-use exact-scope execution admission."
   ],
   "runtime": {
-    "function": "foundation.get_defence_operational_attention_sleep_aware_v1",
+    "function": "foundation.get_defence_operational_attention_revalidation_aware_v1",
+    "sleepAwareFunction": "foundation.get_defence_operational_attention_sleep_aware_v1",
     "baseFunction": "foundation.get_defence_operational_attention_v1",
     "fullEstateField": "operationalAttention"
   }
