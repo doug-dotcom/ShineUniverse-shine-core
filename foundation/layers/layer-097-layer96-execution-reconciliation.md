@@ -1,6 +1,6 @@
 # Foundation Layer 97 — Layer-96 execution reconciliation
 
-**Status:** IMPLEMENTED — CI and production verification pending  
+**Status:** LIVE — CI green and production verification complete  
 **Scope:** independently reconcile each successful Layer-96 bounded Layer-92 reconciliation execution against durable Layer-92 truth
 
 Layer 96 closes direct service-role access to Layer 92.
@@ -73,6 +73,33 @@ CI proves:
 - direct service-role Layer-92 execution remains revoked;
 - direct service-role ledger insert is denied;
 - role and append-only boundaries hold.
+
+## Production proof
+
+Layer 97 is deployed in the Shine Foundation Supabase project as migration:
+
+`20261001005713 — foundation_layer_097_layer96_execution_reconciliation`
+
+Pull request **#127** passed the complete Foundation + Concierge and Shine Defence workflows.
+
+Live production verification confirms:
+
+- Layer-97 ledger, evaluator, reconciler and summary exist;
+- current Layer-96 execution count: **0**;
+- current Layer-97 reconciliation count: **0**;
+- current Layer-92 reconciliation count: **0**;
+- current Layer-91 execution count: **0**;
+- `service_role` can invoke the Layer-97 reconciler but cannot directly INSERT Layer-97 ledger rows;
+- direct `service_role` execution of the Layer-92 reconciler remains **revoked**;
+- Foundation runtime, Gateway, Shine Core, Shine Defence, anon and authenticated cannot reconcile;
+- Foundation runtime can read the Layer-97 summary;
+- Gateway reads the summary only through existing `foundation_runtime` membership;
+- Layer-96 production summary remains empty and continues to report `directLayer92ServiceRoleBypassAllowed=false`;
+- Layer-95 production cause remains **none**;
+- a nonexistent Layer-96 target invoked under `service_role` returns `not-applicable / case-audit-layer96-event-not-found`;
+- that negative probe performs no Layer-92/91/87/86/82/81 or verification rerun and no mutation;
+- Supabase security advisors report **0 findings** after deployment;
+- the three new Layer-97 indexes are reported unused, which is expected while the production reconciliation ledger is empty.
 
 ## Invariant
 
