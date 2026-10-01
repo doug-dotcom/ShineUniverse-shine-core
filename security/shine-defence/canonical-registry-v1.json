@@ -817,7 +817,7 @@
       "id": "target-recovery-awareness-db",
       "path": "foundation/postgres/defence-target-recovery-awareness-v1.sql",
       "version": "1.0.0",
-      "blobSha": "17785d0a5dc064e593c8269d2b98a7edcb8e27b0"
+      "blobSha": "20c3c8b8fcbb6e95dfba8f74e94be1584434762e"
     },
     {
       "id": "on-demand-executor-readiness-edge",
