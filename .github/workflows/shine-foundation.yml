@@ -51,6 +51,7 @@ jobs:
       - run: deno check foundation/runtime/defence-attestation-authority-ingest/index.ts
       - run: deno check foundation/runtime/deployment-receipt-ingest/index.ts
       - run: deno check foundation/runtime/defence-rollback-readiness/index.ts
+      - run: deno check foundation/runtime/defence-on-demand-revalidation-executor/index.ts
 
   persistence:
     runs-on: ubuntu-latest
