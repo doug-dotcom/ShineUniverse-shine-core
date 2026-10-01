@@ -179,6 +179,66 @@ end;
 $authority_sync_test$;
 
 
+do $on_demand_revalidation_purpose$
+declare
+  v_claim jsonb;
+  v_result jsonb;
+begin
+  select foundation.bind_github_oidc_operation_v1(
+    'doug-dotcom/ShineUniverse-shine-core',
+    'refs/heads/main',
+    'doug-dotcom/ShineUniverse-shine-core/.github/workflows/shine-defence-on-demand-revalidation.yml@refs/heads/main',
+    '888888888',
+    '1',
+    'push',
+    'shine-defence-on-demand-revalidation',
+    'on-demand-revalidation-claim',
+    'execution:11111111-1111-4111-8111-111111111111:claim',
+    '{"contract":"shine-defence/on-demand-revalidation-executor-gate-v1","action":"claim"}'::jsonb
+  ) into v_claim;
+
+  select foundation.bind_github_oidc_operation_v1(
+    'doug-dotcom/ShineUniverse-shine-core',
+    'refs/heads/main',
+    'doug-dotcom/ShineUniverse-shine-core/.github/workflows/shine-defence-on-demand-revalidation.yml@refs/heads/main',
+    '888888888',
+    '1',
+    'push',
+    'shine-defence-on-demand-revalidation',
+    'on-demand-revalidation-record-deployment',
+    'execution:11111111-1111-4111-8111-111111111111:deployment',
+    '{"contract":"shine-defence/on-demand-revalidation-executor-gate-v1","action":"record-deployment"}'::jsonb
+  ) into v_result;
+
+  if v_claim->>'status'<>'accepted-new'
+     or v_result->>'status'<>'accepted-new'
+     or v_claim->>'audience'<>'shine-defence-on-demand-revalidation'
+     or v_result->>'operation'<>'on-demand-revalidation-record-deployment' then
+    raise exception 'on-demand revalidation OIDC purpose not accepted: % %',
+      v_claim,v_result;
+  end if;
+
+  begin
+    perform foundation.bind_github_oidc_operation_v1(
+      'doug-dotcom/ShineUniverse-shine-core',
+      'refs/heads/main',
+      'doug-dotcom/ShineUniverse-shine-core/.github/workflows/shine-defence-on-demand-revalidation.yml@refs/heads/main',
+      '888888888',
+      '1',
+      'push',
+      'shine-defence-on-demand-revalidation',
+      'provider-snapshot',
+      'execution:11111111-1111-4111-8111-111111111111:invalid',
+      '{"x":1}'::jsonb
+    );
+    raise exception 'unrelated purpose accepted under on-demand audience';
+  exception
+    when sqlstate '22023' then null;
+  end;
+end;
+$on_demand_revalidation_purpose$;
+
+
 insert into foundation.defence_estate_targets(
   target_id,display_name,provider,provider_project_ref,environment_ref,service_ref,
   target_role,required_for_estate,allowed_runtime_states,lifecycle,metadata
