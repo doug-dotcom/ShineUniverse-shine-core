@@ -1,0 +1,49 @@
+{
+  "contract": "shine-defence/operational-attention-v1",
+  "version": "1.0.0",
+  "purpose": "Project live Defence runtime health and incident evidence into cause-aware operational attention without changing any raw health, incident, admission or estate state.",
+  "sourceOfTruth": {
+    "estateSummary": "foundation.get_defence_estate_summary_v1",
+    "healthObservations": "foundation.defence_health_observations",
+    "probeRequests": "foundation.defence_health_probe_requests",
+    "probeResults": "foundation.defence_health_probe_results",
+    "incidentState": "foundation.current_defence_estate_incident_state"
+  },
+  "defaultWindow": {
+    "lookbackSeconds": 2700,
+    "sharedClusterMinimumTargets": 3,
+    "confirmedSharedFailureFraction": 0.5
+  },
+  "causeClasses": [
+    "confirmed_shared_transport",
+    "shared_transport_cluster",
+    "confirmed_shared_transport_residual",
+    "shared_transport_cluster_residual",
+    "target_specific",
+    "mixed_or_unresolved",
+    "unresolved_health",
+    "non_health_attention"
+  ],
+  "rules": [
+    "A confirmed shared transport cycle has at least the minimum target count, no non-transport failures, and a transport-failure fraction at or above the confirmed threshold.",
+    "A shared transport cluster has at least the minimum target count and no non-transport failures but is below the confirmed shared fraction.",
+    "Cluster recovery requires a later complete all-pass Railway probe cycle with at least as many observed targets.",
+    "A degraded or unhealthy target is residual-shared only when all failed probe samples in its current health window belong to shared transport cycles.",
+    "A target with both shared-cycle failures and failures outside shared cycles is mixed_or_unresolved.",
+    "A target with failures only outside shared cycles is target_specific.",
+    "Non-health estate problems remain separate operational attention and are never relabelled as transport failures.",
+    "The projection never changes raw estate state, health observations, incident state, release admission, rollback recommendation or source truth."
+  ],
+  "invariants": [
+    "Raw health evidence is immutable and preserved.",
+    "Raw estate state is returned unchanged and is never overridden by attribution.",
+    "Recovered shared events may remain visible while conservative health windows retain failed samples.",
+    "No automatic retry, restart, rollback, health-window rewrite, incident suppression or evidence deletion is authorised.",
+    "This runtime operational attention projection remains separate from the human review/certification attention queue.",
+    "Browser roles receive no EXECUTE grant."
+  ],
+  "runtime": {
+    "function": "foundation.get_defence_operational_attention_v1",
+    "fullEstateField": "operationalAttention"
+  }
+}
