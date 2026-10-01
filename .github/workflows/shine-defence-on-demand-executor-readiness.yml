@@ -1,0 +1,55 @@
+name: Shine Defence On-Demand Executor Readiness
+
+on:
+  schedule:
+    - cron: '17 * * * *'
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'security/shine-defence/executor-readiness-tickets/*.json'
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Evaluate Railway credential presence
+        id: readiness
+        env:
+          RAILWAY_TOKEN: ${{ secrets.SHINE_DEFENCE_RAILWAY_WORKSPACE_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -n "$RAILWAY_TOKEN" ]; then
+            echo "credential_ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "credential_ready=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Acquire readiness OIDC token
+        shell: bash
+        run: |
+          set -euo pipefail
+          OIDC_JSON="$(curl -fsSL -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=shine-defence-on-demand-executor-readiness")"
+          OIDC_TOKEN="$(printf '%s' "$OIDC_JSON" | python3 -c 'import json,sys; print(json.load(sys.stdin)["value"])')"
+          echo "::add-mask::$OIDC_TOKEN"
+          printf '%s' "$OIDC_TOKEN" > /tmp/executor-readiness-oidc
+
+      - name: Record bounded readiness receipt
+        env:
+          CREDENTIAL_READY: ${{ steps.readiness.outputs.credential_ready }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          OIDC_TOKEN="$(cat /tmp/executor-readiness-oidc)"
+          BODY="$(node -e 'console.log(JSON.stringify({contract:"shine-defence/on-demand-executor-readiness-v1",schemaVersion:"1.0.0",executorMode:"direct_railway",credentialReady:process.env.CREDENTIAL_READY==="true"}))')"
+          HTTP_STATUS="$(curl -sS -o /tmp/executor-readiness.json -w '%{http_code}' -X POST             -H "Authorization: Bearer $OIDC_TOKEN"             -H "Content-Type: application/json"             --data "$BODY"             https://sjpxqeyewahraxvidvcc.supabase.co/functions/v1/defence-on-demand-executor-readiness)"
+          cat /tmp/executor-readiness.json
+          [ "$HTTP_STATUS" = "200" ]
