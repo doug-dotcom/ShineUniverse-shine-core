@@ -1,7 +1,7 @@
 {
   "contract": "shine-defence/operational-attention-v1",
-  "version": "1.0.0",
-  "purpose": "Project live Defence runtime health and incident evidence into cause-aware operational attention without changing any raw health, incident, admission or estate state.",
+  "version": "1.1.0",
+  "purpose": "Project live Defence runtime health and incident evidence into cause-aware operational attention, including explicit on-demand sleep semantics, without changing raw health, incident, admission or estate state.",
   "sourceOfTruth": {
     "estateSummary": "foundation.get_defence_estate_summary_v1",
     "healthObservations": "foundation.defence_health_observations",
@@ -22,7 +22,9 @@
     "target_specific",
     "mixed_or_unresolved",
     "unresolved_health",
-    "non_health_attention"
+    "non_health_attention",
+    "expected_on_demand_sleep",
+    "on_demand_revalidation_required"
   ],
   "rules": [
     "A confirmed shared transport cycle has at least the minimum target count, no non-transport failures, and a transport-failure fraction at or above the confirmed threshold.",
@@ -32,7 +34,9 @@
     "A target with both shared-cycle failures and failures outside shared cycles is mixed_or_unresolved.",
     "A target with failures only outside shared cycles is target_specific.",
     "Non-health estate problems remain separate operational attention and are never relabelled as transport failures.",
-    "The projection never changes raw estate state, health observations, incident state, release admission, rollback recommendation or source truth."
+    "The projection never changes raw estate state, health observations, incident state, release admission, rollback recommendation or source truth.",
+    "A stale on-demand sleep-aware target is expected sleep only when the exact canonical serving identity is unchanged, prior passing proof is reusable, the latest transition is sleeping, source identity and authority are current, and source head is not ahead.",
+    "An on-demand target with source-ahead, changed serving identity, stale/mismatched source authority, blocking transition evidence or non-reusable prior proof is revalidation-required rather than benign sleep."
   ],
   "invariants": [
     "Raw health evidence is immutable and preserved.",
@@ -40,10 +44,13 @@
     "Recovered shared events may remain visible while conservative health windows retain failed samples.",
     "No automatic retry, restart, rollback, health-window rewrite, incident suppression or evidence deletion is authorised.",
     "This runtime operational attention projection remains separate from the human review/certification attention queue.",
-    "Browser roles receive no EXECUTE grant."
+    "Browser roles receive no EXECUTE grant.",
+    "Expected sleep never changes raw estate state or the underlying release-admission decision.",
+    "No automatic wake or on-demand revalidation is executed by the attention projection."
   ],
   "runtime": {
-    "function": "foundation.get_defence_operational_attention_v1",
+    "function": "foundation.get_defence_operational_attention_sleep_aware_v1",
+    "baseFunction": "foundation.get_defence_operational_attention_v1",
     "fullEstateField": "operationalAttention"
   }
 }
