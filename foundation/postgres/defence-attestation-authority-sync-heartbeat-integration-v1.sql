@@ -23,6 +23,7 @@ declare
   v_authority_sync jsonb;
   v_authority_heartbeat_sentinel jsonb;
   v_correlated_transport_attribution jsonb;
+  v_transport_recurrence_sentinel jsonb;
   v_operational_attention jsonb;
   v_state text;
   v_evaluated_at timestamptz := clock_timestamp();
@@ -42,6 +43,10 @@ begin
   v_correlated_transport_attribution :=
     foundation.get_defence_correlated_transport_attribution_v1(
       v_evaluated_at,21600,3,0.5
+    );
+  v_transport_recurrence_sentinel :=
+    foundation.get_defence_transport_recurrence_sentinel_v1(
+      v_evaluated_at,3600,3,0.5,3
     );
   v_operational_attention :=
     foundation.get_defence_operational_attention_executor_aware_v1(
@@ -76,7 +81,7 @@ begin
 
   return jsonb_build_object(
     'defenceFullEstateSummary','shine-defence/full-estate-summary-v1',
-    'schemaVersion','1.16.0',
+    'schemaVersion','1.17.0',
     'state',v_state,
     'estate',v_estate,
     'supabaseRuntimeReceipts',v_supabase,
@@ -86,6 +91,7 @@ begin
     'attestationAuthoritySync',v_authority_sync,
     'attestationAuthorityHeartbeatSentinel',v_authority_heartbeat_sentinel,
     'correlatedTransportAttribution',v_correlated_transport_attribution,
+    'transportRecurrenceSentinel',v_transport_recurrence_sentinel,
     'operationalAttention',v_operational_attention,
     'releaseTransitionCoverage',v_transition_coverage,
     'releaseAdmission',v_admission,
