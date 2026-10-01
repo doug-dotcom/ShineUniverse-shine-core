@@ -74,7 +74,7 @@ begin
     )
     values(
       request_id,
-      target_id,
+      v_target_id,
       case
         when v_target_id='railway:project-l' then 503
         else null
