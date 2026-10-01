@@ -1,0 +1,30 @@
+{
+  "contract": "shine-defence/on-demand-revalidation-executor-bridge-v1",
+  "version": "1.0.0",
+  "purpose": "Execute a previously admitted on-demand Railway revalidation through an immutable GitHub Actions workflow, GitHub OIDC gate and existing Railway workspace secret without exposing credentials or broadening target scope.",
+  "workflow": ".github/workflows/shine-defence-on-demand-revalidation.yml",
+  "edgeGate": "foundation/runtime/defence-on-demand-revalidation-executor/index.ts",
+  "audience": "shine-defence-on-demand-revalidation",
+  "trigger": {
+    "type": "default-branch execution ticket",
+    "path": "security/shine-defence/on-demand-execution-tickets/<execution-id>.json",
+    "ticketFields": ["contract", "schemaVersion", "executionId"]
+  },
+  "railwayMutation": {
+    "operation": "serviceInstanceDeploy",
+    "latestCommit": true,
+    "scopeFromAdmission": true
+  },
+  "invariants": [
+    "The workflow cannot obtain scope from the ticket; project/environment/service/source scope comes only from the live admitted execution envelope.",
+    "The edge gate validates immutable GitHub OIDC workflow identity and the active Defence attestation authority.",
+    "The edge gate rejects expired, terminal, replayed, integrity-failed or fingerprint-drifted execution admissions.",
+    "Claiming an execution records the redeploy_started step before Railway mutation.",
+    "The Railway workspace token remains a GitHub Actions secret and is never returned to Supabase or logs.",
+    "Deployment verification requires terminal SUCCESS and the deployed commit SHA to equal the admitted expectedSourceHeadSha.",
+    "Failure before verified deployment records a terminal failed execution event.",
+    "The bridge does not change Railway service configuration, variables, domains, replicas, sleep mode or target scope.",
+    "The bridge does not perform rollback.",
+    "Health, attestation and release reconciliation remain downstream Defence gates and are not implied by a successful Railway deployment."
+  ]
+}
