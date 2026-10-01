@@ -28,7 +28,7 @@ begin
   end if;
 
   select foundation.get_defence_full_estate_summary_v1() into v;
-  if v->>'schemaVersion'<>'1.19.0'
+  if v->>'schemaVersion'<>'1.20.0'
      or v#>>'{attestationAuthoritySync,state}'<>'pass'
      or v#>>'{attestationAuthorityHeartbeatSentinel,state}'<>'pass'
      or v#>>'{attestationAuthorityHeartbeatSentinel,band}'<>'current'
@@ -55,6 +55,11 @@ begin
      or v#>>'{controlSchedulerLiveness,extendsProofTtl}'<>'false'
      or v#>>'{controlSchedulerLiveness,mintsAuthorityState}'<>'false'
      or v#>>'{controlSchedulerLiveness,rawEstateStateOverridden}'<>'false'
+     or v#>>'{externalAttestationDispatcher,contract}'<>
+        'shine-defence/external-dispatcher-summary-v1'
+     or v#>>'{externalAttestationDispatcher,dispatcherCanMintProof}'<>'false'
+     or v#>>'{externalAttestationDispatcher,dispatcherCanExtendProofTtl}'<>'false'
+     or v#>>'{externalAttestationDispatcher,workflowOidcRemainsAuthoritative}'<>'true'
      or v#>>'{operationalAttention,sleepAwareOverlay,rawEstateStateOverridden}' is distinct from 'false'
      or v#>>'{operationalAttention,revalidationControl,approvalRequired}'<>'true'
      or v#>>'{operationalAttention,revalidationControl,externalMutationAutomatic}'<>'false'
