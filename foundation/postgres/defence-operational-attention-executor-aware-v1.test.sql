@@ -51,19 +51,23 @@ begin
     'queueItems','[]'::jsonb
   );
 
-  -- Exercise the wrapper's transformation with the same selection function
-  -- used by live operational attention.
-  v := base;
-  v := v || jsonb_build_object(
-    'executorFixture',
-    foundation.get_defence_on_demand_executor_selection_v1(
-      'railway:test-executor-attention',now()
-    )
-  );
+  select foundation.apply_defence_on_demand_executor_selection_v1(
+    base,now()
+  ) into v;
 
-  if v#>>'{executorFixture,state}'<>'blocked'
-     or v#>>'{executorFixture,reasonCode}'<>'no-viable-executor' then
-    raise exception 'Blocked executor fixture invalid: %',v;
+  if v->>'schemaVersion'<>'1.3.0'
+     or v#>>'{executorSelection,contract}'<>
+        'shine-defence/on-demand-executor-selection-v1'
+     or not exists (
+       select 1
+       from jsonb_array_elements(v->'targetItems') x
+       where x->>'targetId'='railway:test-executor-attention'
+         and x->>'attentionClass'='executor_unavailable'
+         and x->>'nextAction'='repair_on_demand_executor_readiness'
+         and x#>>'{executorSelection,state}'='blocked'
+     )
+     or (v#>>'{counts,onDemandExecutorBlockedTargets}')::integer<>1 then
+    raise exception 'Executor-aware attention transformation invalid: %',v;
   end if;
 end;
 $overlay$;
@@ -71,6 +75,11 @@ $overlay$;
 do $security$
 begin
   if has_function_privilege(
+       'anon',
+       'foundation.apply_defence_on_demand_executor_selection_v1(jsonb,timestamp with time zone)',
+       'EXECUTE'
+     )
+     or has_function_privilege(
        'anon',
        'foundation.get_defence_operational_attention_executor_aware_v1(timestamp with time zone,integer,integer,numeric)',
        'EXECUTE'
