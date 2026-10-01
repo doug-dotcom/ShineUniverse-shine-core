@@ -28,7 +28,7 @@ begin
   end if;
 
   select foundation.get_defence_full_estate_summary_v1() into v;
-  if v->>'schemaVersion'<>'1.17.0'
+  if v->>'schemaVersion'<>'1.18.0'
      or v#>>'{attestationAuthoritySync,state}'<>'pass'
      or v#>>'{attestationAuthorityHeartbeatSentinel,state}'<>'pass'
      or v#>>'{attestationAuthorityHeartbeatSentinel,band}'<>'current'
@@ -42,8 +42,12 @@ begin
      or v#>>'{transportRecurrenceSentinel,automaticRetryAuthorized}'<>'false'
      or v#>>'{operationalAttention,defenceOperationalAttention}'<>
         'shine-defence/operational-attention-v1'
-     or v#>>'{operationalAttention,schemaVersion}'<>'1.4.0'
+     or v#>>'{operationalAttention,schemaVersion}'<>'1.5.0'
      or v#>>'{operationalAttention,rawEstateStateOverridden}' is distinct from 'false'
+     or v#>>'{operationalAttention,targetRecovery,contract}'<>
+        'shine-defence/target-recovery-awareness-v1'
+     or v#>>'{operationalAttention,targetRecovery,reclassifiesAttentionOnly}'<>'true'
+     or v#>>'{operationalAttention,targetRecovery,automaticRestartAuthorized}'<>'false'
      or v#>>'{operationalAttention,sleepAwareOverlay,rawEstateStateOverridden}' is distinct from 'false'
      or v#>>'{operationalAttention,revalidationControl,approvalRequired}'<>'true'
      or v#>>'{operationalAttention,revalidationControl,externalMutationAutomatic}'<>'false'
