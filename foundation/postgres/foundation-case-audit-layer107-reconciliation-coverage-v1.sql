@@ -1,7 +1,7 @@
--- Foundation Layer 108: coverage audit for Layer-102 reconciliation.
--- Every successful Layer-101 bounded Layer-97 reconciliation execution requires
--- one immutable Layer-102 reconciliation receipt. Receipt coverage is separate
--- from healthy reconciliation, and Layer-102 proof integrity is recomputed read-only.
+-- Foundation Layer 108: coverage audit for Layer-107 reconciliation.
+-- Every successful Layer-106 bounded Layer-102 reconciliation execution requires
+-- one immutable Layer-107 reconciliation receipt. Receipt coverage is separate
+-- from healthy reconciliation, and Layer-107 proof integrity is recomputed read-only.
 
 create or replace function foundation.get_case_audit_layer107_reconciliation_coverage_v1(
   p_environment text default 'production',
@@ -40,8 +40,8 @@ begin
       e.action_key,
       e.cause_class,
       e.policy_fingerprint,
-      e.reason_code as layer101_reason_code,
-      e.action_result as layer101_action_result,
+      e.reason_code as layer106_reason_code,
+      e.action_result as layer106_action_result,
       e.requested_at,
       greatest(0,floor(extract(epoch from (p_as_of-e.requested_at)))::integer) as age_seconds,
       r.reconciliation_id,
@@ -50,7 +50,7 @@ begin
       r.reason_code as layer107_reason_code,
       r.policy_integrity_valid,
       r.incident_binding_valid,
-      r.layer107_proof_integrity_valid,
+      r.layer102_proof_integrity_valid,
       r.execution_receipt_matches,
       r.before_coverage_valid,
       r.after_coverage_valid,
@@ -59,14 +59,14 @@ begin
       r.reconciliation_proof,
       r.reconciliation_proof_sha256,
       r.reconciled_at,
-      l102.layer96_event_id as l102_layer96_event_id,
-      l102.target_layer91_event_id as l102_target_layer91_event_id,
-      l102.layer92_reconciliation_id as l102_layer92_reconciliation_id,
+      l102.layer101_event_id as l102_layer101_event_id,
+      l102.target_layer96_event_id as l102_target_layer96_event_id,
+      l102.layer97_reconciliation_id as l102_layer97_reconciliation_id,
       l102.reconciliation_state as l102_reconciliation_state,
       l102.reason_code as l102_reason_code,
       l102.policy_integrity_valid as l102_policy_integrity_valid,
       l102.incident_binding_valid as l102_incident_binding_valid,
-      l102.layer92_proof_integrity_valid as l102_layer92_proof_integrity_valid,
+      l102.layer97_proof_integrity_valid as l102_layer97_proof_integrity_valid,
       l102.execution_receipt_matches as l102_execution_receipt_matches,
       l102.before_coverage_valid as l102_before_coverage_valid,
       l102.after_coverage_valid as l102_after_coverage_valid,
@@ -75,7 +75,7 @@ begin
     from foundation.case_audit_layer102_reconcile_exec_events e
     left join foundation.case_audit_layer106_exec_reconciliations r
       on r.layer106_event_id=e.event_id
-    left join foundation.case_audit_layer101_exec_reconciliations l97
+    left join foundation.case_audit_layer101_exec_reconciliations l102
       on l102.reconciliation_id=r.layer102_reconciliation_id
     where e.environment=p_environment
       and e.event_type='executed'
@@ -114,7 +114,7 @@ begin
           and x.reconciliation_proof->'incidentBindingValid'
               is not distinct from to_jsonb(x.incident_binding_valid)
           and nullif(x.reconciliation_proof->'layer102ProofIntegrityValid','null'::jsonb)
-              is not distinct from to_jsonb(x.layer107_proof_integrity_valid)
+              is not distinct from to_jsonb(x.layer102_proof_integrity_valid)
           and nullif(x.reconciliation_proof->'executionReceiptMatches','null'::jsonb)
               is not distinct from to_jsonb(x.execution_receipt_matches)
           and x.reconciliation_proof->'beforeCoverageValid'
@@ -122,11 +122,14 @@ begin
           and x.reconciliation_proof->'afterCoverageValid'
               is not distinct from to_jsonb(x.after_coverage_valid)
           and x.reconciliation_proof->'layer106ActionResult'
-              is not distinct from x.layer101_action_result
+              is not distinct from x.layer106_action_result
           and nullif(x.reconciliation_proof->'layer102Receipt','null'::jsonb)
               is not distinct from x.layer102_snapshot
           and x.reconciliation_proof->'reconciledAt'
               is not distinct from to_jsonb(x.reconciled_at)
+          and x.reconciliation_proof->'layer106RerunPerformed'='false'::jsonb
+          and x.reconciliation_proof->'layer102RerunPerformed'='false'::jsonb
+          and x.reconciliation_proof->'layer101RerunPerformed'='false'::jsonb
           and x.reconciliation_proof->'layer97RerunPerformed'='false'::jsonb
           and x.reconciliation_proof->'layer96RerunPerformed'='false'::jsonb
           and x.reconciliation_proof->'layer92RerunPerformed'='false'::jsonb
@@ -137,9 +140,9 @@ begin
           and x.reconciliation_proof->'layer81RerunPerformed'='false'::jsonb
           and x.reconciliation_proof->'verificationRerunPerformed'='false'::jsonb
           and x.reconciliation_proof->'evidenceMutationPerformed'='false'::jsonb
-          and x.reconciliation_proof->'layer107ReceiptRewritePerformed'='false'::jsonb
-          and x.reconciliation_proof->'layer96ReceiptRewritePerformed'='false'::jsonb
-          and x.reconciliation_proof->'layer92ReceiptRewritePerformed'='false'::jsonb
+          and x.reconciliation_proof->'layer102ReceiptRewritePerformed'='false'::jsonb
+          and x.reconciliation_proof->'layer101ReceiptRewritePerformed'='false'::jsonb
+          and x.reconciliation_proof->'layer97ReceiptRewritePerformed'='false'::jsonb
           and x.reconciliation_proof->'releaseTruthMutationPerformed'='false'::jsonb
           and x.reconciliation_proof->'incidentHistoryMutationPerformed'='false'::jsonb
           and x.reconciliation_proof->'approvalGranted'='false'::jsonb
@@ -156,7 +159,7 @@ begin
           and x.layer106_snapshot->>'policyFingerprint'
               is not distinct from x.policy_fingerprint
           and x.layer106_snapshot->>'eventType' is not distinct from 'executed'
-          and x.layer106_snapshot->>'reasonCode' is not distinct from x.layer101_reason_code
+          and x.layer106_snapshot->>'reasonCode' is not distinct from x.layer106_reason_code
           and x.layer106_snapshot->'requestedAt'
               is not distinct from to_jsonb(x.requested_at)
           and (
@@ -164,21 +167,21 @@ begin
               x.layer102_reconciliation_id is null
               and x.layer102_snapshot is null
               and x.reconciliation_state='missing-layer102-receipt'
-              and x.layer107_proof_integrity_valid is null
+              and x.layer102_proof_integrity_valid is null
               and x.execution_receipt_matches is null
             )
             or
             (
               x.layer102_reconciliation_id is not null
-              and x.l102_layer96_event_id is not null
+              and x.l102_layer101_event_id is not null
               and x.layer102_snapshot->>'reconciliationId'
                   is not distinct from x.layer102_reconciliation_id::text
               and x.layer102_snapshot->>'layer101EventId'
-                  is not distinct from x.l102_layer96_event_id::text
+                  is not distinct from x.l102_layer101_event_id::text
               and x.layer102_snapshot->>'targetLayer96EventId'
-                  is not distinct from x.l102_target_layer91_event_id::text
+                  is not distinct from x.l102_target_layer96_event_id::text
               and x.layer102_snapshot->>'layer97ReconciliationId'
-                  is not distinct from x.l102_layer92_reconciliation_id::text
+                  is not distinct from x.l102_layer97_reconciliation_id::text
               and x.layer102_snapshot->>'reconciliationState'
                   is not distinct from x.l102_reconciliation_state
               and x.layer102_snapshot->>'reasonCode'
@@ -188,7 +191,7 @@ begin
               and x.layer102_snapshot->'incidentBindingValid'
                   is not distinct from to_jsonb(x.l102_incident_binding_valid)
               and nullif(x.layer102_snapshot->'layer97ProofIntegrityValid','null'::jsonb)
-                  is not distinct from to_jsonb(x.l102_layer92_proof_integrity_valid)
+                  is not distinct from to_jsonb(x.l102_layer97_proof_integrity_valid)
               and nullif(x.layer102_snapshot->'executionReceiptMatches','null'::jsonb)
                   is not distinct from to_jsonb(x.l102_execution_receipt_matches)
               and x.layer102_snapshot->'beforeCoverageValid'
@@ -207,7 +210,7 @@ begin
               and x.layer102_reconciliation_id is not null
               and x.policy_integrity_valid is true
               and x.incident_binding_valid is true
-              and x.layer107_proof_integrity_valid is true
+              and x.layer102_proof_integrity_valid is true
               and x.execution_receipt_matches is true
               and x.before_coverage_valid is true
               and x.after_coverage_valid is true
@@ -221,27 +224,27 @@ begin
             (
               x.reconciliation_state='invalid-layer102-receipt'
               and x.layer102_reconciliation_id is not null
-              and x.layer107_proof_integrity_valid is false
+              and x.layer102_proof_integrity_valid is false
             )
             or
             (
               x.reconciliation_state='execution-receipt-mismatch'
               and x.layer102_reconciliation_id is not null
-              and x.layer107_proof_integrity_valid is true
+              and x.layer102_proof_integrity_valid is true
               and x.execution_receipt_matches is false
             )
             or
             (
               x.reconciliation_state='policy-drift'
               and x.layer102_reconciliation_id is not null
-              and x.layer107_proof_integrity_valid is true
+              and x.layer102_proof_integrity_valid is true
               and x.policy_integrity_valid is false
             )
             or
             (
               x.reconciliation_state='incident-drift'
               and x.layer102_reconciliation_id is not null
-              and x.layer107_proof_integrity_valid is true
+              and x.layer102_proof_integrity_valid is true
               and x.policy_integrity_valid is true
               and x.incident_binding_valid is false
             )
@@ -249,7 +252,7 @@ begin
             (
               x.reconciliation_state='coverage-drift'
               and x.layer102_reconciliation_id is not null
-              and x.layer107_proof_integrity_valid is true
+              and x.layer102_proof_integrity_valid is true
               and x.policy_integrity_valid is true
               and x.incident_binding_valid is true
               and x.execution_receipt_matches is true
@@ -311,11 +314,11 @@ begin
       'executionAgeSeconds',q.age_seconds,
       'coverageState',q.coverage_state,
       'reasonCode',q.coverage_reason_code,
-      'layer102ReconciliationId',q.reconciliation_id,
+      'layer107ReconciliationId',q.reconciliation_id,
       'layer107ReconciliationState',q.reconciliation_state,
       'layer102ReconciliationId',q.layer102_reconciliation_id,
-      'layer97ReconciliationState',q.l102_reconciliation_state,
-      'layer102ProofIntegrityValid',q.layer107_proof_integrity_valid,
+      'layer102ReconciliationState',q.l102_reconciliation_state,
+      'layer107ProofIntegrityValid',q.layer107_proof_integrity_valid,
       'reconciledAt',q.reconciled_at
     ) order by q.event_sequence desc),'[]'::jsonb) as items
     from (
@@ -398,9 +401,9 @@ begin
     'layer81RerunPerformed',false,'verificationRerunPerformed',false,
     'evidenceMutationPerformed',false,
     'layer107ReceiptRewritePerformed',false,
-    'layer107ReceiptRewritePerformed',false,
-    'layer96ReceiptRewritePerformed',false,
-    'layer92ReceiptRewritePerformed',false,
+    'layer102ReceiptRewritePerformed',false,
+    'layer101ReceiptRewritePerformed',false,
+    'layer97ReceiptRewritePerformed',false,
     'releaseTruthMutationPerformed',false,
     'incidentHistoryMutationPerformed',false,
     'mutationPerformed',false
