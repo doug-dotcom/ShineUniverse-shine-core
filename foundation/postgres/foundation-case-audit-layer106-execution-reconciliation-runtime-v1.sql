@@ -1,4 +1,4 @@
--- Foundation Layer 107: append one immutable reconciliation receipt for one Layer-101 execution.
+-- Foundation Layer 107: append one immutable reconciliation receipt for one Layer-106 execution.
 
 create or replace function foundation.run_case_audit_layer106_execution_reconciliation_v1(
   p_layer106_event_id uuid,
@@ -16,7 +16,7 @@ declare
   v_proof jsonb;
   v_proof_hash text;
   v_reconciliation_id uuid;
-  v_layer97_id uuid;
+  v_layer102_id uuid;
 begin
   if p_layer106_event_id is null then
     raise exception 'case-audit-layer106-reconciliation-event-id-required';
@@ -38,12 +38,14 @@ begin
         'shine-foundation/case-audit-layer106-execution-reconciliation-v1',
       'schemaVersion','1.0.0','status','not-applicable',
       'layer106EventId',p_layer106_event_id,
-      'reasonCode','case-audit-layer101-event-not-found',
-      'layer97RerunPerformed',false,'layer96RerunPerformed',false,
-      'layer92RerunPerformed',false,'layer91RerunPerformed',false,
-      'layer87RerunPerformed',false,'layer86RerunPerformed',false,
-      'layer82RerunPerformed',false,'layer81RerunPerformed',false,
-      'verificationRerunPerformed',false,'mutationPerformed',false
+      'reasonCode','case-audit-layer106-event-not-found',
+      'layer106RerunPerformed',false,'layer102RerunPerformed',false,
+      'layer101RerunPerformed',false,'layer97RerunPerformed',false,
+      'layer96RerunPerformed',false,'layer92RerunPerformed',false,
+      'layer91RerunPerformed',false,'layer87RerunPerformed',false,
+      'layer86RerunPerformed',false,'layer82RerunPerformed',false,
+      'layer81RerunPerformed',false,'verificationRerunPerformed',false,
+      'mutationPerformed',false
     );
   end if;
 
@@ -54,12 +56,14 @@ begin
       'schemaVersion','1.0.0','status','not-applicable',
       'layer106EventId',v_exec.event_id,
       'sourceEventType',v_exec.event_type,
-      'reasonCode','case-audit-layer101-source-not-executed',
-      'layer97RerunPerformed',false,'layer96RerunPerformed',false,
-      'layer92RerunPerformed',false,'layer91RerunPerformed',false,
-      'layer87RerunPerformed',false,'layer86RerunPerformed',false,
-      'layer82RerunPerformed',false,'layer81RerunPerformed',false,
-      'verificationRerunPerformed',false,'mutationPerformed',false
+      'reasonCode','case-audit-layer106-source-not-executed',
+      'layer106RerunPerformed',false,'layer102RerunPerformed',false,
+      'layer101RerunPerformed',false,'layer97RerunPerformed',false,
+      'layer96RerunPerformed',false,'layer92RerunPerformed',false,
+      'layer91RerunPerformed',false,'layer87RerunPerformed',false,
+      'layer86RerunPerformed',false,'layer82RerunPerformed',false,
+      'layer81RerunPerformed',false,'verificationRerunPerformed',false,
+      'mutationPerformed',false
     );
   end if;
 
@@ -79,11 +83,13 @@ begin
       'reconciliationState',v_existing.reconciliation_state,
       'reasonCode',v_existing.reason_code,
       'reconciliationProofSha256',v_existing.reconciliation_proof_sha256,
-      'layer97RerunPerformed',false,'layer96RerunPerformed',false,
-      'layer92RerunPerformed',false,'layer91RerunPerformed',false,
-      'layer87RerunPerformed',false,'layer86RerunPerformed',false,
-      'layer82RerunPerformed',false,'layer81RerunPerformed',false,
-      'verificationRerunPerformed',false,'mutationPerformed',false
+      'layer106RerunPerformed',false,'layer102RerunPerformed',false,
+      'layer101RerunPerformed',false,'layer97RerunPerformed',false,
+      'layer96RerunPerformed',false,'layer92RerunPerformed',false,
+      'layer91RerunPerformed',false,'layer87RerunPerformed',false,
+      'layer86RerunPerformed',false,'layer82RerunPerformed',false,
+      'layer81RerunPerformed',false,'verificationRerunPerformed',false,
+      'mutationPerformed',false
     );
   end if;
 
@@ -100,9 +106,9 @@ begin
   end if;
 
   begin
-    v_layer97_id := nullif(v_eval->>'layer102ReconciliationId','')::uuid;
+    v_layer102_id := nullif(v_eval->>'layer102ReconciliationId','')::uuid;
   exception when invalid_text_representation then
-    v_layer97_id := null;
+    v_layer102_id := null;
   end;
 
   v_reconciliation_id := gen_random_uuid();
@@ -115,7 +121,7 @@ begin
     'layer106EventId',v_exec.event_id,
     'environment',v_exec.environment,
     'targetLayer101EventId',v_exec.target_layer101_event_id,
-    'layer102ReconciliationId',v_layer97_id,
+    'layer102ReconciliationId',v_layer102_id,
     'reconciliationState',v_eval->>'reconciliationState',
     'reasonCode',v_eval->>'reasonCode',
     'policyIntegrityValid',v_eval->'policyIntegrityValid',
@@ -126,14 +132,17 @@ begin
     'afterCoverageValid',v_eval->'afterCoverageValid',
     'layer106ActionResult',v_eval->'layer106ActionResult',
     'layer102Receipt',v_eval->'layer102Receipt',
-    'layer102RerunPerformed',false,'layer101RerunPerformed',false,
-    'layer97RerunPerformed',false,'layer96RerunPerformed',false,
-    'layer92RerunPerformed',false,'layer91RerunPerformed',false,
+    'layer106RerunPerformed',false,'layer102RerunPerformed',false,
+    'layer101RerunPerformed',false,
+    'layer106RerunPerformed',false,'layer102RerunPerformed',false,
+    'layer101RerunPerformed',false,'layer97RerunPerformed',false,
+    'layer96RerunPerformed',false,'layer92RerunPerformed',false,
+    'layer91RerunPerformed',false,
     'layer87RerunPerformed',false,'layer86RerunPerformed',false,
     'layer82RerunPerformed',false,'layer81RerunPerformed',false,
     'verificationRerunPerformed',false,'evidenceMutationPerformed',false,
-    'layer102ReceiptRewritePerformed',false,'layer96ReceiptRewritePerformed',false,
-    'layer92ReceiptRewritePerformed',false,'releaseTruthMutationPerformed',false,
+    'layer102ReceiptRewritePerformed',false,'layer101ReceiptRewritePerformed',false,
+    'layer97ReceiptRewritePerformed',false,'releaseTruthMutationPerformed',false,
     'incidentHistoryMutationPerformed',false,
     'approvalGranted',false,'executionAuthorityGranted',false,
     'mutationPerformed',false,'reconciledAt',p_reconciled_at
@@ -153,7 +162,7 @@ begin
   )
   values(
     v_reconciliation_id,v_exec.event_id,v_exec.environment,v_exec.target_layer101_event_id,
-    v_layer97_id,v_eval->>'reconciliationState',v_eval->>'reasonCode',
+    v_layer102_id,v_eval->>'reconciliationState',v_eval->>'reasonCode',
     coalesce((v_eval->>'policyIntegrityValid')::boolean,false),
     coalesce((v_eval->>'incidentBindingValid')::boolean,false),
     case when v_eval->'layer102ProofIntegrityValid' is null then null
@@ -184,7 +193,7 @@ begin
     'reconciliationId',v_reconciliation_id,
     'layer106EventId',v_exec.event_id,
     'targetLayer101EventId',v_exec.target_layer101_event_id,
-    'layer102ReconciliationId',v_layer97_id,
+    'layer102ReconciliationId',v_layer102_id,
     'reconciliationState',v_eval->>'reconciliationState',
     'reasonCode',v_eval->>'reasonCode',
     'reconciliationProofSha256',v_proof_hash,
@@ -286,8 +295,8 @@ begin
     'layer87RerunPerformed',false,'layer86RerunPerformed',false,
     'layer82RerunPerformed',false,'layer81RerunPerformed',false,
     'verificationRerunPerformed',false,'evidenceMutationPerformed',false,
-    'layer102ReceiptRewritePerformed',false,'layer96ReceiptRewritePerformed',false,
-    'layer92ReceiptRewritePerformed',false,'releaseTruthMutationPerformed',false,
+    'layer102ReceiptRewritePerformed',false,'layer101ReceiptRewritePerformed',false,
+    'layer97ReceiptRewritePerformed',false,'releaseTruthMutationPerformed',false,
     'incidentHistoryMutationPerformed',false,'mutationPerformed',false
   );
 end;
