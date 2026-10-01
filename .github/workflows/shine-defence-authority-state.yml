@@ -4,7 +4,7 @@ run-name: "Defence Authority State • ${{ github.sha }}"
 on:
   workflow_dispatch:
   schedule:
-    - cron: '17 * * * *'
+    - cron: '13,43 * * * *'
   push:
     branches: [main]
     paths:
