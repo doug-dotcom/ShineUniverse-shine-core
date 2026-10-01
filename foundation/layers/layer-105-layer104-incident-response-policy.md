@@ -1,6 +1,6 @@
 # Foundation Layer 105 — Layer-104 incident response policy
 
-**Status:** IMPLEMENTED — CI and production verification pending  
+**Status:** LIVE — CI green and production verification complete  
 **Scope:** govern what Foundation may do in response to a persistent Layer-103 coverage incident
 
 Layer 104 makes persistent Layer-103 GAP/INVALID coverage operationally visible.
@@ -83,6 +83,37 @@ Foundation runtime and service role may read the policy. Gateway reads only thro
 ## Deliberate non-actions
 
 Layer 105 performs no Layer-102 reconciliation, no upstream rerun, no repair, no receipt rewrite, no history mutation and no release-truth mutation.
+
+## Production proof
+
+Layer 105 is deployed in the Shine Foundation Supabase project as migration:
+
+`20261001034922 — foundation_layer_105_layer104_incident_response_policy`
+
+Pull request **#145** passed the complete Foundation + Concierge and Shine Defence workflows.
+
+Live production verification confirms:
+
+- current Layer-104 operational state: **normal**;
+- current Layer-103 coverage state: **idle**;
+- current cause class: **none**;
+- next evidence action: **none**;
+- `inspect-layer103-coverage`: **admit / read-only**;
+- `run-independent-layer102-reconciliation`: **not-applicable** on clean production;
+- `rerun-layer101`: **deny / prohibited**;
+- `mutate-release-truth`: **deny / prohibited**;
+- the response plan exposes **32** governed actions;
+- Layer-101 execution count remained **0**;
+- Layer-102 reconciliation count remained **0**;
+- Layer-104 incident-event count remained **0**;
+- Foundation runtime and service role can read the policy;
+- Gateway reads only through existing `foundation_runtime` inheritance and has **no direct EXECUTE grant**;
+- Shine Core, Shine Defence and browser roles cannot read the policy;
+- direct service-role Layer-102 reconciliation remains available at Layer 105 and is deliberately left for the next bounded-executor layer to close;
+- Supabase security advisors report **0 findings** after deployment;
+- Supabase performance advisors report no Layer-105-specific finding.
+
+The policy remains non-executing: prohibited-action metadata may describe the hazardous effect of an attempted action, while `decision=deny`, `requiredControl=prohibited` and `executesAction=false` keep the control fail-closed.
 
 ## Invariant
 
