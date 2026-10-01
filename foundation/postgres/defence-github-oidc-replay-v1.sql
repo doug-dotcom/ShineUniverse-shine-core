@@ -134,6 +134,11 @@ begin
       then p_operation in ('reattest-claim','reattest-attest')
     when 'shine-defence-authority-state'
       then p_operation='attestation-authority-sync'
+    when 'shine-defence-on-demand-revalidation'
+      then p_operation in (
+        'on-demand-revalidation-claim',
+        'on-demand-revalidation-record-deployment'
+      )
     else false
   end;
 
