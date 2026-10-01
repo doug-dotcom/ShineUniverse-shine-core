@@ -1,6 +1,6 @@
 {
   "contract": "shine-defence/github-oidc-operation-replay-v1",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "purpose": "Bind a verified GitHub Actions run/attempt, audience, operation and logical target to one semantic request digest so exact retries remain safe and changed-payload replays fail closed.",
   "identityKey": [
     "repository",
@@ -36,6 +36,13 @@
     ],
     "shine-defence-authority-state": [
       "attestation-authority-sync"
+    ],
+    "shine-defence-on-demand-revalidation": [
+      "on-demand-revalidation-claim",
+      "on-demand-revalidation-record-deployment"
+    ],
+    "shine-defence-on-demand-executor-readiness": [
+      "on-demand-executor-readiness"
     ]
   },
   "persistence": {
@@ -50,7 +57,9 @@
     "rollback source evidence",
     "provider estate evidence",
     "re-attestation evidence",
-    "attestation authority-state synchronization"
+    "attestation authority-state synchronization",
+    "on-demand revalidation execution gating",
+    "on-demand executor readiness evidence"
   ],
   "invariants": [
     "The replay binder runs only after cryptographic GitHub OIDC verification.",
@@ -58,6 +67,8 @@
     "The first semantic request owns the identity key permanently.",
     "Bindings and replay/conflict events are append-only and not writable by public application roles.",
     "Exact retry does not create duplicate provider evidence.",
-    "The authority-state publisher may bind only shine-defence-authority-state / attestation-authority-sync."
+    "The authority-state publisher may bind only shine-defence-authority-state / attestation-authority-sync.",
+    "The on-demand revalidation executor may bind only claim and deployment-result operations under its dedicated audience.",
+    "The on-demand executor readiness publisher may bind only shine-defence-on-demand-executor-readiness / on-demand-executor-readiness."
   ]
 }

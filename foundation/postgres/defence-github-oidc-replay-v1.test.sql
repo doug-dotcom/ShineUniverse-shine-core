@@ -239,6 +239,50 @@ end;
 $on_demand_revalidation_purpose$;
 
 
+do $on_demand_executor_readiness_purpose$
+declare
+  v jsonb;
+begin
+  select foundation.bind_github_oidc_operation_v1(
+    'doug-dotcom/ShineUniverse-shine-core',
+    'refs/heads/main',
+    'doug-dotcom/ShineUniverse-shine-core/.github/workflows/shine-defence-on-demand-executor-readiness.yml@refs/heads/main',
+    '889999999',
+    '1',
+    'push',
+    'shine-defence-on-demand-executor-readiness',
+    'on-demand-executor-readiness',
+    'direct_railway:false',
+    '{"contract":"shine-defence/on-demand-executor-readiness-v1","credentialReady":false}'::jsonb
+  ) into v;
+
+  if v->>'status'<>'accepted-new'
+     or v->>'audience'<>'shine-defence-on-demand-executor-readiness'
+     or v->>'operation'<>'on-demand-executor-readiness' then
+    raise exception 'executor readiness OIDC purpose not accepted: %',v;
+  end if;
+
+  begin
+    perform foundation.bind_github_oidc_operation_v1(
+      'doug-dotcom/ShineUniverse-shine-core',
+      'refs/heads/main',
+      'doug-dotcom/ShineUniverse-shine-core/.github/workflows/shine-defence-on-demand-executor-readiness.yml@refs/heads/main',
+      '889999999',
+      '1',
+      'push',
+      'shine-defence-on-demand-executor-readiness',
+      'provider-snapshot',
+      'direct_railway:invalid',
+      '{"x":1}'::jsonb
+    );
+    raise exception 'unrelated purpose accepted under executor readiness audience';
+  exception
+    when sqlstate '22023' then null;
+  end;
+end;
+$on_demand_executor_readiness_purpose$;
+
+
 insert into foundation.defence_estate_targets(
   target_id,display_name,provider,provider_project_ref,environment_ref,service_ref,
   target_role,required_for_estate,allowed_runtime_states,lifecycle,metadata
