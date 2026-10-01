@@ -1,0 +1,121 @@
+{
+  "contract": "shine-defence/external-dispatcher-github-app-v1",
+  "version": "1.0.0",
+  "purpose": "Minimum-permission GitHub App required to activate the scheduler-independent Shine Defence attestation dispatcher.",
+  "githubAppManifest": {
+    "name": "Shine Defence Dispatcher",
+    "url": "https://github.com/doug-dotcom/ShineUniverse-shine-core",
+    "description": "Private control-plane trigger app for Shine Defence attestation workflows. It may start workflows but cannot mint Defence evidence.",
+    "public": false,
+    "default_events": [],
+    "default_permissions": {
+      "actions": "write"
+    },
+    "request_oauth_on_install": false,
+    "setup_on_update": false
+  },
+  "installation": {
+    "account": "doug-dotcom",
+    "repositorySelection": "selected",
+    "requiredRepositories": [
+      {
+        "targetId": "core",
+        "repository": "doug-dotcom/ShineUniverse-shine-core",
+        "repositoryId": "1072897952"
+      },
+      {
+        "targetId": "railway:daash",
+        "repository": "doug-dotcom/Shine-DaAsh",
+        "repositoryId": "1373763946"
+      },
+      {
+        "targetId": "railway:dive",
+        "repository": "doug-dotcom/shine-dive-",
+        "repositoryId": "1361439227"
+      },
+      {
+        "targetId": "railway:dnd",
+        "repository": "doug-dotcom/shine-D-D",
+        "repositoryId": "1384280308"
+      },
+      {
+        "targetId": "railway:fiona",
+        "repository": "doug-dotcom/Fiona-Finance",
+        "repositoryId": "1357712835"
+      },
+      {
+        "targetId": "railway:fish",
+        "repository": "doug-dotcom/shine-fish",
+        "repositoryId": "1384278684"
+      },
+      {
+        "targetId": "railway:my-money",
+        "repository": "doug-dotcom/shine-my-money-",
+        "repositoryId": "1378329747"
+      },
+      {
+        "targetId": "railway:project-l",
+        "repository": "doug-dotcom/Project-L-Modular",
+        "repositoryId": "1240491225"
+      },
+      {
+        "targetId": "railway:punt49",
+        "repository": "doug-dotcom/Punt-49",
+        "repositoryId": "1359524189"
+      },
+      {
+        "targetId": "railway:recovery-companion",
+        "repository": "doug-dotcom/Project-RC",
+        "repositoryId": "1354993812"
+      },
+      {
+        "targetId": "railway:rivers",
+        "repository": "doug-dotcom/shine-music",
+        "repositoryId": "1377780406"
+      },
+      {
+        "targetId": "railway:shine-ai",
+        "repository": "doug-dotcom/Shine-Ai",
+        "repositoryId": "1386493862"
+      },
+      {
+        "targetId": "railway:ski",
+        "repository": "doug-dotcom/Shine-Ski",
+        "repositoryId": "1359646182"
+      },
+      {
+        "targetId": "railway:translate",
+        "repository": "doug-dotcom/shine-translate",
+        "repositoryId": "1368992845"
+      },
+      {
+        "targetId": "railway:travel",
+        "repository": "doug-dotcom/shine-travel",
+        "repositoryId": "1361434212"
+      }
+    ]
+  },
+  "edgeSecrets": [
+    "SHINE_DEFENCE_GITHUB_APP_ID",
+    "SHINE_DEFENCE_GITHUB_APP_INSTALLATION_ID",
+    "SHINE_DEFENCE_GITHUB_APP_PRIVATE_KEY_PKCS8"
+  ],
+  "readinessRequirements": [
+    "GitHub App JWT signs successfully with the configured PKCS#8 private key.",
+    "GET /app returns the configured App ID.",
+    "An installation token can be issued with Actions: write.",
+    "The installation can access all required repositories.",
+    "The installation token can read the expected Actions workflow in every required repository.",
+    "The readiness token is revoked after verification.",
+    "A fresh readiness receipt with state ready exists before the dispatcher may issue any workflow_dispatch call."
+  ],
+  "invariants": [
+    "No webhook subscription is required.",
+    "No user OAuth authorization is required.",
+    "The App is private to its owner.",
+    "Repository selection must remain selected, not all repositories.",
+    "The App never bypasses repo-bound GitHub Actions OIDC.",
+    "The App never records trusted release-head or rollback-source evidence.",
+    "Private key, App JWT and installation token values are never written to Postgres."
+  ]
+}
