@@ -1,4 +1,4 @@
--- Foundation Layer 106: schema and policy fingerprint for the bounded Layer-97 reconciler.
+-- Foundation Layer 106: schema and policy fingerprint for the bounded Layer-102 reconciler.
 
 create or replace function foundation.case_audit_layer102_reconcile_exec_policy_fp_v1(
   p_decision jsonb,
@@ -25,8 +25,8 @@ as $layer106_policy_fp$
           'targetReasonCode',p_target->>'reasonCode',
           'targetRequestedAt',p_target->'requestedAt',
           'reconciliationGraceSeconds',p_target->'reconciliationGraceSeconds',
-          'targetLayer97ReconciliationId',p_target->>'layer102ReconciliationId',
-          'targetLayer97ReconciliationState',p_target->>'layer102ReconciliationState',
+          'targetLayer102ReconciliationId',p_target->>'layer102ReconciliationId',
+          'targetLayer102ReconciliationState',p_target->>'layer102ReconciliationState',
           'layer102ReconciliationAbsent',p_target->'layer102ReconciliationAbsent',
           'incidentState',p_decision->>'incidentState',
           'causeClass',p_decision->>'causeClass',
@@ -44,6 +44,8 @@ as $layer106_policy_fp$
           'historyRewriteAllowed',p_decision->'historyRewriteAllowed',
           'layer101RerunAllowed',p_decision->'layer101RerunAllowed',
           'layer97RerunAllowed',p_decision->'layer97RerunAllowed',
+          'layer96RerunAllowed',p_decision->'layer96RerunAllowed',
+          'layer92RerunAllowed',p_decision->'layer92RerunAllowed',
           'layer91RerunAllowed',p_decision->'layer91RerunAllowed',
           'layer87RerunAllowed',p_decision->'layer87RerunAllowed',
           'layer86RerunAllowed',p_decision->'layer86RerunAllowed',
