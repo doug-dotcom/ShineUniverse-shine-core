@@ -1,6 +1,6 @@
 # Foundation Layer 95 — Layer-94 incident response policy
 
-**Status:** IMPLEMENTED — CI and production verification pending  
+**Status:** LIVE — CI green and production verification complete  
 **Scope:** govern what Foundation may do in response to a persistent Layer-93 coverage incident
 
 Layer 94 makes persistent Layer-93 GAP/INVALID coverage operationally visible.
@@ -83,6 +83,37 @@ Foundation runtime and service role may read the policy. Gateway reads only thro
 ## Deliberate non-actions
 
 Layer 95 performs no Layer-92 reconciliation, no upstream rerun, no repair, no receipt rewrite, no history mutation and no release-truth mutation.
+
+## Production proof
+
+Layer 95 is deployed in the Shine Foundation Supabase project as migration:
+
+`20261001003420 — foundation_layer_095_layer94_incident_response_policy`
+
+Pull request **#124** passed the complete Foundation + Concierge and Shine Defence workflows.
+
+Live production verification confirms:
+
+- current Layer-94 operational state: **normal**;
+- current Layer-93 coverage state: **idle**;
+- current cause class: **none**;
+- next evidence action: **none**;
+- `inspect-layer93-coverage`: **admit / read-only**;
+- `run-independent-layer92-reconciliation`: **not-applicable** on clean production;
+- `rerun-layer91`: **deny / prohibited**;
+- `mutate-release-truth`: **deny / prohibited**;
+- the response plan exposes **28** governed actions;
+- Layer-91 execution count remained **0**;
+- Layer-92 reconciliation count remained **0**;
+- Layer-94 incident-event count remained **0**;
+- Foundation runtime and service role can read the policy;
+- Gateway reads only through existing `foundation_runtime` inheritance;
+- Shine Core, Shine Defence and browser roles cannot read the policy;
+- direct service-role Layer-92 reconciliation remains available at Layer 95 and is deliberately left for the next bounded-executor layer to close;
+- Supabase security advisors report **0 findings** after deployment;
+- Supabase performance advisors report no Layer-95-specific finding.
+
+The policy remains non-executing: even prohibited action metadata identifies what an attempted action would mutate, while `decision=deny`, `requiredControl=prohibited` and `executesAction=false` keep it fail-closed.
 
 ## Invariant
 
