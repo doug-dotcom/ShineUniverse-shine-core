@@ -1,7 +1,7 @@
 -- Foundation Layer 104: incident lifecycle for Layer-103 Layer-102 reconciliation coverage.
--- Layer 103 is read-only coverage truth. Layer 99 turns persistent GAP/INVALID
+-- Layer 103 is read-only coverage truth. Layer 104 turns persistent GAP/INVALID
 -- coverage into append-only operational evidence without reconciling, rerunning,
--- repairing, rewriting, or mutating Layer-102/96/92/91/87/86/82/81 truth.
+-- repairing, rewriting, or mutating Layer-102/101/97/96/92/91/87/86/82/81 truth.
 
 create or replace function foundation.case_audit_layer102_coverage_incident_fingerprint_v1(
   p_snapshot jsonb
@@ -94,7 +94,7 @@ create table foundation.case_audit_layer102_coverage_incident_events (
   environment text not null
     check (environment ~ '^[a-z0-9][a-z0-9._-]*$'),
   domain text not null
-    check (domain='case_audit_layer97_reconciliation_coverage'),
+    check (domain='case_audit_layer102_reconciliation_coverage'),
   event_type text not null
     check (event_type in ('detected','opened','changed','recovered')),
   source_state text not null
@@ -263,7 +263,7 @@ begin
   v_fingerprint :=
     foundation.case_audit_layer102_coverage_incident_fingerprint_v1(p_snapshot);
 
-  v_incident_key := p_environment||':case_audit_layer97_reconciliation_coverage';
+  v_incident_key := p_environment||':case_audit_layer102_reconciliation_coverage';
 
   select * into v_prior
   from foundation.case_audit_layer102_coverage_incident_events
@@ -340,7 +340,7 @@ begin
     )
     values(
       v_event_id,v_incident_key,p_environment,
-      'case_audit_layer97_reconciliation_coverage',
+      'case_audit_layer102_reconciliation_coverage',
       v_event_type,v_state,v_severity,v_reason,v_fingerprint,
       v_detection_started_at,p_persistence_threshold_seconds,
       v_persistence_seconds,p_snapshot,p_observed_at,
@@ -427,7 +427,7 @@ begin
     raise exception 'case-audit-layer102-coverage-sentinel-time-invalid';
   end if;
 
-  v_snapshot := foundation.get_case_audit_layer97_reconciliation_coverage_v1(
+  v_snapshot := foundation.get_case_audit_layer102_reconciliation_coverage_v1(
     p_environment,p_observed_at,p_reconciliation_grace_seconds,100
   );
 
@@ -501,13 +501,13 @@ begin
     raise exception 'case-audit-layer102-coverage-incident-summary-input-invalid';
   end if;
 
-  v_coverage := foundation.get_case_audit_layer97_reconciliation_coverage_v1(
+  v_coverage := foundation.get_case_audit_layer102_reconciliation_coverage_v1(
     p_environment,p_as_of,p_reconciliation_grace_seconds,100
   );
 
   select * into v_current
   from foundation.current_case_audit_layer102_coverage_incident_state
-  where incident_key=p_environment||':case_audit_layer97_reconciliation_coverage';
+  where incident_key=p_environment||':case_audit_layer102_reconciliation_coverage';
 
   select count(*) into v_active_count
   from foundation.current_case_audit_layer102_coverage_incidents
