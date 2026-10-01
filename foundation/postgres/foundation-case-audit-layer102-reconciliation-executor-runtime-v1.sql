@@ -1,4 +1,4 @@
--- Foundation Layer 106: exact-target bounded executor for Layer-97 reconciliation.
+-- Foundation Layer 106: exact-target bounded executor for Layer-102 reconciliation.
 
 create or replace function foundation.execute_case_audit_overdue_layer102_reconciliation_v1(
   p_layer101_event_id uuid,
@@ -14,7 +14,7 @@ as $layer106_execute$
 declare
   v_target foundation.case_audit_layer97_reconcile_exec_events%rowtype;
   v_prior foundation.case_audit_layer102_reconcile_exec_events%rowtype;
-  v_l97 foundation.case_audit_layer101_exec_reconciliations%rowtype;
+  v_l102 foundation.case_audit_layer101_exec_reconciliations%rowtype;
   v_decision jsonb;
   v_incident jsonb;
   v_before jsonb;
@@ -48,7 +48,7 @@ begin
   );
 
   select * into v_target
-  from foundation.case_audit_layer102_reconcile_exec_events
+  from foundation.case_audit_layer97_reconcile_exec_events
   where event_id=p_layer101_event_id
     and environment=p_environment;
 
@@ -62,6 +62,8 @@ begin
       'environment',p_environment,
       'reasonCode','case-audit-overdue-layer102-reconciliation-target-not-found',
       'boundedLayer102ReconcilerOnly',true,
+      'layer101RerunPerformed',false,
+      'layer97RerunPerformed',false,
       'layer96RerunPerformed',false,
       'layer92RerunPerformed',false,
       'layer91RerunPerformed',false,
@@ -71,9 +73,9 @@ begin
       'layer81RerunPerformed',false,
       'verificationRerunPerformed',false,
       'evidenceMutationPerformed',false,
+      'layer102ReceiptRewritePerformed',false,
+      'layer101ReceiptRewritePerformed',false,
       'layer97ReceiptRewritePerformed',false,
-      'layer96ReceiptRewritePerformed',false,
-      'layer92ReceiptRewritePerformed',false,
       'releaseTruthMutationPerformed',false,
       'incidentHistoryMutationPerformed',false
     );
@@ -100,6 +102,8 @@ begin
       'policyFingerprint',v_prior.policy_fingerprint,
       'actionResult',v_prior.action_result,
       'boundedLayer102ReconcilerOnly',true,
+      'layer101RerunPerformed',false,
+      'layer97RerunPerformed',false,
       'layer96RerunPerformed',false,
       'layer92RerunPerformed',false,
       'layer91RerunPerformed',false,
@@ -109,9 +113,9 @@ begin
       'layer81RerunPerformed',false,
       'verificationRerunPerformed',false,
       'evidenceMutationPerformed',false,
+      'layer102ReceiptRewritePerformed',false,
+      'layer101ReceiptRewritePerformed',false,
       'layer97ReceiptRewritePerformed',false,
-      'layer96ReceiptRewritePerformed',false,
-      'layer92ReceiptRewritePerformed',false,
       'releaseTruthMutationPerformed',false,
       'incidentHistoryMutationPerformed',false
     );
@@ -147,7 +151,7 @@ begin
 
   v_target_snapshot := jsonb_build_object(
     'layer101EventId',v_target.event_id,
-    'targetLayer96EventId',v_target.target_layer91_event_id,
+    'targetLayer96EventId',v_target.target_layer96_event_id,
     'coverageIncidentEventId',v_target.coverage_incident_event_id,
     'actionKey',v_target.action_key,
     'causeClass',v_target.cause_class,
@@ -157,9 +161,9 @@ begin
     'requestedAt',v_target.requested_at,
     'ageSeconds',v_age,
     'reconciliationGraceSeconds',p_reconciliation_grace_seconds,
-    'layer102ReconciliationId',v_l97.reconciliation_id,
-    'layer102ReconciliationState',v_l97.reconciliation_state,
-    'layer102ReconciliationAbsent',v_l97.reconciliation_id is null
+    'layer102ReconciliationId',v_l102.reconciliation_id,
+    'layer102ReconciliationState',v_l102.reconciliation_state,
+    'layer102ReconciliationAbsent',v_l102.reconciliation_id is null
   );
 
   v_fp := foundation.case_audit_layer102_reconcile_exec_policy_fp_v1(
@@ -168,7 +172,7 @@ begin
 
   if v_target.event_type<>'executed'
      or v_age<=p_reconciliation_grace_seconds
-     or v_l97.reconciliation_id is not null
+     or v_l102.reconciliation_id is not null
      or v_incident->>'state' not in ('watching','critical')
      or v_incident_event_id is null
      or v_decision->>'decision'<>'admit'
@@ -184,6 +188,8 @@ begin
      or coalesce(v_decision->>'historyRewriteAllowed','true')<>'false'
      or coalesce(v_decision->>'layer101RerunAllowed','true')<>'false'
      or coalesce(v_decision->>'layer97RerunAllowed','true')<>'false'
+     or coalesce(v_decision->>'layer96RerunAllowed','true')<>'false'
+     or coalesce(v_decision->>'layer92RerunAllowed','true')<>'false'
      or coalesce(v_decision->>'layer91RerunAllowed','true')<>'false'
      or coalesce(v_decision->>'layer87RerunAllowed','true')<>'false'
      or coalesce(v_decision->>'layer86RerunAllowed','true')<>'false'
@@ -196,6 +202,8 @@ begin
      or coalesce(v_decision->>'mutatesLayer97Receipt','true')<>'false'
      or coalesce(v_decision->>'rerunsLayer101','true')<>'false'
      or coalesce(v_decision->>'rerunsLayer97','true')<>'false'
+     or coalesce(v_decision->>'rerunsLayer96','true')<>'false'
+     or coalesce(v_decision->>'rerunsLayer92','true')<>'false'
      or coalesce(v_decision->>'rerunsLayer91','true')<>'false'
      or coalesce(v_decision->>'rerunsLayer87','true')<>'false'
      or coalesce(v_decision->>'rerunsLayer86','true')<>'false'
@@ -210,7 +218,7 @@ begin
         then 'case-audit-overdue-layer102-reconciliation-target-not-successful'
       when v_age<=p_reconciliation_grace_seconds
         then 'case-audit-overdue-layer102-reconciliation-within-grace'
-      when v_l97.reconciliation_id is not null
+      when v_l102.reconciliation_id is not null
         then 'case-audit-overdue-layer102-reconciliation-already-reconciled'
       when v_incident->>'state' not in ('watching','critical')
         then 'case-audit-overdue-layer102-reconciliation-incident-not-active'
@@ -244,6 +252,8 @@ begin
       'reasonCode',v_reason,
       'policyFingerprint',v_fp,
       'boundedLayer102ReconcilerOnly',true,
+      'layer101RerunPerformed',false,
+      'layer97RerunPerformed',false,
       'layer96RerunPerformed',false,
       'layer92RerunPerformed',false,
       'layer91RerunPerformed',false,
@@ -253,9 +263,9 @@ begin
       'layer81RerunPerformed',false,
       'verificationRerunPerformed',false,
       'evidenceMutationPerformed',false,
+      'layer102ReceiptRewritePerformed',false,
+      'layer101ReceiptRewritePerformed',false,
       'layer97ReceiptRewritePerformed',false,
-      'layer96ReceiptRewritePerformed',false,
-      'layer92ReceiptRewritePerformed',false,
       'releaseTruthMutationPerformed',false,
       'incidentHistoryMutationPerformed',false
     );
@@ -314,6 +324,8 @@ begin
       'actionResult',v_result,
       'afterCoverageState',v_after->>'state',
       'boundedLayer102ReconcilerOnly',true,
+      'layer101RerunPerformed',false,
+      'layer97RerunPerformed',false,
       'layer96RerunPerformed',false,
       'layer92RerunPerformed',false,
       'layer91RerunPerformed',false,
@@ -323,9 +335,9 @@ begin
       'layer81RerunPerformed',false,
       'verificationRerunPerformed',false,
       'evidenceMutationPerformed',false,
+      'layer102ReceiptRewritePerformed',false,
+      'layer101ReceiptRewritePerformed',false,
       'layer97ReceiptRewritePerformed',false,
-      'layer96ReceiptRewritePerformed',false,
-      'layer92ReceiptRewritePerformed',false,
       'releaseTruthMutationPerformed',false,
       'incidentHistoryMutationPerformed',false
     );
@@ -362,6 +374,8 @@ begin
       'errorDetail',v_error,
       'policyFingerprint',v_fp,
       'boundedLayer102ReconcilerOnly',true,
+      'layer101RerunPerformed',false,
+      'layer97RerunPerformed',false,
       'layer96RerunPerformed',false,
       'layer92RerunPerformed',false,
       'layer91RerunPerformed',false,
@@ -371,9 +385,9 @@ begin
       'layer81RerunPerformed',false,
       'verificationRerunPerformed',false,
       'evidenceMutationPerformed',false,
+      'layer102ReceiptRewritePerformed',false,
+      'layer101ReceiptRewritePerformed',false,
       'layer97ReceiptRewritePerformed',false,
-      'layer96ReceiptRewritePerformed',false,
-      'layer92ReceiptRewritePerformed',false,
       'releaseTruthMutationPerformed',false,
       'incidentHistoryMutationPerformed',false
     );
