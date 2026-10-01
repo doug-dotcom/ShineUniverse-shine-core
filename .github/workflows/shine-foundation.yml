@@ -631,6 +631,14 @@ jobs:
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-release-authority-evidence-parity-v1.sql
       - name: Run Shine Defence release authority-evidence parity tests
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-release-authority-evidence-parity-v1.test.sql
+      - name: Apply Shine Defence on-demand sleep posture attribution
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-on-demand-sleep-posture-v1.sql
+      - name: Run Shine Defence on-demand sleep posture tests
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-on-demand-sleep-posture-v1.test.sql
+      - name: Apply Shine Defence sleep-aware operational attention overlay
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-operational-attention-sleep-aware-v1.sql
+      - name: Run Shine Defence sleep-aware operational attention overlay tests
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-operational-attention-sleep-aware-v1.test.sql
       - name: Integrate Shine Defence authority sync heartbeat into full estate
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-attestation-authority-sync-heartbeat-integration-v1.sql
       - name: Run Shine Defence authority sync heartbeat full-estate tests

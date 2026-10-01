@@ -1,0 +1,37 @@
+{
+  "contract": "shine-defence/on-demand-sleep-posture-v1",
+  "version": "1.0.0",
+  "purpose": "Distinguish expected on-demand sleep staleness from stale on-demand services that require explicit revalidation, without changing raw estate, health, incident or release-admission truth.",
+  "sourceOfTruth": {
+    "targetRegistry": "foundation.defence_estate_targets",
+    "healthTarget": "foundation.current_defence_health_probe_target",
+    "releaseAdmission": "foundation.evaluate_defence_release_admission_v1",
+    "transitionEvents": "foundation.defence_railway_transition_events"
+  },
+  "states": [
+    {
+      "state": "not_applicable",
+      "meaning": "The target is not configured as an on-demand sleep-aware Railway service."
+    },
+    {
+      "state": "expected_sleep_stale",
+      "meaning": "The target is intentionally sleeping, canonical deployment identity is unchanged, prior on-demand proof remains reusable, source identity/authority are current, and source head has not moved ahead."
+    },
+    {
+      "state": "revalidation_required",
+      "meaning": "The target is sleep-aware/on-demand but source, deployment, authority, transition or prior-proof evidence no longer permits benign stale attribution."
+    }
+  ],
+  "invariants": [
+    "This contract never changes the release-admission decision or raw estate state.",
+    "A stale serving proof is never excused when the source head is ahead of the canonical serving commit.",
+    "A changed deployment identity never reuses prior on-demand proof.",
+    "A stale or mismatched source authority never qualifies as expected sleep.",
+    "Failed/crashed transition evidence never qualifies as expected sleep.",
+    "No automatic wake, deploy, retry, rollback, probe or evidence rewrite is authorised.",
+    "Browser roles receive no EXECUTE grant."
+  ],
+  "runtime": {
+    "function": "foundation.get_defence_on_demand_sleep_posture_v1"
+  }
+}
