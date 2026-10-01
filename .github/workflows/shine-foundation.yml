@@ -121,6 +121,10 @@ jobs:
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/advisor-fk-indexes-v1.sql
       - name: Apply hosted-advisor hardening
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/live-advisor-hardening-v1.sql
+      - name: Apply grant/R&D explicit client deny hardening
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/grant-rnd-client-deny-v1.sql
+      - name: Run grant/R&D explicit client deny tests
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/grant-rnd-client-deny-v1.test.sql
       - name: Run persistence acceptance tests
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/persistence-v1.test.sql
       - name: Run runtime acceptance tests
