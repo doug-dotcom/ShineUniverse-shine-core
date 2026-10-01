@@ -1,7 +1,7 @@
 -- Foundation Layer 109: incident lifecycle for Layer-108 Layer-107 reconciliation coverage.
 -- Layer 108 is read-only coverage truth. Layer 109 turns persistent GAP/INVALID
 -- coverage into append-only operational evidence without reconciling, rerunning,
--- repairing, rewriting, or mutating Layer-102/101/97/96/92/91/87/86/82/81 truth.
+-- repairing, rewriting, or mutating Layer-107/106/102/101/97/96/92/91/87/86/82/81 truth.
 
 create or replace function foundation.case_audit_layer107_coverage_incident_fingerprint_v1(
   p_snapshot jsonb
@@ -94,7 +94,7 @@ create table foundation.case_audit_layer107_coverage_incident_events (
   environment text not null
     check (environment ~ '^[a-z0-9][a-z0-9._-]*$'),
   domain text not null
-    check (domain='case_audit_layer102_reconciliation_coverage'),
+    check (domain='case_audit_layer107_reconciliation_coverage'),
   event_type text not null
     check (event_type in ('detected','opened','changed','recovered')),
   source_state text not null
@@ -253,7 +253,7 @@ begin
   v_state := coalesce(p_snapshot->>'state','invalid');
   v_reason := coalesce(
     nullif(p_snapshot->>'reasonCode',''),
-    'case-audit-layer102-state-invalid'
+    'case-audit-layer107-state-invalid'
   );
 
   if v_state not in ('idle','normal','pending','gap','invalid') then
@@ -263,7 +263,7 @@ begin
   v_fingerprint :=
     foundation.case_audit_layer107_coverage_incident_fingerprint_v1(p_snapshot);
 
-  v_incident_key := p_environment||':case_audit_layer102_reconciliation_coverage';
+  v_incident_key := p_environment||':case_audit_layer107_reconciliation_coverage';
 
   select * into v_prior
   from foundation.case_audit_layer107_coverage_incident_events
@@ -340,7 +340,7 @@ begin
     )
     values(
       v_event_id,v_incident_key,p_environment,
-      'case_audit_layer102_reconciliation_coverage',
+      'case_audit_layer107_reconciliation_coverage',
       v_event_type,v_state,v_severity,v_reason,v_fingerprint,
       v_detection_started_at,p_persistence_threshold_seconds,
       v_persistence_seconds,p_snapshot,p_observed_at,
@@ -511,7 +511,7 @@ begin
 
   select * into v_current
   from foundation.current_case_audit_layer107_coverage_incident_state
-  where incident_key=p_environment||':case_audit_layer102_reconciliation_coverage';
+  where incident_key=p_environment||':case_audit_layer107_reconciliation_coverage';
 
   select count(*) into v_active_count
   from foundation.current_case_audit_layer107_coverage_incidents
