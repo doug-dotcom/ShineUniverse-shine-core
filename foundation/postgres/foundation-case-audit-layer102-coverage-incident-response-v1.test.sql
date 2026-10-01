@@ -41,9 +41,11 @@ begin
     'healthyLayer102ReconciliationPercent',0,
     'currentEvent',null,
     'recommendedAction','none',
-    'automaticLayer97Reconciliation',false,
+    'automaticLayer102Reconciliation',false,
     'automaticReconciliation',false,
     'automaticRepair',false,
+    'layer101RerunPerformed',false,
+    'layer97RerunPerformed',false,
     'layer96RerunPerformed',false,
     'layer92RerunPerformed',false,
     'layer91RerunPerformed',false,
@@ -84,13 +86,13 @@ declare
     nullif(current_setting('foundation.test_l105_overdue',true),'')::integer,0
   );
   v_invalid102 integer := coalesce(
-    nullif(current_setting('foundation.test_l105_invalid97',true),'')::integer,0
+    nullif(current_setting('foundation.test_l105_invalid102',true),'')::integer,0
   );
   v_missing97 integer := coalesce(
-    nullif(current_setting('foundation.test_l105_missing92',true),'')::integer,0
+    nullif(current_setting('foundation.test_l105_missing97',true),'')::integer,0
   );
   v_invalid97 integer := coalesce(
-    nullif(current_setting('foundation.test_l105_invalid92',true),'')::integer,0
+    nullif(current_setting('foundation.test_l105_invalid97',true),'')::integer,0
   );
   v_exec_mismatch integer := coalesce(
     nullif(current_setting('foundation.test_l105_exec_mismatch',true),'')::integer,0
@@ -145,6 +147,8 @@ begin
     'layer102ProofIntegrityRecomputed',true,
     'linkedLayer97SnapshotRevalidated',true,
     'layer102ReconciliationPerformed',false,
+    'layer101RerunPerformed',false,
+    'layer97RerunPerformed',false,
     'layer96RerunPerformed',false,
     'layer92RerunPerformed',false,
     'layer91RerunPerformed',false,
@@ -166,9 +170,9 @@ begin
   perform set_config('foundation.test_l105_coverage_state','idle',true);
   perform set_config('foundation.test_l105_reason','case-audit-layer102-no-executions',true);
   perform set_config('foundation.test_l105_overdue','0',true);
+  perform set_config('foundation.test_l105_invalid102','0',true);
+  perform set_config('foundation.test_l105_missing97','0',true);
   perform set_config('foundation.test_l105_invalid97','0',true);
-  perform set_config('foundation.test_l105_missing92','0',true);
-  perform set_config('foundation.test_l105_invalid92','0',true);
   perform set_config('foundation.test_l105_exec_mismatch','0',true);
   perform set_config('foundation.test_l105_policy_drift','0',true);
   perform set_config('foundation.test_l105_incident_drift','0',true);
@@ -182,7 +186,9 @@ begin
      or c->>'automaticLayer102ReconciliationAllowed'<>'false'
      or c->>'automaticRepairAllowed'<>'false'
      or c->>'layer101RerunAllowed'<>'false'
-     or c->>'layer97RerunAllowed'<>'false' then
+     or c->>'layer97RerunAllowed'<>'false'
+     or c->>'layer96RerunAllowed'<>'false'
+     or c->>'layer92RerunAllowed'<>'false' then
     raise exception 'Layer 105 normal cause invalid: %',c;
   end if;
 
@@ -212,9 +218,9 @@ begin
   perform set_config('foundation.test_l105_coverage_state','gap',true);
   perform set_config('foundation.test_l105_reason','case-audit-layer102-overdue',true);
   perform set_config('foundation.test_l105_overdue','1',true);
+  perform set_config('foundation.test_l105_invalid102','0',true);
+  perform set_config('foundation.test_l105_missing97','0',true);
   perform set_config('foundation.test_l105_invalid97','0',true);
-  perform set_config('foundation.test_l105_missing92','0',true);
-  perform set_config('foundation.test_l105_invalid92','0',true);
   perform set_config('foundation.test_l105_exec_mismatch','0',true);
   perform set_config('foundation.test_l105_policy_drift','0',true);
   perform set_config('foundation.test_l105_incident_drift','0',true);
@@ -237,7 +243,7 @@ begin
         <>'foundation.run_case_audit_layer101_execution_reconciliation_v1'
      or d->>'automaticLayer102ReconciliationAllowed'<>'false'
      or d->>'executesAction'<>'false' then
-    raise exception 'Layer 105 bounded Layer-97 admission invalid: %',d;
+    raise exception 'Layer 105 bounded Layer-102 admission invalid: %',d;
   end if;
 end;
 $l105_omission$;
@@ -246,7 +252,7 @@ $l105_omission$;
 do $l105_integrity_precedence$
 declare c jsonb; d jsonb;
 begin
-  perform set_config('foundation.test_l105_invalid97','1',true);
+  perform set_config('foundation.test_l105_invalid102','1',true);
   perform set_config('foundation.test_l105_overdue','1',true);
   perform set_config('foundation.test_l105_reason','case-audit-layer102-receipt-invalid',true);
 
@@ -255,14 +261,14 @@ begin
   );
   if c->>'causeClass'<>'layer102-receipt-integrity'
      or c->>'nextEvidenceAction'<>'inspect-layer102-reconciliation-receipt' then
-    raise exception 'Layer 105 Layer-97 integrity precedence invalid: %',c;
+    raise exception 'Layer 105 Layer-102 integrity precedence invalid: %',c;
   end if;
 
   d:=foundation.evaluate_case_audit_layer102_coverage_incident_response_v1(
     'run-independent-layer102-reconciliation','production',now(),300
   );
   if d->>'decision'<>'not-applicable' then
-    raise exception 'Layer 105 must not reconcile around bad Layer-97 receipt: %',d;
+    raise exception 'Layer 105 must not reconcile around bad Layer-102 receipt: %',d;
   end if;
 end;
 $l105_integrity_precedence$;
@@ -271,22 +277,22 @@ $l105_integrity_precedence$;
 do $l105_deeper_causes$
 declare c jsonb; d jsonb;
 begin
-  perform set_config('foundation.test_l105_invalid97','0',true);
+  perform set_config('foundation.test_l105_invalid102','0',true);
   perform set_config('foundation.test_l105_overdue','0',true);
 
-  perform set_config('foundation.test_l105_invalid92','1',true);
+  perform set_config('foundation.test_l105_invalid97','1',true);
   c:=foundation.get_case_audit_layer102_coverage_incident_cause_v1('production',now(),300);
   if c->>'causeClass'<>'layer97-receipt-integrity' then
-    raise exception 'Layer 105 invalid92 cause: %',c;
+    raise exception 'Layer 105 invalid97 cause: %',c;
   end if;
   d:=foundation.evaluate_case_audit_layer102_coverage_incident_response_v1(
     'inspect-layer97-reconciliation-receipt','production',now(),300
   );
   if d->>'decision'<>'admit' then
-    raise exception 'Layer 105 invalid92 inspect: %',d;
+    raise exception 'Layer 105 invalid97 inspect: %',d;
   end if;
 
-  perform set_config('foundation.test_l105_invalid92','0',true);
+  perform set_config('foundation.test_l105_invalid97','0',true);
   perform set_config('foundation.test_l105_exec_mismatch','1',true);
   c:=foundation.get_case_audit_layer102_coverage_incident_cause_v1('production',now(),300);
   if c->>'causeClass'<>'layer101-execution-receipt-mismatch' then
@@ -315,16 +321,16 @@ begin
   end if;
 
   perform set_config('foundation.test_l105_coverage_drift','0',true);
-  perform set_config('foundation.test_l105_missing92','1',true);
+  perform set_config('foundation.test_l105_missing97','1',true);
   c:=foundation.get_case_audit_layer102_coverage_incident_cause_v1('production',now(),300);
   if c->>'causeClass'<>'layer97-receipt-missing' then
-    raise exception 'Layer 105 missing92 cause: %',c;
+    raise exception 'Layer 105 missing97 cause: %',c;
   end if;
   d:=foundation.evaluate_case_audit_layer102_coverage_incident_response_v1(
     'run-independent-layer102-reconciliation','production',now(),300
   );
   if d->>'decision'<>'not-applicable' then
-    raise exception 'Layer 105 must not create Layer97 around missing Layer92 truth: %',d;
+    raise exception 'Layer 105 must not create Layer102 around missing Layer97 truth: %',d;
   end if;
 end;
 $l105_deeper_causes$;
@@ -361,6 +367,8 @@ begin
        or d->>'historyRewriteAllowed'<>'false'
        or d->>'layer101RerunAllowed'<>'false'
        or d->>'layer97RerunAllowed'<>'false'
+       or d->>'layer96RerunAllowed'<>'false'
+       or d->>'layer92RerunAllowed'<>'false'
        or d->>'layer91RerunAllowed'<>'false'
        or d->>'layer87RerunAllowed'<>'false'
        or d->>'layer86RerunAllowed'<>'false'
@@ -380,7 +388,7 @@ begin
   perform set_config('foundation.test_l105_incident_state','watching',true);
   perform set_config('foundation.test_l105_coverage_state','gap',true);
   perform set_config('foundation.test_l105_reason','case-audit-layer102-overdue',true);
-  perform set_config('foundation.test_l105_missing92','0',true);
+  perform set_config('foundation.test_l105_missing97','0',true);
   perform set_config('foundation.test_l105_overdue','1',true);
 
   p:=foundation.get_case_audit_layer102_coverage_incident_response_plan_v1(
