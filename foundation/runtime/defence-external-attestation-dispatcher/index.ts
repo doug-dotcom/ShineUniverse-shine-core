@@ -329,8 +329,10 @@ Deno.serve(async(req:Request)=>{
       });
     }
 
-    const repositoryIds=[
-      ...new Set(plan.items.map((item:DispatchItem)=>item.repositoryId))
+    const repositoryIds:string[]=[
+      ...new Set(
+        (plan.items as DispatchItem[]).map(item=>String(item.repositoryId))
+      )
     ];
     const installationToken=await createInstallationToken(
       appId,installationId,privateKey,repositoryIds
