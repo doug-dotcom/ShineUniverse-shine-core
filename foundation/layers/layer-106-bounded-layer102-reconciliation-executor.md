@@ -1,6 +1,6 @@
 # Foundation Layer 106 — Bounded Layer-102 reconciliation executor
 
-**Status:** IMPLEMENTED — CI and production verification pending  
+**Status:** LIVE — CI green and production verification complete  
 **Scope:** execute the single bounded action Layer 105 may admit: independent Layer-102 reconciliation of one overdue successful Layer-101 execution
 
 Layer 105 can identify a pure omission where a successful Layer-101 execution is old enough to require Layer-102 reconciliation, no Layer-102 receipt exists, and the Layer-104 incident lifecycle is active.
@@ -77,6 +77,35 @@ CI proves:
 - direct service-role Layer-102 bypass is revoked;
 - service role cannot directly insert Layer-106 ledger rows;
 - append-only and role boundaries hold.
+
+## Production proof
+
+Layer 106 is deployed in the Shine Foundation Supabase project as migration:
+
+`20261001040132 — foundation_layer_106_bounded_layer102_reconciliation_executor`
+
+Pull request **#149** passed the complete Foundation + Concierge and Shine Defence workflows before merge.
+
+Live production verification confirms:
+
+- Layer-106 ledger, executor, policy fingerprint and summary exist;
+- current Layer-106 execution count: **0**;
+- current Layer-102 reconciliation count: **0**;
+- current Layer-101 execution count: **0**;
+- current Layer-104 incident-event count: **0**;
+- direct `service_role` EXECUTE on the Layer-102 reconciler is **revoked**;
+- `service_role` can execute Layer 106;
+- Foundation runtime, Gateway, Shine Core, Shine Defence and browser roles cannot execute Layer 106;
+- `service_role` cannot directly INSERT Layer-106 ledger rows;
+- Foundation runtime can read the summary;
+- Gateway reads the summary only through existing `foundation_runtime` membership;
+- Layer-103 production coverage remains **idle**;
+- Layer-104 production incident state remains **normal**;
+- Layer-105 production cause remains **none**;
+- a nonexistent Layer-101 target invoked under `service_role` returns `not-applicable / target-not-found`;
+- that negative probe creates no Layer-106 event and no Layer-102 reconciliation;
+- Supabase security advisors report **0 findings** after deployment;
+- the two new Layer-106 indexes are reported unused, expected while the production executor ledger is empty.
 
 ## Invariant
 
