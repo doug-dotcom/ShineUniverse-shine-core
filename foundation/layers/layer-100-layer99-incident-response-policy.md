@@ -1,6 +1,6 @@
 # Foundation Layer 100 — Layer-99 incident response policy
 
-**Status:** IMPLEMENTED — CI and production verification pending  
+**Status:** LIVE — CI green and production verification complete  
 **Scope:** govern what Foundation may do in response to a persistent Layer-98 coverage incident
 
 Layer 99 makes persistent Layer-98 GAP/INVALID coverage operationally visible.
@@ -85,6 +85,37 @@ Foundation runtime and service role may read the policy. Gateway reads only thro
 ## Deliberate non-actions
 
 Layer 100 performs no Layer-97 reconciliation, no upstream rerun, no repair, no receipt rewrite, no history mutation and no release-truth mutation.
+
+## Production proof
+
+Layer 100 is deployed in the Shine Foundation Supabase project as migration:
+
+`20261001022415 — foundation_layer_100_layer99_incident_response_policy`
+
+Pull request **#135** passed the complete Foundation + Concierge and Shine Defence workflows.
+
+Live production verification confirms:
+
+- current Layer-99 operational state: **normal**;
+- current Layer-98 coverage state: **idle**;
+- current cause class: **none**;
+- next evidence action: **none**;
+- `inspect-layer98-coverage`: **admit / read-only**;
+- `run-independent-layer97-reconciliation`: **not-applicable** on clean production;
+- `rerun-layer96`: **deny / prohibited**;
+- `mutate-release-truth`: **deny / prohibited**;
+- the response plan exposes **30** governed actions;
+- Layer-96 execution count remained **0**;
+- Layer-97 reconciliation count remained **0**;
+- Layer-99 incident-event count remained **0**;
+- Foundation runtime and service role can read the policy;
+- Gateway reads only through existing `foundation_runtime` inheritance and has **no direct EXECUTE grant**;
+- Shine Core, Shine Defence and browser roles cannot read the policy;
+- direct service-role Layer-97 reconciliation remains available at Layer 100 and is deliberately left for the next bounded-executor layer to close;
+- Supabase security advisors report **0 findings** after deployment;
+- Supabase performance advisors report no Layer-100-specific finding.
+
+The policy remains non-executing: prohibited-action metadata can truthfully describe what an attempted action would mutate while `decision=deny`, `requiredControl=prohibited` and `executesAction=false` keep the control fail-closed.
 
 ## Milestone invariant
 
