@@ -1,6 +1,6 @@
 # Foundation Layer 93 — Layer-92 reconciliation coverage audit
 
-**Status:** IMPLEMENTED — CI and production verification pending  
+**Status:** LIVE — CI green and production verification complete  
 **Scope:** audit coverage and structural integrity of Layer-92 reconciliation receipts over successful Layer-91 executions
 
 Layer 92 independently proves whether a Layer-91 execution claim matches durable Layer-87 truth.
@@ -63,6 +63,33 @@ Layer 93 creates no Layer-92 receipt, reruns no Layer 91/87/86/82/81/verificatio
 ## Acceptance coverage
 
 CI proves six materially different cases: reconciled; pending; overdue; valid `missing-layer87-receipt`; valid `execution-receipt-mismatch`; and a structurally invalid Layer-92 receipt.
+
+## Production proof
+
+Layer 93 is deployed in the Shine Foundation Supabase project as migration:
+
+`20261001001719 — foundation_layer_093_layer92_reconciliation_coverage_audit`
+
+Pull request **#121** passed the complete Foundation + Concierge and Shine Defence workflows. CI caught two fixture-only defects before merge: synthetic fingerprints that exceeded the real 64-hex contract and an ambiguous PL/pgSQL fixture timestamp. The Layer-93 coverage reader itself remained unchanged through both corrections.
+
+Live production verification confirms:
+
+- current Layer-93 state: **idle**;
+- current problem count: **0**;
+- successful Layer-91 execution count: **0**;
+- Layer-92 reconciliation receipt count: **0**;
+- Layer-92 reconciliation coverage: **100%**;
+- healthy Layer-92 reconciliation: **100%**;
+- Layer-92 proof integrity is recomputed by the reader;
+- linked Layer-87 snapshots are revalidated;
+- the coverage read performs no Layer-92 reconciliation and no Layer-91/87/86/82/81/verification rerun;
+- Foundation runtime and service role can read Layer 93;
+- Gateway reads only through existing `foundation_runtime` inheritance and receives no direct grant;
+- Shine Core, Shine Defence and browser roles cannot read Layer 93;
+- Supabase performance advisors report no Layer-93-specific finding;
+- Supabase security advisors report no Layer-93-specific finding.
+
+Two project-wide INFO security advisor notices currently exist for unrelated `public.grant_protocol` and `public.grant_build_evidence` tables having RLS enabled without policies. Those migrations landed outside Layer 93 and are deliberately not altered by this layer.
 
 ## Invariant
 
