@@ -205,6 +205,31 @@ end;
 $activation_ready_fail_closed$;
 
 
+do $activation_blocked_heartbeat$
+declare
+  r jsonb;
+begin
+  select foundation.record_defence_external_dispatcher_heartbeat_v1(
+    gen_random_uuid(),
+    true,
+    'disabled_activation_not_ready',
+    clock_timestamp(),
+    'test:dispatcher-activation:blocked-heartbeat',
+    jsonb_build_object(
+      'activationState','not_configured',
+      'credentialValueExposed',false
+    )
+  ) into r;
+
+  if r->>'status'<>'recorded'
+     or r->>'credentialsReady'<>'true'
+     or r->>'outcome'<>'disabled_activation_not_ready' then
+    raise exception 'Activation-blocked heartbeat invalid: %',r;
+  end if;
+end;
+$activation_blocked_heartbeat$;
+
+
 do $activation_security$
 begin
   if has_table_privilege(
