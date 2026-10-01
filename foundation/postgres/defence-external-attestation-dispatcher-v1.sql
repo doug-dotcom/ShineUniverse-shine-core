@@ -64,7 +64,7 @@ create table if not exists foundation.defence_external_dispatcher_heartbeats (
   heartbeat_id uuid not null unique,
   credentials_ready boolean not null,
   outcome text not null
-    check (outcome in ('ready_idle','ready_dispatched','ready_partial_failure','disabled_missing_credentials','failed')),
+    check (outcome in ('ready_idle','ready_dispatched','ready_partial_failure','disabled_missing_credentials','disabled_activation_not_ready','failed')),
   observed_at timestamptz not null,
   evidence_ref text not null unique,
   metadata jsonb not null default '{}'::jsonb,
@@ -287,7 +287,7 @@ begin
      or p_credentials_ready is null
      or p_outcome not in (
        'ready_idle','ready_dispatched','ready_partial_failure',
-       'disabled_missing_credentials','failed'
+       'disabled_missing_credentials','disabled_activation_not_ready','failed'
      )
      or p_observed_at is null
      or p_evidence_ref is null

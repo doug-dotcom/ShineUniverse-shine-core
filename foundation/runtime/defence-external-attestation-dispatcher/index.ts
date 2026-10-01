@@ -178,6 +178,15 @@ async function dispatchPlan(){
   return rows[0]?.plan??null;
 }
 
+async function activationReadiness(){
+  const rows=await sql`
+    select foundation.get_defence_external_dispatcher_activation_readiness_v1(
+      now(),3600
+    ) as readiness
+  `;
+  return rows[0]?.readiness??null;
+}
+
 async function recordHeartbeat(
   executionId:string,
   credentialsReady:boolean,
@@ -316,13 +325,57 @@ Deno.serve(async(req:Request)=>{
       });
     }
 
+    const activation=await activationReadiness();
+    const activationReady=
+      activation?.state==='ready'&&
+      activation?.latestReceipt?.appIdentityVerified===true&&
+      activation?.latestReceipt?.installationTokenIssued===true&&
+      activation?.latestReceipt?.actionsWriteConfirmed===true&&
+      activation?.latestReceipt?.repositoryCoverageComplete===true&&
+      activation?.latestReceipt?.metadata?.workflowAccessComplete===true;
+
+    const activatedMetadata={
+      ...credentialMetadata,
+      activationState:activation?.state??'missing',
+      activationReceiptId:activation?.latestReceipt?.receiptId??null,
+      activationObservedAt:activation?.latestReceipt?.observedAt??null
+    };
+
+    if(!activationReady){
+      for(const item of plan.items){
+        await recordDispatch(
+          executionId,item,'disabled',null,null,
+          {
+            ...activatedMetadata,
+            reasonCode:'dispatcher-activation-not-ready'
+          }
+        );
+      }
+      const heartbeat=await recordHeartbeat(
+        executionId,
+        true,
+        'disabled_activation_not_ready',
+        activatedMetadata
+      );
+      return jsonResponse(200,{
+        status:'disabled',
+        contract:'shine-defence/external-attestation-dispatcher-v1',
+        reasonCode:'dispatcher-activation-not-ready',
+        activationState:activation?.state??'missing',
+        planPhase:plan.phase,
+        itemCount:plan.items.length,
+        heartbeat
+      });
+    }
+
     if(plan.items.length===0){
       const heartbeat=await recordHeartbeat(
-        executionId,true,'ready_idle',credentialMetadata
+        executionId,true,'ready_idle',activatedMetadata
       );
       return jsonResponse(200,{
         status:'idle',
         contract:'shine-defence/external-attestation-dispatcher-v1',
+        activationState:'ready',
         planPhase:plan.phase,
         itemCount:0,
         heartbeat
@@ -356,7 +409,7 @@ Deno.serve(async(req:Request)=>{
           result.githubRunId,
           result.httpStatus,
           {
-            ...credentialMetadata,
+            ...activatedMetadata,
             githubApiVersion:API_VERSION,
             installationTokenStored:false,
             appJwtStored:false
@@ -376,7 +429,7 @@ Deno.serve(async(req:Request)=>{
         await recordDispatch(
           executionId,item,'failed',null,null,
           {
-            ...credentialMetadata,
+            ...activatedMetadata,
             reasonCode:reason.slice(0,256),
             installationTokenStored:false,
             appJwtStored:false
@@ -396,7 +449,7 @@ Deno.serve(async(req:Request)=>{
       true,
       failed>0?'ready_partial_failure':'ready_dispatched',
       {
-        ...credentialMetadata,
+        ...activatedMetadata,
         dispatchedCount:dispatched,
         failedCount:failed,
         installationTokenStored:false,
