@@ -679,7 +679,7 @@
       "id": "release-attestation-authority-sync-heartbeat-integration-db",
       "path": "foundation/postgres/defence-attestation-authority-sync-heartbeat-integration-v1.sql",
       "version": "1.0.0",
-      "blobSha": "d625b40ddfc023be20127ee234df6202e66cd19c"
+      "blobSha": "1d97aa6001c8858fd017561a0f9f72e2520daf79"
     },
     {
       "id": "release-attestation-authority-heartbeat-sentinel-db",
@@ -702,14 +702,32 @@
     {
       "id": "operational-attention",
       "path": "foundation/contracts/defence-operational-attention-v1.json",
-      "version": "1.0.0",
-      "blobSha": "2558d093055835bada05d2b8b2ac3aa0d6b60f52"
+      "version": "1.1.0",
+      "blobSha": "5d7e1ffcc108108ddbb4c3a4441c0427c19a69a7"
     },
     {
       "id": "operational-attention-db",
       "path": "foundation/postgres/defence-operational-attention-v1.sql",
       "version": "1.0.0",
       "blobSha": "8ce2d060068ac4c885b39b5c8c40f5279556c7b5"
+    },
+    {
+      "id": "on-demand-sleep-posture",
+      "path": "foundation/contracts/defence-on-demand-sleep-posture-v1.json",
+      "version": "1.0.0",
+      "blobSha": "f4c9450f678a5a4b8489761950ab44d619fd616b"
+    },
+    {
+      "id": "on-demand-sleep-posture-db",
+      "path": "foundation/postgres/defence-on-demand-sleep-posture-v1.sql",
+      "version": "1.0.0",
+      "blobSha": "37bc854df14510b7fca0300c93ffc484a7856488"
+    },
+    {
+      "id": "operational-attention-sleep-aware-db",
+      "path": "foundation/postgres/defence-operational-attention-sleep-aware-v1.sql",
+      "version": "1.0.0",
+      "blobSha": "19ffa3b3828690d4bd7b495094e5c3e72413231c"
     },
     {
       "id": "release-attestation-authority-heartbeat-sentinel",
