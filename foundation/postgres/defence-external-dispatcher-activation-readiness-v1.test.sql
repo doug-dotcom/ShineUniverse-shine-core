@@ -141,7 +141,8 @@ begin
     jsonb_build_object(
       'credentialValueExposed',false,
       'installationTokenStored',false,
-      'appJwtStored',false
+      'appJwtStored',false,
+      'workflowAccessComplete',true
     )
   ) into ready;
 
