@@ -648,8 +648,8 @@
     {
       "id": "release-attestation-authority-sync-workflow",
       "path": ".github/workflows/shine-defence-authority-state.yml",
-      "version": "1.1.0",
-      "blobSha": "e86a7da21b67e3ec5da668e6af3ad38c15d9bd73"
+      "version": "1.2.0",
+      "blobSha": "9c2def183abb54400d82ea72b8fc3bf405554f1a"
     },
     {
       "id": "release-attestation-authority-sync-runtime",
