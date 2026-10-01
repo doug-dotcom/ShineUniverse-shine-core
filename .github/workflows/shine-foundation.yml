@@ -726,6 +726,10 @@ jobs:
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-target-recovery-awareness-v1.sql
       - name: Run Shine Defence target recovery awareness tests
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-target-recovery-awareness-v1.test.sql
+      - name: Apply Shine Defence control scheduler liveness
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-control-scheduler-liveness-v1.sql
+      - name: Run Shine Defence control scheduler liveness tests
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-control-scheduler-liveness-v1.test.sql
       - name: Apply Shine Defence transport recurrence sentinel
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-transport-recurrence-sentinel-v1.sql
       - name: Run Shine Defence transport recurrence sentinel tests
