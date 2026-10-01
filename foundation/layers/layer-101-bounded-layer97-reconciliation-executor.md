@@ -1,6 +1,6 @@
 # Foundation Layer 101 — Bounded Layer-97 reconciliation executor
 
-**Status:** IMPLEMENTED — CI and production verification pending  
+**Status:** LIVE — CI green and production verification complete  
 **Scope:** execute the single bounded action Layer 100 may admit: independent Layer-97 reconciliation of one overdue successful Layer-96 execution
 
 Layer 100 can identify a pure omission where a successful Layer-96 execution is old enough to require Layer-97 reconciliation, no Layer-97 receipt exists, and the Layer-99 incident lifecycle is active.
@@ -77,6 +77,35 @@ CI proves:
 - direct service-role Layer-97 bypass is revoked;
 - service role cannot directly insert Layer-101 ledger rows;
 - append-only and role boundaries hold.
+
+## Production proof
+
+Layer 101 is deployed in the Shine Foundation Supabase project as migration:
+
+`20261001023529 — foundation_layer_101_bounded_layer97_reconciliation_executor`
+
+Pull request **#137** passed the complete Foundation + Concierge and Shine Defence workflows before merge.
+
+Live production verification confirms:
+
+- Layer-101 ledger, executor, policy fingerprint and summary exist;
+- current Layer-101 execution count: **0**;
+- current Layer-97 reconciliation count: **0**;
+- current Layer-96 execution count: **0**;
+- current Layer-99 incident-event count: **0**;
+- direct `service_role` EXECUTE on the Layer-97 reconciler is **revoked**;
+- `service_role` can execute Layer 101;
+- Foundation runtime, Gateway, Shine Core, Shine Defence and browser roles cannot execute Layer 101;
+- `service_role` cannot directly INSERT Layer-101 ledger rows;
+- Foundation runtime can read the summary;
+- Gateway reads the summary only through existing `foundation_runtime` membership;
+- Layer-98 production coverage remains **idle**;
+- Layer-99 production incident state remains **normal**;
+- Layer-100 production cause remains **none**;
+- a nonexistent Layer-96 target, invoked under `service_role`, returns `not-applicable / target-not-found`;
+- that negative probe creates no Layer-101 event and no Layer-97 reconciliation;
+- Supabase security advisors report **0 findings** after deployment;
+- the two new Layer-101 indexes are reported unused, which is expected while the production executor ledger is empty.
 
 ## Invariant
 
