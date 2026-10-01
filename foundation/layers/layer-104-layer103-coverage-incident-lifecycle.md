@@ -1,6 +1,6 @@
 # Foundation Layer 104 — Layer-103 coverage incident lifecycle
 
-**Status:** IMPLEMENTED — CI and production verification pending  
+**Status:** LIVE — CI green and production verification complete  
 **Scope:** turn persistent Layer-103 Layer-102 reconciliation-coverage failures into append-only operational incidents
 
 Layer 103 asks whether every successful Layer-101 execution received one trustworthy Layer-102 reconciliation receipt.
@@ -75,6 +75,42 @@ The transition helper and shared hosted wrapper are owner-private. Service role 
 ## Acceptance coverage
 
 CI proves first GAP detection, persistence before opening, quiet unchanged evidence, CHANGED on material evidence change, recovery to PENDING/NORMAL, INVALID watches, clock-noise-resistant fingerprints, service-role-only sentinel execution, append-only history and the complete read/execute role boundary.
+
+## Production proof
+
+Layer 104 is deployed in the Shine Foundation Supabase project as:
+
+- `20261001033957 — foundation_layer_104_layer103_coverage_incident_lifecycle`
+- `20261001034003 — foundation_layer_104_layer103_coverage_incident_hosted`
+
+Pull request **#144** passed the complete Foundation + Concierge and Shine Defence workflows.
+
+Live production verification confirms:
+
+- operational state: **normal**;
+- Layer-103 coverage state: **idle**;
+- active incidents: **0**;
+- watches: **0**;
+- problem count: **0**;
+- successful Layer-101 execution count: **0**;
+- Layer-102 reconciliation receipt count: **0**;
+- Layer-102 reconciliation coverage: **100%**;
+- healthy Layer-102 reconciliation: **100%**;
+- Layer-104 incident-event count: **0**;
+- service role can run the Layer-104 sentinel but cannot call the transition helper or directly insert incident rows;
+- Foundation runtime can read the summary;
+- Gateway reads the summary only through existing `foundation_runtime` membership;
+- Shine Core and Shine Defence cannot run the sentinel;
+- the shared hosted wrapper is owner-private;
+- the existing pg_cron job remains job **39**, remains active, and retains the same five-minute cadence;
+- total production cron-job count remained **28** before and after Layer 104;
+- job 39 now invokes the shared wrapper that runs Layer 94, Layer 99 and Layer 104 sequentially;
+- the shared-wrapper production probe returned no Layer-94, Layer-99 or Layer-104 error and `additionalCronJobCreated=false`;
+- all three shared sentinel transitions returned `eventCreated=false` against clean IDLE coverage;
+- a real service-role Layer-104 sentinel probe also returned `eventCreated=false`;
+- all probes performed no Layer-102 reconciliation, no Layer-101/97/96/92/91/87/86/82/81 or verification rerun, and no authoritative-truth or incident-history mutation;
+- Supabase security advisors report **0 findings** after deployment;
+- Supabase performance advisors report no Layer-104-specific finding.
 
 ## Invariant
 
