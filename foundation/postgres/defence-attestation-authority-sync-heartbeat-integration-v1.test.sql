@@ -28,7 +28,7 @@ begin
   end if;
 
   select foundation.get_defence_full_estate_summary_v1() into v;
-  if v->>'schemaVersion'<>'1.12.0'
+  if v->>'schemaVersion'<>'1.13.0'
      or v#>>'{attestationAuthoritySync,state}'<>'pass'
      or v#>>'{attestationAuthorityHeartbeatSentinel,state}'<>'pass'
      or v#>>'{attestationAuthorityHeartbeatSentinel,band}'<>'current'
@@ -37,7 +37,9 @@ begin
      or v#>>'{correlatedTransportAttribution,rawEstateStateOverridden}' is distinct from 'false'
      or v#>>'{operationalAttention,defenceOperationalAttention}'<>
         'shine-defence/operational-attention-v1'
+     or v#>>'{operationalAttention,schemaVersion}'<>'1.1.0'
      or v#>>'{operationalAttention,rawEstateStateOverridden}' is distinct from 'false'
+     or v#>>'{operationalAttention,sleepAwareOverlay,rawEstateStateOverridden}' is distinct from 'false'
      or v#>>'{attestationAuthoritySync,currentAuthority,authoritySha}'<>
         '7bfd7fe685b4b2da814ac53dafdbfac2350591c8' then
     raise exception 'authority sync missing from full-estate summary: %',v;
