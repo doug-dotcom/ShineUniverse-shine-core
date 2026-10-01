@@ -1,0 +1,284 @@
+name: Shine Defence Native Git Revalidation v1
+
+on:
+  workflow_call:
+    inputs:
+      action:
+        required: true
+        type: string
+      control_id:
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  prepare:
+    if: inputs.action == 'prepare'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Acquire native Git OIDC token
+        shell: bash
+        run: |
+          set -euo pipefail
+          OIDC_JSON="$(curl -fsSL -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=shine-defence-on-demand-native-git")"
+          OIDC_TOKEN="$(printf '%s' "$OIDC_JSON" | python3 -c 'import json,sys; print(json.load(sys.stdin)["value"])')"
+          echo "::add-mask::$OIDC_TOKEN"
+          printf '%s' "$OIDC_TOKEN" > /tmp/native-git-oidc
+
+      - name: Claim candidate preparation scope
+        id: claim
+        env:
+          APPROVAL_ID: ${{ inputs.control_id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          OIDC_TOKEN="$(cat /tmp/native-git-oidc)"
+          BODY="$(APPROVAL_ID="$APPROVAL_ID" node -e 'console.log(JSON.stringify({contract:"shine-defence/on-demand-native-git-bridge-v1",schemaVersion:"1.0.0",action:"prepare-claim",approvalId:process.env.APPROVAL_ID}))')"
+          HTTP="$(curl -sS -o /tmp/native-git-claim.json -w '%{http_code}' -X POST             -H "Authorization: Bearer $OIDC_TOKEN" -H "Content-Type: application/json"             --data "$BODY"             https://sjpxqeyewahraxvidvcc.supabase.co/functions/v1/defence-on-demand-native-git-bridge)"
+          cat /tmp/native-git-claim.json
+          [ "$HTTP" = "200" ]
+          node <<'NODE' >> "$GITHUB_OUTPUT"
+          const fs=require('fs');
+          const x=JSON.parse(fs.readFileSync('/tmp/native-git-claim.json','utf8')).result;
+          const sha=v=>/^[a-f0-9]{40}$/i.test(v||'');
+          if(x.repository!==process.env.GITHUB_REPOSITORY||!sha(x.baseHeadSha)) throw new Error('candidate claim scope invalid');
+          for(const [k,v] of Object.entries({
+            target_id:x.targetId,repository:x.repository,branch:x.branch,
+            base_sha:x.baseHeadSha,trigger_prefix:x.triggerPathPrefix,
+            approval_id:x.approvalId
+          })) console.log(k+'='+v);
+          NODE
+
+      - name: Prepare isolated candidate commit
+        id: candidate
+        env:
+          APPROVAL_ID: ${{ steps.claim.outputs.approval_id }}
+          TARGET_ID: ${{ steps.claim.outputs.target_id }}
+          WATCHED_BRANCH: ${{ steps.claim.outputs.branch }}
+          BASE_SHA: ${{ steps.claim.outputs.base_sha }}
+          TRIGGER_PREFIX: ${{ steps.claim.outputs.trigger_prefix }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin "$WATCHED_BRANCH"
+          OBSERVED="$(git rev-parse "origin/$WATCHED_BRANCH")"
+          [ "$OBSERVED" = "$BASE_SHA" ] || { echo "Watched branch drifted: $OBSERVED != $BASE_SHA"; exit 1; }
+
+          CANDIDATE_BRANCH="shine-defence/native-git-candidate/$APPROVAL_ID"
+          if git ls-remote --exit-code --heads origin "$CANDIDATE_BRANCH" >/dev/null 2>&1; then
+            echo "Candidate branch already exists: $CANDIDATE_BRANCH"
+            exit 1
+          fi
+
+          git checkout --detach "$BASE_SHA"
+          MARKER_PATH="$TRIGGER_PREFIX$APPROVAL_ID.json"
+          mkdir -p "$(dirname "$MARKER_PATH")"
+          APPROVAL_ID="$APPROVAL_ID" TARGET_ID="$TARGET_ID" BASE_SHA="$BASE_SHA" MARKER_PATH="$MARKER_PATH" node <<'NODE'
+          const fs=require('fs');
+          const marker={
+            contract:'shine-defence/on-demand-native-git-candidate-marker-v1',
+            schemaVersion:'1.0.0',
+            approvalId:process.env.APPROVAL_ID,
+            targetId:process.env.TARGET_ID,
+            baseHeadSha:process.env.BASE_SHA,
+            purpose:'Explicit Shine Defence native-Git on-demand revalidation candidate.',
+            runtimeCodeChanged:false,
+            serviceConfigurationChanged:false,
+            rollbackAuthorised:false
+          };
+          fs.writeFileSync(process.env.MARKER_PATH,JSON.stringify(marker,null,2)+'\n');
+          NODE
+
+          MARKER_SHA="$(sha256sum "$MARKER_PATH" | awk '{print $1}')"
+          git config user.name "Shine Defence"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$MARKER_PATH"
+          git commit -m "Defence: prepare native Git revalidation candidate"
+          CANDIDATE_SHA="$(git rev-parse HEAD)"
+          PARENT_SHA="$(git rev-parse HEAD^)"
+          [ "$PARENT_SHA" = "$BASE_SHA" ] || { echo "Candidate parent mismatch"; exit 1; }
+
+          git push origin "HEAD:refs/heads/$CANDIDATE_BRANCH"
+
+          {
+            echo "candidate_branch=$CANDIDATE_BRANCH"
+            echo "candidate_sha=$CANDIDATE_SHA"
+            echo "marker_path=$MARKER_PATH"
+            echo "marker_sha=$MARKER_SHA"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Record immutable candidate
+        env:
+          APPROVAL_ID: ${{ inputs.control_id }}
+          BASE_SHA: ${{ steps.claim.outputs.base_sha }}
+          CANDIDATE_SHA: ${{ steps.candidate.outputs.candidate_sha }}
+          CANDIDATE_BRANCH: ${{ steps.candidate.outputs.candidate_branch }}
+          MARKER_PATH: ${{ steps.candidate.outputs.marker_path }}
+          MARKER_SHA: ${{ steps.candidate.outputs.marker_sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          OIDC_TOKEN="$(cat /tmp/native-git-oidc)"
+          BODY="$(node - <<'NODE'
+          console.log(JSON.stringify({
+            contract:'shine-defence/on-demand-native-git-bridge-v1',
+            schemaVersion:'1.0.0',
+            action:'record-candidate',
+            approvalId:process.env.APPROVAL_ID,
+            baseHeadSha:process.env.BASE_SHA,
+            candidateCommitSha:process.env.CANDIDATE_SHA,
+            candidateBranch:process.env.CANDIDATE_BRANCH,
+            triggerPath:process.env.MARKER_PATH,
+            markerSha256:process.env.MARKER_SHA
+          }));
+          NODE
+          )"
+          HTTP="$(curl -sS -o /tmp/native-git-record.json -w '%{http_code}' -X POST             -H "Authorization: Bearer $OIDC_TOKEN" -H "Content-Type: application/json"             --data "$BODY"             https://sjpxqeyewahraxvidvcc.supabase.co/functions/v1/defence-on-demand-native-git-bridge)"
+          cat /tmp/native-git-record.json
+          [ "$HTTP" = "200" ]
+
+  execute:
+    if: inputs.action == 'execute'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Acquire native Git OIDC token
+        shell: bash
+        run: |
+          set -euo pipefail
+          OIDC_JSON="$(curl -fsSL -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=shine-defence-on-demand-native-git")"
+          OIDC_TOKEN="$(printf '%s' "$OIDC_JSON" | python3 -c 'import json,sys; print(json.load(sys.stdin)["value"])')"
+          echo "::add-mask::$OIDC_TOKEN"
+          printf '%s' "$OIDC_TOKEN" > /tmp/native-git-oidc
+
+      - name: Claim admitted native Git execution
+        id: claim
+        env:
+          EXECUTION_ID: ${{ inputs.control_id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          OIDC_TOKEN="$(cat /tmp/native-git-oidc)"
+          BODY="$(EXECUTION_ID="$EXECUTION_ID" node -e 'console.log(JSON.stringify({contract:"shine-defence/on-demand-native-git-bridge-v1",schemaVersion:"1.0.0",action:"execution-claim",executionId:process.env.EXECUTION_ID}))')"
+          HTTP="$(curl -sS -o /tmp/native-git-execution.json -w '%{http_code}' -X POST             -H "Authorization: Bearer $OIDC_TOKEN" -H "Content-Type: application/json"             --data "$BODY"             https://sjpxqeyewahraxvidvcc.supabase.co/functions/v1/defence-on-demand-native-git-bridge)"
+          cat /tmp/native-git-execution.json
+          [ "$HTTP" = "200" ]
+          node <<'NODE' >> "$GITHUB_OUTPUT"
+          const fs=require('fs');
+          const x=JSON.parse(fs.readFileSync('/tmp/native-git-execution.json','utf8')).result;
+          const sha=v=>/^[a-f0-9]{40}$/i.test(v||'');
+          if(x.repository!==process.env.GITHUB_REPOSITORY||!sha(x.baseHeadSha)||!sha(x.candidateCommitSha)) throw new Error('execution claim scope invalid');
+          for(const [k,v] of Object.entries({
+            repository:x.repository,branch:x.branch,base_sha:x.baseHeadSha,
+            candidate_sha:x.candidateCommitSha,candidate_branch:x.candidateBranch,
+            execution_id:x.executionId
+          })) console.log(k+'='+v);
+          NODE
+
+      - name: Verify exact fast-forward preconditions
+        id: preflight
+        env:
+          WATCHED_BRANCH: ${{ steps.claim.outputs.branch }}
+          BASE_SHA: ${{ steps.claim.outputs.base_sha }}
+          CANDIDATE_SHA: ${{ steps.claim.outputs.candidate_sha }}
+          CANDIDATE_BRANCH: ${{ steps.claim.outputs.candidate_branch }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin "$WATCHED_BRANCH"
+          git fetch --no-tags origin "$CANDIDATE_BRANCH"
+          OBSERVED="$(git rev-parse "origin/$WATCHED_BRANCH")"
+          CANDIDATE_OBSERVED="$(git rev-parse "origin/$CANDIDATE_BRANCH")"
+          [ "$OBSERVED" = "$BASE_SHA" ] || { echo "Watched branch drifted: $OBSERVED != $BASE_SHA"; exit 1; }
+          [ "$CANDIDATE_OBSERVED" = "$CANDIDATE_SHA" ] || { echo "Candidate branch drifted"; exit 1; }
+          git merge-base --is-ancestor "$BASE_SHA" "$CANDIDATE_SHA"
+          echo "observed_head=$OBSERVED" >> "$GITHUB_OUTPUT"
+
+      - name: Record fast-forward start
+        env:
+          EXECUTION_ID: ${{ steps.claim.outputs.execution_id }}
+          OBSERVED_HEAD: ${{ steps.preflight.outputs.observed_head }}
+          CANDIDATE_SHA: ${{ steps.claim.outputs.candidate_sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          OIDC_TOKEN="$(cat /tmp/native-git-oidc)"
+          BODY="$(node - <<'NODE'
+          console.log(JSON.stringify({
+            contract:'shine-defence/on-demand-native-git-bridge-v1',
+            schemaVersion:'1.0.0',
+            action:'record-fast-forward-start',
+            executionId:process.env.EXECUTION_ID,
+            observedBranchHeadSha:process.env.OBSERVED_HEAD,
+            candidateCommitSha:process.env.CANDIDATE_SHA
+          }));
+          NODE
+          )"
+          HTTP="$(curl -sS -o /tmp/native-git-start.json -w '%{http_code}' -X POST             -H "Authorization: Bearer $OIDC_TOKEN" -H "Content-Type: application/json"             --data "$BODY"             https://sjpxqeyewahraxvidvcc.supabase.co/functions/v1/defence-on-demand-native-git-bridge)"
+          cat /tmp/native-git-start.json
+          [ "$HTTP" = "200" ]
+
+      - name: Fast-forward watched deployment branch
+        id: fast_forward
+        env:
+          WATCHED_BRANCH: ${{ steps.claim.outputs.branch }}
+          BASE_SHA: ${{ steps.claim.outputs.base_sha }}
+          CANDIDATE_SHA: ${{ steps.claim.outputs.candidate_sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          git push origin "$CANDIDATE_SHA:refs/heads/$WATCHED_BRANCH"
+          git fetch --no-tags origin "$WATCHED_BRANCH"
+          AFTER="$(git rev-parse "origin/$WATCHED_BRANCH")"
+          [ "$AFTER" = "$CANDIDATE_SHA" ] || { echo "Observed branch head mismatch after fast-forward"; exit 1; }
+          echo "observed_after=$AFTER" >> "$GITHUB_OUTPUT"
+
+      - name: Record fast-forward receipt
+        env:
+          EXECUTION_ID: ${{ steps.claim.outputs.execution_id }}
+          BASE_SHA: ${{ steps.claim.outputs.base_sha }}
+          CANDIDATE_SHA: ${{ steps.claim.outputs.candidate_sha }}
+          OBSERVED_AFTER: ${{ steps.fast_forward.outputs.observed_after }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          OIDC_TOKEN="$(cat /tmp/native-git-oidc)"
+          BODY="$(node - <<'NODE'
+          console.log(JSON.stringify({
+            contract:'shine-defence/on-demand-native-git-bridge-v1',
+            schemaVersion:'1.0.0',
+            action:'record-fast-forward-result',
+            executionId:process.env.EXECUTION_ID,
+            previousHeadSha:process.env.BASE_SHA,
+            newHeadSha:process.env.CANDIDATE_SHA,
+            observedAfterSha:process.env.OBSERVED_AFTER
+          }));
+          NODE
+          )"
+          HTTP="$(curl -sS -o /tmp/native-git-result.json -w '%{http_code}' -X POST             -H "Authorization: Bearer $OIDC_TOKEN" -H "Content-Type: application/json"             --data "$BODY"             https://sjpxqeyewahraxvidvcc.supabase.co/functions/v1/defence-on-demand-native-git-bridge)"
+          cat /tmp/native-git-result.json
+          [ "$HTTP" = "200" ]
+
+      - name: Record terminal execution failure
+        if: failure() && steps.claim.outcome == 'success'
+        env:
+          EXECUTION_ID: ${{ steps.claim.outputs.execution_id }}
+        shell: bash
+        run: |
+          set +e
+          OIDC_JSON="$(curl -fsSL -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=shine-defence-on-demand-native-git")"
+          OIDC_TOKEN="$(printf '%s' "$OIDC_JSON" | python3 -c 'import json,sys; print(json.load(sys.stdin)["value"])')"
+          BODY="$(EXECUTION_ID="$EXECUTION_ID" node -e 'console.log(JSON.stringify({contract:"shine-defence/on-demand-native-git-bridge-v1",schemaVersion:"1.0.0",action:"record-failure",executionId:process.env.EXECUTION_ID,phase:"native_git_fast_forward",reasonCode:"native-git-workflow-failed",externalMutationPerformed:true}))')"
+          curl -sS -X POST -H "Authorization: Bearer $OIDC_TOKEN" -H "Content-Type: application/json"             --data "$BODY"             https://sjpxqeyewahraxvidvcc.supabase.co/functions/v1/defence-on-demand-native-git-bridge || true
