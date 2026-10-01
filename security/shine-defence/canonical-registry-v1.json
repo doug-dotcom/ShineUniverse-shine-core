@@ -742,6 +742,24 @@
       "blobSha": "f82577700b6516f8d4d3077672f9ca5c086da551"
     },
     {
+      "id": "on-demand-revalidation-executor-bridge",
+      "path": "security/shine-defence/on-demand-revalidation-executor-bridge-v1.json",
+      "version": "1.0.0",
+      "blobSha": "7aa004d02c18183e34c28c55bc25c1bb022312fd"
+    },
+    {
+      "id": "on-demand-revalidation-executor-edge",
+      "path": "foundation/runtime/defence-on-demand-revalidation-executor/index.ts",
+      "version": "1.0.0",
+      "blobSha": "c057416d1b7b416107d07c16b4e6912d7edbd6ad"
+    },
+    {
+      "id": "on-demand-revalidation-executor-workflow",
+      "path": ".github/workflows/shine-defence-on-demand-revalidation.yml",
+      "version": "1.0.0",
+      "blobSha": "408bbd2c62b19f31528b895f488d044eea00d4a1"
+    },
+    {
       "id": "operational-attention-revalidation-aware-db",
       "path": "foundation/postgres/defence-operational-attention-revalidation-aware-v1.sql",
       "version": "1.0.0",
