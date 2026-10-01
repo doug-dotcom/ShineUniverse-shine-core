@@ -1,0 +1,6 @@
+{
+  "contract": "shine-defence/on-demand-executor-readiness-trigger-v1",
+  "schemaVersion": "1.0.0",
+  "requestedBy": "human:doug",
+  "purpose": "Read-only signed preflight of direct Railway executor credential presence."
+}
