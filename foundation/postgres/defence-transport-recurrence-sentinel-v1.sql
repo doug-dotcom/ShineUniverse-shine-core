@@ -37,6 +37,16 @@ begin
 
   v_raw_estate := foundation.get_defence_estate_summary_v1();
 
+  -- Give the recovery record a fixed shape even when no qualifying event exists.
+  select
+    null::timestamptz as cycle_at,
+    null::integer as result_count,
+    null::integer as pass_count,
+    null::integer as failure_count,
+    null::timestamptz as first_response_at,
+    null::timestamptz as last_response_at
+  into v_recovery;
+
   with ranked as (
     select
       date_trunc('minute',q.queued_at) as cycle_at,
