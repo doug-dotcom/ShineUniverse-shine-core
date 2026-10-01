@@ -1,0 +1,37 @@
+{
+  "contract": "shine-defence/target-recovery-awareness-v1",
+  "version": "1.0.0",
+  "purpose": "Downgrade advisory investigation attention after an isolated target-specific failure has been followed by enough clean scheduled probes, while preserving the raw degraded health window and every fail-closed gate.",
+  "defaultPolicy": {
+    "minimumConsecutivePasses": 2
+  },
+  "qualification": [
+    "Only target items already classified as target_specific and target_investigation are eligible.",
+    "Recovery evidence is calculated from the same target and health-attention window.",
+    "The latest result per scheduled minute is used so retries do not inflate evidence.",
+    "The last failed result in the window is the recovery anchor.",
+    "At least the configured number of later scheduled samples must exist.",
+    "Every later scheduled sample must pass its contract and the latest result must be a pass.",
+    "A newer failure immediately prevents recovery classification."
+  ],
+  "reclassification": {
+    "causeClass": "target_specific_recovered_residual",
+    "attentionClass": "target_recovery_residual",
+    "nextAction": "observe_residual_health_window"
+  },
+  "invariants": [
+    "Raw health state, probe results and estate state are never rewritten or suppressed.",
+    "Incident state is never rewritten.",
+    "Release admission and rollback state are never overridden.",
+    "The overlay does not retry probes, restart apps, redeploy services or mutate provider configuration.",
+    "Target-specific raw counts remain visible; separate recovered/actionable counts are added.",
+    "Mixed or unresolved health failures are never auto-reclassified as recovered.",
+    "Browser roles receive no EXECUTE grant."
+  ],
+  "runtime": {
+    "evidenceFunction": "foundation.get_defence_target_recovery_evidence_v1",
+    "overlayFunction": "foundation.apply_defence_target_recovery_awareness_v1",
+    "attentionFunction": "foundation.get_defence_operational_attention_recovery_aware_v1",
+    "operationalAttentionSchemaVersion": "1.5.0"
+  }
+}
