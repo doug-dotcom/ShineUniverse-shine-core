@@ -76,7 +76,7 @@ begin
 
   return jsonb_build_object(
     'defenceFullEstateSummary','shine-defence/full-estate-summary-v1',
-    'schemaVersion','1.15.0',
+    'schemaVersion','1.16.0',
     'state',v_state,
     'estate',v_estate,
     'supabaseRuntimeReceipts',v_supabase,

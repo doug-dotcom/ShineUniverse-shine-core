@@ -1,7 +1,7 @@
 {
   "contract": "shine-defence/operational-attention-v1",
-  "version": "1.3.0",
-  "purpose": "Project live Defence runtime health, incident, on-demand sleep, explicit revalidation-control state and pre-admission executor selection into cause-aware operational attention without changing raw health, incident, admission or estate state.",
+  "version": "1.4.0",
+  "purpose": "Project live Defence runtime health, incident, on-demand sleep, explicit revalidation state, executor selection and immutable native-Git candidate preparation into cause-aware operational attention without changing raw health, incident, admission or estate state.",
   "sourceOfTruth": {
     "estateSummary": "foundation.get_defence_estate_summary_v1",
     "healthObservations": "foundation.defence_health_observations",
@@ -42,7 +42,10 @@
     "The operational projection never treats request or approval as proof that Railway mutation occurred.",
     "Executor selection prefers direct_railway only when a fresh signed credential-readiness receipt is true; otherwise it falls back to a proven native_git profile.",
     "If no viable executor is available, operational attention is executor_unavailable before execution admission.",
-    "A native_git selection does not consume a v1 execution admission until a native Git candidate is prepared."
+    "A native_git selection does not consume a v1 execution admission until a native Git candidate is prepared.",
+    "A native_git approval remains pre-admission until an immutable candidate commit is prepared from the exact watched-branch base.",
+    "A candidate_prepared native-Git target maps to admit_on_demand_revalidation_execution.",
+    "An admitted native-Git target maps to execute_native_git_fast_forward."
   ],
   "invariants": [
     "Raw health evidence is immutable and preserved.",
@@ -56,7 +59,9 @@
     "Revalidation request, approval and execution admission state never override raw estate or release-admission truth.",
     "External Railway mutation remains non-automatic and must use a single-use exact-scope execution admission.",
     "Executor readiness and selection never perform an external mutation.",
-    "Direct Railway credential values are never persisted; only bounded boolean readiness receipts are stored."
+    "Direct Railway credential values are never persisted; only bounded boolean readiness receipts are stored.",
+    "Native-Git candidate preparation never changes the watched deployment branch.",
+    "Native-Git operational attention never treats candidate preparation as execution."
   ],
   "runtime": {
     "function": "foundation.get_defence_operational_attention_executor_aware_v1",

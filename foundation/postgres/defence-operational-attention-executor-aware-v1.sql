@@ -113,7 +113,7 @@ begin
   end;
 
   return v_base || jsonb_build_object(
-    'schemaVersion','1.3.0',
+    'schemaVersion','1.4.0',
     'attentionState',v_attention_state,
     'counts',v_counts,
     'targetItems',v_target_items,
@@ -123,7 +123,8 @@ begin
       'directRailwayRequiresFreshCredentialReceipt',true,
       'nativeGitRequiresProvenProfile',true,
       'selectionPerformsExternalMutation',false,
-      'admissionConsumesOnlyDirectRailwayInV1',true,
+      'nativeGitCandidateRequiredBeforeAdmission',true,
+      'nativeGitExecutionAction','execute_native_git_fast_forward',
       'rawEstateStateOverridden',false,
       'releaseAdmissionOverridden',false
     )

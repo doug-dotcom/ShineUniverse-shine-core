@@ -1,7 +1,7 @@
 {
   "contract": "shine-defence/on-demand-revalidation-control-v1",
-  "version": "1.0.0",
-  "purpose": "Provide an append-only, single-use authorisation and execution-admission control plane for on-demand Railway revalidation without performing the external mutation itself.",
+  "version": "1.1.0",
+  "purpose": "Provide an append-only, single-use authorisation and execution-admission control plane for on-demand Railway revalidation, including immutable native-Git candidate preparation before admission, without performing the external mutation itself.",
   "request": {
     "function": "foundation.request_defence_on_demand_revalidation_v1",
     "requiresPosture": "revalidation_required",
@@ -18,7 +18,10 @@
   "approval": {
     "function": "foundation.approve_defence_on_demand_revalidation_v1",
     "role": "shine_defence_on_demand_approver",
-    "methods": ["explicit-human", "external-governance"],
+    "methods": [
+      "explicit-human",
+      "external-governance"
+    ],
     "maximumLifetimeSeconds": 900,
     "singleUse": true,
     "executesExternalMutation": false
@@ -59,6 +62,8 @@
       "pending_approval",
       "approval_expired",
       "approved",
+      "candidate_expired",
+      "candidate_prepared",
       "admission_expired",
       "admitted",
       "in_progress",
@@ -75,6 +80,15 @@
     "The external executor must verify the deployed commit equals the approved source head before health verification.",
     "The external executor must not mark completion without health, attestation and release-admission reconciliation evidence.",
     "No automatic wake, redeploy, retry, rollback or evidence rewrite is authorised by this database control plane.",
-    "Browser roles receive no table access or function EXECUTE grants."
-  ]
+    "Browser roles receive no table access or function EXECUTE grants.",
+    "A native-Git approval does not become executable until an immutable candidate commit is prepared and pinned.",
+    "Native-Git admission pins both the watched-branch base SHA and the candidate commit SHA.",
+    "The watched branch must still equal the pinned base SHA immediately before fast-forward execution."
+  ],
+  "nativeGitCandidate": {
+    "contract": "shine-defence/on-demand-native-git-executor-v1",
+    "recordFunction": "foundation.record_defence_on_demand_native_git_candidate_v1",
+    "requiredBeforeNativeGitAdmission": true,
+    "immutable": true
+  }
 }

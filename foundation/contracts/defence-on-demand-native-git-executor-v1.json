@@ -1,0 +1,34 @@
+{
+  "contract": "shine-defence/on-demand-native-git-executor-v1",
+  "version": "1.0.0",
+  "purpose": "Make native Git a first-class on-demand revalidation executor by preparing and pinning an immutable candidate commit before execution admission.",
+  "candidate": {
+    "table": "foundation.defence_on_demand_native_git_candidates",
+    "recordFunction": "foundation.record_defence_on_demand_native_git_candidate_v1",
+    "appendOnly": true,
+    "singleCandidatePerApproval": true
+  },
+  "admission": {
+    "function": "foundation.admit_defence_on_demand_revalidation_execution_v1",
+    "nativeGitRequiresCandidate": true,
+    "nextAction": "execute_native_git_fast_forward"
+  },
+  "executionSemantics": [
+    "Prepare the candidate on an isolated branch from the exact signed source head.",
+    "Candidate preparation never changes the watched deployment branch.",
+    "Before fast-forward, verify the watched branch still equals baseHeadSha.",
+    "Execution may only fast-forward the configured watched branch from baseHeadSha to candidateCommitSha.",
+    "Railway must report terminal SUCCESS for candidateCommitSha before health evidence is accepted.",
+    "Health, runtime provenance, signed source-head attestation and release admission must converge on candidateCommitSha before completion."
+  ],
+  "invariants": [
+    "Candidate commit SHA is immutable after recording.",
+    "Candidate repository, branch and trigger path must match the approved native Git executor profile.",
+    "Candidate base head must match the live revalidation source head at preparation and admission.",
+    "Executor selection must remain native_git from approval through admission.",
+    "A changed branch head, authority, deployment identity, source fingerprint or executor selection invalidates admission.",
+    "No candidate record performs a branch update or Railway mutation.",
+    "No rollback is authorised.",
+    "Browser roles receive no table access or function EXECUTE grants."
+  ]
+}
