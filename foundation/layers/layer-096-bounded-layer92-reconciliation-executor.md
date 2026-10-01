@@ -1,6 +1,6 @@
 # Foundation Layer 96 — Bounded Layer-92 reconciliation executor
 
-**Status:** IMPLEMENTED — CI and production verification pending  
+**Status:** LIVE — CI green and production verification complete  
 **Scope:** execute the single bounded action Layer 95 may admit: independent Layer-92 reconciliation of one overdue successful Layer-91 execution
 
 Layer 95 can identify a pure omission where a successful Layer-91 execution is old enough to require Layer-92 reconciliation, no Layer-92 receipt exists, and the Layer-94 incident lifecycle is active.
@@ -81,6 +81,35 @@ CI proves:
 ## Deliberate split implementation
 
 Layer 96 is intentionally split into schema, runtime and summary SQL files so each control boundary remains small and independently reviewable while CI applies them as one ordered layer.
+
+## Production proof
+
+Layer 96 is deployed in the Shine Foundation Supabase project as migration:
+
+`20261001004530 — foundation_layer_096_bounded_layer92_reconciliation_executor`
+
+Pull request **#126** passed the complete Foundation + Concierge and Shine Defence workflows before merge.
+
+Live production verification confirms:
+
+- Layer-96 ledger, executor, policy fingerprint and summary exist;
+- current Layer-96 execution count: **0**;
+- current Layer-92 reconciliation count: **0**;
+- current Layer-91 execution count: **0**;
+- current Layer-94 incident-event count: **0**;
+- direct `service_role` EXECUTE on the Layer-92 reconciler is **revoked**;
+- `service_role` can execute Layer 96;
+- Foundation runtime, Gateway, Shine Core, Shine Defence and browser roles cannot execute Layer 96;
+- `service_role` cannot directly INSERT Layer-96 ledger rows;
+- Foundation runtime can read the summary;
+- Gateway reads the summary only through existing `foundation_runtime` membership;
+- Layer-93 production coverage remains **idle**;
+- Layer-94 production incident state remains **normal**;
+- Layer-95 production cause remains **none**;
+- a nonexistent Layer-91 target, invoked under `service_role`, returns `not-applicable / target-not-found`;
+- that negative probe creates no Layer-96 event and no Layer-92 reconciliation;
+- Supabase security advisors report **0 findings** after deployment;
+- the two new Layer-96 indexes are reported unused, which is expected while the production executor ledger is empty.
 
 ## Invariant
 
