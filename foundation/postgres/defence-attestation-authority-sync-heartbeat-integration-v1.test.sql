@@ -28,8 +28,10 @@ begin
   end if;
 
   select foundation.get_defence_full_estate_summary_v1() into v;
-  if v->>'schemaVersion'<>'1.9.0'
+  if v->>'schemaVersion'<>'1.10.0'
      or v#>>'{attestationAuthoritySync,state}'<>'pass'
+     or v#>>'{attestationAuthorityHeartbeatSentinel,state}'<>'pass'
+     or v#>>'{attestationAuthorityHeartbeatSentinel,band}'<>'current'
      or v#>>'{attestationAuthoritySync,currentAuthority,authoritySha}'<>
         '7bfd7fe685b4b2da814ac53dafdbfac2350591c8' then
     raise exception 'authority sync missing from full-estate summary: %',v;

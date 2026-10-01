@@ -1,0 +1,43 @@
+{
+  "contract": "shine-defence/attestation-authority-heartbeat-sentinel-v1",
+  "version": "1.0.0",
+  "purpose": "Surface authority-sync freshness degradation before the existing fail-closed freshness boundary rejects privileged Shine Defence ingest.",
+  "sourceOfTruth": {
+    "summaryFunction": "foundation.get_defence_attestation_authority_sync_summary_v1",
+    "receiptTable": "foundation.defence_attestation_authority_sync_receipts"
+  },
+  "thresholds": {
+    "warningAgeSeconds": 3600,
+    "failClosedAgeSeconds": 5400
+  },
+  "states": [
+    {
+      "state": "pass",
+      "band": "current",
+      "reasonCode": "attestation-authority-sync-current",
+      "meaning": "The latest signed authority-sync receipt is comfortably inside the existing fail-closed freshness window."
+    },
+    {
+      "state": "warning",
+      "band": "expiry_risk",
+      "reasonCode": "attestation-authority-sync-expiry-risk",
+      "meaning": "The latest signed authority-sync receipt is still admissible but has crossed the early-warning threshold."
+    },
+    {
+      "state": "warning",
+      "band": "fail_closed",
+      "meaning": "The underlying authority-sync summary is already warning because authority state is missing, mismatched or stale; privileged ingest remains fail-closed."
+    }
+  ],
+  "invariants": [
+    "The Sentinel is advisory and read-only; it never records authority state, refreshes a heartbeat, retries a workflow or mutates release truth.",
+    "The Sentinel never extends or relaxes the 5400-second authority freshness limit enforced by privileged ingest.",
+    "The early-warning threshold must remain strictly lower than the fail-closed threshold.",
+    "A warning generated before expiry is visible in the full-estate summary without changing the underlying authority-sync admission result.",
+    "Browser roles receive no EXECUTE grant."
+  ],
+  "runtime": {
+    "function": "foundation.get_defence_attestation_authority_heartbeat_sentinel_v1",
+    "fullEstateField": "attestationAuthorityHeartbeatSentinel"
+  }
+}

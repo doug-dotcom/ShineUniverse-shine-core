@@ -543,6 +543,10 @@ jobs:
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-attestation-authority-sync-heartbeat-v1.sql
       - name: Run Shine Defence authority sync heartbeat receipt tests
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-attestation-authority-sync-heartbeat-v1.test.sql
+      - name: Apply Shine Defence authority heartbeat pre-expiry Sentinel
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-attestation-authority-heartbeat-sentinel-v1.sql
+      - name: Run Shine Defence authority heartbeat pre-expiry Sentinel tests
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-attestation-authority-heartbeat-sentinel-v1.test.sql
       - name: Apply Shine Defence release transition coverage
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-release-transition-coverage-v1.sql
       - name: Run Shine Defence release transition coverage acceptance tests
