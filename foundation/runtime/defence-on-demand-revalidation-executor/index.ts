@@ -130,6 +130,12 @@ async function claimExecution(executionId:string,identity:any,liveAuthority:any)
     const envelope=admission.execution_envelope;
     const expectedSha=envelope?.constraints?.expectedSourceHeadSha;
     if(
+      envelope?.executorSelection?.selectedMode!=='direct_railway'||
+      envelope?.constraints?.executorMode!=='direct_railway'
+    ){
+      throw new Error('revalidation-execution-not-direct-railway');
+    }
+    if(
       String(envelope?.authority?.sha??'').toLowerCase()!==liveAuthority.authoritySha||
       String(envelope?.authority?.ref??'')!==liveAuthority.authorityRef
     ){
