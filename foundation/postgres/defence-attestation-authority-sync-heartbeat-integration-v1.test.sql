@@ -32,7 +32,8 @@ begin
      or v#>>'{attestationAuthoritySync,state}'<>'pass'
      or v#>>'{attestationAuthorityHeartbeatSentinel,state}'<>'pass'
      or v#>>'{attestationAuthorityHeartbeatSentinel,band}'<>'current'
-     or v#>>'{correlatedTransportAttribution,state}'<>'none'
+     or v#>>'{correlatedTransportAttribution,defenceCorrelatedTransportAttribution}'<>
+        'shine-defence/correlated-transport-attribution-v1'
      or v#>>'{correlatedTransportAttribution,rawEstateStateOverridden}' is distinct from 'false'
      or v#>>'{attestationAuthoritySync,currentAuthority,authoritySha}'<>
         '7bfd7fe685b4b2da814ac53dafdbfac2350591c8' then
