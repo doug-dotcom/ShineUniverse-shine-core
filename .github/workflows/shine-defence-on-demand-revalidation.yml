@@ -41,6 +41,17 @@ jobs:
           console.log('execution_id='+x.executionId);
           NODE
 
+      - name: Preflight direct Railway credential before claim
+        env:
+          RAILWAY_TOKEN: ${{ secrets.SHINE_DEFENCE_RAILWAY_WORKSPACE_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -z "$RAILWAY_TOKEN" ]; then
+            echo "Direct Railway executor unavailable before admission claim"
+            exit 1
+          fi
+
       - name: Acquire executor OIDC token
         id: oidc_claim
         shell: bash
