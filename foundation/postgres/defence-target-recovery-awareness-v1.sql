@@ -202,7 +202,7 @@ begin
   if p_attention is null
      or jsonb_typeof(p_attention)<>'object'
      or p_attention->>'defenceOperationalAttention'
-          <>'shine-defence/operational-attention-v1'
+          is distinct from 'shine-defence/operational-attention-v1'
      or p_as_of is null
      or p_min_consecutive_passes<1
      or p_min_consecutive_passes>20 then
