@@ -24,7 +24,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          mapfile -t TICKETS < <(git diff-tree --no-commit-id --name-only -r "$GITHUB_SHA^" "$GITHUB_SHA" | grep '^security/shine-defence/on-demand-execution-tickets/.*\.json
+          mapfile -t TICKETS < <(git diff --name-only "$GITHUB_SHA^" "$GITHUB_SHA" | grep -E '^security/shine-defence/on-demand-execution-tickets/[^/]+\.json$' || true)
           if [ "${#TICKETS[@]}" -ne 1 ]; then
             echo "Expected exactly one execution ticket, found ${#TICKETS[@]}"
             exit 1
