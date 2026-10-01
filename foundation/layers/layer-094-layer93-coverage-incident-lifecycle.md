@@ -1,6 +1,6 @@
 # Foundation Layer 94 — Layer-93 coverage incident lifecycle
 
-**Status:** IMPLEMENTED — CI and production verification pending  
+**Status:** LIVE — CI green and production verification complete  
 **Scope:** turn persistent Layer-93 Layer-92 reconciliation-coverage failures into append-only operational incidents
 
 Layer 93 asks whether every successful Layer-91 execution received one trustworthy Layer-92 reconciliation receipt.
@@ -117,6 +117,37 @@ Layer 94 grants no authority to:
 ## Acceptance coverage
 
 CI proves first GAP detection, persistence before opening, quiet unchanged evidence, CHANGED on material evidence change, recovery to PENDING/NORMAL, INVALID watches, clock-noise-resistant fingerprints, service-role-only sentinel execution, append-only history and the complete read/execute role boundary.
+
+## Production proof
+
+Layer 94 is deployed in the Shine Foundation Supabase project as:
+
+- `20261001002440 — foundation_layer_094_layer93_coverage_incident_lifecycle`
+- `20261001002446 — foundation_layer_094_layer93_coverage_incident_hosted`
+
+Pull request **#123** passed the complete Foundation + Concierge and Shine Defence workflows against the then-current shared Foundation head.
+
+Live production verification confirms:
+
+- operational state: **normal**;
+- Layer-93 coverage state: **idle**;
+- active incidents: **0**;
+- watches: **0**;
+- problem count: **0**;
+- successful Layer-91 execution count: **0**;
+- Layer-92 reconciliation receipt count: **0**;
+- Layer-92 reconciliation coverage: **100%**;
+- healthy Layer-92 reconciliation: **100%**;
+- Layer-94 incident-event count: **0**;
+- service role can run the sentinel but cannot call the transition helper or directly insert incident rows;
+- Foundation runtime can read the summary;
+- Gateway reads the summary only through existing `foundation_runtime` membership;
+- Shine Core and Shine Defence cannot run the sentinel;
+- hosted pg_cron job `shine-foundation-case-audit-layer92-coverage-incident-5m` is active as job **39** on `1,6,11,16,21,26,31,36,41,46,51,56 * * * *`;
+- a real service-role sentinel execution returned `eventCreated=false` against clean IDLE coverage;
+- that sentinel performed no Layer-92 reconciliation, no Layer-91/87/86/82/81 or verification rerun, and no authoritative-truth or incident-history mutation;
+- Supabase security advisors report **0 findings** after deployment;
+- Supabase performance advisors report no Layer-94-specific finding.
 
 ## Invariant
 
