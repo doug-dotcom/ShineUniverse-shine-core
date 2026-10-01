@@ -1,6 +1,6 @@
 # Foundation Layer 108 — Layer-107 reconciliation coverage audit
 
-**Status:** IMPLEMENTED — CI and production verification pending  
+**Status:** LIVE — CI green and production verification complete  
 **Scope:** audit coverage and structural integrity of Layer-107 reconciliation receipts over successful Layer-106 executions
 
 Layer 107 independently proves whether a Layer-106 execution claim matches durable Layer-102 truth.
@@ -63,6 +63,32 @@ Layer 108 creates no Layer-107 receipt, reruns no Layer 106/102/101/97/96/92/91/
 ## Acceptance coverage
 
 CI proves six materially different cases: reconciled; pending; overdue; valid `missing-layer102-receipt`; valid `execution-receipt-mismatch`; and a structurally invalid Layer-107 receipt.
+
+## Production proof
+
+Layer 108 is deployed in the Shine Foundation Supabase project as migration:
+
+`20261001045728 — foundation_layer_108_layer107_reconciliation_coverage_audit`
+
+Pull request **#152** passed the complete Foundation + Concierge and Shine Defence workflows.
+
+Live production verification confirms:
+
+- current Layer-108 state: **idle**;
+- current problem count: **0**;
+- successful Layer-106 execution count: **0**;
+- Layer-107 reconciliation receipt count: **0**;
+- Layer-107 reconciliation coverage: **100%**;
+- healthy Layer-107 reconciliation: **100%**;
+- Layer-107 proof integrity is recomputed by the reader;
+- linked Layer-102 snapshots are revalidated;
+- the coverage read performs no Layer-107 reconciliation and no Layer-106/102/101/97/96/92/91/87/86/82/81/verification rerun;
+- Foundation runtime and service role can read Layer 108;
+- Gateway reads only through existing `foundation_runtime` inheritance and has **no direct EXECUTE grant**;
+- Shine Core, Shine Defence and browser roles cannot read Layer 108;
+- the direct service-role Layer-102 bypass remains **revoked**;
+- Supabase security advisors report **0 findings** after deployment;
+- Supabase performance advisors report no Layer-108-specific finding.
 
 ## Invariant
 
