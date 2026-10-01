@@ -52,6 +52,7 @@ jobs:
       - run: deno check foundation/runtime/deployment-receipt-ingest/index.ts
       - run: deno check foundation/runtime/defence-rollback-readiness/index.ts
       - run: deno check foundation/runtime/defence-on-demand-revalidation-executor/index.ts
+      - run: deno check foundation/runtime/defence-on-demand-executor-readiness/index.ts
 
   persistence:
     runs-on: ubuntu-latest
@@ -668,10 +669,18 @@ jobs:
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-on-demand-revalidation-control-v1.sql
       - name: Run Shine Defence explicit on-demand revalidation control tests
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-on-demand-revalidation-control-v1.test.sql
+      - name: Apply Shine Defence pre-admission executor selection
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-on-demand-executor-selection-v1.sql
+      - name: Run Shine Defence pre-admission executor selection tests
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-on-demand-executor-selection-v1.test.sql
       - name: Apply Shine Defence revalidation-aware operational attention
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-operational-attention-revalidation-aware-v1.sql
       - name: Run Shine Defence revalidation-aware operational attention tests
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-operational-attention-revalidation-aware-v1.test.sql
+      - name: Apply Shine Defence executor-aware operational attention
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-operational-attention-executor-aware-v1.sql
+      - name: Run Shine Defence executor-aware operational attention tests
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-operational-attention-executor-aware-v1.test.sql
       - name: Integrate Shine Defence authority sync heartbeat into full estate
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-attestation-authority-sync-heartbeat-integration-v1.sql
       - name: Run Shine Defence authority sync heartbeat full-estate tests
