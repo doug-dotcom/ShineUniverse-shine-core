@@ -1,0 +1,61 @@
+{
+  "contract": "shine-defence/external-attestation-dispatcher-v1",
+  "version": "1.0.0",
+  "purpose": "Provide a scheduler-independent trigger path for private-repository Shine Defence attestation workflows while preserving repo-bound GitHub Actions OIDC as the sole source of trusted release-head and rollback-source evidence.",
+  "triggerPlane": {
+    "scheduler": "Supabase Cron",
+    "invocation": "pg_net -> Supabase Edge Function",
+    "inboundAuthentication": "single-use 256-bit database-issued lease",
+    "cadence": "10 minutes",
+    "authorityFirst": true
+  },
+  "githubAuthentication": {
+    "mode": "GitHub App installation access token",
+    "requiredEdgeSecrets": [
+      "SHINE_DEFENCE_GITHUB_APP_ID",
+      "SHINE_DEFENCE_GITHUB_APP_INSTALLATION_ID",
+      "SHINE_DEFENCE_GITHUB_APP_PRIVATE_KEY_PKCS8"
+    ],
+    "installationTokenRepositoryScope": "only repositories in the current dispatch plan",
+    "installationTokenPermissions": {
+      "actions": "write"
+    },
+    "installationTokenStored": false,
+    "appJwtStored": false
+  },
+  "dispatchPolicy": {
+    "authorityHeartbeatMaxAgeSeconds": 5400,
+    "refreshMarginSeconds": 3600,
+    "dispatchCooldownSeconds": 900,
+    "authorityWorkflow": ".github/workflows/shine-defence-authority-state.yml",
+    "targetWorkflow": ".github/workflows/shine-defence-release-head.yml",
+    "workflowRef": "main"
+  },
+  "sequencing": [
+    "If authority heartbeat is not current or is inside the refresh margin, dispatch only the Core authority-state workflow.",
+    "Do not dispatch target repository workflows in the same cycle as an authority refresh.",
+    "On a later Supabase cycle, target workflows may be dispatched only after authority state is current.",
+    "A dispatched workflow must still pass its existing repo-bound OIDC and live authority verification before Foundation records any trusted evidence."
+  ],
+  "invariants": [
+    "The dispatcher cannot mint release-head evidence.",
+    "The dispatcher cannot mint rollback-source proof.",
+    "The dispatcher cannot extend rollback proof TTL.",
+    "The dispatcher cannot mint or rewrite attestation authority state.",
+    "The dispatcher cannot bypass GitHub Actions OIDC verification.",
+    "The dispatcher cannot bypass live authority heartbeat verification.",
+    "GitHub App tokens and JWTs are never persisted in Postgres.",
+    "Missing GitHub App credentials produce a recorded disabled heartbeat and zero GitHub mutations.",
+    "The public Edge Function entrypoint requires a single-use short-lived database lease and accepts no reusable inbound secret.",
+    "Browser roles receive no database access to leases, events, heartbeats or recorder functions."
+  ],
+  "runtime": {
+    "edgeFunction": "defence-external-attestation-dispatcher",
+    "planFunction": "foundation.get_defence_external_dispatch_plan_v1",
+    "summaryFunction": "foundation.get_defence_external_dispatcher_summary_v1",
+    "leaseIssuer": "foundation.issue_defence_external_dispatch_lease_v1",
+    "leaseClaimer": "foundation.claim_defence_external_dispatch_lease_v1",
+    "fullEstateField": "externalAttestationDispatcher",
+    "fullEstateStateGate": false
+  }
+}
