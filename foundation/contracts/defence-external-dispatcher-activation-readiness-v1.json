@@ -1,0 +1,42 @@
+{
+  "contract": "shine-defence/external-dispatcher-activation-readiness-v1",
+  "version": "1.0.0",
+  "purpose": "Require independently verified GitHub App identity, installation permissions, repository coverage and workflow visibility before the external attestation dispatcher may perform any workflow_dispatch mutation.",
+  "requiredCredentials": [
+    "SHINE_DEFENCE_GITHUB_APP_ID",
+    "SHINE_DEFENCE_GITHUB_APP_INSTALLATION_ID",
+    "SHINE_DEFENCE_GITHUB_APP_PRIVATE_KEY_PKCS8"
+  ],
+  "readinessChecks": [
+    "Credentials are syntactically present.",
+    "Configured PKCS#8 key signs a GitHub App JWT.",
+    "GET /app authenticates and returns the configured App ID.",
+    "Installation access token is issued with Actions write.",
+    "Installation covers Core plus every required Railway repository.",
+    "Expected Actions workflow is visible in every required repository.",
+    "Verification installation token is revoked after the check."
+  ],
+  "states": {
+    "ready": "Every required check passed within the freshness window.",
+    "not_configured": "One or more required Edge secrets are absent.",
+    "blocked": "Credentials exist but app identity, installation, permission, repository coverage or workflow visibility is invalid.",
+    "stale": "Last readiness receipt exceeds the freshness window.",
+    "missing": "No readiness receipt exists."
+  },
+  "activationRule": {
+    "requiredState": "ready",
+    "freshnessSeconds": 3600,
+    "dispatcherBehaviorWhenNotReady": "record disabled_activation_not_ready and perform zero GitHub mutations"
+  },
+  "requiredRepositorySource": "foundation.get_defence_external_dispatcher_required_repositories_v1",
+  "readinessRuntime": "defence-external-dispatcher-readiness",
+  "readinessCron": "shine-defence-external-dispatcher-readiness-30m",
+  "invariants": [
+    "Readiness verification never dispatches a workflow.",
+    "Readiness verification never mints Defence evidence.",
+    "Readiness verification never extends rollback proof TTL.",
+    "Readiness verification never writes GitHub credentials to Postgres.",
+    "The dispatcher cannot activate from credential presence alone.",
+    "Repo-bound GitHub Actions OIDC remains the only trusted workflow evidence identity."
+  ]
+}
