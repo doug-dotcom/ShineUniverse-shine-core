@@ -53,6 +53,7 @@ jobs:
       - run: deno check foundation/runtime/defence-rollback-readiness/index.ts
       - run: deno check foundation/runtime/defence-on-demand-revalidation-executor/index.ts
       - run: deno check foundation/runtime/defence-on-demand-executor-readiness/index.ts
+      - run: deno check foundation/runtime/defence-on-demand-native-git-bridge/index.ts
 
   persistence:
     runs-on: ubuntu-latest
@@ -709,6 +710,10 @@ jobs:
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-on-demand-native-git-executor-v1.sql
       - name: Run Shine Defence native Git executor admission tests
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-on-demand-native-git-executor-v1.test.sql
+      - name: Apply Shine Defence native Git bridge receipts
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-on-demand-native-git-bridge-v1.sql
+      - name: Run Shine Defence native Git bridge receipt tests
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-on-demand-native-git-bridge-v1.test.sql
       - name: Apply Shine Defence revalidation-aware operational attention
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-operational-attention-revalidation-aware-v1.sql
       - name: Run Shine Defence revalidation-aware operational attention tests
