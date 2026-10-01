@@ -1,7 +1,6 @@
 import postgres from 'npm:postgres@3.4.9';
 import {verifyGithubActionsOidc} from '../_shared/github-actions-oidc-v1.mjs';
 import {bindGithubOidcOperation,oidcReplayConflict} from '../_shared/github-oidc-operation-v1.mjs';
-import {verifyLiveDefenceAttestationAuthority} from '../_shared/shine-defence-active-authority-v1.mjs';
 
 const AUDIENCE='shine-defence-on-demand-revalidation';
 const EXPECTED_WORKFLOW_PATH='.github/workflows/shine-defence-on-demand-revalidation.yml';
@@ -41,6 +40,41 @@ const jsonResponse=(status:number,body:unknown)=>new Response(JSON.stringify(bod
 });
 
 const clean=(value:unknown,max=256)=>typeof value==='string'&&value.length>0&&value.length<=max&&!/[\u0000-\u001f\u007f]/.test(value);
+
+async function getLiveAuthority(){
+  const rows=await sql`
+    select
+      lower(a.authority_sha) as authority_sha,
+      a.authority_ref,
+      foundation.get_defence_attestation_authority_sync_summary_v1(
+        now(),5400
+      ) as sync_summary
+    from foundation.current_defence_attestation_authority a
+  `;
+  const current=rows?.[0];
+  const summary=current?.sync_summary;
+  const age=Number(summary?.receiptAgeSeconds);
+  if(
+    !current||
+    !SHA.test(String(current.authority_sha??''))||
+    !clean(current.authority_ref,1024)||
+    !summary||
+    summary.state!=='pass'||
+    summary.reasonCode!=='attestation-authority-sync-current'||
+    !Number.isFinite(age)||
+    age<0||
+    age>5400||
+    String(summary?.currentAuthority?.authoritySha??'').toLowerCase()!==String(current.authority_sha).toLowerCase()||
+    String(summary?.currentAuthority?.authorityRef??'')!==String(current.authority_ref)
+  ){
+    throw new Error('revalidation-executor-authority-not-current');
+  }
+  return {
+    authoritySha:String(current.authority_sha).toLowerCase(),
+    authorityRef:String(current.authority_ref),
+    receiptAgeSeconds:age
+  };
+}
 
 async function claimExecution(executionId:string,identity:any,liveAuthority:any){
   return sql.begin(async tx=>{
@@ -95,6 +129,12 @@ async function claimExecution(executionId:string,identity:any,liveAuthority:any)
 
     const envelope=admission.execution_envelope;
     const expectedSha=envelope?.constraints?.expectedSourceHeadSha;
+    if(
+      String(envelope?.authority?.sha??'').toLowerCase()!==liveAuthority.authoritySha||
+      String(envelope?.authority?.ref??'')!==liveAuthority.authorityRef
+    ){
+      throw new Error('revalidation-execution-authority-drift');
+    }
     if(!UUID.test(String(envelope?.railway?.projectId??''))||
        !UUID.test(String(envelope?.railway?.environmentId??''))||
        !UUID.test(String(envelope?.railway?.serviceId??''))||
@@ -201,7 +241,7 @@ Deno.serve(async(req:Request)=>{
     const auth=req.headers.get('authorization')??'';
     if(!auth.startsWith('Bearer ')) return jsonResponse(401,{error:'missing-oidc-token'});
     const identity=await verifyGithubActionsOidc(auth.slice(7),OIDC_POLICY);
-    const liveAuthority=await verifyLiveDefenceAttestationAuthority({sql,identity});
+    const liveAuthority=await getLiveAuthority();
 
     const raw=await req.text();
     if(raw.length>MAX_BODY_BYTES) return jsonResponse(413,{error:'body-too-large'});
