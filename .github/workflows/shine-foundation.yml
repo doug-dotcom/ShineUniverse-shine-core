@@ -471,6 +471,10 @@ jobs:
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-case-audit-layer92-reconciliation-coverage-v1.sql
       - name: Run Foundation Layer-93 Layer-92 reconciliation coverage tests
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-case-audit-layer92-reconciliation-coverage-v1.test.sql
+      - name: Apply Foundation Layer-94 Layer-93 coverage incident lifecycle
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-case-audit-layer92-coverage-incident-v1.sql
+      - name: Run Foundation Layer-94 Layer-93 coverage incident lifecycle tests
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-case-audit-layer92-coverage-incident-v1.test.sql
       - name: Apply Shine Defence Sentinel
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-sentinel-v1.sql
       - name: Run Shine Defence Sentinel acceptance tests
