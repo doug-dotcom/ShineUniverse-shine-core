@@ -739,7 +739,7 @@
       "id": "external-attestation-dispatcher-edge",
       "path": "foundation/runtime/defence-external-attestation-dispatcher/index.ts",
       "version": "1.0.0",
-      "blobSha": "bae9dc0475951c6fc17f9fb2647249f5d410d131"
+      "blobSha": "1ee5a16e87fc3fe70320a7eecbd8b17328cfe166"
     },
     {
       "id": "external-attestation-dispatcher-cron-db",
