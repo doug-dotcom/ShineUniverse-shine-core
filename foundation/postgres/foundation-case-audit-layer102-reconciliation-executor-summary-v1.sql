@@ -1,4 +1,4 @@
--- Foundation Layer 106: read-only bounded Layer-97 execution summary.
+-- Foundation Layer 106: read-only bounded Layer-102 execution summary.
 
 create or replace function foundation.get_case_audit_layer102_reconcile_exec_summary_v1(
   p_environment text default 'production',
@@ -22,7 +22,7 @@ begin
      or p_limit is null
      or p_limit<1
      or p_limit>100 then
-    raise exception 'case-audit-layer97-reconcile-exec-summary-input-invalid';
+    raise exception 'case-audit-layer102-reconcile-exec-summary-input-invalid';
   end if;
 
   select
@@ -76,6 +76,8 @@ begin
     'directLayer102ServiceRoleBypassAllowed',false,
     'layer101RerunPerformed',false,
     'layer97RerunPerformed',false,
+    'layer96RerunPerformed',false,
+    'layer92RerunPerformed',false,
     'layer91RerunPerformed',false,
     'layer87RerunPerformed',false,
     'layer86RerunPerformed',false,
