@@ -639,6 +639,14 @@ jobs:
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-operational-attention-sleep-aware-v1.sql
       - name: Run Shine Defence sleep-aware operational attention overlay tests
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-operational-attention-sleep-aware-v1.test.sql
+      - name: Apply Shine Defence explicit on-demand revalidation control plane
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-on-demand-revalidation-control-v1.sql
+      - name: Run Shine Defence explicit on-demand revalidation control tests
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-on-demand-revalidation-control-v1.test.sql
+      - name: Apply Shine Defence revalidation-aware operational attention
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-operational-attention-revalidation-aware-v1.sql
+      - name: Run Shine Defence revalidation-aware operational attention tests
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-operational-attention-revalidation-aware-v1.test.sql
       - name: Integrate Shine Defence authority sync heartbeat into full estate
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-attestation-authority-sync-heartbeat-integration-v1.sql
       - name: Run Shine Defence authority sync heartbeat full-estate tests
