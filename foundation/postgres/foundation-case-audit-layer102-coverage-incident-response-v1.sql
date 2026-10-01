@@ -97,7 +97,7 @@ begin
 
   elsif v_coverage_drift>0 then
     v_cause := 'layer98-coverage-binding-drift';
-    v_domain := 'layer-103-reconciliation-coverage-binding';
+    v_domain := 'layer-98-reconciliation-coverage-binding';
     v_next := 'inspect-layer98-coverage-binding';
 
   elsif v_missing97>0 then
@@ -218,7 +218,7 @@ begin
     v_action_class := 'observe';
     v_decision := 'admit';
     v_required_control := 'read-only';
-    v_reason := 'case-audit-layer102-response-inspect-layer99-incident';
+    v_reason := 'case-audit-layer102-response-inspect-layer104-incident';
 
   elsif p_action_key='inspect-overdue-layer102-reconciliations' then
     v_action_class := 'observe';
@@ -240,11 +240,11 @@ begin
     if v_cause_class='layer102-receipt-integrity' then
       v_decision := 'admit';
       v_required_control := 'read-only';
-      v_reason := 'case-audit-layer102-response-inspect-layer97-receipt';
+      v_reason := 'case-audit-layer102-response-inspect-layer102-receipt';
     else
       v_decision := 'not-applicable';
       v_required_control := 'none';
-      v_reason := 'case-audit-layer102-response-layer97-receipt-not-relevant';
+      v_reason := 'case-audit-layer102-response-layer102-receipt-not-relevant';
     end if;
 
   elsif p_action_key='inspect-layer97-reconciliation-receipt' then
@@ -276,7 +276,7 @@ begin
     if v_cause_class='layer100-policy-drift' then
       v_decision := 'admit';
       v_required_control := 'read-only';
-      v_reason := 'case-audit-layer102-response-inspect-layer95-policy';
+      v_reason := 'case-audit-layer102-response-inspect-layer100-policy';
     else
       v_decision := 'not-applicable';
       v_required_control := 'none';
@@ -288,7 +288,7 @@ begin
     if v_cause_class='layer99-incident-binding-drift' then
       v_decision := 'admit';
       v_required_control := 'read-only';
-      v_reason := 'case-audit-layer102-response-inspect-layer94-incident';
+      v_reason := 'case-audit-layer102-response-inspect-layer99-incident';
     else
       v_decision := 'not-applicable';
       v_required_control := 'none';
@@ -300,7 +300,7 @@ begin
     if v_cause_class='layer98-coverage-binding-drift' then
       v_decision := 'admit';
       v_required_control := 'read-only';
-      v_reason := 'case-audit-layer102-response-inspect-layer93-coverage';
+      v_reason := 'case-audit-layer102-response-inspect-layer98-coverage';
     else
       v_decision := 'not-applicable';
       v_required_control := 'none';
