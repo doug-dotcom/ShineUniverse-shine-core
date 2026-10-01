@@ -175,9 +175,9 @@ begin
         'eventType','executed',
         'reasonCode','case-audit-overdue-reconciliation-layer82-ran',
         'requestedAt',(
-          select requested_at
-          from foundation.case_audit_verify_reconcile_exec_events
-          where event_id=(
+          select src.requested_at
+          from foundation.case_audit_verify_reconcile_exec_events src
+          where src.event_id=(
             '93000000-0000-4000-8000-'||lpad((700+i)::text,12,'0')
           )::uuid
         ),
