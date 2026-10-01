@@ -678,8 +678,8 @@
     {
       "id": "release-attestation-authority-sync-heartbeat-integration-db",
       "path": "foundation/postgres/defence-attestation-authority-sync-heartbeat-integration-v1.sql",
-      "version": "1.3.0",
-      "blobSha": "a508ab635569c8e19424a6c5d96205dc60b6bd5c"
+      "version": "1.4.0",
+      "blobSha": "79ac5bbba77f0a0ddfe5751a32adb8e33b1b6a61"
     },
     {
       "id": "release-attestation-authority-heartbeat-sentinel-db",
@@ -722,6 +722,30 @@
       "path": "foundation/postgres/defence-control-scheduler-liveness-v1.sql",
       "version": "1.0.0",
       "blobSha": "57d5403e57bc2cd774e6a2e151edf9ea4af1ceeb"
+    },
+    {
+      "id": "external-attestation-dispatcher",
+      "path": "foundation/contracts/defence-external-attestation-dispatcher-v1.json",
+      "version": "1.0.0",
+      "blobSha": "32e054672bd95af84b96e5af7857f920abb770e9"
+    },
+    {
+      "id": "external-attestation-dispatcher-db",
+      "path": "foundation/postgres/defence-external-attestation-dispatcher-v1.sql",
+      "version": "1.0.0",
+      "blobSha": "4210b4c00024e0f65dc91afb80bcc9855d343037"
+    },
+    {
+      "id": "external-attestation-dispatcher-edge",
+      "path": "foundation/runtime/defence-external-attestation-dispatcher/index.ts",
+      "version": "1.0.0",
+      "blobSha": "bae9dc0475951c6fc17f9fb2647249f5d410d131"
+    },
+    {
+      "id": "external-attestation-dispatcher-cron-db",
+      "path": "foundation/postgres/defence-external-attestation-dispatcher-cron-v1.sql",
+      "version": "1.0.0",
+      "blobSha": "b9ef83f9c81476eb149a6a5dcb661e08972f138d"
     },
     {
       "id": "operational-attention",
