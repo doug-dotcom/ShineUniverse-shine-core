@@ -141,6 +141,15 @@ begin
       )
     when 'shine-defence-on-demand-executor-readiness'
       then p_operation='on-demand-executor-readiness'
+    when 'shine-defence-on-demand-native-git'
+      then p_operation in (
+        'native-git-prepare-claim',
+        'native-git-record-candidate',
+        'native-git-execution-claim',
+        'native-git-record-fast-forward-start',
+        'native-git-record-fast-forward-result',
+        'native-git-record-failure'
+      )
     else false
   end;
 

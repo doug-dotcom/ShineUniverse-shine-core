@@ -283,6 +283,61 @@ end;
 $on_demand_executor_readiness_purpose$;
 
 
+do $native_git_bridge_purposes$
+declare
+  v jsonb;
+  op text;
+begin
+  foreach op in array array[
+    'native-git-prepare-claim',
+    'native-git-record-candidate',
+    'native-git-execution-claim',
+    'native-git-record-fast-forward-start',
+    'native-git-record-fast-forward-result',
+    'native-git-record-failure'
+  ]
+  loop
+    select foundation.bind_github_oidc_operation_v1(
+      'doug-dotcom/test-native-git-app',
+      'refs/heads/main',
+      'doug-dotcom/test-native-git-app/.github/workflows/shine-defence-native-git-candidate.yml@refs/heads/main',
+      '890000001',
+      '1',
+      'push',
+      'shine-defence-on-demand-native-git',
+      op,
+      'native-git:test:'||op,
+      jsonb_build_object('contract','shine-defence/on-demand-native-git-bridge-v1','operation',op)
+    ) into v;
+
+    if v->>'status'<>'accepted-new'
+       or v->>'audience'<>'shine-defence-on-demand-native-git'
+       or v->>'operation'<>op then
+      raise exception 'native Git bridge OIDC purpose not accepted: % %',op,v;
+    end if;
+  end loop;
+
+  begin
+    perform foundation.bind_github_oidc_operation_v1(
+      'doug-dotcom/test-native-git-app',
+      'refs/heads/main',
+      'doug-dotcom/test-native-git-app/.github/workflows/shine-defence-native-git-candidate.yml@refs/heads/main',
+      '890000001',
+      '1',
+      'push',
+      'shine-defence-on-demand-native-git',
+      'provider-snapshot',
+      'native-git:test:invalid',
+      '{"x":1}'::jsonb
+    );
+    raise exception 'unrelated purpose accepted under native Git bridge audience';
+  exception
+    when sqlstate '22023' then null;
+  end;
+end;
+$native_git_bridge_purposes$;
+
+
 insert into foundation.defence_estate_targets(
   target_id,display_name,provider,provider_project_ref,environment_ref,service_ref,
   target_role,required_for_estate,allowed_runtime_states,lifecycle,metadata
