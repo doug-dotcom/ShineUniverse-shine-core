@@ -252,11 +252,11 @@ begin
     if v_cause_class in ('layer97-receipt-integrity','layer97-receipt-missing') then
       v_decision := 'admit';
       v_required_control := 'read-only';
-      v_reason := 'case-audit-layer102-response-inspect-layer92-receipt';
+      v_reason := 'case-audit-layer102-response-inspect-layer97-receipt';
     else
       v_decision := 'not-applicable';
       v_required_control := 'none';
-      v_reason := 'case-audit-layer102-response-layer92-receipt-not-relevant';
+      v_reason := 'case-audit-layer102-response-layer97-receipt-not-relevant';
     end if;
 
   elsif p_action_key='inspect-layer101-execution-receipt' then
@@ -264,11 +264,11 @@ begin
     if v_cause_class='layer101-execution-receipt-mismatch' then
       v_decision := 'admit';
       v_required_control := 'read-only';
-      v_reason := 'case-audit-layer102-response-inspect-layer96-receipt';
+      v_reason := 'case-audit-layer102-response-inspect-layer101-receipt';
     else
       v_decision := 'not-applicable';
       v_required_control := 'none';
-      v_reason := 'case-audit-layer102-response-layer96-receipt-not-relevant';
+      v_reason := 'case-audit-layer102-response-layer101-receipt-not-relevant';
     end if;
 
   elsif p_action_key='inspect-layer100-policy-binding' then
@@ -280,7 +280,7 @@ begin
     else
       v_decision := 'not-applicable';
       v_required_control := 'none';
-      v_reason := 'case-audit-layer102-response-layer95-policy-not-relevant';
+      v_reason := 'case-audit-layer102-response-layer100-policy-not-relevant';
     end if;
 
   elsif p_action_key='inspect-layer99-incident-binding' then
@@ -292,7 +292,7 @@ begin
     else
       v_decision := 'not-applicable';
       v_required_control := 'none';
-      v_reason := 'case-audit-layer102-response-layer94-incident-not-relevant';
+      v_reason := 'case-audit-layer102-response-layer99-incident-not-relevant';
     end if;
 
   elsif p_action_key='inspect-layer98-coverage-binding' then
@@ -304,7 +304,7 @@ begin
     else
       v_decision := 'not-applicable';
       v_required_control := 'none';
-      v_reason := 'case-audit-layer102-response-layer93-coverage-not-relevant';
+      v_reason := 'case-audit-layer102-response-layer98-coverage-not-relevant';
     end if;
 
   elsif p_action_key='run-independent-layer102-reconciliation' then
