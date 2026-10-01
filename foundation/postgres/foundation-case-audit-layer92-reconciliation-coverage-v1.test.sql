@@ -27,7 +27,7 @@ begin
       ('93000000-0000-4000-8000-'||lpad((100+i)::text,12,'0'))::uuid,
       'production','93000000-0000-4000-8000-000000000001'::uuid,
       'record-fresh-promotion-case-audit-observation','observer-freshness',
-      repeat(to_hex(i),64),'executed','test-layer93-layer76',
+      lpad(to_hex(i),64,'0'),'executed','test-layer93-layer76',
       '{}'::jsonb,'{}'::jsonb,'{}'::jsonb,
       jsonb_build_object('status','recorded','test','layer93','chain',i),
       '{}'::jsonb,now()-interval '25 minutes'
@@ -50,7 +50,7 @@ begin
       'production',
       ('93000000-0000-4000-8000-'||lpad((100+i)::text,12,'0'))::uuid,
       null,'run-independent-verification','verification-omission',
-      repeat(to_hex(i+6),64),'executed',
+      lpad(to_hex(i+6),64,'0'),'executed',
       'case-audit-overdue-verification-layer77-ran',
       '{}'::jsonb,'{}'::jsonb,'{}'::jsonb,'{}'::jsonb,
       jsonb_build_object('status','recorded','test','layer93','chain',i),
@@ -74,7 +74,7 @@ begin
       'production',
       ('93000000-0000-4000-8000-'||lpad((300+i)::text,12,'0'))::uuid,
       null,'run-independent-reconciliation','reconciliation-omission',
-      repeat(to_hex(i+12),64),'executed',
+      lpad(to_hex(i+12),64,'0'),'executed',
       'case-audit-overdue-reconciliation-layer82-ran',
       '{}'::jsonb,'{}'::jsonb,'{}'::jsonb,'{}'::jsonb,
       jsonb_build_object('status','recorded','test','layer93','chain',i),
@@ -117,7 +117,7 @@ begin
         'reconciliationIncidentEventId',null,
         'actionKey','run-independent-reconciliation',
         'causeClass','reconciliation-omission',
-        'policyFingerprint',repeat(to_hex(i+12),64),
+        'policyFingerprint',lpad(to_hex(i+12),64,'0'),
         'eventType','executed',
         'reasonCode','case-audit-overdue-reconciliation-layer82-ran',
         'requestedAt',(
@@ -130,7 +130,7 @@ begin
       ),
       null,
       jsonb_build_object('test','layer93','layer87',i),
-      repeat(to_hex(i+20),64),
+      lpad(to_hex(i+20),64,'0'),
       now()-interval '4 minutes'
     );
   end loop;
@@ -160,7 +160,7 @@ begin
       ('93000000-0000-4000-8000-'||lpad((700+i)::text,12,'0'))::uuid,
       null,
       'run-independent-layer87-reconciliation','layer87-reconciliation-omission',
-      repeat(to_hex(i+26),64),'executed',
+      lpad(to_hex(i+26),64,'0'),'executed',
       'case-audit-overdue-layer87-reconciliation-ran',
       '{}'::jsonb,'{}'::jsonb,
       jsonb_build_object(
@@ -171,7 +171,7 @@ begin
         'reconciliationIncidentEventId',null,
         'actionKey','run-independent-reconciliation',
         'causeClass','reconciliation-omission',
-        'policyFingerprint',repeat(to_hex(i+12),64),
+        'policyFingerprint',lpad(to_hex(i+12),64,'0'),
         'eventType','executed',
         'reasonCode','case-audit-overdue-reconciliation-layer82-ran',
         'requestedAt',(
@@ -226,7 +226,7 @@ begin
           'layer82ReconciliationId',null,
           'reconciliationState','missing-layer82-receipt',
           'reasonCode','case-audit-reconcile-exec-layer82-receipt-missing',
-          'reconciliationProofSha256',repeat(to_hex(i+20),64),
+          'reconciliationProofSha256',lpad(to_hex(i+20),64,'0'),
           'layer82RerunPerformed',false,'layer81RerunPerformed',false,
           'verificationRerunPerformed',false,'mutationPerformed',false
         )
