@@ -139,6 +139,8 @@ begin
         'on-demand-revalidation-claim',
         'on-demand-revalidation-record-deployment'
       )
+    when 'shine-defence-on-demand-executor-readiness'
+      then p_operation='on-demand-executor-readiness'
     else false
   end;
 
