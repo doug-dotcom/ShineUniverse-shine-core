@@ -1,0 +1,5 @@
+{
+  "contract": "shine-defence/on-demand-executor-readiness-ticket-v1",
+  "schemaVersion": "1.0.0",
+  "purpose": "Trigger signed direct Railway credential readiness preflight."
+}
