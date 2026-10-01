@@ -678,8 +678,8 @@
     {
       "id": "release-attestation-authority-sync-heartbeat-integration-db",
       "path": "foundation/postgres/defence-attestation-authority-sync-heartbeat-integration-v1.sql",
-      "version": "1.2.0",
-      "blobSha": "ff644ccb283609003c245401306ee18315111616"
+      "version": "1.3.0",
+      "blobSha": "a508ab635569c8e19424a6c5d96205dc60b6bd5c"
     },
     {
       "id": "release-attestation-authority-heartbeat-sentinel-db",
@@ -710,6 +710,18 @@
       "path": "foundation/postgres/defence-transport-recurrence-sentinel-v1.sql",
       "version": "1.0.0",
       "blobSha": "691095189bfc63c4f20eff9264950f35a52b753f"
+    },
+    {
+      "id": "control-scheduler-liveness",
+      "path": "foundation/contracts/defence-control-scheduler-liveness-v1.json",
+      "version": "1.0.0",
+      "blobSha": "0963f4b31658453f9ec735099960472a4c8d65f4"
+    },
+    {
+      "id": "control-scheduler-liveness-db",
+      "path": "foundation/postgres/defence-control-scheduler-liveness-v1.sql",
+      "version": "1.0.0",
+      "blobSha": "57d5403e57bc2cd774e6a2e151edf9ea4af1ceeb"
     },
     {
       "id": "operational-attention",
