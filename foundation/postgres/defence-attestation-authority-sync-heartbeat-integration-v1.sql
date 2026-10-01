@@ -49,8 +49,8 @@ begin
       v_evaluated_at,3600,3,0.5,3
     );
   v_operational_attention :=
-    foundation.get_defence_operational_attention_executor_aware_v1(
-      v_evaluated_at,2700,3,0.5
+    foundation.get_defence_operational_attention_recovery_aware_v1(
+      v_evaluated_at,2700,3,0.5,2
     );
   v_transition_coverage := foundation.get_defence_release_transition_coverage_v1();
   v_admission := foundation.get_defence_release_admission_summary_v1();
@@ -81,7 +81,7 @@ begin
 
   return jsonb_build_object(
     'defenceFullEstateSummary','shine-defence/full-estate-summary-v1',
-    'schemaVersion','1.17.0',
+    'schemaVersion','1.18.0',
     'state',v_state,
     'estate',v_estate,
     'supabaseRuntimeReceipts',v_supabase,
