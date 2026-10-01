@@ -1,4 +1,18 @@
 -- Shine Defence external dispatcher activation readiness v1.
+-- Extend the existing dispatcher heartbeat vocabulary so credentials may be
+-- present while activation readiness remains blocked.
+alter table foundation.defence_external_dispatcher_heartbeats
+  drop constraint if exists defence_external_dispatcher_heartbeats_outcome_check;
+
+alter table foundation.defence_external_dispatcher_heartbeats
+  add constraint defence_external_dispatcher_heartbeats_outcome_check
+  check (
+    outcome in (
+      'ready_idle','ready_dispatched','ready_partial_failure',
+      'disabled_missing_credentials','disabled_activation_not_ready','failed'
+    )
+  );
+
 -- Validates GitHub App identity, installation permissions and repository coverage
 -- without dispatching any workflow.
 
