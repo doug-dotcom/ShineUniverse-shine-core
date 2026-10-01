@@ -116,6 +116,7 @@ begin
       'reasonCode','no-correlated-transport-event',
       'rawEstateState',v_raw_estate->>'state',
       'rawHealthEvidencePreserved',true,
+      'rawEstateStateOverridden',false,
       'lookbackSeconds',p_lookback_seconds,
       'minimumAffectedTargets',p_min_affected_targets,
       'minimumFailureFraction',p_min_failure_fraction,
