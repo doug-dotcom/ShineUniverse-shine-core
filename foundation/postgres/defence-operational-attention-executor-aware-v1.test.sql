@@ -55,7 +55,7 @@ begin
     base,now()
   ) into v;
 
-  if v->>'schemaVersion'<>'1.3.0'
+  if v->>'schemaVersion'<>'1.4.0'
      or v#>>'{executorSelection,contract}'<>
         'shine-defence/on-demand-executor-selection-v1'
      or not exists (
