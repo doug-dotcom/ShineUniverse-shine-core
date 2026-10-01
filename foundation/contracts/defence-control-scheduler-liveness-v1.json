@@ -1,0 +1,33 @@
+{
+  "contract": "shine-defence/control-scheduler-liveness-v1",
+  "version": "1.0.0",
+  "purpose": "Observe whether GitHub scheduled Defence control-plane workflows are arriving at the expected cadence, without treating scheduler activity as source proof or authority proof.",
+  "defaultPolicy": {
+    "warningAgeSeconds": 1800,
+    "criticalAgeSeconds": 7200
+  },
+  "sources": {
+    "rollbackScheduler": "foundation.github_oidc_operation_bindings where audience=shine-defence-rollback-readiness, operation=rollback-claim and event_name=schedule",
+    "authorityScheduler": "foundation.defence_attestation_authority_sync_receipts where github_event=schedule"
+  },
+  "states": {
+    "pass": "All observed schedules are current.",
+    "watch": "At least one schedule is delayed beyond the warning age but not beyond the critical age.",
+    "warning": "At least one schedule is missing, invalid-future or silent beyond the critical age."
+  },
+  "invariants": [
+    "Scheduled workflow activity is diagnostic metadata, never an evidence source for source availability or authority state.",
+    "The sentinel cannot create or refresh rollback source proof.",
+    "The sentinel cannot extend any proof TTL.",
+    "The sentinel cannot mint or refresh attestation authority state.",
+    "The sentinel cannot override estate, admission or rollback readiness state.",
+    "Push or workflow-dispatch success does not masquerade as scheduled liveness.",
+    "Browser roles receive no EXECUTE grant."
+  ],
+  "runtime": {
+    "function": "foundation.get_defence_control_scheduler_liveness_v1",
+    "classifier": "foundation.classify_defence_scheduler_age_v1",
+    "fullEstateField": "controlSchedulerLiveness",
+    "fullEstateStateGate": false
+  }
+}
