@@ -519,6 +519,14 @@ jobs:
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-case-audit-layer97-reconciliation-executor-summary-v1.sql
       - name: Run Foundation Layer-101 bounded executor tests
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-case-audit-layer97-reconciliation-executor-v1.test.sql
+      - name: Apply Foundation Layer-102 reconciliation ledger
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-case-audit-layer101-execution-reconciliation-schema-v1.sql
+      - name: Apply Foundation Layer-102 independent evaluation
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-case-audit-layer101-execution-reconciliation-evaluate-v1.sql
+      - name: Apply Foundation Layer-102 reconciliation writer and summary
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-case-audit-layer101-execution-reconciliation-runtime-v1.sql
+      - name: Run Foundation Layer-102 execution reconciliation tests
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-case-audit-layer101-execution-reconciliation-v1.test.sql
       - name: Apply Shine Defence Sentinel
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-sentinel-v1.sql
       - name: Run Shine Defence Sentinel acceptance tests
