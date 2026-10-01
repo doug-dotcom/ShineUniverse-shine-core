@@ -611,7 +611,7 @@ begin
       when v_executor_mode='direct_railway'
         then 'execute_direct_railway_revalidation'
       when v_executor_mode='native_git'
-        then 'execute_native_git_revalidation'
+        then 'execute_native_git_fast_forward'
       else 'review_on_demand_executor_selection'
     end;
   elsif v_approval.approval_id is not null
