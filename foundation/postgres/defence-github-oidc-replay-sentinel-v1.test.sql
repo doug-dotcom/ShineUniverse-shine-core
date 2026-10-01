@@ -133,6 +133,16 @@ begin
        'authenticated',
        'foundation.get_defence_github_oidc_replay_summary_v1(timestamptz,integer)',
        'EXECUTE'
+     )
+     or has_function_privilege(
+       'anon',
+       'foundation.escalate_github_oidc_replay_conflict_v1()',
+       'EXECUTE'
+     )
+     or has_function_privilege(
+       'authenticated',
+       'foundation.escalate_github_oidc_replay_conflict_v1()',
+       'EXECUTE'
      ) then
     raise exception 'public roles unexpectedly access OIDC replay Sentinel';
   end if;

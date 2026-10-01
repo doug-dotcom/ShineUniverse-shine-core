@@ -102,6 +102,13 @@ begin
 end;
 $replay_alert$;
 
+-- Trigger-only privileged code must never inherit PostgreSQL's default
+-- PUBLIC EXECUTE grant. The trigger is installed by the owner below and does
+-- not require direct execution by browser/runtime roles.
+revoke all on function foundation.escalate_github_oidc_replay_conflict_v1()
+  from public,anon,authenticated,foundation_runtime,foundation_gateway,
+       shine_defence_runtime,service_role;
+
 drop trigger if exists github_oidc_operation_events_replay_sentinel
   on foundation.github_oidc_operation_events;
 
