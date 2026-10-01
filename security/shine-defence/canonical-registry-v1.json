@@ -766,6 +766,12 @@
       "blobSha": "c435197bbffb0ec0b0452468eab9fa0916407007"
     },
     {
+      "id": "on-demand-native-git-reusable-workflow",
+      "path": ".github/workflows/shine-defence-native-git-revalidation-v1.yml",
+      "version": "1.0.0",
+      "blobSha": "c31bb5e5fb30d0df8d7cb5e1323dc23ecf21e57d"
+    },
+    {
       "id": "on-demand-native-git-bridge",
       "path": "security/shine-defence/on-demand-native-git-bridge-v1.json",
       "version": "1.0.0",
