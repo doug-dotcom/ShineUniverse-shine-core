@@ -1,0 +1,69 @@
+# Foundation Layer 93 — Layer-92 reconciliation coverage audit
+
+**Status:** IMPLEMENTED — CI and production verification pending  
+**Scope:** audit coverage and structural integrity of Layer-92 reconciliation receipts over successful Layer-91 executions
+
+Layer 92 independently proves whether a Layer-91 execution claim matches durable Layer-87 truth.
+
+Layer 93 asks:
+
+> **Did every successful Layer-91 execution receive exactly one trustworthy Layer-92 receipt?**
+
+## Coverage reader
+
+`foundation.get_case_audit_layer92_reconciliation_coverage_v1(...)`
+
+It reads successful Layer-91 execution events, Layer-92 reconciliation receipts, and the linked Layer-87 snapshot required to validate each Layer-92 receipt. It writes nothing.
+
+## Two measurements
+
+`layer92ReconciliationCoveragePercent` measures receipt coverage.
+
+`healthyLayer92ReconciliationPercent` measures how many Layer-91 claims were actually reconciled.
+
+A valid negative Layer-92 receipt counts as covered but unhealthy. A corrupt Layer-92 receipt is invalid evidence.
+
+## States
+
+Per execution:
+
+- `pending`
+- `overdue`
+- `invalid-reconciliation`
+- `reconciled`
+- `missing-layer87-receipt`
+- `invalid-layer87-receipt`
+- `execution-receipt-mismatch`
+- `policy-drift`
+- `incident-drift`
+- `coverage-drift`
+
+Overall:
+
+- **idle**
+- **normal**
+- **pending**
+- **gap**
+- **invalid**
+
+## Independent integrity
+
+Layer 93 recomputes Layer-92 proof SHA-256 and revalidates the proof envelope, exact Layer-91 binding, Layer-91 action result, no-rerun/no-rewrite flags and the linked durable Layer-87 snapshot.
+
+Layer 93 does not rerun Layer 92's evaluator or writer.
+
+## Authority boundary
+
+Foundation runtime and service role may read the audit. Gateway reads only through existing `foundation_runtime` membership and receives no direct grant. Shine Core, Shine Defence and browser roles are denied.
+
+## Deliberate non-actions
+
+Layer 93 creates no Layer-92 receipt, reruns no Layer 91/87/86/82/81/verification work, repairs no evidence, rewrites no receipt, changes no incident history or release truth, and grants no authority.
+
+## Acceptance coverage
+
+CI proves six materially different cases: reconciled; pending; overdue; valid `missing-layer87-receipt`; valid `execution-receipt-mismatch`; and a structurally invalid Layer-92 receipt.
+
+## Invariant
+
+> Missing Layer-92 evidence, negative Layer-92 evidence and corrupt Layer-92 evidence are three different truths.
