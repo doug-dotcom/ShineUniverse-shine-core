@@ -1,6 +1,6 @@
 # Foundation Layer 107 — Layer-106 execution reconciliation
 
-**Status:** IMPLEMENTED — CI and production verification pending  
+**Status:** LIVE — CI green and production verification complete  
 **Scope:** independently reconcile each successful Layer-106 bounded Layer-102 reconciliation execution against durable Layer-102 truth
 
 Layer 106 closes direct service-role access to Layer 102.
@@ -73,6 +73,33 @@ CI proves:
 - direct service-role Layer-102 execution remains revoked;
 - direct service-role ledger insert is denied;
 - role and append-only boundaries hold.
+
+## Production proof
+
+Layer 107 is deployed in the Shine Foundation Supabase project as migration:
+
+`20261001042950 — foundation_layer_107_layer106_execution_reconciliation`
+
+Pull request **#151** passed the complete Foundation + Concierge and Shine Defence workflows.
+
+Live production verification confirms:
+
+- Layer-107 ledger, evaluator, reconciler and summary exist;
+- current Layer-106 execution count: **0**;
+- current Layer-107 reconciliation count: **0**;
+- current Layer-102 reconciliation count: **0**;
+- current Layer-101 execution count: **0**;
+- `service_role` can invoke the Layer-107 reconciler but cannot directly INSERT Layer-107 ledger rows;
+- direct `service_role` execution of the Layer-102 reconciler remains **revoked**;
+- Foundation runtime, Gateway, Shine Core, Shine Defence, anon and authenticated cannot reconcile;
+- Foundation runtime can read the Layer-107 summary;
+- Gateway reads the summary only through existing `foundation_runtime` membership;
+- Layer-106 production summary remains empty and continues to report `directLayer102ServiceRoleBypassAllowed=false`;
+- Layer-105 production cause remains **none**;
+- a nonexistent Layer-106 target invoked under `service_role` returns `not-applicable / case-audit-layer106-event-not-found`;
+- that negative probe reports no Layer-106/102/101/97/96/92/91/87/86/82/81 or verification rerun and no mutation;
+- Supabase security advisors report **0 findings** after deployment;
+- the three new Layer-107 indexes are reported unused, expected while the production reconciliation ledger is empty.
 
 ## Invariant
 
