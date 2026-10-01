@@ -756,14 +756,14 @@
     {
       "id": "on-demand-native-git-executor",
       "path": "foundation/contracts/defence-on-demand-native-git-executor-v1.json",
-      "version": "1.0.0",
-      "blobSha": "c53c8860d8f8bd6aa160e68b99e708a7a429abc5"
+      "version": "1.1.0",
+      "blobSha": "0ceb8c067fc29afbf2ed931018b23ebd4f6b3f43"
     },
     {
       "id": "on-demand-native-git-executor-db",
       "path": "foundation/postgres/defence-on-demand-native-git-executor-v1.sql",
-      "version": "1.0.0",
-      "blobSha": "19ab4f3a7b9f841bee222cbc3f25885396fe7389"
+      "version": "1.1.0",
+      "blobSha": "c435197bbffb0ec0b0452468eab9fa0916407007"
     },
     {
       "id": "operational-attention-executor-aware-db",
