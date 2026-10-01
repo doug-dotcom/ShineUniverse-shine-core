@@ -395,6 +395,13 @@ begin
     raise exception 'Native Git fast-forward receipt invalid: %',r;
   end if;
 
+end;
+$record_fast_forward_receipt$;
+
+reset role;
+
+do $verify_fast_forward_receipt$
+begin
   if (
     select count(*)
     from foundation.defence_on_demand_native_git_fast_forward_receipts
@@ -406,7 +413,7 @@ begin
     raise exception 'Native Git fast-forward receipt row missing';
   end if;
 end;
-$record_fast_forward_receipt$;
+$verify_fast_forward_receipt$;
 
 do $fast_forward_receipt_append_only$
 begin
