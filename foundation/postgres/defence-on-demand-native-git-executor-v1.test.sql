@@ -291,6 +291,7 @@ begin
     raise exception 'Native Git candidate unexpectedly mutated';
   exception
     when sqlstate '55000' then null;
+    when insufficient_privilege then null;
   end;
 end;
 $candidate_append_only$;
