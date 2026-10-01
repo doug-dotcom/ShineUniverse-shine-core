@@ -546,8 +546,8 @@
     {
       "id": "github-oidc-operation-replay-db",
       "path": "foundation/postgres/defence-github-oidc-replay-v1.sql",
-      "version": "1.2.0",
-      "blobSha": "fc66eb5b69310956106d88779c7c80291a0a9a14"
+      "version": "1.3.0",
+      "blobSha": "e7a6df228d4f3f96251bddd893e680dbd2ef0326"
     },
     {
       "id": "github-oidc-replay-sentinel",
