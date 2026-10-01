@@ -20,6 +20,7 @@ declare
   v_counts jsonb;
   v_pending integer := 0;
   v_approved integer := 0;
+  v_candidate_prepared integer := 0;
   v_execution_ready integer := 0;
   v_in_progress integer := 0;
   v_failed integer := 0;
@@ -67,13 +68,30 @@ begin
           v_approved := v_approved+1;
           v_item := v_item || jsonb_build_object(
             'attentionClass','authorised_execution_pending',
+            'nextAction',coalesce(
+              v_status->>'nextAction',
+              'admit_on_demand_revalidation_execution'
+            )
+          );
+        when 'candidate_prepared' then
+          v_candidate_prepared := v_candidate_prepared+1;
+          v_item := v_item || jsonb_build_object(
+            'attentionClass','authorised_execution_pending',
             'nextAction','admit_on_demand_revalidation_execution'
+          );
+        when 'candidate_expired' then
+          v_item := v_item || jsonb_build_object(
+            'attentionClass','human_authorisation',
+            'nextAction','request_on_demand_revalidation'
           );
         when 'admitted' then
           v_execution_ready := v_execution_ready+1;
           v_item := v_item || jsonb_build_object(
             'attentionClass','authorised_execution_pending',
-            'nextAction','redeploy_current_source'
+            'nextAction',coalesce(
+              v_status->>'nextAction',
+              'continue_on_demand_revalidation_execution'
+            )
           );
         when 'in_progress' then
           v_in_progress := v_in_progress+1;
@@ -141,6 +159,7 @@ begin
     || jsonb_build_object(
       'onDemandRevalidationPendingApproval',v_pending,
       'onDemandRevalidationApproved',v_approved,
+      'onDemandRevalidationCandidatePrepared',v_candidate_prepared,
       'onDemandRevalidationExecutionReady',v_execution_ready,
       'onDemandRevalidationInProgress',v_in_progress,
       'onDemandRevalidationFailed',v_failed,
@@ -150,6 +169,7 @@ begin
   v_attention_state := case
     when v_pending>0
       or v_approved>0
+      or v_candidate_prepared>0
       or v_execution_ready>0
       or v_in_progress>0
       or v_failed>0
