@@ -710,3 +710,204 @@ grant execute on function foundation.get_defence_on_demand_revalidation_status_v
   text,timestamptz
 ) to foundation_runtime,shine_defence_runtime,service_role,
        shine_defence_on_demand_approver,shine_defence_on_demand_executor;
+
+create or replace function foundation.record_defence_on_demand_revalidation_step_v1(
+  p_event_id uuid,
+  p_execution_id uuid,
+  p_step_type text,
+  p_evidence jsonb,
+  p_occurred_at timestamptz
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = ''
+as $record_step$
+declare
+  v_admission foundation.defence_on_demand_revalidation_admissions%rowtype;
+  v_envelope_hash text;
+  v_evidence_hash text;
+  v_expected_step text;
+  v_expected_source_sha text;
+  v_executor_mode text;
+  v_required_base_sha text;
+  v_step_order text[] := array[
+    'redeploy_started',
+    'deployment_verified',
+    'health_probe_queued',
+    'health_verified',
+    'attestation_verified',
+    'release_reconciled',
+    'completed'
+  ];
+  v_completed integer := 0;
+begin
+  if p_event_id is null
+     or p_execution_id is null
+     or p_occurred_at is null
+     or p_step_type is null
+     or p_evidence is null
+     or jsonb_typeof(p_evidence)<>'object'
+     or pg_column_size(p_evidence)>32768 then
+    raise exception 'on-demand-revalidation-step-fields-invalid';
+  end if;
+
+  if p_step_type not in (
+    'redeploy_started','deployment_verified','health_probe_queued',
+    'health_verified','attestation_verified','release_reconciled',
+    'completed','failed'
+  ) then
+    raise exception 'on-demand-revalidation-step-invalid';
+  end if;
+
+  select * into v_admission
+  from foundation.defence_on_demand_revalidation_admissions
+  where execution_id=p_execution_id
+  for update;
+
+  if v_admission.execution_id is null then
+    raise exception 'on-demand-revalidation-execution-missing';
+  end if;
+
+  v_envelope_hash := encode(
+    extensions.digest(
+      convert_to(v_admission.execution_envelope::text,'UTF8'),'sha256'
+    ),
+    'hex'
+  );
+
+  if v_envelope_hash is distinct from v_admission.envelope_sha256 then
+    raise exception 'on-demand-revalidation-execution-integrity-failed';
+  end if;
+
+  if p_occurred_at<v_admission.admitted_at
+     or p_occurred_at>v_admission.expires_at+interval '30 minutes' then
+    raise exception 'on-demand-revalidation-step-time-invalid';
+  end if;
+
+  if exists (
+    select 1
+    from foundation.defence_on_demand_revalidation_events
+    where execution_id=p_execution_id
+      and step_type in ('completed','failed')
+  ) then
+    raise exception 'on-demand-revalidation-execution-terminal';
+  end if;
+
+  select count(*)::integer into v_completed
+  from foundation.defence_on_demand_revalidation_events
+  where execution_id=p_execution_id
+    and step_type=any(v_step_order);
+
+  if p_step_type<>'failed' then
+    v_expected_step := v_step_order[v_completed+1];
+    if v_expected_step is distinct from p_step_type then
+      raise exception 'on-demand-revalidation-step-out-of-order';
+    end if;
+  end if;
+
+  v_expected_source_sha :=
+    v_admission.execution_envelope#>>'{constraints,expectedSourceHeadSha}';
+  v_executor_mode :=
+    v_admission.execution_envelope#>>'{constraints,executorMode}';
+  v_required_base_sha :=
+    v_admission.execution_envelope#>>'{constraints,requiredBranchBaseSha}';
+
+  if p_step_type='redeploy_started' then
+    if p_evidence->>'projectId' is distinct from
+         v_admission.execution_envelope#>>'{railway,projectId}'
+       or p_evidence->>'environmentId' is distinct from
+         v_admission.execution_envelope#>>'{railway,environmentId}'
+       or p_evidence->>'serviceId' is distinct from
+         v_admission.execution_envelope#>>'{railway,serviceId}'
+       or p_evidence->>'expectedSourceHeadSha' is distinct from
+         v_expected_source_sha then
+      raise exception 'on-demand-revalidation-redeploy-evidence-scope-mismatch';
+    end if;
+
+    if v_executor_mode='native_git' then
+      if p_evidence->>'executorMode'<>'native_git'
+         or p_evidence->>'repository' is distinct from
+            v_admission.execution_envelope#>>'{sourceCandidate,repository}'
+         or p_evidence->>'branch' is distinct from
+            v_admission.execution_envelope#>>'{sourceCandidate,branch}'
+         or p_evidence->>'observedBranchHeadSha' is distinct from
+            v_required_base_sha
+         or p_evidence->>'candidateCommitSha' is distinct from
+            v_expected_source_sha then
+        raise exception 'on-demand-native-git-fast-forward-precondition-failed';
+      end if;
+    elsif v_executor_mode<>'direct_railway' then
+      raise exception 'on-demand-revalidation-executor-mode-invalid';
+    end if;
+  elsif p_step_type='deployment_verified' then
+    if p_evidence->>'status'<>'SUCCESS'
+       or p_evidence->>'deployedCommitSha' is distinct from
+          v_expected_source_sha
+       or coalesce(p_evidence->>'deploymentId','')='' then
+      raise exception 'on-demand-revalidation-deployment-verification-failed';
+    end if;
+  elsif p_step_type='health_probe_queued' then
+    if p_evidence->>'targetId' is distinct from
+         v_admission.execution_envelope->>'targetId'
+       or coalesce(p_evidence->>'probeRequestId','')='' then
+      raise exception 'on-demand-revalidation-probe-queue-evidence-invalid';
+    end if;
+  elsif p_step_type='health_verified' then
+    if p_evidence->>'targetId' is distinct from
+         v_admission.execution_envelope->>'targetId'
+       or coalesce((p_evidence->>'contractOk')::boolean,false)<>true then
+      raise exception 'on-demand-revalidation-health-verification-failed';
+    end if;
+  elsif p_step_type='attestation_verified' then
+    if p_evidence->>'authoritySha' is distinct from
+         v_admission.execution_envelope#>>'{authority,sha}'
+       or p_evidence->>'sourceHeadSha' is distinct from
+         v_expected_source_sha then
+      raise exception 'on-demand-revalidation-attestation-verification-failed';
+    end if;
+  elsif p_step_type='release_reconciled' then
+    if p_evidence->>'targetId' is distinct from
+         v_admission.execution_envelope->>'targetId'
+       or p_evidence->>'decision' not in ('admit','canonical')
+       or p_evidence->>'admissionState' not in (
+          'admitted','canonical','rollback-observed'
+       ) then
+      raise exception 'on-demand-revalidation-release-reconciliation-failed';
+    end if;
+  elsif p_step_type='completed' then
+    if coalesce((p_evidence->>'verified')::boolean,false)<>true then
+      raise exception 'on-demand-revalidation-completion-not-verified';
+    end if;
+  end if;
+
+  v_evidence_hash := encode(
+    extensions.digest(
+      convert_to(p_evidence::text,'UTF8'),'sha256'
+    ),
+    'hex'
+  );
+
+  insert into foundation.defence_on_demand_revalidation_events(
+    event_id,execution_id,step_type,evidence,occurred_at,evidence_sha256
+  ) values (
+    p_event_id,p_execution_id,p_step_type,p_evidence,p_occurred_at,v_evidence_hash
+  );
+
+  return jsonb_build_object(
+    'status','recorded',
+    'executionId',p_execution_id,
+    'stepType',p_step_type,
+    'evidenceSha256',v_evidence_hash,
+    'terminal',p_step_type in ('completed','failed')
+  );
+end;
+$record_step$;
+
+revoke all on function foundation.record_defence_on_demand_revalidation_step_v1(
+  uuid,uuid,text,jsonb,timestamptz
+) from public,anon,authenticated,foundation_runtime,foundation_gateway,
+       service_role,shine_defence_runtime,shine_defence_on_demand_approver;
+grant execute on function foundation.record_defence_on_demand_revalidation_step_v1(
+  uuid,uuid,text,jsonb,timestamptz
+) to shine_defence_on_demand_executor;
