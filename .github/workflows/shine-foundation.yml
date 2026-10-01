@@ -705,6 +705,10 @@ jobs:
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-on-demand-executor-selection-v1.sql
       - name: Run Shine Defence pre-admission executor selection tests
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-on-demand-executor-selection-v1.test.sql
+      - name: Apply Shine Defence native Git executor admission
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-on-demand-native-git-executor-v1.sql
+      - name: Run Shine Defence native Git executor admission tests
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-on-demand-native-git-executor-v1.test.sql
       - name: Apply Shine Defence revalidation-aware operational attention
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-operational-attention-revalidation-aware-v1.sql
       - name: Run Shine Defence revalidation-aware operational attention tests
