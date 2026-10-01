@@ -96,11 +96,6 @@ begin
        'foundation.get_defence_attestation_authority_heartbeat_sentinel_v1(timestamp with time zone,integer,integer)',
        'EXECUTE'
      )
-     or has_function_privilege(
-       'foundation_gateway',
-       'foundation.get_defence_attestation_authority_heartbeat_sentinel_v1(timestamp with time zone,integer,integer)',
-       'EXECUTE'
-     )
      or not has_function_privilege(
        'shine_defence_runtime',
        'foundation.get_defence_attestation_authority_heartbeat_sentinel_v1(timestamp with time zone,integer,integer)',
