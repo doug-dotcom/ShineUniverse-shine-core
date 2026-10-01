@@ -679,7 +679,7 @@
       "id": "release-attestation-authority-sync-heartbeat-integration-db",
       "path": "foundation/postgres/defence-attestation-authority-sync-heartbeat-integration-v1.sql",
       "version": "1.0.0",
-      "blobSha": "7e1f04e113154acc899213d9fbd77e5613b6857a"
+      "blobSha": "8b73312d1d3307cb885f7ea8a969b8f118f1d844"
     },
     {
       "id": "release-attestation-authority-heartbeat-sentinel-db",
@@ -702,8 +702,8 @@
     {
       "id": "operational-attention",
       "path": "foundation/contracts/defence-operational-attention-v1.json",
-      "version": "1.2.0",
-      "blobSha": "eab52f1f39824b9dd2273455d57f1f5688d18f55"
+      "version": "1.3.0",
+      "blobSha": "f446b3b0909660d01ebcfc25824d7617676e7e68"
     },
     {
       "id": "operational-attention-db",
@@ -742,6 +742,36 @@
       "blobSha": "f82577700b6516f8d4d3077672f9ca5c086da551"
     },
     {
+      "id": "on-demand-executor-selection",
+      "path": "foundation/contracts/defence-on-demand-executor-selection-v1.json",
+      "version": "1.0.0",
+      "blobSha": "cc9be677893f9cf9690cb38074c30fb737cccd6f"
+    },
+    {
+      "id": "on-demand-executor-selection-db",
+      "path": "foundation/postgres/defence-on-demand-executor-selection-v1.sql",
+      "version": "1.0.0",
+      "blobSha": "fe2e9139b83c15189c3e8b86b9bb6aeb03b51a1f"
+    },
+    {
+      "id": "operational-attention-executor-aware-db",
+      "path": "foundation/postgres/defence-operational-attention-executor-aware-v1.sql",
+      "version": "1.0.0",
+      "blobSha": "9e91ad4c9f3fe983e990e2c89ef02f190897f100"
+    },
+    {
+      "id": "on-demand-executor-readiness-edge",
+      "path": "foundation/runtime/defence-on-demand-executor-readiness/index.ts",
+      "version": "1.0.0",
+      "blobSha": "a928ea398e4b1f4adf662a0ab2aad9eadb9cf9c6"
+    },
+    {
+      "id": "on-demand-executor-readiness-workflow",
+      "path": ".github/workflows/shine-defence-on-demand-executor-readiness.yml",
+      "version": "1.0.0",
+      "blobSha": "f115d115b29af4fa520c5c30e6635c55d7d1ff64"
+    },
+    {
       "id": "on-demand-revalidation-executor-bridge",
       "path": "security/shine-defence/on-demand-revalidation-executor-bridge-v1.json",
       "version": "1.0.0",
@@ -751,13 +781,13 @@
       "id": "on-demand-revalidation-executor-edge",
       "path": "foundation/runtime/defence-on-demand-revalidation-executor/index.ts",
       "version": "1.0.0",
-      "blobSha": "c057416d1b7b416107d07c16b4e6912d7edbd6ad"
+      "blobSha": "322aa27b06f04fbdc30a77b41e0fa2ed96ef67b7"
     },
     {
       "id": "on-demand-revalidation-executor-workflow",
       "path": ".github/workflows/shine-defence-on-demand-revalidation.yml",
       "version": "1.0.0",
-      "blobSha": "38e772404edf6985a3bf23c44215314e78241d1a"
+      "blobSha": "5a0e84d3670946be928743b287ca4718ca01cb89"
     },
     {
       "id": "operational-attention-revalidation-aware-db",
