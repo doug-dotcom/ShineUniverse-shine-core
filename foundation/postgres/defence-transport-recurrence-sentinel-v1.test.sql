@@ -11,6 +11,16 @@ declare
   request_id uuid;
   sentinel jsonb;
 begin
+  select foundation.get_defence_transport_recurrence_sentinel_v1(
+    t-interval '1 day',600,3,0.5,3
+  ) into sentinel;
+
+  if sentinel->>'state'<>'stable'
+     or sentinel->>'latestEventState'<>'none'
+     or (sentinel->>'qualifyingCycleCount')::integer<>0 then
+    raise exception 'Transport recurrence stable state misclassified: %',sentinel;
+  end if;
+
   -- Three qualifying shared transport cycles: three TLS transport failures and
   -- one passing target in each cycle.
   foreach cycle_offset in array array[0,5,10] loop
