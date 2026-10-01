@@ -282,6 +282,67 @@ begin
 end;
 $admit_native$;
 
+
+do $reject_changed_branch$
+begin
+  begin
+    perform foundation.record_defence_on_demand_revalidation_step_v1(
+      '71000007-0000-4000-8000-000000000001',
+      '71000006-0000-4000-8000-000000000001',
+      'redeploy_started',
+      jsonb_build_object(
+        'projectId','71111111-1111-4111-8111-111111111111',
+        'environmentId','72222222-2222-4222-8222-222222222222',
+        'serviceId','73333333-3333-4333-8333-333333333333',
+        'expectedSourceHeadSha',repeat('c',40),
+        'executorMode','native_git',
+        'repository','doug-dotcom/test-revalidation-control',
+        'branch','main',
+        'observedBranchHeadSha',repeat('f',40),
+        'candidateCommitSha',repeat('c',40)
+      ),
+      now()
+    );
+    raise exception 'Changed native Git branch head unexpectedly accepted';
+  exception
+    when raise_exception then
+      if sqlerrm<>'on-demand-native-git-fast-forward-precondition-failed' then
+        raise;
+      end if;
+  end;
+end;
+$reject_changed_branch$;
+
+do $accept_exact_fast_forward$
+declare
+  r jsonb;
+begin
+  select foundation.record_defence_on_demand_revalidation_step_v1(
+    '71000007-0000-4000-8000-000000000002',
+    '71000006-0000-4000-8000-000000000001',
+    'redeploy_started',
+    jsonb_build_object(
+      'projectId','71111111-1111-4111-8111-111111111111',
+      'environmentId','72222222-2222-4222-8222-222222222222',
+      'serviceId','73333333-3333-4333-8333-333333333333',
+      'expectedSourceHeadSha',repeat('c',40),
+      'executorMode','native_git',
+      'repository','doug-dotcom/test-revalidation-control',
+      'branch','main',
+      'observedBranchHeadSha',repeat('b',40),
+      'candidateCommitSha',repeat('c',40)
+    ),
+    now()
+  ) into r;
+
+  if r->>'status'<>'recorded'
+     or r->>'stepType'<>'redeploy_started'
+     or r->>'terminal'<>'false' then
+    raise exception 'Exact native Git fast-forward precondition not recorded: %',r;
+  end if;
+end;
+$accept_exact_fast_forward$;
+
 do $candidate_append_only$
 begin
   begin

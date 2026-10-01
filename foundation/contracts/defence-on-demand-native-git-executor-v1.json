@@ -1,6 +1,6 @@
 {
   "contract": "shine-defence/on-demand-native-git-executor-v1",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "purpose": "Make native Git a first-class on-demand revalidation executor by preparing and pinning an immutable candidate commit before execution admission.",
   "candidate": {
     "table": "foundation.defence_on_demand_native_git_candidates",
@@ -29,6 +29,18 @@
     "A changed branch head, authority, deployment identity, source fingerprint or executor selection invalidates admission.",
     "No candidate record performs a branch update or Railway mutation.",
     "No rollback is authorised.",
-    "Browser roles receive no table access or function EXECUTE grants."
-  ]
+    "Browser roles receive no table access or function EXECUTE grants.",
+    "The execution ledger rejects native-Git start evidence when the observed watched-branch head differs from the admitted base SHA."
+  ],
+  "fastForwardGuard": {
+    "evidenceStep": "redeploy_started",
+    "requiredEvidence": [
+      "executorMode=native_git",
+      "repository",
+      "branch",
+      "observedBranchHeadSha",
+      "candidateCommitSha"
+    ],
+    "rule": "observedBranchHeadSha must equal the admitted requiredBranchBaseSha and candidateCommitSha must equal admitted expectedSourceHeadSha"
+  }
 }
