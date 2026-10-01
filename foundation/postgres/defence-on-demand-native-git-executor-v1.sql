@@ -197,7 +197,7 @@ begin
   v_candidate := jsonb_build_object(
     'defenceOnDemandNativeGitCandidate',
       'shine-defence/on-demand-native-git-candidate-v1',
-    'schemaVersion','1.0.0',
+    'schemaVersion','1.1.0',
     'candidateId',p_candidate_id,
     'approvalId',p_approval_id,
     'requestId',v_request.request_id,
@@ -421,7 +421,7 @@ begin
   v_envelope := jsonb_build_object(
     'defenceOnDemandRevalidationExecutionAdmission',
       'shine-defence/on-demand-revalidation-execution-admission-v1',
-    'schemaVersion','1.0.0',
+    'schemaVersion','1.1.0',
     'executionId',p_execution_id,
     'requestId',v_request.request_id,
     'approvalId',v_approval.approval_id,
@@ -548,7 +548,7 @@ begin
     return jsonb_build_object(
       'defenceOnDemandRevalidationStatus',
         'shine-defence/on-demand-revalidation-status-v1',
-      'schemaVersion','1.0.0',
+      'schemaVersion','1.1.0',
       'targetId',p_target_id,
       'state','none',
       'nextAction','request_on_demand_revalidation',
@@ -650,7 +650,7 @@ begin
   return jsonb_build_object(
     'defenceOnDemandRevalidationStatus',
       'shine-defence/on-demand-revalidation-status-v1',
-    'schemaVersion','1.0.0',
+    'schemaVersion','1.1.0',
     'targetId',p_target_id,
     'state',v_state,
     'nextAction',v_next_action,
