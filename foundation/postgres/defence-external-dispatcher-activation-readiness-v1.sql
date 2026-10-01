@@ -291,6 +291,7 @@ begin
     or not p_repository_coverage_complete
     or p_covered_repository_count<>p_required_repository_count
     or jsonb_array_length(p_missing_repository_ids)<>0
+    or p_metadata->>'workflowAccessComplete' is distinct from 'true'
   ) then
     raise exception 'invalid-ready-dispatcher-readiness'
       using errcode='22023';
