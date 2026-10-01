@@ -1,6 +1,6 @@
 # Foundation Layer 98 — Layer-97 reconciliation coverage audit
 
-**Status:** IMPLEMENTED — CI and production verification pending  
+**Status:** LIVE — CI green and production verification complete  
 **Scope:** audit coverage and structural integrity of Layer-97 reconciliation receipts over successful Layer-96 executions
 
 Layer 97 independently proves whether a Layer-96 execution claim matches durable Layer-92 truth.
@@ -63,6 +63,32 @@ Layer 98 creates no Layer-97 receipt, reruns no Layer 96/92/91/87/86/82/81/verif
 ## Acceptance coverage
 
 CI proves six materially different cases: reconciled; pending; overdue; valid `missing-layer92-receipt`; valid `execution-receipt-mismatch`; and a structurally invalid Layer-97 receipt.
+
+## Production proof
+
+Layer 98 is deployed in the Shine Foundation Supabase project as migration:
+
+`20261001012648 — foundation_layer_098_layer97_reconciliation_coverage_audit`
+
+Pull request **#129** passed the complete Foundation + Concierge and Shine Defence workflows.
+
+Live production verification confirms:
+
+- current Layer-98 state: **idle**;
+- current problem count: **0**;
+- successful Layer-96 execution count: **0**;
+- Layer-97 reconciliation receipt count: **0**;
+- Layer-97 reconciliation coverage: **100%**;
+- healthy Layer-97 reconciliation: **100%**;
+- Layer-97 proof integrity is recomputed by the reader;
+- linked Layer-92 snapshots are revalidated;
+- the coverage read performs no Layer-97 reconciliation and no Layer-96/92/91/87/86/82/81/verification rerun;
+- Foundation runtime and service role can read Layer 98;
+- Gateway reads only through existing `foundation_runtime` inheritance and has **no direct EXECUTE grant**;
+- Shine Core, Shine Defence and browser roles cannot read Layer 98;
+- the direct service-role Layer-92 bypass remains **revoked**;
+- Supabase security advisors report **0 findings** after deployment;
+- Supabase performance advisors report no Layer-98-specific finding.
 
 ## Invariant
 
