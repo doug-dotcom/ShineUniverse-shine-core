@@ -1,0 +1,46 @@
+{
+  "contract": "shine-defence/on-demand-executor-selection-v1",
+  "version": "1.0.0",
+  "purpose": "Choose a viable on-demand revalidation executor before an execution admission is consumed, preferring a fresh credential-proven direct Railway path and otherwise selecting an explicitly proven native Git deployment path.",
+  "modes": [
+    {
+      "mode": "direct_railway",
+      "priority": 1,
+      "readiness": "Requires a fresh OIDC-recorded readiness receipt proving the Core GitHub Actions Railway credential is present."
+    },
+    {
+      "mode": "native_git",
+      "priority": 2,
+      "readiness": "Requires an explicit target executor profile with a previously verified GitHub-to-Railway deployment path."
+    }
+  ],
+  "selection": {
+    "function": "foundation.get_defence_on_demand_executor_selection_v1",
+    "order": ["direct_railway", "native_git"],
+    "blockedState": "blocked"
+  },
+  "approvalBoundary": [
+    "The selected executor mode is recorded in the explicit approval.",
+    "If executor selection changes after approval, admission fails closed and requires re-approval.",
+    "A native_git selection does not consume an execution admission until a native Git candidate/trigger is prepared.",
+    "A direct_railway workflow checks credential presence before claiming the execution admission."
+  ],
+  "readiness": {
+    "table": "foundation.defence_on_demand_executor_readiness_receipts",
+    "recordFunction": "foundation.record_defence_on_demand_executor_readiness_v1",
+    "workflow": ".github/workflows/shine-defence-on-demand-executor-readiness.yml",
+    "edgeFunction": "foundation/runtime/defence-on-demand-executor-readiness/index.ts"
+  },
+  "profiles": {
+    "table": "foundation.defence_on_demand_executor_profiles",
+    "appendOnly": true
+  },
+  "invariants": [
+    "Credential values are never stored or returned; only boolean readiness and bounded evidence are recorded.",
+    "Readiness receipts expire and cannot be used indefinitely.",
+    "Native Git readiness must be backed by a previously verified exact-commit Railway deployment.",
+    "Selector state never changes raw health, release admission or estate state.",
+    "No selection result performs an external mutation.",
+    "Browser roles receive no table access or function EXECUTE grants."
+  ]
+}
