@@ -22,6 +22,7 @@ declare
   v_authority_parity jsonb;
   v_authority_sync jsonb;
   v_authority_heartbeat_sentinel jsonb;
+  v_correlated_transport_attribution jsonb;
   v_state text;
   v_evaluated_at timestamptz := clock_timestamp();
 begin
@@ -36,6 +37,10 @@ begin
   v_authority_heartbeat_sentinel :=
     foundation.get_defence_attestation_authority_heartbeat_sentinel_v1(
       v_evaluated_at,3600,5400
+    );
+  v_correlated_transport_attribution :=
+    foundation.get_defence_correlated_transport_attribution_v1(
+      v_evaluated_at,21600,3,0.5
     );
   v_transition_coverage := foundation.get_defence_release_transition_coverage_v1();
   v_admission := foundation.get_defence_release_admission_summary_v1();
@@ -66,7 +71,7 @@ begin
 
   return jsonb_build_object(
     'defenceFullEstateSummary','shine-defence/full-estate-summary-v1',
-    'schemaVersion','1.10.0',
+    'schemaVersion','1.11.0',
     'state',v_state,
     'estate',v_estate,
     'supabaseRuntimeReceipts',v_supabase,
@@ -75,6 +80,7 @@ begin
     'releaseAuthorityParity',v_authority_parity,
     'attestationAuthoritySync',v_authority_sync,
     'attestationAuthorityHeartbeatSentinel',v_authority_heartbeat_sentinel,
+    'correlatedTransportAttribution',v_correlated_transport_attribution,
     'releaseTransitionCoverage',v_transition_coverage,
     'releaseAdmission',v_admission,
     'rollbackReadiness',v_rollback,
