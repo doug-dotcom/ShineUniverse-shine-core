@@ -97,7 +97,7 @@ insert into foundation.defence_railway_transition_events(
   '52222222-2222-4222-8222-222222222222',
   '53333333-3333-4333-8333-333333333333',
   '54444444-4444-4444-8444-444444444444',
-  'deployment_status','sleeping',null,'test','main',repeat('a',40),
+  'Deployment.SLEEPING','sleeping','INFO','test','main',repeat('a',40),
   now()-interval '149 minutes',repeat('1',64),
   'test:sleep-posture:transition','{}'
 );
