@@ -1,3 +1,5 @@
+import {buildFoundationAccessRequest} from './foundation-access-request-v2.mjs';
+
 const MAX_RESPONSE_BYTES=64*1024;
 const CREDENTIAL_KINDS=new Set(['bearer-jwt','opaque-header']);
 
@@ -35,22 +37,7 @@ export function createFoundationAppClient({
       if(typeof scope!=='string'||!scope||typeof purpose!=='string'||!purpose) throw new TypeError('scope and purpose are required');
       if(!resourceCategory&&!resourceId) throw new TypeError('resourceCategory or resourceId is required');
 
-      const envelope={
-        gatewayRequest:'shine-foundation/gateway-request-v2',
-        schemaVersion:'2.0.0',
-        operation:'access.evaluate',
-        traceId:crypto.randomUUID(),
-        permission:{
-          requestId:crypto.randomUUID(),
-          appId,
-          scope,
-          purpose,
-          ...(resourceId?{resourceId}:{}),
-          ...(resourceCategory?{resourceCategory}:{}),
-          requestedAt:new Date().toISOString(),
-          ...(context===undefined?{}:{context})
-        }
-      };
+      const envelope=buildFoundationAccessRequest({appId,scope,purpose,resourceId,resourceCategory,context});
 
       const headers={
         'Content-Type':'application/json',
