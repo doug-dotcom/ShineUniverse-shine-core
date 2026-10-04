@@ -116,3 +116,33 @@ test('already-granted is idempotent success without exposing identity or grant i
   assert.equal(Object.hasOwn(result,'shineId'),false);
   assert.equal(Object.hasOwn(result,'grantId'),false);
 });
+
+test('capability consent preserves exact purpose and expiry and rejects elapsed expiry before writes',async()=>{
+ const {createIntegrationCapabilityConsentService}=await import('./integration-user-consent-v1.mjs');
+ const writes=[];let proofs=0;
+ const service=createIntegrationCapabilityConsentService({clock:()=> '2026-10-04T06:00:00Z',
+ idFactory:()=>consentId,adapters:{
+ verifyIntegrationClient:async()=>{proofs++;return {clientId:'shine.companion'}},
+ verifyIntegrationIdentity:async()=>({shineId}),verifyIntegrationDelegation:async()=>null,
+ grantIntegrationClientCapability:async args=>{writes.push(args);return {outcome:'granted',reasonCode:'consent-recorded'}}
+ }});
+ const request={integrationCapabilityConsent:'shine-foundation/integration-capability-consent-v1',
+ schemaVersion:'1.0.0',requestId,clientId:'shine.companion',capabilityId:'travel.plan_trip',
+ purpose:'travel.plan',consent:true,requestedAt:'2026-10-04T06:00:00Z'};
+ for(const expiresAt of ['invalid','2026-10-04T05:59:59Z','2026-10-04T06:00:00Z',123]){
+  const result=await service({envelope:{...request,expiresAt},authContext:{}});
+  assert.equal(result.status,'invalid');assert.equal(result.reasonCode,'invalid-grant-expiry');
+ }
+ assert.equal(proofs,0);assert.equal(writes.length,0);
+ const expiresAt='2026-10-04T07:00:00Z';
+ assert.equal((await service({envelope:{...request,expiresAt},authContext:{}})).status,'granted');
+ assert.equal(writes[0].capabilityId,request.capabilityId);
+ assert.equal(writes[0].purpose,request.purpose);assert.equal(writes[0].expiresAt,expiresAt);
+});
+test('undeclared scope or purpose cannot be broadened during consent',async()=>{
+ for(const override of [{scope:'vault.write'},{purpose:'ski.other'}]){
+  const {consent,writes}=make();
+  assert.equal((await consent({envelope:{...envelope,...override},authContext:{}})).reasonCode,'scope-not-declared');
+  assert.equal(writes.length,0);
+ }
+});

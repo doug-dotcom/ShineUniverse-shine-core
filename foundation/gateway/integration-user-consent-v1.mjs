@@ -88,7 +88,9 @@ export function createIntegrationCapabilityConsentService({adapters,clock=()=>ne
        !fresh(envelope.requestedAt,clock)){
       return base(kind,envelope,'invalid','invalid-integration-capability-consent');
     }
-    if(envelope.expiresAt!==undefined&&envelope.expiresAt!==null&&!Number.isFinite(Date.parse(envelope.expiresAt))){
+    if(envelope.expiresAt!==undefined&&envelope.expiresAt!==null&&
+       (typeof envelope.expiresAt!=='string'||!Number.isFinite(Date.parse(envelope.expiresAt))||
+        Date.parse(envelope.expiresAt)<=Date.parse(clock()))){
       return base(kind,envelope,'invalid','invalid-grant-expiry');
     }
     let verified;
