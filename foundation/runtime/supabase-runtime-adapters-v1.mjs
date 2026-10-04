@@ -58,13 +58,19 @@ const mapGrant=row=>({
   ...(row.revoked_at?{revokedAt:toIso(row.revoked_at)}:{})
 });
 
+const stableJson=value=>{
+  if(Array.isArray(value)) return '['+value.map(stableJson).join(',')+']';
+  if(value&&typeof value==='object') return '{'+Object.keys(value).sort().map(k=>JSON.stringify(k)+':'+stableJson(value[k])).join(',')+'}';
+  return JSON.stringify(value);
+};
 const sameAudit=(row,event)=>{
   const eq=(a,b)=>String(a??'')===String(b??'');
   return eq(row.app_id,event.appId)&&eq(row.shine_id,event.shineId)&&
     eq(row.scope,event.scope)&&eq(row.purpose,event.purpose)&&
     eq(row.resource_id,event.resourceId)&&eq(row.resource_category,event.resourceCategory)&&
     eq(row.decision,event.decision)&&eq(row.reason_code,event.reasonCode)&&
-    eq(row.grant_id,event.grantId);
+    eq(row.grant_id,event.grantId)&&eq(row.defence_evidence_ref,event.defenceEvidenceRef)&&
+    stableJson(normalizeJsonObject(row.request_context)??{})===stableJson(event.requestContext??{});
 };
 
 /** @param {{sql:any, defenceGate:any, fetchImpl?:typeof fetch}} [options] */
@@ -1328,7 +1334,8 @@ export function createSupabaseRuntimeAdapters({sql,defenceGate,fetchImpl=fetch}=
 
       const existing=await sql`
         select app_id, shine_id::text, scope, purpose, resource_id::text,
-               resource_category, decision, reason_code, grant_id::text
+               resource_category, decision, reason_code, grant_id::text,
+               defence_evidence_ref,request_context
         from foundation.access_audit_events
         where request_id=${event.requestId}::uuid limit 1
       `;

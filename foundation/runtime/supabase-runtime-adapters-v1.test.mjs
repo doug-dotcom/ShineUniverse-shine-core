@@ -802,3 +802,26 @@ test('invocation requires a ticket bound to the exact action before calling the 
  adapters.issueCapabilityInvocationTicket=async()=>valid;
  assert.equal((await adapters.invokeCapability(args)).status,'completed');assert.equal(calls,1);
 });
+
+test('audit retry accepts identical evidence and rejects changed content for the same request ID',async()=>{
+ const event={eventId:'55555555-5555-4555-8555-555555555555',requestId:resourceId,
+ appId:'shine.travel',shineId,scope:'vault.read',purpose:'travel.plan',resourceCategory:'journey',
+ decision:'allow',reasonCode:'grant-match',grantId,occurredAt:'2026-10-04T06:00:00Z',
+ defenceEvidenceRef:'defence://one',requestContext:{admission:{state:'admit',version:1}}};
+ const stored={app_id:event.appId,shine_id:shineId,scope:event.scope,purpose:event.purpose,
+ resource_category:event.resourceCategory,decision:event.decision,reason_code:event.reasonCode,
+ grant_id:grantId,defence_evidence_ref:event.defenceEvidenceRef,
+ request_context:{admission:{version:1,state:'admit'}}};
+ const adapters=createSupabaseRuntimeAdapters({sql:async strings=>{
+  const query=strings.join('');
+  if(query.includes('insert into foundation.access_audit_events')){
+   assert.match(query,/on conflict \(request_id\) do nothing/);return [];
+  }
+  assert.match(query,/defence_evidence_ref,request_context/);return [stored];
+ },defenceGate:createFoundationRuntimeDefenceGateV1()});
+ assert.deepEqual(await adapters.writeAuditEvent(event),{inserted:false,replayed:true});
+ for(const override of [{scope:'vault.write'},{shineId:resourceId},{defenceEvidenceRef:'defence://two'},
+   {requestContext:{admission:{state:'admit',version:2}}}]){
+  await assert.rejects(()=>adapters.writeAuditEvent({...event,...override}),/audit-replay-conflict/);
+ }
+});
