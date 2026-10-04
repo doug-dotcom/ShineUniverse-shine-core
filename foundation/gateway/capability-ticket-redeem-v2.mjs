@@ -38,7 +38,7 @@ export function createCapabilityTicketRedeemService({
       });
       if(!result) return response('unavailable','capability-ticket-redeem-unavailable');
       if(result.allowed===true){
-        if(result.capabilityId!==envelope.capabilityId || result.stepId!==envelope.stepId){
+        if(result.ticketId!==envelope.ticketId || result.capabilityId!==envelope.capabilityId || result.stepId!==envelope.stepId){
           return response('unavailable','capability-ticket-binding-mismatch');
         }
         return response('allowed',result.reasonCode,{
