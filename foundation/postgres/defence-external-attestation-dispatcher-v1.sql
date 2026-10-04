@@ -550,6 +550,7 @@ begin
     v_state := case
       when v_age>p_fresh_seconds then 'stale'
       when not v_latest.credentials_ready then 'disabled'
+      when v_latest.outcome='disabled_activation_not_ready' then 'disabled'
       when v_latest.outcome='failed' then 'warning'
       when v_latest.outcome='ready_partial_failure' then 'warning'
       else 'pass'
