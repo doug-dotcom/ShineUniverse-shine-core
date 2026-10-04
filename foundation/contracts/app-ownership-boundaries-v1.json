@@ -1,0 +1,203 @@
+{
+  "version": "1.0.0",
+  "authority": "catalogue-contract-only",
+  "ownerMeaning": "code repository owner; not user identity or data owner",
+  "policy": {
+    "catalogueMembershipGrantsAccess": false,
+    "sharedRepositoryGrantsAccess": false,
+    "primaryProductStandalone": true,
+    "foundationOwnsAccessDecisions": true,
+    "defenceMayVeto": true
+  },
+  "apps": [
+    {
+      "app_key": "atlas",
+      "canonical_repo": "doug-dotcom/shine-Atlas-",
+      "category": "product",
+      "codeOwner": "doug-dotcom",
+      "gatewayAppId": null,
+      "responsibility": "app-primary-function",
+      "integrationBoundary": "server-authenticated exact capability, user, scope and purpose; no implicit cross-app access"
+    },
+    {
+      "app_key": "concierge",
+      "canonical_repo": "doug-dotcom/Project-L-Modular",
+      "category": "shared_service",
+      "codeOwner": "doug-dotcom",
+      "gatewayAppId": null,
+      "responsibility": "authorised-dispatch",
+      "integrationBoundary": "server-authenticated exact capability, user, scope and purpose; no implicit cross-app access"
+    },
+    {
+      "app_key": "daash",
+      "canonical_repo": "doug-dotcom/Shine-DaAsh",
+      "category": "product",
+      "codeOwner": "doug-dotcom",
+      "gatewayAppId": "shine.daash",
+      "responsibility": "app-primary-function",
+      "integrationBoundary": "server-authenticated exact capability, user, scope and purpose; no implicit cross-app access"
+    },
+    {
+      "app_key": "defence",
+      "canonical_repo": "doug-dotcom/ShineUniverse-shine-core",
+      "category": "shared_service",
+      "codeOwner": "doug-dotcom",
+      "gatewayAppId": null,
+      "responsibility": "safety-veto-and-independent-verification",
+      "integrationBoundary": "server-authenticated exact capability, user, scope and purpose; no implicit cross-app access"
+    },
+    {
+      "app_key": "dive",
+      "canonical_repo": "doug-dotcom/shine-dive-",
+      "category": "product",
+      "codeOwner": "doug-dotcom",
+      "gatewayAppId": "shine.dive",
+      "responsibility": "app-primary-function",
+      "integrationBoundary": "server-authenticated exact capability, user, scope and purpose; no implicit cross-app access"
+    },
+    {
+      "app_key": "dnd",
+      "canonical_repo": "doug-dotcom/shine-D-D",
+      "category": "product",
+      "codeOwner": "doug-dotcom",
+      "gatewayAppId": "shine.dnd",
+      "responsibility": "app-primary-function",
+      "integrationBoundary": "server-authenticated exact capability, user, scope and purpose; no implicit cross-app access"
+    },
+    {
+      "app_key": "fiona",
+      "canonical_repo": "doug-dotcom/Fiona-Finance",
+      "category": "product",
+      "codeOwner": "doug-dotcom",
+      "gatewayAppId": "shine.fiona",
+      "responsibility": "app-primary-function",
+      "integrationBoundary": "server-authenticated exact capability, user, scope and purpose; no implicit cross-app access"
+    },
+    {
+      "app_key": "fish",
+      "canonical_repo": "doug-dotcom/shine-fish",
+      "category": "product",
+      "codeOwner": "doug-dotcom",
+      "gatewayAppId": "shine.fish",
+      "responsibility": "app-primary-function",
+      "integrationBoundary": "server-authenticated exact capability, user, scope and purpose; no implicit cross-app access"
+    },
+    {
+      "app_key": "foundation",
+      "canonical_repo": "doug-dotcom/ShineUniverse-shine-core",
+      "category": "control_plane",
+      "codeOwner": "doug-dotcom",
+      "gatewayAppId": null,
+      "responsibility": "identity-consent-permission-audit",
+      "integrationBoundary": "server-authenticated exact capability, user, scope and purpose; no implicit cross-app access"
+    },
+    {
+      "app_key": "ken_sail",
+      "canonical_repo": "doug-dotcom/Shine---Ken-Sail-",
+      "category": "product",
+      "codeOwner": "doug-dotcom",
+      "gatewayAppId": null,
+      "responsibility": "app-primary-function",
+      "integrationBoundary": "server-authenticated exact capability, user, scope and purpose; no implicit cross-app access"
+    },
+    {
+      "app_key": "my_money",
+      "canonical_repo": "doug-dotcom/shine-my-money-",
+      "category": "product",
+      "codeOwner": "doug-dotcom",
+      "gatewayAppId": "shine.money",
+      "responsibility": "app-primary-function",
+      "integrationBoundary": "server-authenticated exact capability, user, scope and purpose; no implicit cross-app access"
+    },
+    {
+      "app_key": "project_l",
+      "canonical_repo": "doug-dotcom/Project-L-Modular",
+      "category": "companion",
+      "codeOwner": "doug-dotcom",
+      "gatewayAppId": null,
+      "responsibility": "permitted-memory-retrieval",
+      "integrationBoundary": "server-authenticated exact capability, user, scope and purpose; no implicit cross-app access"
+    },
+    {
+      "app_key": "punt49",
+      "canonical_repo": "doug-dotcom/Punt-49",
+      "category": "product",
+      "codeOwner": "doug-dotcom",
+      "gatewayAppId": null,
+      "responsibility": "app-primary-function",
+      "integrationBoundary": "server-authenticated exact capability, user, scope and purpose; no implicit cross-app access"
+    },
+    {
+      "app_key": "recovery_companion",
+      "canonical_repo": "doug-dotcom/Project-RC",
+      "category": "companion",
+      "codeOwner": "doug-dotcom",
+      "gatewayAppId": null,
+      "responsibility": "app-primary-function",
+      "integrationBoundary": "server-authenticated exact capability, user, scope and purpose; no implicit cross-app access"
+    },
+    {
+      "app_key": "rivers",
+      "canonical_repo": "doug-dotcom/shine-music",
+      "category": "product",
+      "codeOwner": "doug-dotcom",
+      "gatewayAppId": null,
+      "responsibility": "app-primary-function",
+      "integrationBoundary": "server-authenticated exact capability, user, scope and purpose; no implicit cross-app access"
+    },
+    {
+      "app_key": "shine_ai",
+      "canonical_repo": "doug-dotcom/Shine-Ai",
+      "category": "shared_service",
+      "codeOwner": "doug-dotcom",
+      "gatewayAppId": null,
+      "responsibility": "task-coordination-within-granted-authority",
+      "integrationBoundary": "server-authenticated exact capability, user, scope and purpose; no implicit cross-app access"
+    },
+    {
+      "app_key": "shine_me",
+      "canonical_repo": "doug-dotcom/Project-L-Modular",
+      "category": "companion",
+      "codeOwner": "doug-dotcom",
+      "gatewayAppId": null,
+      "responsibility": "user-facing-companion",
+      "integrationBoundary": "server-authenticated exact capability, user, scope and purpose; no implicit cross-app access"
+    },
+    {
+      "app_key": "ski",
+      "canonical_repo": "doug-dotcom/Shine-Ski",
+      "category": "product",
+      "codeOwner": "doug-dotcom",
+      "gatewayAppId": "shine.ski",
+      "responsibility": "app-primary-function",
+      "integrationBoundary": "server-authenticated exact capability, user, scope and purpose; no implicit cross-app access"
+    },
+    {
+      "app_key": "translate",
+      "canonical_repo": "doug-dotcom/shine-translate",
+      "category": "product",
+      "codeOwner": "doug-dotcom",
+      "gatewayAppId": "shine.translate",
+      "responsibility": "app-primary-function",
+      "integrationBoundary": "server-authenticated exact capability, user, scope and purpose; no implicit cross-app access"
+    },
+    {
+      "app_key": "travel",
+      "canonical_repo": "doug-dotcom/shine-travel",
+      "category": "product",
+      "codeOwner": "doug-dotcom",
+      "gatewayAppId": "shine.travel",
+      "responsibility": "app-primary-function",
+      "integrationBoundary": "server-authenticated exact capability, user, scope and purpose; no implicit cross-app access"
+    },
+    {
+      "app_key": "wellness",
+      "canonical_repo": "doug-dotcom/Shine-Wellness",
+      "category": "product",
+      "codeOwner": "doug-dotcom",
+      "gatewayAppId": "shine.wellness",
+      "responsibility": "app-primary-function",
+      "integrationBoundary": "server-authenticated exact capability, user, scope and purpose; no implicit cross-app access"
+    }
+  ]
+}

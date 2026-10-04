@@ -26,6 +26,7 @@ jobs:
         with:
           node-version: '22'
       - run: node foundation/integration-kit/verify-object-registry-v1.mjs
+      - run: node --test foundation/integration-kit/verify-app-ownership-boundaries-v1.test.mjs
       - run: node foundation/integration-kit/verify-gateway-operation-registry-v1.mjs
       - run: node foundation/integration-kit/verify-gateway-policy-wiring-v1.mjs
       - run: node foundation/integration-kit/verify-gateway-operation-audit-wiring-v1.mjs
