@@ -248,6 +248,10 @@ export function createFoundationGateway({adapters,clock=()=>new Date().toISOStri
     }catch{
       return dependencyFailure('defence-evaluation',verified.shineId,admissionContext);
     }
+    if(!['allow','deny'].includes(defence?.decision)||
+       typeof defence?.evidenceRef!=='string'||!defence.evidenceRef.trim()){
+      return dependencyFailure('defence-response-invalid',verified.shineId,admissionContext);
+    }
 
     const decision=evaluateAccess({
       request:effectiveRequest,

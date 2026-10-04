@@ -335,3 +335,15 @@ test('failure provenance still fails closed if the audit store is unavailable',a
  const r=await gateway({envelope:v2,authContext:{}});
  assert.equal(r.status,'unavailable');assert.equal(r.reasonCode,'audit-write-failed');
 });
+
+test('Defence must return an explicit decision with evidence before access proceeds',async()=>{
+ for(const defence of [null,{}, {decision:'allow'}, {decision:'allow',evidenceRef:' '},
+ {decision:'allow',evidenceRef:42},{decision:'unknown',evidenceRef:'defence://unknown'}]){
+  const {gateway,audit}=create({evaluateDefence:async()=>defence});
+  const result=await gateway({envelope:v2,authContext:{}});
+  assert.equal(result.status,'unavailable');
+  assert.equal(audit.length,1);
+  assert.equal(audit[0].decision,'deny');
+  assert.equal(audit[0].requestContext.dependencyFailure.stage,'defence-response-invalid');
+ }
+});
