@@ -226,6 +226,13 @@ begin
      or r->>'outcome'<>'disabled_activation_not_ready' then
     raise exception 'Activation-blocked heartbeat invalid: %',r;
   end if;
+
+  select foundation.get_defence_external_dispatcher_summary_v1(clock_timestamp())
+  into r;
+  if r->>'state'<>'disabled'
+     or r->'latestHeartbeat'->>'outcome'<>'disabled_activation_not_ready' then
+    raise exception 'Activation-blocked dispatcher reported a passing summary: %',r;
+  end if;
 end;
 $activation_blocked_heartbeat$;
 
