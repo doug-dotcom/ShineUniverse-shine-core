@@ -203,3 +203,23 @@ test('checkpoint lookup outage stops execution and recovery reuses durable compl
  assert.equal(capture.length,1);
  assert.equal(resumed.results[0].reasonCode,'concierge-step-reused');
 });
+
+test('recovery requires current authorisation before accessing saved results',async()=>{
+ for(const failure of ['client','identity','delegation','blocked','unknown','missing']){
+  const adapters=executeAdapters({capture:[]});let downstream=0;
+  adapters.getConciergeResumeState=async()=>{downstream++;return {steps:[{completed:true,stepId:'step-1',result:{private:true}}]}};
+  adapters.invokeCapability=async()=>{downstream++};
+  if(failure==='client') adapters.verifyIntegrationClient=async()=>null;
+  if(failure==='identity') adapters.verifyIntegrationIdentity=async()=>null;
+  if(failure==='delegation') adapters.verifyIntegrationDelegation=async()=>null;
+  if(['blocked','unknown','missing'].includes(failure)) adapters.gateConciergeExecution=async()=>(
+   failure==='missing'?{}:{status:failure,reasonCode:'permission-revoked'});
+  const service=createConciergeExecuteService({clock:()=>CLOCK,idFactory:()=>HANDOFF,adapters});
+  const result=await service({envelope:{conciergeExecute:'shine-concierge/execute-v1',schemaVersion:'1.0.0',
+   requestId:REQUEST,clientId:'shine.wellness',requestedAt:CLOCK,inputs:{'calendar.book':handoff()}},
+   authContext:failure==='delegation'?{delegationToken:'revoked'}:{}});
+  assert.notEqual(result.status,'completed',failure);
+  assert.equal(downstream,0,failure);
+  assert.equal(result.results,undefined,failure);
+ }
+});

@@ -155,6 +155,10 @@ export function createConciergeExecuteService({adapters,clock=()=>new Date().toI
       });
     }
 
+    if(gate.status!=='allowed'){
+      return response(kind,envelope,'unavailable','concierge-execution-gate-invalid');
+    }
+
     try{
       await adapters.recordConciergeExecutionEvent({
         eventId:idFactory(),
