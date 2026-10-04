@@ -1,4 +1,10 @@
 import {projectWellnessHealthMinimalHandoff,WELLNESS_CONCIERGE_PURPOSE} from './wellness-concierge-health-minimal-v1.mjs';
+// Only failures known to occur before endpoint dispatch may be queued automatically.
+export const isSafeConciergeRetry=reason=>[
+  'capability-adapter-quarantined',
+  'capability-adapter-registry-unavailable',
+  'capability-adapter-health-unavailable'
+].includes(reason);
 const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const CLIENT=/^[a-z0-9][a-z0-9._:-]*$/;
 const TOKEN=/^[a-z0-9][a-z0-9._:-]*$/;
@@ -265,14 +271,7 @@ export function createConciergeExecuteService({adapters,clock=()=>new Date().toI
 
       if(outcome?.status!=='completed'){
         const reason=outcome?.reasonCode??'capability-invocation-failed';
-        const transientReasons=new Set([
-          'capability-adapter-quarantined',
-          'capability-endpoint-unavailable',
-          'capability-endpoint-rejected',
-          'capability-response-invalid',
-          'capability-invocation-failed'
-        ]);
-        if(transientReasons.has(reason)){
+        if(isSafeConciergeRetry(reason)){
           results[results.length-1]={
             ...results[results.length-1],
             transient:true,

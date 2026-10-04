@@ -166,3 +166,19 @@ test('a checkpoint naming a different capability cannot be reused for this actio
  assert.equal(result.status,'unavailable');assert.equal(result.reasonCode,'concierge-checkpoint-binding-mismatch');
  assert.equal(capture.length,0);
 });
+
+test('only confirmed pre-dispatch failures queue an automatic retry',async()=>{
+ for(const reason of ['capability-adapter-quarantined','capability-adapter-registry-unavailable',
+ 'capability-adapter-health-unavailable','capability-endpoint-unavailable','capability-endpoint-rejected',
+ 'capability-response-invalid','capability-invocation-failed','permission-denied']){
+  let queued=0,invoked=0;
+  const adapters=executeAdapters({capture:[]});
+  adapters.invokeCapability=async()=>{invoked++;return {status:'failed',reasonCode:reason}};
+  adapters.queueConciergeRetry=async()=>{queued++;return {ok:true}};
+  const service=createConciergeExecuteService({clock:()=>CLOCK,idFactory:()=>HANDOFF,adapters});
+  await service({envelope:{conciergeExecute:'shine-concierge/execute-v1',schemaVersion:'1.0.0',
+   requestId:REQUEST,clientId:'shine.wellness',requestedAt:CLOCK,inputs:{'calendar.book':handoff()}},authContext:{}});
+  assert.equal(queued,reason.startsWith('capability-adapter-')?1:0,reason);
+  assert.equal(invoked,1,reason);
+ }
+});
