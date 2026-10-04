@@ -733,7 +733,7 @@
       "id": "external-attestation-dispatcher-db",
       "path": "foundation/postgres/defence-external-attestation-dispatcher-v1.sql",
       "version": "1.1.0",
-      "blobSha": "bacb4d4f526a960868d67e4317cfc1d618356fd5"
+      "blobSha": "a05114b8a5aa127fb80ad8668a3d089b47031985"
     },
     {
       "id": "external-attestation-dispatcher-edge",
