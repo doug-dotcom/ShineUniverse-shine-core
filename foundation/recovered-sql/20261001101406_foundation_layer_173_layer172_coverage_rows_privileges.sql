@@ -1,0 +1,6 @@
+
+revoke all on foundation.case_audit_layer172_coverage_rows_v1
+from public,anon,authenticated,foundation_gateway,shine_core_control_plane,shine_defence_runtime;
+
+grant select on foundation.case_audit_layer172_coverage_rows_v1
+to foundation_runtime,service_role;

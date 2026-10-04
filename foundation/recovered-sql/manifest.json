@@ -1,0 +1,758 @@
+{
+  "projectRef": "sjpxqeyewahraxvidvcc",
+  "recoveredAt": "2026-10-04",
+  "source": "supabase_migrations.schema_migrations",
+  "execution": "archive-only; not applied by CI",
+  "entries": [
+    {
+      "version": "20261001052103",
+      "name": "foundation_layer_110_layer109_incident_response_policy",
+      "source_md5": "954328ede09e9337cc7a67a73b024242",
+      "path": "20261001052103_foundation_layer_110_layer109_incident_response_policy.sql"
+    },
+    {
+      "version": "20261001052214",
+      "name": "foundation_layer_111_bounded_layer107_reconciliation_executor",
+      "source_md5": "d0af039d22db955b68d6c8736132a014",
+      "path": "20261001052214_foundation_layer_111_bounded_layer107_reconciliation_executor.sql"
+    },
+    {
+      "version": "20261001053629",
+      "name": "foundation_layer_112_layer111_execution_reconciliation",
+      "source_md5": "c5b9f1e11f3f9d63123d64e27bb6502e",
+      "path": "20261001053629_foundation_layer_112_layer111_execution_reconciliation.sql"
+    },
+    {
+      "version": "20261001053719",
+      "name": "foundation_layer_113_layer112_reconciliation_coverage_audit",
+      "source_md5": "450eaa60d6e3b85420530f79eedcd743",
+      "path": "20261001053719_foundation_layer_113_layer112_reconciliation_coverage_audit.sql"
+    },
+    {
+      "version": "20261001053803",
+      "name": "foundation_layer_114_layer113_coverage_incident_lifecycle",
+      "source_md5": "d23d361f40c81fde6277e2664f78a018",
+      "path": "20261001053803_foundation_layer_114_layer113_coverage_incident_lifecycle.sql"
+    },
+    {
+      "version": "20261001053842",
+      "name": "foundation_layer_115_layer114_incident_response_policy",
+      "source_md5": "7c571555fa0d99244664d5900712a481",
+      "path": "20261001053842_foundation_layer_115_layer114_incident_response_policy.sql"
+    },
+    {
+      "version": "20261001053919",
+      "name": "foundation_layer_116_bounded_layer112_reconciliation_executor",
+      "source_md5": "667ebb3b6abfaca8e7a3f2dba14e8461",
+      "path": "20261001053919_foundation_layer_116_bounded_layer112_reconciliation_executor.sql"
+    },
+    {
+      "version": "20261001053950",
+      "name": "foundation_layer_117_layer116_execution_reconciliation",
+      "source_md5": "1ba72514b5b3688f6b81dd204aa01404",
+      "path": "20261001053950_foundation_layer_117_layer116_execution_reconciliation.sql"
+    },
+    {
+      "version": "20261001054031",
+      "name": "foundation_layer_118_layer117_reconciliation_coverage_audit",
+      "source_md5": "4bd57b7e9c07331dbf0b4513aba7cfbf",
+      "path": "20261001054031_foundation_layer_118_layer117_reconciliation_coverage_audit.sql"
+    },
+    {
+      "version": "20261001054118",
+      "name": "foundation_layer_119_layer118_coverage_incident_lifecycle",
+      "source_md5": "9efe2f0bc53440e620b4d01ea020e394",
+      "path": "20261001054118_foundation_layer_119_layer118_coverage_incident_lifecycle.sql"
+    },
+    {
+      "version": "20261001054154",
+      "name": "foundation_layer_120_layer119_incident_response_policy",
+      "source_md5": "68a4d3979cad6f9e1be5eed67d74e3dc",
+      "path": "20261001054154_foundation_layer_120_layer119_incident_response_policy.sql"
+    },
+    {
+      "version": "20261001054232",
+      "name": "foundation_layer_121_bounded_layer117_reconciliation_executor",
+      "source_md5": "aef59e2383d0091e64b39a4a13e53969",
+      "path": "20261001054232_foundation_layer_121_bounded_layer117_reconciliation_executor.sql"
+    },
+    {
+      "version": "20261001054835",
+      "name": "foundation_layer_122_layer121_execution_reconciliation",
+      "source_md5": "fc7d5fc6913bf058e7b6626a59c7feea",
+      "path": "20261001054835_foundation_layer_122_layer121_execution_reconciliation.sql"
+    },
+    {
+      "version": "20261001054911",
+      "name": "foundation_layer_123_layer122_reconciliation_coverage_audit",
+      "source_md5": "34d223575586ba6d30584f2304c7d536",
+      "path": "20261001054911_foundation_layer_123_layer122_reconciliation_coverage_audit.sql"
+    },
+    {
+      "version": "20261001054954",
+      "name": "foundation_layer_124_layer123_coverage_incident_lifecycle",
+      "source_md5": "4ba558b2dc32eada7206c536b4f0b237",
+      "path": "20261001054954_foundation_layer_124_layer123_coverage_incident_lifecycle.sql"
+    },
+    {
+      "version": "20261001055045",
+      "name": "foundation_layer_125_layer124_incident_response_policy",
+      "source_md5": "6c8d39a19529a236e9a74f978e67af7d",
+      "path": "20261001055045_foundation_layer_125_layer124_incident_response_policy.sql"
+    },
+    {
+      "version": "20261001055122",
+      "name": "foundation_layer_126_bounded_layer122_reconciliation_executor",
+      "source_md5": "aa58345c48e3096e2bb843e53921d623",
+      "path": "20261001055122_foundation_layer_126_bounded_layer122_reconciliation_executor.sql"
+    },
+    {
+      "version": "20261001055202",
+      "name": "foundation_layer_127_layer126_execution_reconciliation",
+      "source_md5": "2700e1d053286ead7016ad8088a590a4",
+      "path": "20261001055202_foundation_layer_127_layer126_execution_reconciliation.sql"
+    },
+    {
+      "version": "20261001055233",
+      "name": "foundation_layer_128_layer127_reconciliation_coverage_audit",
+      "source_md5": "b564396505f72f5782f97ab21c7edf3f",
+      "path": "20261001055233_foundation_layer_128_layer127_reconciliation_coverage_audit.sql"
+    },
+    {
+      "version": "20261001055303",
+      "name": "foundation_layer_129_layer128_coverage_incident_lifecycle",
+      "source_md5": "fcd4e2b0a64c409c673cd3d76690bab5",
+      "path": "20261001055303_foundation_layer_129_layer128_coverage_incident_lifecycle.sql"
+    },
+    {
+      "version": "20261001055344",
+      "name": "foundation_layer_130_layer129_incident_response_policy",
+      "source_md5": "66469bc2ad76927f99bfd8e6d865d32d",
+      "path": "20261001055344_foundation_layer_130_layer129_incident_response_policy.sql"
+    },
+    {
+      "version": "20261001055735",
+      "name": "foundation_layer_131_bounded_layer127_reconciliation_executor",
+      "source_md5": "96576142791dadc42cc399617e358984",
+      "path": "20261001055735_foundation_layer_131_bounded_layer127_reconciliation_executor.sql"
+    },
+    {
+      "version": "20261001055812",
+      "name": "foundation_layer_132_layer131_execution_reconciliation",
+      "source_md5": "8f68e5557b2112661c23185fdccfb726",
+      "path": "20261001055812_foundation_layer_132_layer131_execution_reconciliation.sql"
+    },
+    {
+      "version": "20261001060040",
+      "name": "foundation_layer_133_layer132_reconciliation_coverage_audit",
+      "source_md5": "6ac792c49b6668be79b7b2a5d3a3d335",
+      "path": "20261001060040_foundation_layer_133_layer132_reconciliation_coverage_audit.sql"
+    },
+    {
+      "version": "20261001060415",
+      "name": "foundation_layer_134_layer133_coverage_incident_lifecycle",
+      "source_md5": "658570d07c918f1a7a66b64a0e3e3694",
+      "path": "20261001060415_foundation_layer_134_layer133_coverage_incident_lifecycle.sql"
+    },
+    {
+      "version": "20261001060541",
+      "name": "foundation_layer_135_layer134_incident_response_policy",
+      "source_md5": "9c7ae3700ccde1a206719296744c4ffc",
+      "path": "20261001060541_foundation_layer_135_layer134_incident_response_policy.sql"
+    },
+    {
+      "version": "20261001060708",
+      "name": "foundation_layer_136_bounded_layer132_reconciliation_executor",
+      "source_md5": "6860d0a08502adfd442e407feed131bc",
+      "path": "20261001060708_foundation_layer_136_bounded_layer132_reconciliation_executor.sql"
+    },
+    {
+      "version": "20261001060825",
+      "name": "foundation_layer_137_layer136_execution_reconciliation",
+      "source_md5": "126545a6a9d935de272efc412e3c454a",
+      "path": "20261001060825_foundation_layer_137_layer136_execution_reconciliation.sql"
+    },
+    {
+      "version": "20261001060945",
+      "name": "foundation_layer_138_layer137_reconciliation_coverage_audit",
+      "source_md5": "3922cfb906d68a84b7b4dcda08623c7b",
+      "path": "20261001060945_foundation_layer_138_layer137_reconciliation_coverage_audit.sql"
+    },
+    {
+      "version": "20261001061113",
+      "name": "foundation_layer_139_layer138_coverage_incident_lifecycle",
+      "source_md5": "20840a89bd44c504cf9ce1f831ebdaf4",
+      "path": "20261001061113_foundation_layer_139_layer138_coverage_incident_lifecycle.sql"
+    },
+    {
+      "version": "20261001061245",
+      "name": "foundation_layer_140_layer139_incident_response_policy",
+      "source_md5": "a0eb96d7d3d01a07993c29a5bdb6773f",
+      "path": "20261001061245_foundation_layer_140_layer139_incident_response_policy.sql"
+    },
+    {
+      "version": "20261001061358",
+      "name": "foundation_layer_141_bounded_layer137_reconciliation_executor",
+      "source_md5": "216d3529baa8236e449658f35d6d2938",
+      "path": "20261001061358_foundation_layer_141_bounded_layer137_reconciliation_executor.sql"
+    },
+    {
+      "version": "20261001061520",
+      "name": "foundation_layer_142_layer141_execution_reconciliation",
+      "source_md5": "caa10d8101345dd7f102f6fe48e4f018",
+      "path": "20261001061520_foundation_layer_142_layer141_execution_reconciliation.sql"
+    },
+    {
+      "version": "20261001061643",
+      "name": "foundation_layer_143_layer142_reconciliation_coverage_audit",
+      "source_md5": "3a9da348b223f9afbb02f1d9f4f76907",
+      "path": "20261001061643_foundation_layer_143_layer142_reconciliation_coverage_audit.sql"
+    },
+    {
+      "version": "20261001062330",
+      "name": "foundation_layer_144_layer143_coverage_incident_lifecycle",
+      "source_md5": "3e0d1be959d23bddd9721cd29e3ecdd6",
+      "path": "20261001062330_foundation_layer_144_layer143_coverage_incident_lifecycle.sql"
+    },
+    {
+      "version": "20261001062508",
+      "name": "foundation_layer_145_layer144_incident_response_policy",
+      "source_md5": "484f1b485459517b061a383d805b1f56",
+      "path": "20261001062508_foundation_layer_145_layer144_incident_response_policy.sql"
+    },
+    {
+      "version": "20261001063555",
+      "name": "foundation_layer_146_bounded_layer142_reconciliation_executor",
+      "source_md5": "9697e260f671e846f9b6d096222da202",
+      "path": "20261001063555_foundation_layer_146_bounded_layer142_reconciliation_executor.sql"
+    },
+    {
+      "version": "20261001063753",
+      "name": "foundation_layer_147_layer146_execution_reconciliation",
+      "source_md5": "81cad7c26d4aab39dfec580bbdfca114",
+      "path": "20261001063753_foundation_layer_147_layer146_execution_reconciliation.sql"
+    },
+    {
+      "version": "20261001064139",
+      "name": "foundation_layer_148_layer147_coverage_rows",
+      "source_md5": "334d1010f76db74fc6612723c3ad34ba",
+      "path": "20261001064139_foundation_layer_148_layer147_coverage_rows.sql"
+    },
+    {
+      "version": "20261001064159",
+      "name": "foundation_layer_148_layer147_coverage_summary",
+      "source_md5": "ab86234e927c4b73e66637fe75a779ea",
+      "path": "20261001064159_foundation_layer_148_layer147_coverage_summary.sql"
+    },
+    {
+      "version": "20261001083127",
+      "name": "foundation_layer_149_layer148_coverage_incident_lifecycle",
+      "source_md5": "bdc88ef4bd6924337e83fa3b1feca2bd",
+      "path": "20261001083127_foundation_layer_149_layer148_coverage_incident_lifecycle.sql"
+    },
+    {
+      "version": "20261001083255",
+      "name": "foundation_layer_150_layer149_incident_response_policy",
+      "source_md5": "501e1bef3f3304f58f9cb20f3073c07a",
+      "path": "20261001083255_foundation_layer_150_layer149_incident_response_policy.sql"
+    },
+    {
+      "version": "20261001083418",
+      "name": "foundation_layer_151_bounded_layer147_reconciliation_executor",
+      "source_md5": "de4f56606b5ebc408b0287ddb4073cde",
+      "path": "20261001083418_foundation_layer_151_bounded_layer147_reconciliation_executor.sql"
+    },
+    {
+      "version": "20261001083455",
+      "name": "foundation_layer_151_executor_event_id_shadow_fix",
+      "source_md5": "b2f51d0df39ee3b064eb8704aee6fb15",
+      "path": "20261001083455_foundation_layer_151_executor_event_id_shadow_fix.sql"
+    },
+    {
+      "version": "20261001083620",
+      "name": "foundation_layer_152_layer151_execution_reconciliation",
+      "source_md5": "bedc8081688ef9b25d93e750f73fb3e3",
+      "path": "20261001083620_foundation_layer_152_layer151_execution_reconciliation.sql"
+    },
+    {
+      "version": "20261001084307",
+      "name": "foundation_layer_153_layer152_coverage_rows",
+      "source_md5": "1c2a45dbedd4c99650f907464eb175f7",
+      "path": "20261001084307_foundation_layer_153_layer152_coverage_rows.sql"
+    },
+    {
+      "version": "20261001084339",
+      "name": "foundation_layer_153_layer152_coverage_summary",
+      "source_md5": "3ea9318e02763664a9ab715cf665bf7c",
+      "path": "20261001084339_foundation_layer_153_layer152_coverage_summary.sql"
+    },
+    {
+      "version": "20261001084534",
+      "name": "foundation_layer_154_layer153_coverage_incident_lifecycle",
+      "source_md5": "f54e7bea82bf996cd48ec91716bdf81b",
+      "path": "20261001084534_foundation_layer_154_layer153_coverage_incident_lifecycle.sql"
+    },
+    {
+      "version": "20261001084655",
+      "name": "foundation_layer_155_layer154_incident_response_policy",
+      "source_md5": "2c622b595829fcfb8e30803f3b719aba",
+      "path": "20261001084655_foundation_layer_155_layer154_incident_response_policy.sql"
+    },
+    {
+      "version": "20261001085557",
+      "name": "foundation_layer_156_layer152_executor_schema",
+      "source_md5": "d895d9869db6b9671da0046a383b562d",
+      "path": "20261001085557_foundation_layer_156_layer152_executor_schema.sql"
+    },
+    {
+      "version": "20261001085626",
+      "name": "foundation_layer_156_layer152_fresh_admission_validator",
+      "source_md5": "efdff53c3f1633495e7e7350447d53bf",
+      "path": "20261001085626_foundation_layer_156_layer152_fresh_admission_validator.sql"
+    },
+    {
+      "version": "20261001085649",
+      "name": "foundation_layer_156_layer152_executor_runtime",
+      "source_md5": "c9a3daf94b7a41b04e70ce4eb704a6d8",
+      "path": "20261001085649_foundation_layer_156_layer152_executor_runtime.sql"
+    },
+    {
+      "version": "20261001090842",
+      "name": "foundation_layer_157_layer156_execution_reconciliation_schema",
+      "source_md5": "32000087523d54d83a7f18ebb21b7f44",
+      "path": "20261001090842_foundation_layer_157_layer156_execution_reconciliation_schema.sql"
+    },
+    {
+      "version": "20261001090912",
+      "name": "foundation_layer_157_layer156_execution_reconciliation_runtime",
+      "source_md5": "0255ff5260b8b196622fd96079fb2500",
+      "path": "20261001090912_foundation_layer_157_layer156_execution_reconciliation_runtime.sql"
+    },
+    {
+      "version": "20261001091146",
+      "name": "foundation_layer_158_layer157_coverage_rows",
+      "source_md5": "bae2cd0afba9bd42d9250c14debf0c46",
+      "path": "20261001091146_foundation_layer_158_layer157_coverage_rows.sql"
+    },
+    {
+      "version": "20261001091209",
+      "name": "foundation_layer_158_layer157_coverage_summary",
+      "source_md5": "9cf6d359884decd7e8ec587ccb8bdfe2",
+      "path": "20261001091209_foundation_layer_158_layer157_coverage_summary.sql"
+    },
+    {
+      "version": "20261001091620",
+      "name": "foundation_layer_159_layer158_coverage_incident_lifecycle",
+      "source_md5": "cc4e017d3ea324cd06851a730586eaa3",
+      "path": "20261001091620_foundation_layer_159_layer158_coverage_incident_lifecycle.sql"
+    },
+    {
+      "version": "20261001092038",
+      "name": "foundation_layer_160_semantic_coverage_fingerprint",
+      "source_md5": "57410e32d8947b83b10e835c7c641b2a",
+      "path": "20261001092038_foundation_layer_160_semantic_coverage_fingerprint.sql"
+    },
+    {
+      "version": "20261001092109",
+      "name": "foundation_layer_160_layer159_incident_cause",
+      "source_md5": "57cf3bd5cc08ce7200e42d1f1705bc62",
+      "path": "20261001092109_foundation_layer_160_layer159_incident_cause.sql"
+    },
+    {
+      "version": "20261001092134",
+      "name": "foundation_layer_160_layer159_incident_response_policy",
+      "source_md5": "9c5cedd478f50d19f0389c47ffd65498",
+      "path": "20261001092134_foundation_layer_160_layer159_incident_response_policy.sql"
+    },
+    {
+      "version": "20261001092320",
+      "name": "foundation_layer_161_layer157_executor_schema",
+      "source_md5": "246a5be6c967b42c952c8b82b1e3d2b5",
+      "path": "20261001092320_foundation_layer_161_layer157_executor_schema.sql"
+    },
+    {
+      "version": "20261001092340",
+      "name": "foundation_layer_161_layer157_semantic_admission_validator",
+      "source_md5": "e0cc3c3795ad69cabb7ea23bcc426493",
+      "path": "20261001092340_foundation_layer_161_layer157_semantic_admission_validator.sql"
+    },
+    {
+      "version": "20261001092401",
+      "name": "foundation_layer_161_layer157_executor_runtime",
+      "source_md5": "52ea238ab262eb3021543f7d7635aef0",
+      "path": "20261001092401_foundation_layer_161_layer157_executor_runtime.sql"
+    },
+    {
+      "version": "20261001092841",
+      "name": "foundation_layer_162_layer161_execution_reconciliation_schema",
+      "source_md5": "563b3b61106a37a85ec629e028d792e7",
+      "path": "20261001092841_foundation_layer_162_layer161_execution_reconciliation_schema.sql"
+    },
+    {
+      "version": "20261001092945",
+      "name": "foundation_layer_162_layer161_execution_reconciliation_runtime",
+      "source_md5": "5fd0d5815a3ae7c3edf5c4e6b4203492",
+      "path": "20261001092945_foundation_layer_162_layer161_execution_reconciliation_runtime.sql"
+    },
+    {
+      "version": "20261001093049",
+      "name": "foundation_layer_163_layer162_coverage_rows",
+      "source_md5": "c0c31b93254831adcc7a1e7a23aef839",
+      "path": "20261001093049_foundation_layer_163_layer162_coverage_rows.sql"
+    },
+    {
+      "version": "20261001093111",
+      "name": "foundation_layer_163_layer162_coverage_summary",
+      "source_md5": "369ecc1a51050123b6780239972c9e41",
+      "path": "20261001093111_foundation_layer_163_layer162_coverage_summary.sql"
+    },
+    {
+      "version": "20261001093539",
+      "name": "foundation_layer_164_semantic_coverage_fingerprint",
+      "source_md5": "5908acb97c343f013e683cb07d823631",
+      "path": "20261001093539_foundation_layer_164_semantic_coverage_fingerprint.sql"
+    },
+    {
+      "version": "20261001093608",
+      "name": "foundation_layer_164_layer163_coverage_incident_lifecycle",
+      "source_md5": "5cf11e1a783ea6fe45ce190fd077f452",
+      "path": "20261001093608_foundation_layer_164_layer163_coverage_incident_lifecycle.sql"
+    },
+    {
+      "version": "20261001094407",
+      "name": "foundation_layer_165_layer164_incident_response_policy",
+      "source_md5": "8d35a4782f73c35be48c3e7f9e0bc61b",
+      "path": "20261001094407_foundation_layer_165_layer164_incident_response_policy.sql"
+    },
+    {
+      "version": "20261001094627",
+      "name": "foundation_layer_166_layer162_executor_schema",
+      "source_md5": "68e74d7c14f3d1c06a370671206249ac",
+      "path": "20261001094627_foundation_layer_166_layer162_executor_schema.sql"
+    },
+    {
+      "version": "20261001094710",
+      "name": "foundation_layer_166_layer162_incident_evidence_verifier",
+      "source_md5": "910fd2f02edb673ea8be433b4b4a1a21",
+      "path": "20261001094710_foundation_layer_166_layer162_incident_evidence_verifier.sql"
+    },
+    {
+      "version": "20261001094746",
+      "name": "foundation_layer_166_layer162_admission_validator",
+      "source_md5": "b736a8bd719f0915b6c16e1ff9bf9a7e",
+      "path": "20261001094746_foundation_layer_166_layer162_admission_validator.sql"
+    },
+    {
+      "version": "20261001094837",
+      "name": "foundation_layer_166_layer162_execution_context",
+      "source_md5": "544b50876163c5e7957da8165fc99ea6",
+      "path": "20261001094837_foundation_layer_166_layer162_execution_context.sql"
+    },
+    {
+      "version": "20261001094902",
+      "name": "foundation_layer_166_layer162_executor_runtime",
+      "source_md5": "740c117ca03eb9bcab5f96b012565dbc",
+      "path": "20261001094902_foundation_layer_166_layer162_executor_runtime.sql"
+    },
+    {
+      "version": "20261001095142",
+      "name": "foundation_layer_167_layer166_execution_reconciliation_schema",
+      "source_md5": "57b3ca46453cdad90c5aa7073ddb73d5",
+      "path": "20261001095142_foundation_layer_167_layer166_execution_reconciliation_schema.sql"
+    },
+    {
+      "version": "20261001095226",
+      "name": "foundation_layer_167_layer166_execution_reconciliation_runtime",
+      "source_md5": "e32e7b5af4f8fb36ce185e2d8244c426",
+      "path": "20261001095226_foundation_layer_167_layer166_execution_reconciliation_runtime.sql"
+    },
+    {
+      "version": "20261001095530",
+      "name": "foundation_layer_168_layer167_coverage_rows_view",
+      "source_md5": "d289a4dc60455ade9451feb00b641f48",
+      "path": "20261001095530_foundation_layer_168_layer167_coverage_rows_view.sql"
+    },
+    {
+      "version": "20261001095541",
+      "name": "foundation_layer_168_layer167_coverage_rows_privileges",
+      "source_md5": "e5197f15771a00c36f15f1ea359b0439",
+      "path": "20261001095541_foundation_layer_168_layer167_coverage_rows_privileges.sql"
+    },
+    {
+      "version": "20261001095609",
+      "name": "foundation_layer_168_layer167_coverage_summary",
+      "source_md5": "24f30f09c26702526f27325981764295",
+      "path": "20261001095609_foundation_layer_168_layer167_coverage_summary.sql"
+    },
+    {
+      "version": "20261001095823",
+      "name": "foundation_layer_169_semantic_coverage_fingerprint",
+      "source_md5": "fb619003cccfa7cc12d8545f39374b3a",
+      "path": "20261001095823_foundation_layer_169_semantic_coverage_fingerprint.sql"
+    },
+    {
+      "version": "20261001095852",
+      "name": "foundation_layer_169_layer168_coverage_incident_lifecycle",
+      "source_md5": "65a9bb30f866b8e22d1a5897359e90be",
+      "path": "20261001095852_foundation_layer_169_layer168_coverage_incident_lifecycle.sql"
+    },
+    {
+      "version": "20261001100413",
+      "name": "foundation_layer_170_layer169_incident_response_policy",
+      "source_md5": "70393084da4283f84e36c6bfc71aa1f2",
+      "path": "20261001100413_foundation_layer_170_layer169_incident_response_policy.sql"
+    },
+    {
+      "version": "20261001100611",
+      "name": "foundation_layer_171_layer167_executor_schema",
+      "source_md5": "5097565b0bbc5a895d9745f5c84a26cf",
+      "path": "20261001100611_foundation_layer_171_layer167_executor_schema.sql"
+    },
+    {
+      "version": "20261001100625",
+      "name": "foundation_layer_171_layer167_incident_evidence_verifier",
+      "source_md5": "c8cc76a06d515b76f8cb7e1e3a1fbcf1",
+      "path": "20261001100625_foundation_layer_171_layer167_incident_evidence_verifier.sql"
+    },
+    {
+      "version": "20261001100639",
+      "name": "foundation_layer_171_layer167_admission_validator",
+      "source_md5": "9203e8e0fdbbafaa772b65828c52a97c",
+      "path": "20261001100639_foundation_layer_171_layer167_admission_validator.sql"
+    },
+    {
+      "version": "20261001100659",
+      "name": "foundation_layer_171_layer167_execution_context",
+      "source_md5": "2248c3a555d7f37d221a3b4b020233b7",
+      "path": "20261001100659_foundation_layer_171_layer167_execution_context.sql"
+    },
+    {
+      "version": "20261001100719",
+      "name": "foundation_layer_171_layer167_executor_runtime",
+      "source_md5": "a13a1f52ee5fefdd1fa77a85d6d3d2f9",
+      "path": "20261001100719_foundation_layer_171_layer167_executor_runtime.sql"
+    },
+    {
+      "version": "20261001101158",
+      "name": "foundation_layer_172_layer171_execution_reconciliation_schema",
+      "source_md5": "bd986ae2f2ceaa1e895cfe1ff61b29ff",
+      "path": "20261001101158_foundation_layer_172_layer171_execution_reconciliation_schema.sql"
+    },
+    {
+      "version": "20261001101232",
+      "name": "foundation_layer_172_layer171_execution_reconciliation_runtime",
+      "source_md5": "94c2e8f018fd72af99709dd01c2ae8b7",
+      "path": "20261001101232_foundation_layer_172_layer171_execution_reconciliation_runtime.sql"
+    },
+    {
+      "version": "20261001101356",
+      "name": "foundation_layer_173_layer172_coverage_rows_view",
+      "source_md5": "ee8ae8bb225d720e1c6395f699c99e3d",
+      "path": "20261001101356_foundation_layer_173_layer172_coverage_rows_view.sql"
+    },
+    {
+      "version": "20261001101406",
+      "name": "foundation_layer_173_layer172_coverage_rows_privileges",
+      "source_md5": "9c1eba362f0eea75e904b2353827ffc4",
+      "path": "20261001101406_foundation_layer_173_layer172_coverage_rows_privileges.sql"
+    },
+    {
+      "version": "20261001101432",
+      "name": "foundation_layer_173_layer172_coverage_summary",
+      "source_md5": "155cb65ce3f48e6b5d04e2c0eea08394",
+      "path": "20261001101432_foundation_layer_173_layer172_coverage_summary.sql"
+    },
+    {
+      "version": "20261001101724",
+      "name": "foundation_layer_174_semantic_coverage_fingerprint",
+      "source_md5": "b74d73073946d5b784de955cf8d66bad",
+      "path": "20261001101724_foundation_layer_174_semantic_coverage_fingerprint.sql"
+    },
+    {
+      "version": "20261001101752",
+      "name": "foundation_layer_174_layer173_coverage_incident_lifecycle",
+      "source_md5": "21aaa11ab5d5ff8ef6c350dd69690e4a",
+      "path": "20261001101752_foundation_layer_174_layer173_coverage_incident_lifecycle.sql"
+    },
+    {
+      "version": "20261001102209",
+      "name": "foundation_layer_175_layer174_incident_response_policy",
+      "source_md5": "eb069c6545d6072228d67e6e883741b0",
+      "path": "20261001102209_foundation_layer_175_layer174_incident_response_policy.sql"
+    },
+    {
+      "version": "20261001102310",
+      "name": "foundation_layer_176_layer172_executor_schema",
+      "source_md5": "298ac553e783b7d626805895a53342c2",
+      "path": "20261001102310_foundation_layer_176_layer172_executor_schema.sql"
+    },
+    {
+      "version": "20261001102324",
+      "name": "foundation_layer_176_layer172_incident_evidence_verifier",
+      "source_md5": "a4a4487b4838677af552197f2606806e",
+      "path": "20261001102324_foundation_layer_176_layer172_incident_evidence_verifier.sql"
+    },
+    {
+      "version": "20261001102341",
+      "name": "foundation_layer_176_layer172_admission_validator",
+      "source_md5": "48c20ec85b70a69256419dc72d573a32",
+      "path": "20261001102341_foundation_layer_176_layer172_admission_validator.sql"
+    },
+    {
+      "version": "20261001102355",
+      "name": "foundation_layer_176_layer172_execution_context",
+      "source_md5": "4d97f2b75ae953ea408c629e9b2e96f2",
+      "path": "20261001102355_foundation_layer_176_layer172_execution_context.sql"
+    },
+    {
+      "version": "20261001102414",
+      "name": "foundation_layer_176_layer172_executor_runtime",
+      "source_md5": "c2a5b42f27b814bf2f9c4bd852643d57",
+      "path": "20261001102414_foundation_layer_176_layer172_executor_runtime.sql"
+    },
+    {
+      "version": "20261001102631",
+      "name": "foundation_layer_177_layer176_execution_reconciliation_schema",
+      "source_md5": "23379f9e39b4b491e96b7ce0ebd7e3d2",
+      "path": "20261001102631_foundation_layer_177_layer176_execution_reconciliation_schema.sql"
+    },
+    {
+      "version": "20261001102706",
+      "name": "foundation_layer_177_layer176_execution_reconciliation_runtime",
+      "source_md5": "945650a6d77e9d969777a237c2c6b55f",
+      "path": "20261001102706_foundation_layer_177_layer176_execution_reconciliation_runtime.sql"
+    },
+    {
+      "version": "20261001103438",
+      "name": "foundation_layer_178_layer177_coverage_summary",
+      "source_md5": "19c0defc06bec2d97e058ca62948601e",
+      "path": "20261001103438_foundation_layer_178_layer177_coverage_summary.sql"
+    },
+    {
+      "version": "20261001104325",
+      "name": "foundation_layer_179_layer177_coverage_incident_lifecycle",
+      "source_md5": "9919dc2cc13a78c3e6115194b04752ab",
+      "path": "20261001104325_foundation_layer_179_layer177_coverage_incident_lifecycle.sql"
+    },
+    {
+      "version": "20261001104344",
+      "name": "foundation_layer_179_layer177_incident_rls_policy",
+      "source_md5": "5bcce78b9f5be0a89b0d336f903df3be",
+      "path": "20261001104344_foundation_layer_179_layer177_incident_rls_policy.sql"
+    },
+    {
+      "version": "20261001123752",
+      "name": "foundation_layer_180_layer177_incident_response_policy",
+      "source_md5": "5bcff30c376307a8d90de0eb644097f5",
+      "path": "20261001123752_foundation_layer_180_layer177_incident_response_policy.sql"
+    },
+    {
+      "version": "20261001123957",
+      "name": "foundation_layer_181_layer177_admission_validator",
+      "source_md5": "c4e54cabf3f61c1351afaac6517a968f",
+      "path": "20261001123957_foundation_layer_181_layer177_admission_validator.sql"
+    },
+    {
+      "version": "20261001124115",
+      "name": "foundation_layer_182_layer177_bounded_executor",
+      "source_md5": "6db201e2a59679e45f4bb17855dd1f00",
+      "path": "20261001124115_foundation_layer_182_layer177_bounded_executor.sql"
+    },
+    {
+      "version": "20261001124339",
+      "name": "foundation_layer_183_layer182_execution_reconciliation",
+      "source_md5": "56683ed68ab18cf5d84c585b61b96dba",
+      "path": "20261001124339_foundation_layer_183_layer182_execution_reconciliation.sql"
+    },
+    {
+      "version": "20261001124939",
+      "name": "foundation_layer_184_layer183_coverage_summary",
+      "source_md5": "6faaafa84eecbabbe4a05eaa09b3906a",
+      "path": "20261001124939_foundation_layer_184_layer183_coverage_summary.sql"
+    },
+    {
+      "version": "20261001125208",
+      "name": "foundation_layer_185_layer183_coverage_incident_lifecycle",
+      "source_md5": "c4013c8726554902bec72f314004ce0a",
+      "path": "20261001125208_foundation_layer_185_layer183_coverage_incident_lifecycle.sql"
+    },
+    {
+      "version": "20261001125700",
+      "name": "foundation_layer_186_layer183_incident_response_policy",
+      "source_md5": "3b1a76be3e25783aeaadd8e1b830f765",
+      "path": "20261001125700_foundation_layer_186_layer183_incident_response_policy.sql"
+    },
+    {
+      "version": "20261001125909",
+      "name": "foundation_layer_187_layer183_admission_validator",
+      "source_md5": "8ea548afb51f333019f95b118c2a0c96",
+      "path": "20261001125909_foundation_layer_187_layer183_admission_validator.sql"
+    },
+    {
+      "version": "20261001130112",
+      "name": "foundation_layer_188_layer183_bounded_executor",
+      "source_md5": "369b0cc68b1cab64efcbe13ca45d80b0",
+      "path": "20261001130112_foundation_layer_188_layer183_bounded_executor.sql"
+    },
+    {
+      "version": "20261001131125",
+      "name": "foundation_layer_189_layer188_execution_reconciliation",
+      "source_md5": "ec3b6ca6bce92d4b4ffcfdc4a79665d6",
+      "path": "20261001131125_foundation_layer_189_layer188_execution_reconciliation.sql"
+    },
+    {
+      "version": "20261001132210",
+      "name": "foundation_layer_190_layer189_coverage_summary",
+      "source_md5": "05edeb05bf769d0fc8b68ad869254513",
+      "path": "20261001132210_foundation_layer_190_layer189_coverage_summary.sql"
+    },
+    {
+      "version": "20261001132401",
+      "name": "foundation_layer_191_layer189_coverage_incident_lifecycle",
+      "source_md5": "cf42142e866b35e015e9fb203b22323e",
+      "path": "20261001132401_foundation_layer_191_layer189_coverage_incident_lifecycle.sql"
+    },
+    {
+      "version": "20261001132543",
+      "name": "foundation_layer_192_layer189_incident_response_policy",
+      "source_md5": "0c4a9aa08e5fa07ca9b920f1dc135f8d",
+      "path": "20261001132543_foundation_layer_192_layer189_incident_response_policy.sql"
+    },
+    {
+      "version": "20261001135118",
+      "name": "foundation_layer_193_layer189_admission_validator",
+      "source_md5": "e2a08b2862a702030224b62345d8c8cc",
+      "path": "20261001135118_foundation_layer_193_layer189_admission_validator.sql"
+    },
+    {
+      "version": "20261001135341",
+      "name": "foundation_layer_194_layer189_bounded_executor",
+      "source_md5": "16950f9ba96abc325042b4275b2ecca7",
+      "path": "20261001135341_foundation_layer_194_layer189_bounded_executor.sql"
+    },
+    {
+      "version": "20261001135550",
+      "name": "foundation_layer_195_layer194_execution_reconciliation",
+      "source_md5": "5541ea48038b37ff0f3b1f3ea4030817",
+      "path": "20261001135550_foundation_layer_195_layer194_execution_reconciliation.sql"
+    },
+    {
+      "version": "20261001135653",
+      "name": "foundation_layer_196_layer195_coverage_summary",
+      "source_md5": "e226130ac8f1d0b9710d51149f034152",
+      "path": "20261001135653_foundation_layer_196_layer195_coverage_summary.sql"
+    },
+    {
+      "version": "20261001135823",
+      "name": "foundation_layer_197_layer195_coverage_incident_lifecycle",
+      "source_md5": "ddaf7b756b4ec440b725d310e84e84d2",
+      "path": "20261001135823_foundation_layer_197_layer195_coverage_incident_lifecycle.sql"
+    },
+    {
+      "version": "20261001140119",
+      "name": "foundation_layer_198_layer195_incident_response_policy",
+      "source_md5": "ef5a88b15d57bafb7bfc12b274a78f9f",
+      "path": "20261001140119_foundation_layer_198_layer195_incident_response_policy.sql"
+    }
+  ]
+}
