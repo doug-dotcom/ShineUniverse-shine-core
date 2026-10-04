@@ -138,6 +138,31 @@ test('missing Vault resource denies even when category grant exists',async()=>{
   assert.equal(audit.length,1);
 });
 
+test('foreign resource metadata never reaches Defence even from a faulty adapter',async()=>{
+  let defenceCalls=0;
+  const {gateway,audit}=create({getVaultResource:async()=>({...resource,ownerShineId:'88888888-8888-4888-8888-888888888888'}),
+    evaluateDefence:async()=>{defenceCalls++;return {decision:'allow'}}});
+  const result=await gateway({envelope:v2,authContext:{jwt:'user'}});
+  assert.equal(result.reasonCode,'resource-owner-mismatch');assert.equal(defenceCalls,0);
+  assert.equal(audit[0].shineId,shineId);
+});
+
+test('another account grants cannot authorise the current account',async()=>{
+  const {gateway}=create({getEffectiveGrants:async()=>[{...grant,ownerShineId:'88888888-8888-4888-8888-888888888888'}]});
+  const result=await gateway({envelope:v2,authContext:{jwt:'user'}});
+  assert.equal(result.status,'denied');assert.equal(result.reasonCode,'no-matching-grant');
+});
+
+test('successive users on the same gateway receive separately scoped lookups and audits',async()=>{
+  const second='88888888-8888-4888-8888-888888888888',owners=[],grantOwners=[];
+  const {gateway,audit}=create({verifyIdentity:async({authContext})=>({shineId:authContext.account}),
+    getVaultResource:async({ownerShineId})=>{owners.push(ownerShineId);return {...resource,ownerShineId}},
+    getEffectiveGrants:async({shineId:ownerShineId})=>{grantOwners.push(ownerShineId);return [{...grant,ownerShineId}]}});
+  for(const account of [shineId,second]) assert.equal((await gateway({envelope:v2,authContext:{account}})).status,'allowed');
+  assert.deepEqual(owners,[shineId,second]);assert.deepEqual(grantOwners,owners);
+  assert.deepEqual(audit.map(e=>e.shineId),owners);
+});
+
 test('missing grant is denied and audited',async()=>{
   const {gateway,audit}=create({getEffectiveGrants:async()=>[]});
   const result=await gateway({envelope:v2,authContext:{}});

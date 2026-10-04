@@ -276,6 +276,19 @@ test('reads Vault metadata and effective grants without Vault content',async()=>
   assert.equal(grants[0].grantId,grantId);
 });
 
+test('resource ID lookup is constrained by verified owner and refuses missing ownership',async()=>{
+  let calls=0;
+  const adapters=createSupabaseRuntimeAdapters({sql:async(strings,...values)=>{
+    calls++;
+    assert.match(strings.join('?'),/resource_id=\?::uuid and owner_shine_id=\?::uuid/);
+    assert.deepEqual(values,[resourceId,shineId]);return [];
+  },defenceGate:createFoundationRuntimeDefenceGateV1()});
+  assert.equal(await adapters.getVaultResource({resourceId}),null);
+  assert.equal(calls,0);
+  assert.equal(await adapters.getVaultResource({resourceId,ownerShineId:shineId}),null);
+  assert.equal(calls,1);
+});
+
 test('runtime Defence gate rejects oversized untrusted context',async()=>{
   const gate=createFoundationRuntimeDefenceGateV1({maxContextBytes:20});
   const result=await gate({

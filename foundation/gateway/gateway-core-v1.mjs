@@ -227,6 +227,11 @@ export function createFoundationGateway({adapters,clock=()=>new Date().toISOStri
       return response(envelope,'unavailable','foundation-dependency-unavailable');
     }
 
+    // Recheck adapter ownership before passing resource metadata to Defence.
+    if(resource && resource.ownerShineId!==verified.shineId){
+      return persistAndRespond({decision:'deny',reasonCode:'resource-owner-mismatch'},undefined,verified.shineId,admissionContext);
+    }
+
     let defence;
     try{
       defence=await adapters.evaluateDefence({

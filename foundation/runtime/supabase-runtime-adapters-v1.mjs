@@ -1273,10 +1273,12 @@ export function createSupabaseRuntimeAdapters({sql,defenceGate,fetchImpl=fetch}=
     },
 
     async getVaultResource({resourceId,resourceCategory,ownerShineId}={}){
+      if(!ownerShineId) return null;
       const rows=resourceId
         ? await sql`
             select resource_id::text, owner_shine_id::text, category, sensitivity, content_type, storage_ref
-            from foundation.vault_resources where resource_id=${resourceId}::uuid limit 1
+            from foundation.vault_resources
+            where resource_id=${resourceId}::uuid and owner_shine_id=${ownerShineId}::uuid limit 1
           `
         : await sql`
             select resource_id::text, owner_shine_id::text, category, sensitivity, content_type, storage_ref
