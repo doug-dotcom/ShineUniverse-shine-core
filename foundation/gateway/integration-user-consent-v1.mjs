@@ -134,7 +134,9 @@ export function createIntegrationGrantRevocationService({adapters,clock=()=>new 
         grantId:envelope.grantId,occurredAt:clock()
       });
     }catch{return base(kind,envelope,'unavailable','integration-grant-revocation-write-failed')}
-    if(!result?.outcome) return base(kind,envelope,'unavailable','integration-grant-revocation-write-failed');
+    if(!result?.outcome||typeof result.reasonCode!=='string'||!result.reasonCode||
+       (result.grantId!=null&&result.grantId!==envelope.grantId))
+      return base(kind,envelope,'unavailable','integration-grant-revocation-write-failed');
     return base(kind,envelope,
       result.outcome==='revoked'?'revoked':result.outcome==='already-revoked'?'already-revoked':'denied',
       result.reasonCode,{grantId:result.grantId??envelope.grantId}
@@ -163,7 +165,9 @@ export function createIntegrationLinkRevocationService({adapters,clock=()=>new D
         linkId:envelope.linkId,occurredAt:clock()
       });
     }catch{return base(kind,envelope,'unavailable','integration-link-revocation-write-failed')}
-    if(!result?.outcome) return base(kind,envelope,'unavailable','integration-link-revocation-write-failed');
+    if(!result?.outcome||typeof result.reasonCode!=='string'||!result.reasonCode||
+       (result.linkId!=null&&result.linkId!==envelope.linkId))
+      return base(kind,envelope,'unavailable','integration-link-revocation-write-failed');
     return base(kind,envelope,
       result.outcome==='revoked'?'revoked':result.outcome==='already-revoked'?'already-revoked':'denied',
       result.reasonCode,{linkId:result.linkId??envelope.linkId}

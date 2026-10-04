@@ -101,3 +101,30 @@ test('revocation has no Defence dependency',()=>{
     }
   }));
 });
+
+test('integration withdrawal reports only a confirmed result for the requested grant or link',async()=>{
+ const {createIntegrationGrantRevocationService,createIntegrationLinkRevocationService}=await import('./integration-user-consent-v1.mjs');
+ for(const [factory,marker,field,method] of [
+  [createIntegrationGrantRevocationService,'integrationGrantRevocation','grantId','revokeIntegrationClientGrant'],
+  [createIntegrationLinkRevocationService,'integrationLinkRevocation','linkId','revokeIntegrationClientLink']]){
+  const request={[marker]:'shine-foundation/'+(field==='grantId'?'integration-grant-revocation':'integration-link-revocation')+'-v1',
+   schemaVersion:'1.0.0',requestId,clientId:'shine.companion',[field]:grantId,revoke:true,requestedAt:'2026-10-04T06:00:00Z'};
+  let result,writes=[];
+  const handle=factory({clock:()=> '2026-10-04T06:00:00Z',idFactory:()=>eventId,adapters:{
+   verifyIntegrationClient:async()=>({clientId:request.clientId}),
+   verifyIntegrationIdentity:async()=>({shineId}),verifyIntegrationDelegation:async()=>null,
+   [method]:async args=>{writes.push(args);if(result instanceof Error)throw result;return result}
+  }});
+  for(const invalid of [null,{outcome:'revoked'},{outcome:'revoked',reasonCode:'ok',[field]:eventId},new Error('offline')]){
+   result=invalid;assert.equal((await handle({envelope:request,authContext:{}})).status,'unavailable');
+  }
+  for(const outcome of ['revoked','already-revoked']){
+   result={outcome,reasonCode:'confirmed',[field]:grantId};
+   const r=await handle({envelope:request,authContext:{}});assert.equal(r.status,outcome);assert.equal(r[field],grantId);
+  }
+  assert.equal(writes.every(w=>w.ownerShineId===shineId&&w[field]===grantId),true);
+  const before=writes.length;
+  assert.equal((await handle({envelope:{...request,revoke:false},authContext:{}})).status,'invalid');
+  assert.equal(writes.length,before);
+ }
+});
