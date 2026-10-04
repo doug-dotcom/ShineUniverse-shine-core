@@ -218,6 +218,37 @@ test('registered external issuer verifies user then maps canonical Shine ID',asy
   assert.equal(result.sessionId,'session-1');
 });
 
+test('mixed user credentials are denied before database or provider verification',async()=>{
+  let sqlCalls=0,fetchCalls=0;
+  const adapters=createSupabaseRuntimeAdapters({sql:async()=>{sqlCalls++;return []},
+    defenceGate:createFoundationRuntimeDefenceGateV1(),fetchImpl:async()=>{fetchCalls++;return Response.json({id:'auth-user'})}});
+  for(const userToken of ['a'.repeat(64),'']) {
+    assert.equal(await adapters.verifyIdentity({claimedAppId:'shine.travel',
+      authContext:{jwt:jwt({iss:issuer,sub:'auth-user'}),userToken}}),null);
+  }
+  assert.equal(sqlCalls,0);assert.equal(fetchCalls,0);
+});
+
+test('linked JWT and opaque accounts resolve to the same canonical identity',async()=>{
+  const raw='a'.repeat(64),hash=await sha256Hex(raw);
+  const {adapters}=makeAdapters({fetchImpl:async(url)=>String(url).includes('/auth/v1/user')
+    ?Response.json({id:'auth-user'}):Response.json([{vault_hash:hash}])});
+  const authenticated=await adapters.verifyIdentity({claimedAppId:'shine.travel',authContext:{jwt:jwt({iss:issuer})}});
+  const opaque=await adapters.verifyIdentity({claimedAppId:'shine.dive',authContext:{userToken:raw}});
+  assert.equal(authenticated.shineId,shineId);assert.equal(opaque.shineId,authenticated.shineId);
+  assert.notEqual(authenticated.providerId,opaque.providerId);
+});
+
+test('ambiguous JWT providers fail closed without contacting either provider',async()=>{
+  let calls=0;
+  const adapters=createSupabaseRuntimeAdapters({sql:async(strings)=>{
+    assert.match(strings.join(''),/limit 2/);
+    return [1,2].map(n=>({provider_id:'provider-'+n,project_url:'https://identity.example.test',publishable_key:'public-key'}));
+  },defenceGate:createFoundationRuntimeDefenceGateV1(),fetchImpl:async()=>{calls++;return Response.json({id:'auth-user'})}});
+  assert.equal(await adapters.verifyIdentity({claimedAppId:'shine.travel',authContext:{jwt:jwt({iss:issuer})}}),null);
+  assert.equal(calls,0);
+});
+
 test('unregistered issuer is denied without contacting external Auth',async()=>{
   let calls=0;
   const {adapters}=makeAdapters({fetchImpl:async()=>{calls++;return Response.json({id:'x'})}});

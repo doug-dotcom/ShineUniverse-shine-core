@@ -170,6 +170,9 @@ export function createSupabaseRuntimeAdapters({sql,defenceGate,fetchImpl=fetch}=
     async verifyIdentity({authContext,claimedAppId}={}){
       if(!claimedAppId) return null;
 
+      // A request must identify one user credential, without mode precedence.
+      if(authContext?.jwt!=null && authContext?.userToken!=null) return null;
+
       const jwt=authContext?.jwt;
       if(jwt){
         const untrusted=decodeJwtPayload(jwt);
@@ -184,10 +187,10 @@ export function createSupabaseRuntimeAdapters({sql,defenceGate,fetchImpl=fetch}=
             and p.status='active'
             and a.app_id=${claimedAppId}
             and a.status='active'
-          limit 1
+          limit 2
         `;
-        const provider=first(providers);
-        if(!provider) return null;
+        if(!Array.isArray(providers)||providers.length!==1) return null;
+        const provider=providers[0];
 
         const verification=await fetchImpl(String(provider.project_url).replace(/\/$/,'')+'/auth/v1/user',{
           method:'GET',
