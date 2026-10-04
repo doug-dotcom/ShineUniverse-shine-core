@@ -202,7 +202,9 @@ export function createConciergeExecuteService({adapters,clock=()=>new Date().toI
         ownerShineId:verified.identity.shineId,
         clientId:envelope.clientId
       });
-    }catch{}
+    }catch{
+      return response(kind,envelope,'unavailable','concierge-resume-state-unavailable');
+    }
     const checkpointByStep=new Map(
       (Array.isArray(resumeState?.steps)?resumeState.steps:[])
         .filter(s=>s?.completed===true&&s?.stepId)

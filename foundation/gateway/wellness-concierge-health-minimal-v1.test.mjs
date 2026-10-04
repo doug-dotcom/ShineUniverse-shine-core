@@ -182,3 +182,24 @@ test('only confirmed pre-dispatch failures queue an automatic retry',async()=>{
   assert.equal(invoked,1,reason);
  }
 });
+
+test('checkpoint lookup outage stops execution and recovery reuses durable completion',async()=>{
+ const capture=[],durable=[];
+ const adapters=executeAdapters({capture});
+ const args={envelope:{conciergeExecute:'shine-concierge/execute-v1',schemaVersion:'1.0.0',
+ requestId:REQUEST,clientId:'shine.wellness',requestedAt:CLOCK,inputs:{'calendar.book':handoff()}},authContext:{}};
+ const run=()=>createConciergeExecuteService({clock:()=>CLOCK,idFactory:()=>HANDOFF,adapters})(args);
+ adapters.getConciergeResumeState=async()=>{throw new Error('private database failure')};
+ assert.equal((await run()).reasonCode,'concierge-resume-state-unavailable');
+ assert.equal(capture.length,0);
+ adapters.getConciergeResumeState=async()=>({steps:durable});
+ adapters.recordConciergeStepCheckpoint=async checkpoint=>{
+  durable.push({...checkpoint,completed:true});return {ok:true};
+ };
+ assert.equal((await run()).status,'completed');
+ assert.equal(capture.length,1);
+ const resumed=await run();
+ assert.equal(resumed.status,'completed');
+ assert.equal(capture.length,1);
+ assert.equal(resumed.results[0].reasonCode,'concierge-step-reused');
+});
