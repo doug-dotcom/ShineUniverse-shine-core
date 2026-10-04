@@ -774,3 +774,31 @@ test('Atlas Feed persistence delegates the exact event, admission and receipt to
   assert.equal(JSON.parse(calls[0][1]).eventId,'22222222-2222-4222-8222-222222222222');
   assert.equal(JSON.parse(calls[0][2]).appId,'shine.dive');
 });
+
+test('invocation requires a ticket bound to the exact action before calling the app',async()=>{
+ const capabilityId='travel.plan_trip',requestId='22222222-2222-4222-8222-222222222222';
+ const valid={ticketId:'11111111-1111-4111-8111-111111111111',stepId:requestId,capabilityId};
+ let calls=0;
+ const adapters=createSupabaseRuntimeAdapters({sql:async()=>[{
+   endpoint_url:'https://travel.example.test/capability',adapter_protocol:'shine-capability/v1',
+   auth_mode:'one-time-foundation-ticket',timeout_ms:1000,status:'active',effective_status:'active',
+   invocation_state:'live',capability_mode:'read'
+ }],defenceGate:createFoundationRuntimeDefenceGateV1(),fetchImpl:async(url,options)=>{
+   calls++;const body=JSON.parse(options.body);
+   assert.equal(body.context.stepId,requestId);assert.equal(body.context.ticketId,valid.ticketId);
+   return Response.json({protocol:'shine-capability-result/v1',schemaVersion:'1.0.0',
+     requestId,capabilityId,status:'completed',result:{ok:true}});
+ }});
+ adapters.getCapabilityAdapterHealth=async()=>({health_status:'healthy'});
+ adapters.recordCapabilityAdapterHealth=async()=>({});
+ const args={capabilityId,requestId,input:{},context:{conciergeRequestId:valid.ticketId,ownerShineId:shineId,clientId:'shine.companion',purpose:'travel.plan'}};
+ for(const ticket of [{...valid,stepId:valid.ticketId},{...valid,capabilityId:'travel.book_trip'},
+   {...valid,stepId:undefined},{...valid,capabilityId:undefined}]){
+   adapters.issueCapabilityInvocationTicket=async()=>ticket;
+   const result=await adapters.invokeCapability(args);
+   assert.equal(result.status,'failed');assert.equal(result.reasonCode,'capability-ticket-action-mismatch');
+ }
+ assert.equal(calls,0);
+ adapters.issueCapabilityInvocationTicket=async()=>valid;
+ assert.equal((await adapters.invokeCapability(args)).status,'completed');assert.equal(calls,1);
+});

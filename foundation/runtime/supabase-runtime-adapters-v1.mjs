@@ -1203,6 +1203,9 @@ export function createSupabaseRuntimeAdapters({sql,defenceGate,fetchImpl=fetch}=
         return {status:'failed',reasonCode:'capability-ticket-issue-failed'};
       }
       if(!ticket?.ticketId) return {status:'failed',reasonCode:'capability-ticket-issue-failed'};
+      if(ticket.stepId!==requestId || ticket.capabilityId!==capabilityId){
+        return {status:'failed',reasonCode:'capability-ticket-action-mismatch'};
+      }
 
       let response;
       const startedAt=Date.now();
