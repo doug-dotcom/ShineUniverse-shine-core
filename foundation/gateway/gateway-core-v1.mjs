@@ -91,11 +91,15 @@ export function createFoundationGateway({adapters,clock=()=>new Date().toISOStri
       );
     };
 
+    const dependencyFailure=(stage,shineId=null,requestContext={},reasonCode='foundation-dependency-unavailable')=>
+      persistAndRespond({decision:'deny',reasonCode},undefined,shineId,
+        {...requestContext,dependencyFailure:{stage}},'unavailable');
+
     let verifiedApp;
     try{
       verifiedApp=await adapters.verifyAppCaller({authContext,claimedAppId:permission.appId});
     }catch{
-      return response(envelope,'unavailable','foundation-dependency-unavailable');
+      return dependencyFailure('app-caller-verification');
     }
 
     if(!verifiedApp?.appId){
@@ -109,7 +113,7 @@ export function createFoundationGateway({adapters,clock=()=>new Date().toISOStri
     try{
       verified=await adapters.verifyIdentity({authContext,claimedAppId:permission.appId});
     }catch{
-      return response(envelope,'unavailable','foundation-dependency-unavailable');
+      return dependencyFailure('identity-verification');
     }
 
     if(!verified?.shineId){
@@ -128,7 +132,7 @@ export function createFoundationGateway({adapters,clock=()=>new Date().toISOStri
     try{
       manifest=await adapters.getAppManifest({appId:effectiveRequest.appId});
     }catch{
-      return response(envelope,'unavailable','foundation-dependency-unavailable');
+      return dependencyFailure('manifest-lookup',verified.shineId);
     }
 
     if(!manifest || manifest.appId!==effectiveRequest.appId || !appManifestDeclaresPermission(manifest,effectiveRequest)){
@@ -149,7 +153,7 @@ export function createFoundationGateway({adapters,clock=()=>new Date().toISOStri
         asOf:now
       });
     }catch{
-      return response(envelope,'unavailable','dependency-admission-unavailable');
+      return dependencyFailure('dependency-admission',verified.shineId,{},'dependency-admission-unavailable');
     }
 
     const admissionContext={
@@ -224,7 +228,7 @@ export function createFoundationGateway({adapters,clock=()=>new Date().toISOStri
         })
       ]);
     }catch{
-      return response(envelope,'unavailable','foundation-dependency-unavailable');
+      return dependencyFailure('resource-and-grant-lookup',verified.shineId,admissionContext);
     }
 
     // Recheck adapter ownership before passing resource metadata to Defence.
@@ -242,7 +246,7 @@ export function createFoundationGateway({adapters,clock=()=>new Date().toISOStri
         resource
       });
     }catch{
-      return response(envelope,'unavailable','foundation-dependency-unavailable');
+      return dependencyFailure('defence-evaluation',verified.shineId,admissionContext);
     }
 
     const decision=evaluateAccess({

@@ -278,7 +278,8 @@ test('dependency failure becomes unavailable',async()=>{
   const {gateway,audit}=create({getAppManifest:async()=>{throw new Error('db down')}});
   const result=await gateway({envelope:v2,authContext:{}});
   assert.equal(result.status,'unavailable');
-  assert.equal(audit.length,0);
+  assert.equal(audit.length,1);
+  assert.equal(audit[0].decision,'deny');
 });
 
 test('allow is suppressed if audit cannot persist',async()=>{
@@ -312,4 +313,25 @@ test('undeclared scope short-circuits before Vault and grants',async()=>{
   assert.equal(result.reasonCode,'scope-not-declared');
   assert.equal(vaultCalls,0);
   assert.equal(grantCalls,0);
+});
+
+test('dependency failures retain stage provenance and only verified identities in the audit',async()=>{
+ const stages=[['verifyAppCaller','app-caller-verification',null],['verifyIdentity','identity-verification',null],
+ ['getAppManifest','manifest-lookup',shineId],['evaluateDependencyAdmission','dependency-admission',shineId],
+ ['getVaultResource','resource-and-grant-lookup',shineId],['evaluateDefence','defence-evaluation',shineId]];
+ for(const [adapter,stage,expectedIdentity] of stages){
+  const {gateway,audit}=create({[adapter]:async()=>{throw new Error('private-token-secret')}});
+  const result=await gateway({envelope:v1,authContext:{jwt:'private-token-secret'}});
+  assert.equal(result.status,'unavailable');assert.equal(audit.length,1);
+  assert.equal(audit[0].decision,'deny');assert.equal(audit[0].shineId,expectedIdentity);
+  assert.equal(audit[0].requestContext.dependencyFailure.stage,stage);
+  assert.equal(audit[0].reasonCode,result.reasonCode);
+  assert.equal(JSON.stringify({result,audit}).includes('private-token-secret'),false);
+ }
+});
+test('failure provenance still fails closed if the audit store is unavailable',async()=>{
+ const {gateway}=create({getAppManifest:async()=>{throw new Error('offline')},
+ writeAuditEvent:async()=>{throw new Error('offline')}});
+ const r=await gateway({envelope:v2,authContext:{}});
+ assert.equal(r.status,'unavailable');assert.equal(r.reasonCode,'audit-write-failed');
 });
