@@ -1,5 +1,16 @@
 const first=rows=>Array.isArray(rows)&&rows.length?rows[0]:null;
 
+// Circuit-breaker availability is separate from evidence freshness.
+export function classifyCapabilityHealthEvidence(lastEventAt,now=Date.now()){
+  const maxAgeMs=5*60*1000;
+  const observedAt=typeof lastEventAt==='string'?Date.parse(lastEventAt):NaN;
+  if(!Number.isFinite(observedAt)||!Number.isFinite(now)||observedAt>now){
+    return {evidence_freshness:'unknown',evidence_age_ms:null,evidence_max_age_ms:maxAgeMs};
+  }
+  const age=now-observedAt;
+  return {evidence_freshness:age<maxAgeMs?'fresh':'stale',evidence_age_ms:age,evidence_max_age_ms:maxAgeMs};
+}
+
 export async function sha256Hex(value){
   if(typeof value!=='string'||!value) return null;
   const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(value));
@@ -1141,18 +1152,20 @@ export function createSupabaseRuntimeAdapters({sql,defenceGate,fetchImpl=fetch}=
 
     async getCapabilityAdapterHealth({capabilityId}={}){
       const rows=await sql`
-        select capability_id,health_status,retry_after,last_outcome,failures_in_last_3
+        select capability_id,health_status,retry_after,last_outcome,last_event_at,failures_in_last_3
         from foundation.capability_adapter_health
         where capability_id=${capabilityId}
         limit 1
       `;
-      return first(rows)??{
+      const health=first(rows)??{
         capability_id:capabilityId,
         health_status:'unknown',
         retry_after:null,
         last_outcome:'unknown',
+        last_event_at:null,
         failures_in_last_3:0
       };
+      return {...health,...classifyCapabilityHealthEvidence(health.last_event_at)};
     },
 
     async recordCapabilityAdapterHealth({eventId,capabilityId,outcome,reasonCode,latencyMs=null,occurredAt}={}){

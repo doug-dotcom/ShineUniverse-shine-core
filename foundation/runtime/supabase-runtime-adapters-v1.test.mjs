@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createSupabaseRuntimeAdapters,sha256Hex} from './supabase-runtime-adapters-v1.mjs';
+import {createSupabaseRuntimeAdapters,sha256Hex,classifyCapabilityHealthEvidence} from './supabase-runtime-adapters-v1.mjs';
 import {createFoundationRuntimeDefenceGateV1} from './runtime-defence-gate-v1.mjs';
 
 const shineId='11111111-1111-4111-8111-111111111111';
@@ -840,4 +840,27 @@ test('missing capability health row is unknown rather than available',async()=>{
  const adapters=createSupabaseRuntimeAdapters({sql:async()=>[],defenceGate:createFoundationRuntimeDefenceGateV1()});
  const health=await adapters.getCapabilityAdapterHealth({capabilityId:'travel.plan_trip'});
  assert.equal(health.health_status,'unknown');assert.equal(health.last_outcome,'unknown');
+ assert.equal(health.evidence_freshness,'unknown');
+});
+
+test('health evidence expires at five minutes and rejects future or invalid timestamps',()=>{
+ const now=Date.parse('2026-10-04T06:00:00Z');
+ for(const age of [0,299999,300000,300001]){
+  const result=classifyCapabilityHealthEvidence(new Date(now-age).toISOString(),now);
+  assert.equal(result.evidence_freshness,age<300000?'fresh':'stale');
+  assert.equal(result.evidence_age_ms,age);
+ }
+ for(const value of [null,undefined,'','invalid',42,new Date(now).toISOString().replace('06:00','06:01')]){
+  assert.equal(classifyCapabilityHealthEvidence(value,now).evidence_freshness,'unknown');
+ }
+});
+
+test('available circuit breaker does not imply fresh successful health evidence',async()=>{
+ const adapters=createSupabaseRuntimeAdapters({sql:async strings=>{
+  assert.match(strings.join(''),/last_event_at/);
+  return [{health_status:'available',last_outcome:'failure',last_event_at:'2000-01-01T00:00:00Z'}];
+ },defenceGate:createFoundationRuntimeDefenceGateV1()});
+ const health=await adapters.getCapabilityAdapterHealth({capabilityId:'travel.plan_trip'});
+ assert.equal(health.health_status,'available');assert.equal(health.evidence_freshness,'stale');
+ assert.equal(health.last_outcome,'failure');
 });
