@@ -208,6 +208,9 @@ export function createConciergeExecuteService({adapters,clock=()=>new Date().toI
       const stepId=String(step?.stepId??'');
       const input=executionInputs?.[capabilityId]??{};
       const checkpoint=checkpointByStep.get(stepId);
+      if(checkpoint?.capabilityId!=null && checkpoint.capabilityId!==capabilityId){
+        return response(kind,envelope,'unavailable','concierge-checkpoint-binding-mismatch',{results});
+      }
       if(checkpoint){
         results.push({
           capabilityId,

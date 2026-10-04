@@ -143,3 +143,26 @@ test('rejects a clinical payload before the first specialist invocation',async()
   assert.equal(result.reasonCode,'concierge-wellness-health-minimal-input-invalid');
   assert.equal(capture.length,0);
 });
+
+test('execution and checkpoint writes retain the same parent request and action step',async()=>{
+ const capture=[],checkpoints=[];
+ const adapters=executeAdapters({capture});
+ adapters.recordConciergeStepCheckpoint=async args=>{checkpoints.push(args);return {ok:true}};
+ const service=createConciergeExecuteService({adapters,clock:()=>CLOCK,idFactory:()=>HANDOFF});
+ const result=await service({envelope:{conciergeExecute:'shine-concierge/execute-v1',schemaVersion:'1.0.0',
+ requestId:REQUEST,clientId:'shine.wellness',requestedAt:CLOCK,inputs:{'calendar.book':handoff()}},authContext:{}});
+ assert.equal(result.status,'completed');
+ assert.equal(capture[0].context.conciergeRequestId,REQUEST);
+ assert.equal(checkpoints[0].requestId,REQUEST);
+ assert.equal(checkpoints[0].stepId,capture[0].requestId);
+ assert.equal(checkpoints[0].capabilityId,capture[0].capabilityId);
+});
+test('a checkpoint naming a different capability cannot be reused for this action',async()=>{
+ const capture=[];const adapters=executeAdapters({capture});
+ adapters.getConciergeResumeState=async()=>({steps:[{completed:true,stepId:'step-1',capabilityId:'calendar.cancel',result:{ok:true}}]});
+ const service=createConciergeExecuteService({adapters,clock:()=>CLOCK,idFactory:()=>HANDOFF});
+ const result=await service({envelope:{conciergeExecute:'shine-concierge/execute-v1',schemaVersion:'1.0.0',
+ requestId:REQUEST,clientId:'shine.wellness',requestedAt:CLOCK,inputs:{'calendar.book':handoff()}},authContext:{}});
+ assert.equal(result.status,'unavailable');assert.equal(result.reasonCode,'concierge-checkpoint-binding-mismatch');
+ assert.equal(capture.length,0);
+});
