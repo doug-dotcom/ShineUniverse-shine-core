@@ -16,6 +16,26 @@ const allowedResponse=body=>Response.json({
   decision:{decision:'allow',reasonCode:'grant-match'}
 });
 
+test('malformed permissions fail before either credential mode sends a request',async()=>{
+  const circular={};circular.self=circular;
+  const invalid=[{scope:'vault read'},{scope:42},{purpose:' '},{purpose:'Travel.plan'},
+    {resourceId:'not-a-uuid'},{resourceId:null},{resourceCategory:''},
+    {resourceCategory:'bad/category'},{context:null},{context:[]},{context:circular},
+    {context:{value:undefined}},{context:{value:NaN}},{context:{value:1n}},
+    {context:{value:()=>1}},{context:{value:new Date()}},
+    {context:{get value(){throw new Error('must not execute')}}}];
+  for(const userCredentialMode of ['bearer-jwt','opaque-header']) {
+    let calls=0;
+    const client=createFoundationAppClient({foundationUrl:'https://foundation.example',appId:'shine.travel',
+      appToken:'a'.repeat(64),userCredentialMode,fetchImpl:async()=>{calls++;throw new Error('unexpected request')}});
+    for(const override of invalid) {
+      await assert.rejects(()=>client.evaluate({userCredential:'token',scope:'vault.read',purpose:'travel.plan',
+        resourceCategory:'journey',...override}),TypeError);
+    }
+    assert.equal(calls,0);
+  }
+});
+
 test('JWT client keeps credentials in headers and never sends shineId',async()=>{
   let call;
   const client=createFoundationAppClient({
