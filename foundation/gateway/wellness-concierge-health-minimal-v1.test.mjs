@@ -223,3 +223,26 @@ test('recovery requires current authorisation before accessing saved results',as
   assert.equal(result.results,undefined,failure);
  }
 });
+
+test('recovery after transient failure honours revocation before checkpoint reuse',async()=>{
+ const capture=[],stored=[{completed:true,stepId:'step-1',capabilityId:'calendar.book',result:{ok:true}}];
+ const adapters=executeAdapters({capture});let revoked=false,reads=0,queues=0;
+ adapters.gateConciergeExecution=async()=>revoked?{status:'blocked',reasonCode:'permission-revoked'}:{
+  status:'allowed',plan:{purpose:WELLNESS_CONCIERGE_PURPOSE,steps:[
+   {stepId:'step-1',capabilityId:'calendar.book',appId:'calendar'},
+   {stepId:'step-2',capabilityId:'calendar.book',appId:'calendar'}]}};
+ adapters.getConciergeResumeState=async()=>{reads++;return {steps:stored}};
+ adapters.invokeCapability=async args=>{capture.push(args);return {status:'failed',reasonCode:'capability-adapter-health-unavailable'}};
+ adapters.queueConciergeRetry=async()=>{queues++;return {ok:true}};
+ const args={envelope:{conciergeExecute:'shine-concierge/execute-v1',schemaVersion:'1.0.0',
+ requestId:REQUEST,clientId:'shine.wellness',requestedAt:CLOCK,inputs:{'calendar.book':handoff()}},authContext:{}};
+ const run=()=>createConciergeExecuteService({clock:()=>CLOCK,idFactory:()=>HANDOFF,adapters})(args);
+ await run();
+ assert.equal(capture.length,1);assert.equal(capture[0].requestId,'step-2');
+ assert.equal(queues,1);assert.equal(reads,1);
+ revoked=true;
+ const recovered=await run();
+ assert.equal(recovered.status,'blocked');assert.equal(recovered.reasonCode,'permission-revoked');
+ assert.equal(capture.length,1);assert.equal(reads,1);assert.equal(queues,1);
+ assert.equal(recovered.results,undefined);
+});
