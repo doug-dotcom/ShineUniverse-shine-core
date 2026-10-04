@@ -158,3 +158,22 @@ test('denies when the requested Vault resource does not exist',()=>{
   assert.equal(result.decision,'deny');
   assert.equal(result.reasonCode,'resource-not-found');
 });
+
+test('temporary grant expires at the exact boundary',()=>{
+ const expiresAt='2026-10-04T06:00:00.000Z';
+ const grants=[{...grant,expiresAt}];
+ assert.equal(evaluateAccess({...base,grants,now:'2026-10-04T05:59:59.999Z'}).decision,'allow');
+ for(const now of [expiresAt,'2026-10-04T06:00:00.001Z'])
+  assert.equal(evaluateAccess({...base,grants,now}).reasonCode,'grant-expired');
+});
+test('malformed grant timing fails closed rather than creating indefinite access',()=>{
+ for(const field of ['expiresAt','notBefore'])for(const value of ['invalid','',123,false,{}]){
+  const r=evaluateAccess({...base,grants:[{...grant,[field]:value}]});
+  assert.equal(r.decision,'deny');assert.equal(r.reasonCode,'grant-time-invalid');
+ }
+});
+test('invalid temporary grant does not prevent an independent valid grant from matching',()=>{
+ const invalid={...grant,expiresAt:'invalid'};
+ for(const grants of [[invalid,grant],[grant,invalid]])
+  assert.equal(evaluateAccess({...base,grants}).decision,'allow');
+});

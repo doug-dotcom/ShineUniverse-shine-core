@@ -10,6 +10,7 @@ export const DENY_REASONS = Object.freeze({
   GRANT_INACTIVE: 'grant-inactive',
   GRANT_NOT_YET_ACTIVE: 'grant-not-yet-active',
   GRANT_EXPIRED: 'grant-expired',
+  GRANT_TIME_INVALID: 'grant-time-invalid',
   GRANT_REVOKED: 'grant-revoked',
   SCOPE_MISMATCH: 'scope-mismatch',
   PURPOSE_MISMATCH: 'purpose-mismatch',
@@ -39,6 +40,10 @@ const resourceMatches=(selector,request,resource)=>{
 const grantTimeState=(grant,nowMs)=>{
   if(grant.status==='revoked' || grant.revokedAt) return DENY_REASONS.GRANT_REVOKED;
   if(grant.status!=='active') return DENY_REASONS.GRANT_INACTIVE;
+  for(const field of ['notBefore','expiresAt']){
+    if(grant[field]!=null && (typeof grant[field]!=='string'||!Number.isFinite(Date.parse(grant[field]))))
+      return DENY_REASONS.GRANT_TIME_INVALID;
+  }
   if(grant.notBefore && Date.parse(grant.notBefore)>nowMs) return DENY_REASONS.GRANT_NOT_YET_ACTIVE;
   if(grant.expiresAt && Date.parse(grant.expiresAt)<=nowMs) return DENY_REASONS.GRANT_EXPIRED;
   return null;
@@ -92,6 +97,7 @@ export function evaluateAccess({
 
   let strongestTemporalReason=DENY_REASONS.GRANT_INACTIVE;
   const temporalRank={
+    [DENY_REASONS.GRANT_TIME_INVALID]:5,
     [DENY_REASONS.GRANT_REVOKED]:4,
     [DENY_REASONS.GRANT_EXPIRED]:3,
     [DENY_REASONS.GRANT_NOT_YET_ACTIVE]:2,
