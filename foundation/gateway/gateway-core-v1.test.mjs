@@ -373,3 +373,20 @@ test('AI-supplied approval context cannot replace grants or Defence decisions',a
   assert.equal(audit[0].decision,'deny');
  }
 });
+
+test('memory permission boundary requires exact owner, scope, purpose and current grant',async()=>{
+ const permission={...v2.permission,appId:'shine.ai',scope:'memory.read',purpose:'assistant.recall',resourceCategory:'memory'};
+ const memoryManifest={appId:'shine.ai',foundation:{requestedScopes:[{scope:'memory.read',purpose:'assistant.recall',resourceCategory:'memory'}]}};
+ const memoryResource={...resource,category:'memory'};
+ const memoryGrant={...grant,appId:'shine.ai',scope:'memory.read',purpose:'assistant.recall',resourceSelector:{resourceCategory:'memory'}};
+ for(const change of [null,{ownerShineId:resourceId},{scope:'memory.write'},
+ {purpose:'marketing.profile'},{status:'revoked'},{expiresAt:'2026-09-26T08:31:00Z'}]){
+  const {gateway,audit}=create({verifyAppCaller:async()=>({appId:'shine.ai'}),
+   getAppManifest:async()=>memoryManifest,getVaultResource:async()=>memoryResource,
+   getEffectiveGrants:async()=>[{...memoryGrant,...change}]});
+  const result=await gateway({envelope:{...v2,permission},authContext:{}});
+  assert.equal(result.status,change?'denied':'allowed');
+  assert.equal(audit[0].shineId,shineId);
+  assert.equal(audit[0].decision,change?'deny':'allow');
+ }
+});
