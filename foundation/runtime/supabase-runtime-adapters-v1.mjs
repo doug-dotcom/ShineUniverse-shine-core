@@ -1148,7 +1148,7 @@ export function createSupabaseRuntimeAdapters({sql,defenceGate,fetchImpl=fetch}=
       `;
       return first(rows)??{
         capability_id:capabilityId,
-        health_status:'available',
+        health_status:'unknown',
         retry_after:null,
         last_outcome:'unknown',
         failures_in_last_3:0
@@ -1185,6 +1185,9 @@ export function createSupabaseRuntimeAdapters({sql,defenceGate,fetchImpl=fetch}=
       const health=await this.getCapabilityAdapterHealth({capabilityId});
       if(health?.health_status==='quarantined'){
         return {status:'failed',reasonCode:'capability-adapter-quarantined',retryAfter:health.retry_after??null};
+      }
+      if(health?.health_status!=='available'){
+        return {status:'failed',reasonCode:'capability-adapter-health-unavailable'};
       }
       if(!['read','advisory'].includes(String(adapter.capability_mode))){
         return {status:'failed',reasonCode:'capability-mode-not-supported'};

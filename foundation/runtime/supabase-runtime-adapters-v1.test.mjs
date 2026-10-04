@@ -789,7 +789,7 @@ test('invocation requires a ticket bound to the exact action before calling the 
    return Response.json({protocol:'shine-capability-result/v1',schemaVersion:'1.0.0',
      requestId,capabilityId,status:'completed',result:{ok:true}});
  }});
- adapters.getCapabilityAdapterHealth=async()=>({health_status:'healthy'});
+ adapters.getCapabilityAdapterHealth=async()=>({health_status:'available'});
  adapters.recordCapabilityAdapterHealth=async()=>({});
  const args={capabilityId,requestId,input:{},context:{conciergeRequestId:valid.ticketId,ownerShineId:shineId,clientId:'shine.companion',purpose:'travel.plan'}};
  for(const ticket of [{...valid,stepId:valid.ticketId},{...valid,capabilityId:'travel.book_trip'},
@@ -799,6 +799,16 @@ test('invocation requires a ticket bound to the exact action before calling the 
    assert.equal(result.status,'failed');assert.equal(result.reasonCode,'capability-ticket-action-mismatch');
  }
  assert.equal(calls,0);
+ let tickets=0;
+ adapters.issueCapabilityInvocationTicket=async()=>{tickets++;return valid};
+ for(const health of [null,{}, {health_status:'unknown'},{health_status:'healthy'}]){
+  adapters.getCapabilityAdapterHealth=async()=>health;
+  assert.equal((await adapters.invokeCapability(args)).reasonCode,'capability-adapter-health-unavailable');
+ }
+ adapters.getCapabilityAdapterHealth=async()=>({health_status:'quarantined',retry_after:'2026-10-04T07:00:00Z'});
+ assert.equal((await adapters.invokeCapability(args)).reasonCode,'capability-adapter-quarantined');
+ assert.equal(tickets,0);assert.equal(calls,0);
+ adapters.getCapabilityAdapterHealth=async()=>({health_status:'available'});
  adapters.issueCapabilityInvocationTicket=async()=>valid;
  assert.equal((await adapters.invokeCapability(args)).status,'completed');assert.equal(calls,1);
 });
@@ -824,4 +834,10 @@ test('audit retry accepts identical evidence and rejects changed content for the
    {requestContext:{admission:{state:'admit',version:2}}}]){
   await assert.rejects(()=>adapters.writeAuditEvent({...event,...override}),/audit-replay-conflict/);
  }
+});
+
+test('missing capability health row is unknown rather than available',async()=>{
+ const adapters=createSupabaseRuntimeAdapters({sql:async()=>[],defenceGate:createFoundationRuntimeDefenceGateV1()});
+ const health=await adapters.getCapabilityAdapterHealth({capabilityId:'travel.plan_trip'});
+ assert.equal(health.health_status,'unknown');assert.equal(health.last_outcome,'unknown');
 });
