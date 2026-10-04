@@ -1179,7 +1179,8 @@ export function createSupabaseRuntimeAdapters({sql,defenceGate,fetchImpl=fetch}=
     },
 
     async invokeCapability({capabilityId,requestId,input,context}={}){
-      const rows=await sql`
+      let rows;
+      try{rows=await sql`
         select
           a.endpoint_url,a.adapter_protocol,a.auth_mode,a.timeout_ms,a.status,a.effective_status,
           c.invocation_state,c.capability_mode
@@ -1187,7 +1188,9 @@ export function createSupabaseRuntimeAdapters({sql,defenceGate,fetchImpl=fetch}=
         join foundation.app_capabilities c on c.capability_id=a.capability_id
         where a.capability_id=${capabilityId}
         limit 1
-      `;
+      `;}catch{
+        return {status:'failed',reasonCode:'capability-adapter-registry-unavailable'};
+      }
       const adapter=first(rows);
       if(!adapter||adapter.status!=='active'||adapter.invocation_state!=='live'){
         return {status:'failed',reasonCode:'capability-adapter-not-live'};
@@ -1195,7 +1198,10 @@ export function createSupabaseRuntimeAdapters({sql,defenceGate,fetchImpl=fetch}=
       if(adapter.effective_status!=='active'){
         return {status:'failed',reasonCode:'capability-adapter-attestation-mismatch',adapterStatus:adapter.effective_status};
       }
-      const health=await this.getCapabilityAdapterHealth({capabilityId});
+      let health;
+      try{health=await this.getCapabilityAdapterHealth({capabilityId})}catch{
+        return {status:'failed',reasonCode:'capability-adapter-health-unavailable'};
+      }
       if(health?.health_status==='quarantined'){
         return {status:'failed',reasonCode:'capability-adapter-quarantined',retryAfter:health.retry_after??null};
       }

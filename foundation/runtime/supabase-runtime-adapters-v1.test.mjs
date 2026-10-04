@@ -808,9 +808,23 @@ test('invocation requires a ticket bound to the exact action before calling the 
  adapters.getCapabilityAdapterHealth=async()=>({health_status:'quarantined',retry_after:'2026-10-04T07:00:00Z'});
  assert.equal((await adapters.invokeCapability(args)).reasonCode,'capability-adapter-quarantined');
  assert.equal(tickets,0);assert.equal(calls,0);
+ adapters.getCapabilityAdapterHealth=async()=>{throw new Error('private database detail')};
+ assert.deepEqual(await adapters.invokeCapability(args),{status:'failed',reasonCode:'capability-adapter-health-unavailable'});
+ assert.equal(tickets,0);assert.equal(calls,0);
  adapters.getCapabilityAdapterHealth=async()=>({health_status:'available'});
  adapters.issueCapabilityInvocationTicket=async()=>valid;
  assert.equal((await adapters.invokeCapability(args)).status,'completed');assert.equal(calls,1);
+});
+
+test('registry outage returns a bounded failure before health, tickets or network',async()=>{
+ let downstream=0;
+ const adapters=createSupabaseRuntimeAdapters({sql:async()=>{throw new Error('private connection detail')},
+  defenceGate:createFoundationRuntimeDefenceGateV1(),fetchImpl:async()=>{downstream++}});
+ adapters.getCapabilityAdapterHealth=async()=>{downstream++};
+ adapters.issueCapabilityInvocationTicket=async()=>{downstream++};
+ assert.deepEqual(await adapters.invokeCapability({capabilityId:'travel.plan_trip'}),
+  {status:'failed',reasonCode:'capability-adapter-registry-unavailable'});
+ assert.equal(downstream,0);
 });
 
 test('audit retry accepts identical evidence and rejects changed content for the same request ID',async()=>{
