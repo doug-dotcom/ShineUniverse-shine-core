@@ -54,10 +54,10 @@ function classifyRailway(deployments,{sleepAllowed=false}={}){
     return {runtimeState:'active',current:latest,latest};
   }
   if(['FAILED','CRASHED'].includes(latest.status)){
-    return {runtimeState:serving?'active':'failed',current:serving??latest,latest};
+    return {runtimeState:serving?(serving.status==='SLEEPING'?(sleepAllowed?'sleeping':'inactive'):'active'):'failed',current:serving??latest,latest};
   }
   if(['REMOVED','REMOVING','SKIPPED'].includes(latest.status)){
-    return {runtimeState:serving?'active':'inactive',current:serving,latest};
+    return {runtimeState:serving?(serving.status==='SLEEPING'?(sleepAllowed?'sleeping':'inactive'):'active'):'inactive',current:serving,latest};
   }
   return {runtimeState:'unknown',current:serving,latest};
 }
@@ -186,6 +186,18 @@ function selfTest(){
   const failed={id:'d3',status:'FAILED',createdAt:'2026-09-28T02:00:00.000Z',meta:{commitHash:'c'.repeat(40),branch:'main'}};
   const r2=railwayObservation(source,[failed,ok]);
   if(r2.runtimeState!=='active'||r2.deploymentRef!=='d1')fail('failed candidate must not erase serving Railway release');
+
+  const sleeping={...ok,status:'SLEEPING'};
+  for(const status of ['SKIPPED','REMOVED','REMOVING','FAILED','CRASHED']){
+    const attempt={...failed,status};
+    for(const sleepAllowed of [true,false]){
+      const observed=railwayObservation({...source,sleepAllowed},[attempt,sleeping]);
+      if(observed.runtimeState!==(sleepAllowed?'sleeping':'inactive')||observed.deploymentRef!=='d1'||observed.metadata.currentDeploymentStatus!=='SLEEPING')
+        fail('sleeping serving fallback failed: '+status+' sleepAllowed='+sleepAllowed);
+    }
+    const active=railwayObservation(source,[attempt,ok]);
+    if(active.runtimeState!=='active'||active.deploymentRef!=='d1')fail('active serving fallback failed: '+status);
+  }
 
   const s=supabaseObservation({targetId:'supabase:'+('z'.repeat(20)),projectRef:'z'.repeat(20)},{status:'ACTIVE_HEALTHY',region:'ap-southeast-2',database:{version:'17.6.1.166',postgres_engine:'17'}});
   if(s.runtimeState!=='active'||s.healthState!=='healthy')fail('Supabase healthy classification failed');
