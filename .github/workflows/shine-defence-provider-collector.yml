@@ -80,3 +80,39 @@ jobs:
           echo "OIDC ingest proof succeeded with zero provider observations."
           echo "Configure SHINE_DEFENCE_RAILWAY_WORKSPACE_TOKEN and/or SHINE_DEFENCE_SUPABASE_READ_TOKEN."
           echo "No freshness is manufactured; estate Sentinel will warn when existing provider evidence expires."
+
+      - name: Summarise provider evidence coverage
+        if: always() && steps.collect.outcome == 'success'
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const snapshot = JSON.parse(fs.readFileSync('provider-snapshot.json', 'utf8'));
+          const responsePath = '/tmp/provider-ingest-response.json';
+          let accepted = 'unverified';
+          if (fs.existsSync(responsePath)) {
+            try {
+              const response = JSON.parse(fs.readFileSync(responsePath, 'utf8'));
+              if (response.status === 'accepted' && Number.isInteger(response.accepted)) accepted = response.accepted;
+            } catch {}
+          }
+          const count = snapshot.observations.length;
+          const pending = Object.values(snapshot.providerStatus).some(status => status !== 'configured');
+          const state = pending ? 'Credential pending — provider coverage incomplete' : (count === 0 ? 'No provider evidence collected' : 'Provider evidence collected');
+          const lines = [
+            '## Shine Defence provider evidence',
+            '',
+            '**' + state + '**',
+            '',
+            '| Check | Result |',
+            '| --- | --- |',
+            '| Railway credential | ' + snapshot.providerStatus.railway + ' |',
+            '| Supabase credential | ' + snapshot.providerStatus.supabase + ' |',
+            '| Observations collected | ' + count + ' |',
+            '| Observations accepted | ' + accepted + ' |',
+            '',
+            'A successful workflow does not establish full provider coverage or estate certification.',
+            'Zero observations do not refresh any target. Verify target evidence and freshness in Foundation.',
+            ''
+          ];
+          fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, lines.join('\n'));
+          NODE
