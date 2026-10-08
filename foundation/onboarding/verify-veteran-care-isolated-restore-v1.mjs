@@ -14,7 +14,8 @@ export function assertVeteranCareRestoreDatabaseName(name){
   return name;
 }
 const tables=['checkpoints','permissions','records','retry_bindings','revocations','tasks'];
-export async function runVeteranCareIsolatedRestore(){
+export async function runVeteranCareIsolatedRestore({verifyRestoredDatabase}={}){
+  if(verifyRestoredDatabase!==undefined&&typeof verifyRestoredDatabase!=='function')throw new TypeError('trusted isolated proof callback required');
   assertVeteranCareRestoreCIEnvironment(process.env);
   const suffix=randomBytes(12).toString('hex'),source=assertVeteranCareRestoreDatabaseName('vc_restore_source_'+suffix),target=assertVeteranCareRestoreDatabaseName('vc_restore_target_'+suffix),role='vc_restore_reader_'+suffix;
   const childEnv={PATH:process.env.PATH,PGHOST:'127.0.0.1',PGPORT:'5432',PGUSER:'postgres',PGPASSWORD:'postgres',PGDATABASE:'postgres',LC_ALL:'C'};
@@ -55,10 +56,13 @@ export async function runVeteranCareIsolatedRestore(){
       if(result.split('\n').at(-1)!==String(expected)+':true')throw Error();
     }
     if(await sql(target,"select count(*) from vc_restore.tasks where status='paused'")!=='1')throw Error();
+    const continuity=verifyRestoredDatabase?await verifyRestoredDatabase(Object.freeze({source,target,readerRole:role,sql})):null;
+    if(verifyRestoredDatabase&&continuity?.revocationContinuityVerified!==true)throw Error();
     report={contract:'shine-foundation/veteran-care-isolated-restore-proof-v1',status:'passed',evidenceMode:'synthetic-postgres-ci',databaseRestoreExecuted:true,
       fixtureSha256:hash(fixture),archiveSha256:archiveHash,schemaSha256:schemaHash,constraintsSha256:constraintsHash,tableDigests,
       schemaAndDataMatched:true,constraintsMatched:true,rowLevelSecurityVerified:true,leastPrivilegeVerified:true,crossOwnerReadBlocked:true,pausedTaskPreserved:true,
-      productionBackupVerified:false,productionRestorePerformed:false,revocationContinuityVerified:false,restoreAuthorityProvided:false};
+      productionBackupVerified:false,productionRestorePerformed:false,revocationContinuityVerified:continuity!==null,restoreAuthorityProvided:false,
+      ...(continuity?{revocationContinuity:continuity}:{})};
   }catch{error=new Error('isolated synthetic restore drill failed');}
   // Only databases created by this invocation may be removed. Never accept a
   // caller database name, remote connection string or backup archive.
