@@ -8,8 +8,10 @@ const TOKEN_AUDIENCE='authenticated';
 // Server-only Supabase Auth instance for the dedicated VC project. getClaims
 // must verify the explicit JWT using the supported SDK; decode/getSession are
 // not substitutes. The consumer owns client setup and live acceptance.
-export function createVeteranCareAudienceIdentityVerifier({auth,...options}={}){
+export function createVeteranCareAudienceIdentityVerifier({auth,verifyCurrentSession,...options}={}){
   if(typeof auth?.getClaims!=='function') throw new TypeError('verified token claims authority is required');
+  if(verifyCurrentSession!==undefined&&typeof verifyCurrentSession!=='function')
+    throw new TypeError('session authority must be a function');
   const getClaims=auth.getClaims.bind(auth);
   const verifyIdentity=createVeteranCareBoundIdentityVerifier(options);
   const appId=options.appId;
@@ -29,6 +31,15 @@ export function createVeteranCareAudienceIdentityVerifier({auth,...options}={}){
         return deny('vc-token-audience-mismatch');
       if(claims.role!=='authenticated'||claims.sub!==identity.identity.authSubject)
         return deny('vc-token-identity-mismatch');
+      if(verifyCurrentSession){
+        const session=await verifyCurrentSession({
+          sessionProof:Object.freeze({sessionId:claims.session_id,expiresAt:claims.exp,notBefore:claims.nbf}),
+          identity:Object.freeze({...identity.identity}),appId,issuer:VETERAN_CARE_ISSUER
+        });
+        if(session?.status!=='current') return session?.status==='unavailable'
+          ? {status:'unavailable',reasonCode:'vc-session-authority-unavailable'}
+          : deny('vc-session-not-current');
+      }
       // Server context only, not a portable credential or a resource grant.
       return {...identity,audience:{appId,issuer:VETERAN_CARE_ISSUER,tokenAudience:TOKEN_AUDIENCE}};
     }catch{return unavailable();}
