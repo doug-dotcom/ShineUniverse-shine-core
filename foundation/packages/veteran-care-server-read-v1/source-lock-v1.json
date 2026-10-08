@@ -1,0 +1,82 @@
+{
+  "contract": "shine-foundation/vc-server-package-source-lock-v1",
+  "schemaVersion": "1.0.0",
+  "sourceCommit": "1b8098d9580f6633677ef0924690f946840a044a",
+  "files": [
+    {
+      "path": "foundation/onboarding/veteran-care-audience-v1.mjs",
+      "sha256": "604c1aa484cdb7b2162f284f40e6a00af49e22d13aec3832dfaf61523b8cb4c9",
+      "gitBlobSha": "98a38fd943908d9b4b2fc50194af75b7a3bfdace"
+    },
+    {
+      "path": "foundation/onboarding/veteran-care-capability-health-v1.mjs",
+      "sha256": "33cc87a7f335e78c57c70c038e5320e01489e2342f80b7dac28a14bed8c2db06",
+      "gitBlobSha": "56ef4e2bc7515f112b12ce491e6d272c2701478c"
+    },
+    {
+      "path": "foundation/onboarding/veteran-care-credential-reference-v1.mjs",
+      "sha256": "e2ea682c5f0320d8a88303484dcbf733a449e12f361f99ee930e5eaa589cd99c",
+      "gitBlobSha": "7af9665335e5555d9360119c9e2a7e0bdae42369"
+    },
+    {
+      "path": "foundation/onboarding/veteran-care-identity-v1.mjs",
+      "sha256": "888efc9848eca8fed01f73edd48cf83f7718325c4b71440ef70974c056c20506",
+      "gitBlobSha": "03111f01eff6b829ef04abccee2c7c1b9076323a"
+    },
+    {
+      "path": "foundation/onboarding/veteran-care-l-binding-v1.mjs",
+      "sha256": "6eecb40bb3700d472b59dded374f7798294f760be810aac54ce6f6f6716dc3b0",
+      "gitBlobSha": "f7d1e73c5dcad19778a0ca68314a13a7aff5f06e"
+    },
+    {
+      "path": "foundation/onboarding/veteran-care-memory-read-v1.mjs",
+      "sha256": "327f76aae0d9c75fcbba5c3555d0b6d41aa35df2a84a85856a8090282ccfd33e",
+      "gitBlobSha": "6535a51411075d150742759dd8899e2a1ac010ef"
+    },
+    {
+      "path": "foundation/onboarding/veteran-care-memory-scope-v1.mjs",
+      "sha256": "977dccec59e1e9458ee651842450732902e07c7a8f39d047e62c66bd4f6a4665",
+      "gitBlobSha": "96d1eba19250ae2ce7a92a4f6a4e36869387d789"
+    },
+    {
+      "path": "foundation/onboarding/veteran-care-project-boundary-v1.mjs",
+      "sha256": "a37c104b6e257d8df09455c845adf9e3a43f749c311238014922e4efa9576367",
+      "gitBlobSha": "8b289a18067fff48a584a5d08a5178323cad5986"
+    },
+    {
+      "path": "foundation/onboarding/veteran-care-result-audience-v1.mjs",
+      "sha256": "d3b76a7d57b502159013dce7cfe211ca7af30dcac1008199978bef8c25de101d",
+      "gitBlobSha": "988de8f48d80c346a2ea5f6d60df2949c69a36f3"
+    },
+    {
+      "path": "foundation/onboarding/veteran-care-resume-recheck-v1.mjs",
+      "sha256": "792922b3f82931b4996487c12c8b445ee45a49d2ff924bfbc371ba3a1c1d4a42",
+      "gitBlobSha": "2870b317e4b2f5ad9d946388dcb9cc9e9c5764e9"
+    },
+    {
+      "path": "foundation/onboarding/veteran-care-retry-identity-v1.mjs",
+      "sha256": "7000acb7987b884da2604e72a5aa5d9e8f5389df0923cc3c0bbcea69d01f658a",
+      "gitBlobSha": "435e4e055282c15d20ec04b68be149747cc18664"
+    },
+    {
+      "path": "foundation/onboarding/veteran-care-server-read-v1.mjs",
+      "sha256": "b3d5ac6c2f153829bd3d05df5021050752c54bf9699026d8c0191ea1a6eb6307",
+      "gitBlobSha": "33cfc615c4fb6f871a0665679acc5656e4b16607"
+    },
+    {
+      "path": "foundation/onboarding/veteran-care-session-v1.mjs",
+      "sha256": "28f3413298c7909505819b44f1bc8e2230f4c05b189d712d996d0362d9f2c068",
+      "gitBlobSha": "07e3ebca127225669b9b2d72a06e65ad684902d4"
+    },
+    {
+      "path": "foundation/onboarding/veteran-care-task-authority-v1.mjs",
+      "sha256": "c0dc6e0f37c6f470efc35025ceda14d02f55d4e025a429e9d5c6e4593bb4b76c",
+      "gitBlobSha": "64d499902e350e9b2bc7df014ce74a7fbbab2893"
+    },
+    {
+      "path": "foundation/runtime/supabase-runtime-adapters-v1.mjs",
+      "sha256": "350fd5565593960cfbd3328cbb1af4fc888a14b94689697a0e4b772b2ebdc3f3",
+      "gitBlobSha": "f38c9d5f35cd523389f679516a474bfd6f393705"
+    }
+  ]
+}
