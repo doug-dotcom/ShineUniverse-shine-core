@@ -1,0 +1,158 @@
+{
+  "contract": "shine-foundation/veteran-care-ai-l-proof-v1",
+  "schemaVersion": "1.0.0",
+  "status": "passed",
+  "evidenceMode": "offline-synthetic",
+  "liveIntegrationVerified": false,
+  "realCredentialsUsed": false,
+  "modelCallsPerformed": 0,
+  "externalTransportPerformed": false,
+  "sourceManifest": [
+    {
+      "path": "veteran-care-ai-caller-v1.mjs",
+      "sha256": "a6edbe2aa2c2389d881bfbe53b7d319eb6c90a5641facf53b3a425ef01226264"
+    },
+    {
+      "path": "veteran-care-ai-decision-v1.mjs",
+      "sha256": "848f8b6be0e1f9a138310e7fdde90725f23305342cfa93a188978a794df6b935"
+    },
+    {
+      "path": "veteran-care-private-handle-v1.mjs",
+      "sha256": "e140077322beb13b8ee64f160c37c4b262f447495d856f7983e34e61e1194ec1"
+    },
+    {
+      "path": "veteran-care-l-binding-v1.mjs",
+      "sha256": "6eecb40bb3700d472b59dded374f7798294f760be810aac54ce6f6f6716dc3b0"
+    },
+    {
+      "path": "veteran-care-memory-scope-v1.mjs",
+      "sha256": "977dccec59e1e9458ee651842450732902e07c7a8f39d047e62c66bd4f6a4665"
+    },
+    {
+      "path": "veteran-care-memory-read-v1.mjs",
+      "sha256": "327f76aae0d9c75fcbba5c3555d0b6d41aa35df2a84a85856a8090282ccfd33e"
+    },
+    {
+      "path": "veteran-care-ai-tool-v1.mjs",
+      "sha256": "76bfde14bbd50883e7ecf4228d625907b616b10f078a4e3b6a330acb5be6a552"
+    },
+    {
+      "path": "veteran-care-result-audience-v1.mjs",
+      "sha256": "d3b76a7d57b502159013dce7cfe211ca7af30dcac1008199978bef8c25de101d"
+    },
+    {
+      "path": "veteran-care-task-authority-v1.mjs",
+      "sha256": "c0dc6e0f37c6f470efc35025ceda14d02f55d4e025a429e9d5c6e4593bb4b76c"
+    }
+  ],
+  "checksPassed": 25,
+  "checksTotal": 25,
+  "results": [
+    {
+      "scenario": "verified AI caller and exact record tool scope",
+      "outcome": "tool-scope-approved"
+    },
+    {
+      "scenario": "scope metadata does not invoke AI tool",
+      "outcome": false
+    },
+    {
+      "scenario": "scope metadata does not permit model disclosure",
+      "outcome": false
+    },
+    {
+      "scenario": "exact record produces opaque private handle",
+      "outcome": "handle-ready"
+    },
+    {
+      "scenario": "fresh caller and grant resolve private handle",
+      "outcome": "handle-resolved"
+    },
+    {
+      "scenario": "separate L consent and running task yield internal result",
+      "outcome": "task-bound-result"
+    },
+    {
+      "scenario": "record and memory flow share verified actor",
+      "outcome": true
+    },
+    {
+      "scenario": "record and memory preparation remain exact",
+      "outcome": true
+    },
+    {
+      "scenario": "private result stays within VC server audience",
+      "outcome": "vc-trusted-server"
+    },
+    {
+      "scenario": "private result is not transported",
+      "outcome": false
+    },
+    {
+      "scenario": "unverified AI proof withholds tool scope",
+      "outcome": true
+    },
+    {
+      "scenario": "model-selected broader tool refused",
+      "outcome": true
+    },
+    {
+      "scenario": "disabled AI tool policy withholds scope",
+      "outcome": true
+    },
+    {
+      "scenario": "record consent cannot substitute for memory consent",
+      "outcome": true
+    },
+    {
+      "scenario": "missing memory consent performs no read",
+      "outcome": true
+    },
+    {
+      "scenario": "different L user cannot borrow VC identity",
+      "outcome": true
+    },
+    {
+      "scenario": "different L user performs no read",
+      "outcome": true
+    },
+    {
+      "scenario": "AI audience cannot receive private L result",
+      "outcome": true
+    },
+    {
+      "scenario": "cancellation during selected read suppresses result",
+      "outcome": false
+    },
+    {
+      "scenario": "retry of cancelled task remains denied",
+      "outcome": true
+    },
+    {
+      "scenario": "cancelled retry performs no further read",
+      "outcome": true
+    },
+    {
+      "scenario": "record withdrawal invalidates prior opaque handle",
+      "outcome": true
+    },
+    {
+      "scenario": "record withdrawal defeats fresh AI tool scope",
+      "outcome": true
+    },
+    {
+      "scenario": "memory withdrawal defeats freshly checked task result",
+      "outcome": true
+    },
+    {
+      "scenario": "handle lifetime cannot outlive its own deadline",
+      "outcome": true
+    }
+  ],
+  "liveOpen": [
+    "authenticated AI caller/proposal verification and tool policy",
+    "protected L user/link/consent/read adapters",
+    "recipient transport and durable task lifecycle",
+    "paired consumer execution and disclosure evidence"
+  ]
+}
