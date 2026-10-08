@@ -1,0 +1,39 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {createVeteranCareLAppBinder as create} from './veteran-care-l-binding-v1.mjs';
+import {VETERAN_CARE_ISSUER as issuer} from './veteran-care-identity-v1.mjs';
+import {VETERAN_CARE_PROJECT_URL as url} from './veteran-care-project-boundary-v1.mjs';
+const start='1970-01-01T00:16:40.000Z',end='1970-01-01T00:33:20.000Z';
+const timed=()=>({notBefore:start,expiresAt:end,consentWindow:{startsAt:start,expiresAt:end}});
+const appId='shine.veteran-care',recordId='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',preparationId='bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',grantId='cccccccc-cccc-4ccc-8ccc-cccccccccccc';
+const shineId='11111111-1111-4111-8111-111111111111',authSubject='22222222-2222-4222-8222-222222222222',sessionId='33333333-3333-4333-8333-333333333333';
+const purpose='veteran-care.appointment-preparation',scope='veteran-care.record.read',resourceCategory='veteran-care.record';
+const grant=()=>({grantId,appId,ownerShineId:shineId,scope,purpose,status:'active',resourceSelector:{resourceId:recordId,resourceVersion:3},purposeBinding:{kind:'appointment-preparation',preparationId},...timed()});
+const input=()=>({authContext:{appToken:'synthetic',jwt:'e30.'+Buffer.from(JSON.stringify({iss:issuer})).toString('base64url')+'.c2ln'},request:{capabilityId:'veteran-care.selected_record_read',input:{recordId,recordVersion:3}},purposeContext:{preparationId}});
+const stamp=(revision=1)=>({appId,ownerShineId:shineId,revision});
+const context=()=>({complete:true,appManifest:{appId,foundation:{requestedScopes:[{scope,purpose,resourceCategory}]}},grants:[grant()],defenceDecision:'allow',permissionSnapshot:stamp()});
+function fixture({snapshot=context(),current=stamp(),lookup,options={}}={}){
+  const calls=[];
+  const evaluate=create({bindingClock:()=>1500000,verifyIntegrationClient:async()=>({clientId:'shine.companion',clientKind:'first-party-companion'}),verifyCompanionUser:async()=>({verified:true,clientId:'shine.companion',shineId}),getCurrentVCCompanionLink:async q=>{calls.push(q);return link();},appId,providerId:'supabase:veteran-care',clock:()=>1500000,permissionClock:()=>1500000,idFactory:()=>grantId,
+    configuration:{mode:'veteran_care',issuer,authProjectUrl:url,databaseProjectUrl:url,storageProjectUrl:url},
+    auth:{getClaims:async()=>({data:{claims:{iss:issuer,aud:'authenticated',role:'authenticated',sub:authSubject,session_id:sessionId,exp:3000}}})},
+    verifyAppCaller:async()=>({appId}),verifyIdentity:async()=>({shineId,authSubject,providerId:'supabase:veteran-care'}),
+    getSessionState:async()=>({status:'active',sessionId,authSubject,issuer,expiresAt:null}),
+    getResourceDescriptor:async()=>({resourceId:recordId,resourceVersion:3,ownerShineId:shineId,category:resourceCategory}),
+    getPreparationContext:async()=>({status:'available',preparationId,ownerShineId:shineId,purpose}),
+    getPermissionContext:async()=>snapshot,
+    getCurrentPermissionRevision:async q=>{calls.push(q);return lookup?lookup(q):current;},...options});
+  return {evaluate,calls};
+}
+const link=()=>({foundationAppId:appId,clientId:'shine.companion',ownerShineId:shineId,linkId:sessionId,status:'active',revision:1,validUntil:end});
+const joined=()=>({authContext:input().authContext,companionAuthContext:{clientToken:'synthetic-client',userToken:'synthetic-user'}});
+test('verified L app and matching user produce current frozen link metadata only',async()=>{const f=fixture(),r=await f.evaluate(joined());assert.equal(r.status,'l-app-bound');assert.equal(r.binding.companionClientId,'shine.companion');assert.equal(r.binding.actorShineId,shineId);assert.equal(r.binding.linkId,sessionId);assert.equal(r.binding.linkRevision,1);assert.ok(Object.isFrozen(r.binding));assert.equal(r.executionPermitted,false);assert.equal(r.memoryReadPermitted,false);assert.equal(r.memoryWritePermitted,false);assert.equal(JSON.stringify(r).includes('synthetic'),false);assert.deepEqual(f.calls,[{foundationAppId:appId,clientId:'shine.companion',actorShineId:shineId}]);});
+test('another app or client kind cannot borrow L identity',async()=>{for(const client of [null,{clientId:'shine.travel',clientKind:'first-party-companion'},{clientId:'shine.companion',clientKind:'third-party'}]){let users=0;const r=await fixture({options:{verifyIntegrationClient:async()=>client,verifyCompanionUser:async()=>{users++;}}}).evaluate(joined());assert.equal(r.status,'denied');assert.equal(users,0);}});
+test('app credentials without verified same-user identity cannot reach link lookup',async()=>{for(const user of [{verified:false,clientId:'shine.companion',shineId},{verified:true,clientId:'shine.travel',shineId},{verified:true,clientId:'shine.companion',shineId:sessionId}]){const f=fixture({options:{verifyCompanionUser:async()=>user}});assert.equal((await f.evaluate(joined())).binding,undefined);assert.equal(f.calls.length,0);}});
+test('missing revoked wrong-owner wrong-app wrong-client or malformed link denies',async()=>{for(const change of [r=>r.status='revoked',r=>r.ownerShineId=recordId,r=>r.foundationAppId='shine.travel',r=>r.clientId='shine.travel',r=>r.revision=0,r=>r.linkId='all',r=>r.validUntil='invalid']){const row=link();change(row);assert.equal((await fixture({options:{getCurrentVCCompanionLink:async()=>row}}).evaluate(joined())).binding,undefined);}});
+test('every binding refresh consults current link and refuses later withdrawal',async()=>{let active=true,revision=1;const f=fixture({options:{getCurrentVCCompanionLink:async()=>({...link(),status:active?'active':'revoked',revision})}});assert.equal((await f.evaluate(joined())).binding.linkRevision,1);revision=2;assert.equal((await f.evaluate(joined())).binding.linkRevision,2);active=false;assert.equal((await f.evaluate(joined())).binding,undefined);});
+test('expiry during asynchronous lookup and regressing clocks withhold binding',async()=>{for(const late of [2000000,1499999,NaN]){let clock=1500000;const f=fixture({options:{bindingClock:()=>clock,getCurrentVCCompanionLink:async()=>{clock=late;return link();}}});assert.equal((await f.evaluate(joined())).binding,undefined);}});
+test('all dependency outages fail closed without returning credential details',async()=>{for(const key of ['verifyIntegrationClient','verifyCompanionUser','getCurrentVCCompanionLink']){const r=await fixture({options:{[key]:async()=>{throw Error('synthetic-user');}}}).evaluate(joined());assert.equal(r.status,'unavailable');assert.equal(r.binding,undefined);assert.equal(JSON.stringify(r).includes('synthetic-user'),false);}});
+test('extra owner memory grant fields and credential accessors cannot select authority',async()=>{for(const change of [q=>q.ownerShineId=shineId,q=>q.memoryScope='all',q=>q.companionAuthContext.clientId='shine.companion',q=>Object.defineProperty(q.companionAuthContext,'userToken',{get(){throw Error('getter');}})]){const q=joined();change(q);assert.equal((await fixture().evaluate(q)).reasonCode,'vc-l-binding-input-invalid');}});
+test('credential mutation cannot change the captured L principal verification',async()=>{const q=joined();let seen;const f=fixture({options:{verifyIntegrationClient:async({authContext})=>{seen=authContext;return {clientId:'shine.companion',clientKind:'first-party-companion'};}}});const pending=f.evaluate(q);q.companionAuthContext.userToken='changed';q.authContext.jwt='changed';assert.equal((await pending).status,'l-app-bound');assert.equal(seen.userToken,'synthetic-user');assert.ok(Object.isFrozen(seen));});
+test('VC session failure stops all L lookups and missing link cannot bind',async()=>{let calls=0;const f=fixture({options:{getSessionState:async()=>null,verifyIntegrationClient:async()=>{calls++;}}});assert.equal((await f.evaluate(joined())).binding,undefined);assert.equal(calls,0);assert.equal((await fixture({options:{getCurrentVCCompanionLink:async()=>null}}).evaluate(joined())).binding,undefined);});
