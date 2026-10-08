@@ -41,6 +41,7 @@ jobs:
       - run: node --test foundation/runtime/supabase-runtime-adapters-v1.test.mjs foundation/onboarding/veteran-care-identity-v1.test.mjs foundation/onboarding/veteran-care-capabilities-v1.test.mjs foundation/onboarding/veteran-care-project-boundary-v1.test.mjs foundation/onboarding/veteran-care-audience-v1.test.mjs foundation/onboarding/veteran-care-session-v1.test.mjs foundation/onboarding/veteran-care-resource-scope-v1.test.mjs foundation/onboarding/veteran-care-permission-v1.test.mjs foundation/onboarding/veteran-care-purpose-v1.test.mjs foundation/onboarding/veteran-care-grant-expiry-v1.test.mjs
       - run: node --test foundation/onboarding/connection-spec-v1.test.mjs foundation/onboarding/foundation-app-client-v1.test.mjs foundation/onboarding/identity-claim-client-v1.test.mjs foundation/onboarding/grant-consent-client-v1.test.mjs
       - run: node foundation/onboarding/verify-examples-v1.mjs
+      - run: node foundation/onboarding/verify-veteran-care-access-v1.mjs
       - run: node --test foundation/onboarding/foundation-access-request-v2.test.mjs
       - uses: denoland/setup-deno@v2
         with:
