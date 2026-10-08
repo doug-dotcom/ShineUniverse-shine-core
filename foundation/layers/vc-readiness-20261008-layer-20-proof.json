@@ -1,0 +1,71 @@
+{
+  "contract": "shine-foundation/veteran-care-revocation-proof-v1",
+  "evidence": "offline-synthetic",
+  "passed": 15,
+  "consumerScope": "two isolated VC evaluator instances; one app-scoped feed",
+  "hostedAuthenticationVerified": false,
+  "durableDatabaseVerified": false,
+  "productionDisclosureVerified": false,
+  "results": [
+    {
+      "scenario": "consumer A initially allowed",
+      "outcome": "allow"
+    },
+    {
+      "scenario": "consumer B initially allowed",
+      "outcome": "allow"
+    },
+    {
+      "scenario": "withdrawal recorded through real producer",
+      "outcome": "revoked"
+    },
+    {
+      "scenario": "outbox does not imply consumer enforcement",
+      "outcome": false
+    },
+    {
+      "scenario": "recorded withdrawal before delivery",
+      "outcome": "withdrawal-recorded"
+    },
+    {
+      "scenario": "stale cached consumer A refuses after withdrawal",
+      "outcome": "vc-permission-snapshot-stale"
+    },
+    {
+      "scenario": "fresh consumer B refuses revoked grant",
+      "outcome": "vc-permission-missing"
+    },
+    {
+      "scenario": "app feed delivery recorded",
+      "outcome": "ok"
+    },
+    {
+      "scenario": "delivery before acknowledgement",
+      "outcome": "delivered"
+    },
+    {
+      "scenario": "real acknowledgement producer confirms",
+      "outcome": "acknowledged"
+    },
+    {
+      "scenario": "exact withdrawal delivery ack chain verified",
+      "outcome": "acknowledged"
+    },
+    {
+      "scenario": "acknowledgement does not imply private enforcement",
+      "outcome": false
+    },
+    {
+      "scenario": "consumer A remains blocked after acknowledgement",
+      "outcome": "deny"
+    },
+    {
+      "scenario": "consumer B remains blocked after acknowledgement",
+      "outcome": "deny"
+    },
+    {
+      "scenario": "wrong delivery acknowledgement rejected",
+      "outcome": "unavailable"
+    }
+  ]
+}
