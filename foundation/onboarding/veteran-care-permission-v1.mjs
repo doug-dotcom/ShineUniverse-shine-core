@@ -10,13 +10,15 @@ function plainData(value){
 // Current server authority only: no caller grants, no execution or ticket minting.
 // Generic grant semantics are reused; this exact VC path adds explicit Defence
 // allow and a single unambiguous exact-version grant requirement.
-export function createVeteranCarePermissionEvaluator({getPermissionContext,permissionClock=()=>Date.now(),resolvePurposeBinding,evaluateGrantWindow,...options}={}){
+export function createVeteranCarePermissionEvaluator({getPermissionContext,permissionClock=()=>Date.now(),resolvePurposeBinding,evaluateGrantWindow,verifyPermissionFreshness,...options}={}){
   if(typeof getPermissionContext!=='function'||typeof permissionClock!=='function')
     throw new TypeError('current permission authority and server clock are required');
   if(resolvePurposeBinding!==undefined&&typeof resolvePurposeBinding!=='function')
     throw new TypeError('purpose binding authority must be a function');
   if(evaluateGrantWindow!==undefined&&typeof evaluateGrantWindow!=='function')
     throw new TypeError('grant window policy must be a function');
+  if(verifyPermissionFreshness!==undefined&&typeof verifyPermissionFreshness!=='function')
+    throw new TypeError('permission freshness authority must be a function');
   const buildScope=createVeteranCareResourceScopeBuilder(options);
   return async function evaluate(input){
     const scoped=await buildScope(input);
@@ -33,9 +35,15 @@ export function createVeteranCarePermissionEvaluator({getPermissionContext,permi
         request=Object.freeze({...request,contract:'shine-foundation/veteran-care-purpose-request-v1',
           purposeBinding:Object.freeze({kind:binding.kind,preparationId:binding.preparationId.toLowerCase()})});
       }
-      const context=await getPermissionContext(Object.freeze({request}));
+      let context=await getPermissionContext(Object.freeze({request}));
       if(!plainData(context)||context.complete!==true||!plainData(context.appManifest)||!Array.isArray(context.grants)||context.grants.length>100)
         return refuse('denied','vc-permission-context-invalid');
+      if(verifyPermissionFreshness){
+        const fresh=await verifyPermissionFreshness({request,context});
+        if(fresh?.status==='stale')return refuse('denied','vc-permission-snapshot-stale');
+        if(fresh?.status!=='current'||!plainData(fresh.context))return refuse('unavailable','vc-permission-freshness-unavailable');
+        context=fresh.context;
+      }
       if(context.defenceDecision!=='allow') return refuse('denied','vc-defence-not-allowed');
       const grants=Array.from(context.grants);
       const ids=new Set();
