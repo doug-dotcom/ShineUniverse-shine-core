@@ -10,15 +10,27 @@ function plainData(value){
 // Current server authority only: no caller grants, no execution or ticket minting.
 // Generic grant semantics are reused; this exact VC path adds explicit Defence
 // allow and a single unambiguous exact-version grant requirement.
-export function createVeteranCarePermissionEvaluator({getPermissionContext,permissionClock=()=>Date.now(),...options}={}){
+export function createVeteranCarePermissionEvaluator({getPermissionContext,permissionClock=()=>Date.now(),resolvePurposeBinding,...options}={}){
   if(typeof getPermissionContext!=='function'||typeof permissionClock!=='function')
     throw new TypeError('current permission authority and server clock are required');
+  if(resolvePurposeBinding!==undefined&&typeof resolvePurposeBinding!=='function')
+    throw new TypeError('purpose binding authority must be a function');
   const buildScope=createVeteranCareResourceScopeBuilder(options);
   return async function evaluate(input){
     const scoped=await buildScope(input);
     if(scoped.status!=='scope-ready') return refuse(scoped.status,scoped.reasonCode);
-    const request=scoped.request;
+    let request=scoped.request;
     try{
+      if(resolvePurposeBinding){
+        const resolved=await resolvePurposeBinding({request,purposeContext:input?.purposeContext});
+        if(resolved?.status!=='bound') return refuse(resolved?.status==='unavailable'?'unavailable':'denied','vc-purpose-binding-unverified');
+        const binding=resolved.binding;
+        if(!plainData(binding)||Reflect.ownKeys(binding).length!==2||binding.kind!=='appointment-preparation'||
+          typeof binding.preparationId!=='string'||!UUID.test(binding.preparationId))
+          return refuse('denied','vc-purpose-binding-unverified');
+        request=Object.freeze({...request,contract:'shine-foundation/veteran-care-purpose-request-v1',
+          purposeBinding:Object.freeze({kind:binding.kind,preparationId:binding.preparationId.toLowerCase()})});
+      }
       const context=await getPermissionContext(Object.freeze({request}));
       if(!plainData(context)||context.complete!==true||!plainData(context.appManifest)||!Array.isArray(context.grants)||context.grants.length>100)
         return refuse('denied','vc-permission-context-invalid');
@@ -41,6 +53,11 @@ export function createVeteranCarePermissionEvaluator({getPermissionContext,permi
       const matches=[];
       for(const grant of grants){
         const selector=grant.resourceSelector;
+        if(request.purposeBinding){
+          const binding=grant.purposeBinding;
+          if(!plainData(binding)||Reflect.ownKeys(binding).length!==2||binding.kind!==request.purposeBinding.kind||
+            typeof binding.preparationId!=='string'||binding.preparationId.toLowerCase()!==request.purposeBinding.preparationId) continue;
+        }
         // Category-wide or mixed selectors cannot substitute for exact consent.
         if(Reflect.ownKeys(selector).length!==2||typeof selector.resourceId!=='string'||
           !UUID.test(selector.resourceId)||selector.resourceId.toLowerCase()!==request.resourceId||
