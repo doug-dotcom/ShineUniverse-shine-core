@@ -1,0 +1,106 @@
+{
+  "contract": "shine-foundation/vc-live-consumer-wiring-v1",
+  "schemaVersion": "1.0.0",
+  "sprint": "Foundation Live Integration",
+  "layer": 1,
+  "totalLayers": 20,
+  "baselineCommit": "bbe104e5929edce61ef690d02b7d4bc71df80bc4",
+  "entryPoint": {
+    "path": "foundation/onboarding/veteran-care-server-read-v1.mjs",
+    "blobSha": "33cfc615c4fb6f871a0665679acc5656e4b16607",
+    "export": "createVeteranCareServerReadEntryPoint",
+    "requiredAdaptersExport": "VETERAN_CARE_SERVER_READ_ADAPTERS",
+    "requiredAdapterCount": 19
+  },
+  "compositionOwner": "Foundation",
+  "consumerMountOwner": "VC Integrations / Security",
+  "ownerAcknowledgementsVerified": false,
+  "consumerRepository": null,
+  "consumerBranch": null,
+  "consumerMountPath": null,
+  "consumerReleaseCommit": null,
+  "liveIntegrationVerified": false,
+  "groups": [
+    {
+      "owner": "VC Integrations / Security",
+      "callbacks": [
+        "verifyAppCaller",
+        "verifyIdentity",
+        "getClaims",
+        "getSessionState",
+        "verifyResultRecipient",
+        "getCurrentVCCapabilityHealth"
+      ],
+      "evidence": "Current registry/issuer/audience and independent caller/session/recipient proof; protected fresh health collector. Rejection of wrong owner/audience, revoked session and stale health."
+    },
+    {
+      "owner": "L / Companion",
+      "callbacks": [
+        "verifyIntegrationClient",
+        "verifyCompanionUser",
+        "getCurrentVCCompanionLink",
+        "getMemoryDescriptor",
+        "getPreparationContext",
+        "getMemoryPermissionContext",
+        "getCurrentMemoryPermissionRevision",
+        "readSelectedMemory"
+      ],
+      "evidence": "Independent L client/user proof, current same-owner link, selected version/category/preparation and separate current consent/revocation authority; protected exact read and in-flight withdrawal rejection."
+    },
+    {
+      "owner": "VC Orchestration",
+      "callbacks": [
+        "getCurrentVCTask",
+        "getCurrentResumeCheckpoint",
+        "getExistingRetryIdentity"
+      ],
+      "evidence": "Protected durable task/checkpoint/retry stores; current task cancellation and fresh resume checks. Saved permission never becomes authority."
+    },
+    {
+      "owner": "Credential custody / Security",
+      "callbacks": [
+        "getCurrentCredentialReference",
+        "resolveCredentialReference"
+      ],
+      "evidence": "Protected fresh reference and vault resolution; independent rotation/revocation checks. No credentials in checkpoint, logs or response."
+    }
+  ],
+  "requestKeys": [
+    "checkpointId",
+    "credentialReferenceId",
+    "authContext"
+  ],
+  "authContextKeys": [
+    "appToken",
+    "jwt"
+  ],
+  "configurationKeys": [
+    "mode",
+    "issuer",
+    "authProjectUrl",
+    "databaseProjectUrl",
+    "storageProjectUrl"
+  ],
+  "fixedAppId": "shine.veteran-care",
+  "fixedProviderId": "supabase:veteran-care",
+  "blockedByDefault": true,
+  "authorityProvided": false,
+  "privateResultAudience": "vc-trusted-server",
+  "modelDisclosurePermitted": false,
+  "memoryWritePermitted": false,
+  "transportPermitted": false,
+  "sourceContractPolicy": "Callback query/return shapes are inherited unchanged from the pinned producer source and transitive modules. This manifest assigns composition responsibility; it creates no alternate permission authority.",
+  "acceptanceEvidenceRequired": [
+    "exact consumer repository, branch, mount path and release commit",
+    "independent protected adapter implementation identities and evidence for every callback",
+    "current approved configuration and registration, beyond string equality",
+    "synthetic live wrong-owner/audience/revocation/cancellation/rotation/outage journeys",
+    "exact deployed release and explicit acceptance"
+  ],
+  "missingDependencies": [
+    "consumer mount identity not inspected",
+    "protected adapter implementations not inspected",
+    "owner acknowledgements not obtained",
+    "joined live acceptance not performed"
+  ]
+}
