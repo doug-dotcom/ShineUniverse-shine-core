@@ -1,0 +1,83 @@
+{
+  "contract": "shine-foundation/veteran-care-recovery-source-inventory-v1",
+  "date": "2026-10-08",
+  "foundationAppId": "shine.veteran-care",
+  "sourceBaseline": "809dfc4e540cc7ae485f5c3851b13161e10fd61e",
+  "evidenceKind": "source-inventory",
+  "backupCoverageVerified": false,
+  "restoreVerified": false,
+  "assets": [
+    {
+      "assetId": "release-source",
+      "owner": "Foundation",
+      "sourceBoundary": "foundation-repository",
+      "recoveryMethod": "restore",
+      "evidenceStatus": "not-inspected",
+      "maxBackupAgeMs": null
+    },
+    {
+      "assetId": "database-schema",
+      "owner": "VC Integrations",
+      "sourceBoundary": "veteran-care-project",
+      "recoveryMethod": "restore",
+      "evidenceStatus": "not-inspected",
+      "maxBackupAgeMs": null
+    },
+    {
+      "assetId": "database-records",
+      "owner": "VC Integrations",
+      "sourceBoundary": "veteran-care-project",
+      "recoveryMethod": "restore",
+      "evidenceStatus": "not-inspected",
+      "maxBackupAgeMs": null
+    },
+    {
+      "assetId": "revocation-ledger",
+      "owner": "Foundation/Defence",
+      "sourceBoundary": "foundation-authority",
+      "recoveryMethod": "reconcile",
+      "evidenceStatus": "not-inspected",
+      "maxBackupAgeMs": null
+    },
+    {
+      "assetId": "storage-objects",
+      "owner": "VC Integrations",
+      "sourceBoundary": "veteran-care-storage",
+      "recoveryMethod": "restore",
+      "evidenceStatus": "not-inspected",
+      "maxBackupAgeMs": null
+    },
+    {
+      "assetId": "identity-configuration",
+      "owner": "VC Integrations/Security",
+      "sourceBoundary": "veteran-care-auth",
+      "recoveryMethod": "rebuild",
+      "evidenceStatus": "not-inspected",
+      "maxBackupAgeMs": null
+    },
+    {
+      "assetId": "retry-checkpoints",
+      "owner": "VC Orchestration",
+      "sourceBoundary": "veteran-care-orchestration",
+      "recoveryMethod": "reconcile",
+      "evidenceStatus": "not-inspected",
+      "maxBackupAgeMs": null
+    },
+    {
+      "assetId": "credential-custody",
+      "owner": "VC Integrations/Security",
+      "sourceBoundary": "protected-credential-vault",
+      "recoveryMethod": "reissue",
+      "evidenceStatus": "not-inspected",
+      "maxBackupAgeMs": null
+    },
+    {
+      "assetId": "companion-memory",
+      "owner": "L",
+      "sourceBoundary": "companion-project",
+      "recoveryMethod": "restore",
+      "evidenceStatus": "not-inspected",
+      "maxBackupAgeMs": null
+    }
+  ]
+}
