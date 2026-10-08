@@ -10,11 +10,13 @@ function plainData(value){
 // Current server authority only: no caller grants, no execution or ticket minting.
 // Generic grant semantics are reused; this exact VC path adds explicit Defence
 // allow and a single unambiguous exact-version grant requirement.
-export function createVeteranCarePermissionEvaluator({getPermissionContext,permissionClock=()=>Date.now(),resolvePurposeBinding,...options}={}){
+export function createVeteranCarePermissionEvaluator({getPermissionContext,permissionClock=()=>Date.now(),resolvePurposeBinding,evaluateGrantWindow,...options}={}){
   if(typeof getPermissionContext!=='function'||typeof permissionClock!=='function')
     throw new TypeError('current permission authority and server clock are required');
   if(resolvePurposeBinding!==undefined&&typeof resolvePurposeBinding!=='function')
     throw new TypeError('purpose binding authority must be a function');
+  if(evaluateGrantWindow!==undefined&&typeof evaluateGrantWindow!=='function')
+    throw new TypeError('grant window policy must be a function');
   const buildScope=createVeteranCareResourceScopeBuilder(options);
   return async function evaluate(input){
     const scoped=await buildScope(input);
@@ -62,14 +64,26 @@ export function createVeteranCarePermissionEvaluator({getPermissionContext,permi
         if(Reflect.ownKeys(selector).length!==2||typeof selector.resourceId!=='string'||
           !UUID.test(selector.resourceId)||selector.resourceId.toLowerCase()!==request.resourceId||
           selector.resourceVersion!==request.resourceVersion) continue;
+        let expiresAtMs=null;
+        if(evaluateGrantWindow){
+          const window=evaluateGrantWindow({grant,nowMs});
+          if(window?.status!=='current'||!Number.isSafeInteger(window.expiresAtMs)||window.expiresAtMs<=nowMs) continue;
+          expiresAtMs=window.expiresAtMs;
+        }
         const canonical={...grant,ownerShineId:grant.ownerShineId.toLowerCase(),resourceSelector:{...selector,resourceId:selector.resourceId.toLowerCase()}};
         const result=evaluateAccess({request,verifiedShineId:request.shineId,appManifest:context.appManifest,resource,grants:[canonical],now,defenceDecision:'allow'});
-        if(result.decision==='allow') matches.push(grant.grantId.toLowerCase());
+        if(result.decision==='allow') matches.push({grantId:grant.grantId.toLowerCase(),expiresAtMs});
       }
       if(!matches.length) return refuse('denied','vc-permission-missing');
       if(matches.length!==1) return refuse('denied','vc-permission-ambiguous');
+      if(evaluateGrantWindow){
+        const completedAt=permissionClock();
+        if(!Number.isSafeInteger(completedAt)||completedAt<nowMs) return refuse('unavailable','vc-permission-authority-unavailable');
+        if(completedAt>=matches[0].expiresAtMs) return refuse('denied','vc-grant-expired');
+      }
       return {status:'permission-allowed',decision:'allow',reasonCode:'vc-exact-grant-match',
-        authorizationApplied:true,executionPerformed:false,grantId:matches[0],request};
+        authorizationApplied:true,executionPerformed:false,grantId:matches[0].grantId,request,
+        ...(evaluateGrantWindow?{permissionValidUntil:new Date(matches[0].expiresAtMs).toISOString()}:{})};
     }catch{return refuse('unavailable','vc-permission-authority-unavailable');}
   };
 }
