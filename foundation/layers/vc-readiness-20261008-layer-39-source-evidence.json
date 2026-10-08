@@ -1,0 +1,25 @@
+{
+  "contract": "shine-foundation/vc-release-rollback-source-evidence-v1",
+  "evidenceMode": "github-source",
+  "entries": [
+    {
+      "kind": "release",
+      "sourceCommitSha": "59b2acd9fad43cd89115da6725ff022c14f1e553",
+      "artifactPath": "foundation/releases/vc-readiness-20261008-layer-39-release-source.json",
+      "artifactSha256": "b0d02b1c7451352f69b04521099f4d5b17f463b438765a91049bfb37fd831c4c",
+      "scope": "synthetic-restore-proof-only",
+      "deploymentVerified": false
+    },
+    {
+      "kind": "rollback",
+      "sourceCommitSha": "60ecc7fe6679a8f7caa7ac22622cb3234228792e",
+      "artifactPath": "foundation/releases/vc-readiness-20261008-layer-39-rollback-source.json",
+      "artifactSha256": "2023de1aaf4d7588cd823150f5a35dce8fcbef8cc76fc1497c9100c3f1e4b9ab",
+      "scope": "synthetic-restore-proof-only",
+      "deploymentVerified": false
+    }
+  ],
+  "productionReleaseVerified": false,
+  "productionRollbackVerified": false,
+  "deploymentPerformed": false
+}
