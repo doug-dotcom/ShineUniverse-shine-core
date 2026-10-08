@@ -1,0 +1,246 @@
+{
+  "scope": "vc-readiness-source-sprint",
+  "baselineCommit": "1b68f509c0c7763eec9903f88cdd583739012c20",
+  "priorMergedLayers": 39,
+  "handoverLayer": 40,
+  "completionCondition": "Layer 40 merged after all three CI checks succeed",
+  "productionReadinessVerified": false,
+  "productionDeploymentPerformed": false,
+  "liveIntegrationVerified": false,
+  "priorLayerReceipts": [
+    {
+      "layer": 1,
+      "path": "foundation/layers/vc-readiness-20261008-layer-01.md",
+      "title": "Foundation \u2014 VC Readiness layer 01/40: dedicated identity adapter",
+      "sha256": "cbf6480d122df94331cf1f0a98a53da2f2a6aa713d6c7c197d126e2639a3342e"
+    },
+    {
+      "layer": 2,
+      "path": "foundation/layers/vc-readiness-20261008-layer-02.md",
+      "title": "Foundation VC Readiness \u2014 layer 02/40: bounded capability declaration",
+      "sha256": "ffd71c4e8ac9ba67788fadba29606a3a200c964a697cdb53f9c07f309ff67aa0"
+    },
+    {
+      "layer": 3,
+      "path": "foundation/layers/vc-readiness-20261008-layer-03.md",
+      "title": "VC readiness \u2014 layer 03: dedicated-project boundary",
+      "sha256": "6c40e886ee248bfdb4756d488076d7fb7e8a3f461c912ea156c7fc84c451357d"
+    },
+    {
+      "layer": 4,
+      "path": "foundation/layers/vc-readiness-20261008-layer-04.md",
+      "title": "VC readiness \u2014 layer 04: audience-bound identity",
+      "sha256": "624cfb9f3e0240148745d54d39cbe109031ad5c32eaa61ca72410e930d975680"
+    },
+    {
+      "layer": 5,
+      "path": "foundation/layers/vc-readiness-20261008-layer-05.md",
+      "title": "VC readiness \u2014 layer 05: session authority checks",
+      "sha256": "c777415b67b08918ea4797c742523b1f62a63c82ff8095f22c74452d68067908"
+    },
+    {
+      "layer": 6,
+      "path": "foundation/layers/vc-readiness-20261008-layer-06.md",
+      "title": "VC readiness \u2014 layer 06: exact resource scoping",
+      "sha256": "85ca3431c8082b1a38836adc344ce53b95a58022e4eb2d096b838c6fdea6ca8d"
+    },
+    {
+      "layer": 7,
+      "path": "foundation/layers/vc-readiness-20261008-layer-07.md",
+      "title": "VC readiness \u2014 layer 07: deny-by-default permissions",
+      "sha256": "fba06a1209ac2b5bfdb56dd0c0f03154c1c7e6c24e070f207bf49b60ff2f6291"
+    },
+    {
+      "layer": 8,
+      "path": "foundation/layers/vc-readiness-20261008-layer-08.md",
+      "title": "VC readiness \u2014 layer 08: purpose-bound grant contract",
+      "sha256": "3e28f8b6cbf0e48787b06543cd7aace0bc5462c5ab0f1d2a0080abb931821e88"
+    },
+    {
+      "layer": 9,
+      "path": "foundation/layers/vc-readiness-20261008-layer-09.md",
+      "title": "VC readiness \u2014 layer 09: grant expiry enforcement",
+      "sha256": "af5fedb11a24fc15ef1ec07aaaaee39a30e825f9212856f00fa6df482ffcedce"
+    },
+    {
+      "layer": 10,
+      "path": "foundation/layers/vc-readiness-20261008-layer-10.md",
+      "title": "VC readiness \u2014 layer 10: identity and access proof",
+      "sha256": "bc8e972c1f28fa344c1bffdaca8eda64b816f836316497fc4793e6929443ed5a"
+    },
+    {
+      "layer": 11,
+      "path": "foundation/layers/vc-readiness-20261008-layer-11.md",
+      "title": "VC readiness \u2014 layer 11: revocation propagation entry",
+      "sha256": "f4b3e8d5272ba08a98c0b3c3fcdc56f2395c6566c7258c57a049b1cf06f251ce"
+    },
+    {
+      "layer": 12,
+      "path": "foundation/layers/vc-readiness-20261008-layer-12.md",
+      "title": "VC readiness \u2014 layer 12: revocation acknowledgement status",
+      "sha256": "c2e2889be95e6fec0b4ce29d4ee72b74618dc678a39bf81b99cf8fab973ed247"
+    },
+    {
+      "layer": 13,
+      "path": "foundation/layers/vc-readiness-20261008-layer-13.md",
+      "title": "VC readiness \u2014 layer 13: stale-grant cache rejection",
+      "sha256": "903155d064c1148aa9bd26d12f818699ce32bbf28348edc7ffe0e1061afa8094"
+    },
+    {
+      "layer": 14,
+      "path": "foundation/layers/vc-readiness-20261008-layer-14.md",
+      "title": "VC readiness \u2014 layer 14: in-flight permission recheck",
+      "sha256": "2780b080da0aa2015e76061b05bda58a8ec431fb1f4c2de1d794a0639604f2cf"
+    },
+    {
+      "layer": 15,
+      "path": "foundation/layers/vc-readiness-20261008-layer-15.md",
+      "title": "VC readiness \u2014 layer 15: delegated-access contract",
+      "sha256": "aa050ee6f22ebd4f7e30c3c46f3ff7bc81f96218d56631e9677bf48902344efb"
+    },
+    {
+      "layer": 16,
+      "path": "foundation/layers/vc-readiness-20261008-layer-16.md",
+      "title": "VC readiness \u2014 layer 16: read/write separation",
+      "sha256": "97b41ad936e56d203f70d2f67d6ecfe2e78e489161c1576e855aa7053532f35e"
+    },
+    {
+      "layer": 17,
+      "path": "foundation/layers/vc-readiness-20261008-layer-17.md",
+      "title": "VC readiness \u2014 layer 17: content-free audit event contract",
+      "sha256": "3792caeb391deedcd0dc74540a9d870003bf8da492758db7da9ec212d2d1f498"
+    },
+    {
+      "layer": 18,
+      "path": "foundation/layers/vc-readiness-20261008-layer-18.md",
+      "title": "VC readiness \u2014 layer 18: safe denial explanations",
+      "sha256": "7293716c6d54b902d5d6e3922bb69953c2ff2f4f3edf36b1c196f56e9476ea25"
+    },
+    {
+      "layer": 19,
+      "path": "foundation/layers/vc-readiness-20261008-layer-19.md",
+      "title": "VC readiness \u2014 layer 19: permission-service outage handling",
+      "sha256": "4c8e462e5cbb9d0aa4bdcb119c5ec0357ef0a0b5a6daa045ea5b33e46b4e311e"
+    },
+    {
+      "layer": 20,
+      "path": "foundation/layers/vc-readiness-20261008-layer-20.md",
+      "title": "VC readiness \u2014 layer 20: joined revocation proof journey",
+      "sha256": "e428ae752caf85835a0dbd934bcbc7a559fcda6970b26c95c09f83e726f8150c"
+    },
+    {
+      "layer": 21,
+      "path": "foundation/layers/vc-readiness-20261008-layer-21.md",
+      "title": "VC readiness \u2014 layer 21: Shine AI caller binding",
+      "sha256": "be7ced743177ae95158698dcb31fe47adf7b9e62bbecfd94e83894c79e6d57a7"
+    },
+    {
+      "layer": 22,
+      "path": "foundation/layers/vc-readiness-20261008-layer-22.md",
+      "title": "VC readiness \u2014 layer 22: permission decision envelope",
+      "sha256": "418aa9b089c32d975d3126c57527257e7ca83237441110a0296fe9d153537ae6"
+    },
+    {
+      "layer": 23,
+      "path": "foundation/layers/vc-readiness-20261008-layer-23.md",
+      "title": "VC readiness \u2014 layer 23: private resource handle contract",
+      "sha256": "f083434b3f8ef393ec36ee4171827eb88bf48aac9ccd4f81976f97218bad9d5f"
+    },
+    {
+      "layer": 24,
+      "path": "foundation/layers/vc-readiness-20261008-layer-24.md",
+      "title": "VC readiness \u2014 layer 24: L app binding",
+      "sha256": "3ca68c0319df51e83ef6d38d433c6cf267297e8d94a8ee7e1a9ee6f507d432bd"
+    },
+    {
+      "layer": 25,
+      "path": "foundation/layers/vc-readiness-20261008-layer-25.md",
+      "title": "VC readiness \u2014 layer 25: memory scope enforcement",
+      "sha256": "5ad9fba74c17fe0d6f997c1ff17188373668018d0dd93b0525ceb56b4b26127e"
+    },
+    {
+      "layer": 26,
+      "path": "foundation/layers/vc-readiness-20261008-layer-26.md",
+      "title": "VC readiness \u2014 layer 26: read-only retrieval",
+      "sha256": "0cf7079839514b5595e34ef14805fa29ccecd2afa64cfdb8a0d2c43735c795c0"
+    },
+    {
+      "layer": 27,
+      "path": "foundation/layers/vc-readiness-20261008-layer-27.md",
+      "title": "VC readiness \u2014 layer 27: AI tool authority",
+      "sha256": "7cabb23c8203a7bd87b6a9a15983eafc2398c23b067a05e2d86e07fa4864d4eb"
+    },
+    {
+      "layer": 28,
+      "path": "foundation/layers/vc-readiness-20261008-layer-28.md",
+      "title": "VC readiness \u2014 layer 28: result audience",
+      "sha256": "ac2c3f1caace82fc07eb71ed077d5bb9e5eaf6f9a87c39baa48ae81dafa6603e"
+    },
+    {
+      "layer": 29,
+      "path": "foundation/layers/vc-readiness-20261008-layer-29.md",
+      "title": "VC readiness \u2014 layer 29: cancelled task authority",
+      "sha256": "64297e7d8b9c2aae3d6c02bc5cbee7afc32a1935ca1152ec6ecc6a98d68b0fe7"
+    },
+    {
+      "layer": 30,
+      "path": "foundation/layers/vc-readiness-20261008-layer-30.md",
+      "title": "VC readiness \u2014 layer 30: joined VC\u2013AI\u2013L proof",
+      "sha256": "5db82a79716eea0fd841cda5accc77f0ece05dde55183609b9e842f4e7c209d4"
+    },
+    {
+      "layer": 31,
+      "path": "foundation/layers/vc-readiness-20261008-layer-31.md",
+      "title": "VC readiness \u2014 layer 31: retry identity",
+      "sha256": "bea8c6449114779e73a8173c21611444784dbc66620989ee7000ff2475b3b1bb"
+    },
+    {
+      "layer": 32,
+      "path": "foundation/layers/vc-readiness-20261008-layer-32.md",
+      "title": "VC readiness layer 32 \u2014 resume recheck",
+      "sha256": "4880c7376bfd52d2fcacb989767fe1977faac1f867fa49a5ecc04ebc40afdd55"
+    },
+    {
+      "layer": 33,
+      "path": "foundation/layers/vc-readiness-20261008-layer-33.md",
+      "title": "VC readiness layer 33 \u2014 checkpoint failure",
+      "sha256": "a9a94831588f436e77dd9a0a2aed1877ae56330f546a6587c20291713b730694"
+    },
+    {
+      "layer": 34,
+      "path": "foundation/layers/vc-readiness-20261008-layer-34.md",
+      "title": "VC readiness layer 34 \u2014 credential references",
+      "sha256": "3722dbfecd7b17e08c888815a20e539a546433b63c6397fad0f5d005d9d1a71f"
+    },
+    {
+      "layer": 35,
+      "path": "foundation/layers/vc-readiness-20261008-layer-35.md",
+      "title": "VC readiness layer 35 \u2014 capability health",
+      "sha256": "7fc6015236cd283629887605fb0065a5e04d7185bb326a6db3649e022673c133"
+    },
+    {
+      "layer": 36,
+      "path": "foundation/layers/vc-readiness-20261008-layer-36.md",
+      "title": "VC readiness layer 36 \u2014 recovery inventory",
+      "sha256": "17fe6a3d8a65d22e0e064ae3559a57d8be5711e982443ef2ca33fbf4f65f0601"
+    },
+    {
+      "layer": 37,
+      "path": "foundation/layers/vc-readiness-20261008-layer-37.md",
+      "title": "VC readiness layer 37 \u2014 isolated database restore",
+      "sha256": "3968362bba1d4404e7afd7c21ff1553b9c3d3516110224f164d64fad3b2e83bb"
+    },
+    {
+      "layer": 38,
+      "path": "foundation/layers/vc-readiness-20261008-layer-38.md",
+      "title": "VC readiness layer 38 \u2014 restored revocation continuity",
+      "sha256": "434273fa89ce64f5d9c0db7b26f0d744bfc2591e2b51b85672f4c602731d7932"
+    },
+    {
+      "layer": 39,
+      "path": "foundation/layers/vc-readiness-20261008-layer-39.md",
+      "title": "VC readiness layer 39 \u2014 exact release/rollback",
+      "sha256": "d18aea5f7b0d6418947e25305298337fa1344a3ca2517a5c900cfd32e53fa85f"
+    }
+  ]
+}
