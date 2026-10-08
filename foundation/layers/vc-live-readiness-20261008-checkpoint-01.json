@@ -1,0 +1,26 @@
+{
+  "observedAt": "2026-10-08T10:20:15.221Z",
+  "scope": "vc-live-readiness-baseline",
+  "foundationSourceCommit": "74ecaf3f45e8a30dfb64ba4d131c2aa14d23ff79",
+  "vcSourceCommit": "7e83800135b08fd498577fbfade70ff1ad465a6c",
+  "railwayProjectId": "d6e85c16-1f57-489b-9dfd-cc1963f765da",
+  "railwayEnvironmentId": "88d23731-f8c6-45c6-b55a-d7fedc82a071",
+  "railwayServiceId": "505db8ca-1226-4987-88f6-ccf31219e2b2",
+  "deploymentId": "32e9e395-6124-4060-afb1-34a7264f84d5",
+  "providerStatus": "SUCCESS",
+  "replicas": {
+    "running": 1,
+    "crashed": 0,
+    "total": 1
+  },
+  "recentFailedDeployments": 3,
+  "pendingWork": [],
+  "domain": "shine-veteran-care-production.up.railway.app",
+  "evidenceMode": "live-provider-metadata-and-pinned-source",
+  "independentRuntimeProbePerformed": false,
+  "runtimeArtifactDigestVerified": false,
+  "foundationPipelineMountedInInspectedServer": false,
+  "productionReadinessVerified": false,
+  "privateJourneyPerformed": false,
+  "deploymentPerformed": false
+}
