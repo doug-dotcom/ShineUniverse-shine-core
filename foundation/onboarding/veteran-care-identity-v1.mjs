@@ -1,7 +1,7 @@
 // Server-only VC consumer adapter. Configuration must come from Foundation's registry.
 // This adapter verifies identity only: it never links accounts or grants Vault access.
 const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-const DEDICATED_ISSUER='https://akyzwuvfvugzyauaptsk.supabase.co/auth/v1';
+export const VETERAN_CARE_ISSUER='https://akyzwuvfvugzyauaptsk.supabase.co/auth/v1';
 const deny=reasonCode=>({status:'denied',reasonCode});
 const unavailable=()=>({status:'unavailable',reasonCode:'vc-identity-authority-unavailable'});
 
@@ -18,7 +18,7 @@ export function createVeteranCareIdentityVerifier({appId,providerId,verifyAppCal
     try{
       const payload=jwt.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');
       const claims=JSON.parse(atob(payload+'='.repeat((4-payload.length%4)%4)));
-      if(claims?.iss!==DEDICATED_ISSUER) return deny('vc-identity-provider-mismatch');
+      if(claims?.iss!==VETERAN_CARE_ISSUER) return deny('vc-identity-provider-mismatch');
     }catch{return deny('vc-user-proof-invalid');}
     const credentials={appToken:authContext?.appToken,jwt};
     let app,identity;
@@ -35,3 +35,4 @@ export function createVeteranCareIdentityVerifier({appId,providerId,verifyAppCal
     return {status:'verified',identity:{shineId:identity.shineId,authSubject:identity.authSubject,providerId}};
   };
 }
+
