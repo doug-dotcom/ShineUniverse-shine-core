@@ -114,3 +114,9 @@ test('privileged watcher excludes PR code, artifacts, OIDC and recursive trigger
   const triggers=workflow.split('\non:\n')[1].split('permissions:')[0];
   assert.doesNotMatch(triggers,/workflow_dispatch:|schedule:|pull_request|Authority State|Heartbeat Recovery\n/);
 });
+
+test('normal Core completion can request the signed publisher',async()=>{
+  const f=fixture({source:{path:'.github/workflows/shine-defence-core.yml',event:'push'}});
+  assert.equal((await f.execute()).result,'refresh-requested');
+  assert.equal(f.calls.filter(call=>call.options.method==='POST').length,1);
+});
