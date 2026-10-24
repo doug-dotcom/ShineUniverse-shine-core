@@ -28,6 +28,7 @@ jobs:
         with:
           node-version: '22'
       - run: node security/shine-defence/integration-kit/verify-registry-v1.mjs
+      - run: node --test security/shine-defence/integration-kit/authority-heartbeat-recovery-v1.test.mjs
       - run: node --test foundation/runtime/_shared/github-actions-oidc-v1.test.mjs
       - run: node --test foundation/runtime/_shared/shine-defence-active-authority-v1.test.mjs
       - run: node security/shine-defence/integration-kit/verify-release-attestation-authority-lineage-v1.mjs --self-test
@@ -96,3 +97,4 @@ jobs:
       - run: node security/shine-defence/integration-kit/verify-review-rejections-v1.mjs
       - run: node security/shine-defence/integration-kit/verify-review-promotions-v1.mjs --self-test
       - run: node security/shine-defence/integration-kit/verify-review-promotions-v1.mjs
+
