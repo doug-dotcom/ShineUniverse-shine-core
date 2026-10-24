@@ -3,6 +3,7 @@ name: Shine Defence Heartbeat Recovery
 on:
   workflow_run:
     workflows:
+      - Shine Defence Core
       - Shine Defence On-Demand Executor Readiness
       - Shine Defence Artefact Re-attestation
       - Shine Defence Provider Collector

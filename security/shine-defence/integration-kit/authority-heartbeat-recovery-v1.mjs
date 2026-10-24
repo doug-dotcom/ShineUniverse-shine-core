@@ -6,6 +6,7 @@ const REPOSITORY_ID=1072897952;
 const PUBLISHER='.github/workflows/shine-defence-authority-state.yml';
 const API='https://api.github.com/repos/'+REPOSITORY;
 const CONTROL_PATHS=new Set([
+  '.github/workflows/shine-defence-core.yml',
   '.github/workflows/shine-defence-on-demand-executor-readiness.yml',
   '.github/workflows/shine-defence-reattest.yml',
   '.github/workflows/shine-defence-provider-collector.yml',
