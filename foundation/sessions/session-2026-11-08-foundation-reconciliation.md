@@ -83,3 +83,13 @@ Doug explicitly approved issuing the prepared 30-day replacement. The atomic ope
 Four live v94 checks passed: own VC status HTTP 200; Travel status using the VC credential HTTP 403 app-caller-mismatch; original expired credential HTTP 403 app-caller-unverified; valid replacement app credential without user credentials HTTP 401 unauthenticated on personal access evaluation. Requests 303796–303799; no timeouts. Machine-readable evidence: foundation/evidence/vc-service-authentication-20261108.json.
 
 This verifies service authentication and isolation. It does not establish user-authorised access, cross-account/revocation success, product acceptance, or rollout of the new Vault reference to every VC consuming deployment. No personal grants, scopes, identities or client links were changed.
+
+## Deployed VC consumer credential rollout — completed 8 November 2026
+
+Located the actual VC Railway consumer: project d6e85c16-1f57-489b-9dfd-cc1963f765da, production 88d23731-f8c6-45c6-b55a-d7fedc82a071, service 505db8ca-1226-4987-88f6-ccf31219e2b2. Verified deployed source 8592242ca0b92310a053919427f2a2d051a97036 on codex/cadj-live-release-20261026, rather than assuming repository main.
+
+Installed the approved v2 replacement in the existing VETERAN_FOUNDATION_APP_TOKEN variable through an internal secret transfer, without returning the value to model-visible output or writing it to a file. Redeployed the existing build explicitly. Deployment e3624f47-9a86-4b5c-ae31-054bc66e1ad0 reached SUCCESS and retained the same source commit. The build/test/build command completed. No unrelated variables were changed.
+
+The deployed server calls createVCFoundationServerMount() without protected owner-service dependencies. Its public memory-read handler deliberately returns 503, reports retrievalPerformed=false/resultReturned=false, and does not parse credentials or invoke read authority. The eleven named owner groups in foundation-owner-services.mjs have not been composed in server.mjs. This corrects the earlier overly narrow conclusion that a user session alone was the remaining blocker: user sign-in cannot supply missing protected service composition.
+
+Machine-readable findings: foundation/evidence/vc-consumer-rollout-and-integration-gaps-20261108.json. Post-deployment checks queued as 304045 (health) and 304046 (closed memory transport). Full user-authorised integration and acceptance remain unverified. No synthetic users or personal grants were created during this continuation.
