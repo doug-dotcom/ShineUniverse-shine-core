@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-08",
+  "component": "VC Foundation identity owner",
+  "source": {
+    "repository": "doug-dotcom/Shine-Veteran-",
+    "pullRequest": 905,
+    "mergeCommit": "67af917ad29ecc04d54e89dc5e89ceaeadcb5531"
+  },
+  "implemented": [
+    "three allow-listed parameterised identity/session SQL statements",
+    "transaction-local metadata-only reader roles",
+    "fixed-origin bounded uncached current Auth session policy retrieval"
+  ],
+  "verification": {
+    "localIdentityUnitTests": 10,
+    "combinedLocalOwnerTests": 20,
+    "postgresCiRun": 42477387743,
+    "postgresCiResult": "success",
+    "ciTests": 11,
+    "failed": 0,
+    "skipped": 0,
+    "scope": "Synthetic PostgreSQL 17 schemas with RLS and column grants; SDK identity verification stubbed. Not a live login."
+  },
+  "liveInspection": {
+    "vcIdentityProvider": "active",
+    "vcAppAssociation": "active",
+    "vcAppRegistry": "active",
+    "publishableKeyFormatValid": true,
+    "authRlsEnabled": [
+      "sessions",
+      "users",
+      "refresh_tokens"
+    ]
+  },
+  "deployment": {
+    "runtimeConfigured": false,
+    "roleProposalsApplied": false,
+    "managementCredentialCreated": false,
+    "personalRecordsChanged": false,
+    "publicMemoryReadEnabled": false,
+    "latestObservedRailwaySource": "8592242ca0b92310a053919427f2a2d051a97036"
+  },
+  "remaining": [
+    "protected runtime pools and role provisioning",
+    "appropriately scoped current-policy credential in protected custody",
+    "companion credential custody backend",
+    "remaining L/memory/recipient/health owner implementations",
+    "trusted server composition and authenticated integration acceptance"
+  ]
+}
