@@ -3,7 +3,7 @@ import {readFileSync,readdirSync,statSync} from 'node:fs';
 import {join,relative} from 'node:path';
 import {fileURLToPath} from 'node:url';
 
-export const SHINE_DEFENCE_FOUNDATION_RUNTIME_INSPECTOR_VERSION='1.0.0';
+export const SHINE_DEFENCE_FOUNDATION_RUNTIME_INSPECTOR_VERSION='1.1.0';
 
 const root=fileURLToPath(new URL('../../../',import.meta.url));
 
@@ -32,14 +32,17 @@ function pinnedNpm(spec){
   return /^npm:(?:@[^/]+\/[^@]+|[^@]+)@\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$/.test(spec);
 }
 
-export function inspectFoundationRuntime({repoRoot=root}={}){
+export function inspectFoundationRuntime({repoRoot=root,deployedFiles=null}={}){
   const runtimeDir=join(repoRoot,'foundation/runtime');
-  const runtimeFiles=walk(runtimeDir).filter(path=>/\.(?:ts|mjs|js)$/.test(path));
+  const runtimeFiles=deployedFiles
+    ?deployedFiles.filter(f=>/\.(?:ts|mjs|js)$/.test(f.name)).map(f=>join(repoRoot,f.name))
+    :walk(runtimeDir).filter(path=>/\.(?:ts|mjs|js)$/.test(path));
+  const source=path=>deployedFiles?deployedFiles.find(f=>join(repoRoot,f.name)===path)?.content:readFileSync(path,'utf8');
   const findings=[];
   const allImports=[];
 
   for(const path of runtimeFiles){
-    const text=readFileSync(path,'utf8');
+    const text=source(path);
     for(const spec of imports(text)){
       allImports.push({file:relative(repoRoot,path).replaceAll('\\','/'),spec});
       if(spec.startsWith('npm:')&&!pinnedNpm(spec)){
@@ -51,7 +54,8 @@ export function inspectFoundationRuntime({repoRoot=root}={}){
     }
   }
 
-  const gateway=readFileSync(join(repoRoot,'foundation/runtime/edge-function/index.ts'),'utf8');
+  const gateway=source(join(repoRoot,'foundation/runtime/edge-function/index.ts'));
+  if(typeof gateway!=='string')throw new Error('deployed-gateway-entrypoint-missing');
   const navigator=readFileSync(join(repoRoot,'foundation/runtime/data-navigator/index.ts'),'utf8');
   const posture=readFileSync(join(repoRoot,'foundation/postgres/defence-operational-posture-v1.sql'),'utf8');
 
