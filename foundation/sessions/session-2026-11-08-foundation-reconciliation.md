@@ -75,3 +75,11 @@ Remaining: a valid existing client/user session and reviewed test resources are 
 The existing VC Foundation live integration credential was issued on 8 October and expired on 7 November 2026 at 22:48 Brisbane (12:48 UTC). Its stored Vault reference was found and matched to its registered hash without exposing the secret. The effective-credential view confirms expired. Live request 303770 to the app status route, with that stored credential passed internally, returned HTTP 403 app-caller-unverified. Expiry enforcement works.
 
 The credential ledger is append-only. No expiry was extended and no trigger was disabled. Prepared an unexecuted atomic replacement proposal in foundation/operations/proposed-vc-service-credential-renewal-20261108.sql: generate a new 256-bit service token, store only its hash in the ledger and its encrypted value in Vault, expire after 30 days, preserve the old expired record, and leave all user grants/scopes unchanged. Activation awaits Doug's decision on the new authentication period; no replacement has been issued. An authenticated user test session remains a separate requirement for personal cross-app access tests.
+
+## Approved VC service credential replacement — completed
+
+Doug explicitly approved issuing the prepared 30-day replacement. The atomic operation completed at 17:53:09 Brisbane on 8 November 2026. Replacement label VC Foundation live integration v2 is active until 17:53:09 Brisbane on 8 December 2026. Its encrypted Vault value matches the registered active hash. No plaintext token was returned to chat or written to the repository. The old expired record remains intact.
+
+Four live v94 checks passed: own VC status HTTP 200; Travel status using the VC credential HTTP 403 app-caller-mismatch; original expired credential HTTP 403 app-caller-unverified; valid replacement app credential without user credentials HTTP 401 unauthenticated on personal access evaluation. Requests 303796–303799; no timeouts. Machine-readable evidence: foundation/evidence/vc-service-authentication-20261108.json.
+
+This verifies service authentication and isolation. It does not establish user-authorised access, cross-account/revocation success, product acceptance, or rollout of the new Vault reference to every VC consuming deployment. No personal grants, scopes, identities or client links were changed.
