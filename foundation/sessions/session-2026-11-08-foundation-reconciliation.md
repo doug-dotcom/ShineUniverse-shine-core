@@ -105,3 +105,15 @@ GitHub Actions run 42476839268 completed SUCCESS: 11 tests passed, zero failed a
 The source is merged but not yet configured in the live server. Railway's latest observed deployment remains e3624f47-9a86-4b5c-ae31-054bc66e1ad0 at source 8592242ca0b92310a053919427f2a2d051a97036. No new deployment was claimed. A protected bounded pool, remaining nine owner groups and trusted server composition are still required. Public memory-read transport remains closed and user-authorised integration/acceptance remains unverified.
 
 Evidence: foundation/evidence/vc-orchestration-owner-20261108.json. This increment does not represent 25 completed layers.
+
+## Protected VC identity backend — source merged, activation pending
+
+Implemented the identity adapter's concrete Foundation/VC PostgreSQL dependencies and current Auth policy reader in Shine-Veteran- PR #905, merged at 67af917ad29ecc04d54e89dc5e89ceaeadcb5531. SQL is restricted to the three exact parameterised adapter statements; lookup values and project/provider/app scope are validated. Transactions assume dedicated reader roles and return only required metadata. The current-policy reader uses the fixed VC Management API GET endpoint with redirect denial, no cache and a 2.5-second deadline. Missing/nullable fields deny access rather than implying unrestricted sessions.
+
+Validation: ten identity unit tests passed locally; twenty combined identity/orchestration unit tests passed. GitHub Actions 42477387743 completed SUCCESS with eleven tests, zero failures and zero skips. The PostgreSQL 17 test exercised actual RLS/column-restricted queries through the existing identity adapter: wrong-subject, revocation, logout, expiry, banned/deleted/anonymous users, and disabled/unverified identity bindings denied. Sensitive email/password/refresh-token columns and writes were denied. SDK token verification was stubbed in this database test; this is not a live authenticated user workflow.
+
+Live metadata inspection confirms the VC provider, app association and app registration are active, the provider key has the required publishable format, and the three Auth tables have RLS enabled. No key value or personal record was retrieved.
+
+The two reader role/policy SQL files are proposals, not live migrations; Auth policy changes require the actual Auth table owner. No runtime login, management credential, personal binding, session, auth setting or token was changed. Protected pools, appropriate current-policy credential custody, companion credential custody, remaining L/memory/recipient/health owner services and server composition remain outstanding. The public memory route remains closed. Latest observed Railway deployment remains e3624f47-9a86-4b5c-ae31-054bc66e1ad0 on source 8592242ca0b92310a053919427f2a2d051a97036; merged source is not claimed as deployed.
+
+Evidence: foundation/evidence/vc-identity-owner-20261108.json. No layer counter increase or full integration/acceptance claim.
