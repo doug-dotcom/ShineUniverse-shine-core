@@ -51,3 +51,21 @@ At approximately 17:01 Brisbane, the automatic collector reported degraded healt
 ### Remaining verification requirements
 
 Authenticated cross-app success and denial/revocation checks need a valid existing client/user session and reviewed test resources; stored credential hashes cannot be used as bearer credentials. No new identities, credentials or personal grants were created. Product acceptance requires the corresponding real user workflow. The batch is still not represented as 25 newly completed build layers.
+
+## Current release — v94 audit retry patch, 8 November 2026, 17:42 Brisbane
+
+- PR #211 merged after both GitHub workflows completed successfully: Foundation + Concierge run 42459518881 and Defence run 42459518941. The SQL persistence job and contract job both passed.
+- Retry prevention is now live in Supabase gateway v94. It retries only an outcome audit write once with identical evidence; it never repeats a domain operation. Persistent audit failure retains the completed response and remains observable. No old audit outcome was invented.
+- All 31 deployed files were compared with the uploaded bundle. Only the HTTP handler changed from v93. Archived release: foundation/releases/audit-outcome-retry-gateway-v94.json at source commit 2af08b6b767bfa5ea41e9a9596a4e31a452a2cf5.
+- Artifact SHA-256: ae18126784563b871230c5f0b0931160d0f41feda99a2c2df7e61ac2c6cc2152. Canonical file digest: bb92361ecd58742f687fd161ed651243c85e02f442638363fc08c24b626a05f6.
+- Re-ran the module suite against the exact v94 file bytes: 235 passed, zero failed.
+- GitHub OIDC receipt publication run 42459741134 passed; receipt e62e79a4-c261-4c54-81fc-4c0e91d09afc, publication 56e07ab2-e18e-4908-88ea-355052e03745.
+- Exact-bundle Defence re-attestation run 42459741107 completed SUCCESS. All seven database posture controls pass; no missing artifact-bound evidence.
+- Immutable binding d47612d6-ee60-438a-af62-6e154bf504b3, release foundation:layer-225:2af08b6b. Binding passes; Universe projection is aligned. This is a patch to Layer 225, not a claim of 25 newly completed layers.
+- Three deployment smoke probes (303724–303726) returned HTTP 200 with a valid health contract. Their aggregate p95 was 13.766 ms. This small warm deployment sample does not prove the intermittent latency is resolved.
+- Negative live consent request 303727 returned HTTP 401 unauthenticated and produced a complete v94 policy/outcome chain. No grant was issued.
+- Readiness observation 381c170d-ce83-4e28-90c8-2349ec2e1795 remains degraded because of the historical open v90 audit trace. Current v94 runtime has a complete audit chain and no broken chain.
+- Correlating platform logs by execution ID refines the latency evidence: request 10717a4d-a5e8-4bf5-8d96-0c73b0199e06 took 4510 ms, boot 615 ms and CPU 34 ms; request c17298fc-ac5a-40ab-a239-7bf43fb4eea1 took 5414 ms, boot 345 ms and CPU 26 ms. This points to waiting/platform overhead but does not establish the exact cause. The earlier uncorrelated boot estimate must not be used as a matched measurement.
+- Dashboard refreshed to v94 and deployed successfully as 8fd90680-c9be-43bb-b2dc-01141be0d3f6. Access control/content checks passed. Historical snapshots retained; integration/acceptance remain unverified.
+
+Remaining: a valid existing client/user session and reviewed test resources are required for authenticated positive access, cross-account denial and revocation/invocation checks. Hashes in credential stores are not usable bearer credentials. A real user workflow is required for product acceptance. Future provider-version drift collection, intermittent latency diagnosis and the historical audit incident remain open.
