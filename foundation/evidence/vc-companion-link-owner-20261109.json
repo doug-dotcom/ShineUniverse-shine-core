@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "workDateBrisbane": "2026-11-09",
+  "component": "VC companion-link owner",
+  "source": {
+    "repository": "doug-dotcom/Shine-Veteran-",
+    "pullRequest": 907,
+    "mergeCommit": "0338c0736b281dfa1cce3344bbf8704213af1f49"
+  },
+  "implemented": [
+    "explicit bounded VC association",
+    "current canonical Foundation link/client/account/revocation checks",
+    "minimum expiry across sources",
+    "final VC withdrawal/revision reread"
+  ],
+  "verification": {
+    "unitTests": 10,
+    "postgresCiTests": 11,
+    "ciRun": 42536314902,
+    "result": "success",
+    "failed": 0,
+    "skipped": 0,
+    "databases": "two independent PostgreSQL 17 services",
+    "liveSchemaDryRuns": "passed, rolled back",
+    "liveRestrictedFoundationQuery": "sentinel scope returned zero rows; role access succeeded; temporary membership rolled back"
+  },
+  "applied": [
+    {
+      "project": "akyzwuvfvugzyauaptsk",
+      "migration": "vc_foundation_companion_link_v1",
+      "rows": 0,
+      "rls": true,
+      "clientSchemaAccess": false
+    },
+    {
+      "project": "sjpxqeyewahraxvidvcc",
+      "migration": "foundation_vc_companion_link_reader_v1",
+      "readerScope": "required columns on four existing RLS-protected base tables",
+      "privateClientMetadataAccess": false
+    }
+  ],
+  "roles": {
+    "login": false,
+    "superuser": false,
+    "bypassRls": false,
+    "writes": false,
+    "runtimeMembershipCreated": false
+  },
+  "personalLinksCreated": false,
+  "personalGrantsChanged": false,
+  "limits": [
+    "L client/user proof verifiers remain unimplemented",
+    "no consented enrolment",
+    "runtime pools not provisioned",
+    "provider not composed into live server",
+    "remaining memory/recipient/health services incomplete",
+    "public memory transport closed",
+    "separate observations are not a distributed atomic snapshot"
+  ],
+  "advisors": "same pre-existing findings; no new companion-link finding"
+}
