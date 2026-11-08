@@ -2,13 +2,13 @@
   "contract": "shine-foundation/deployment-receipt-publish-v1",
   "schemaVersion": "1.0.0",
   "receipt": {
-    "runtimeVersion": "93",
-    "artifactSha256": "9ad0189be337a91ca90b3c278d0a274a445cdbacd976f9935753d4b151e3e565",
+    "runtimeVersion": "94",
+    "artifactSha256": "ae18126784563b871230c5f0b0931160d0f41feda99a2c2df7e61ac2c6cc2152",
     "runtimeState": "active",
-    "sourceCommit": "b135f80d07bc1bafd8266c1bd1e510fa84a4b22d",
-    "providerEvidenceRef": "supabase:mcp:foundation-gateway:v93:exact-31-file-comparison:2026-11-08",
-    "providerObservedAt": "2026-11-08T06:55:26.262632Z",
+    "sourceCommit": "2af08b6b767bfa5ea41e9a9596a4e31a452a2cf5",
+    "providerEvidenceRef": "supabase:mcp:foundation-gateway:v94:exact-31-file-comparison:2026-11-08",
+    "providerObservedAt": "2026-11-08T07:40:19.437Z",
     "rollback": false
   },
-  "attestationRevision": "v93-source-reconciliation-20261108"
+  "attestationRevision": "audit-outcome-retry-v94"
 }
