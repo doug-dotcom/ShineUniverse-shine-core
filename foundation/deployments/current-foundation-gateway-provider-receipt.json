@@ -2,13 +2,13 @@
   "contract": "shine-foundation/deployment-receipt-publish-v1",
   "schemaVersion": "1.0.0",
   "receipt": {
-    "runtimeVersion": "90",
-    "artifactSha256": "3294e28293df667224ed9ab2551e2e5a6a88bab6f6805791bec14e7d22512692",
+    "runtimeVersion": "93",
+    "artifactSha256": "9ad0189be337a91ca90b3c278d0a274a445cdbacd976f9935753d4b151e3e565",
     "runtimeState": "active",
-    "sourceCommit": "1a8148a8eb748a19ac03107d9e9ec7313297384b",
-    "providerEvidenceRef": "supabase:management-api:foundation-gateway:v90:3294e28293df667224ed9ab2551e2e5a6a88bab6f6805791bec14e7d22512692",
-    "providerObservedAt": "2026-09-28T10:25:12.023Z",
+    "sourceCommit": "b135f80d07bc1bafd8266c1bd1e510fa84a4b22d",
+    "providerEvidenceRef": "supabase:mcp:foundation-gateway:v93:exact-31-file-comparison:2026-11-08",
+    "providerObservedAt": "2026-11-08T06:55:26.262632Z",
     "rollback": false
   },
-  "attestationRevision": "atlas-feed-layer3-v90"
+  "attestationRevision": "v93-source-reconciliation-20261108"
 }
