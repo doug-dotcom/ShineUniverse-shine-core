@@ -2,6 +2,7 @@
 import {createHash} from 'node:crypto';
 import {readFileSync,writeFileSync} from 'node:fs';
 import {resolve} from 'node:path';
+import {loadVerifiedRuntimeBundle} from './verified-runtime-bundle-v1.mjs';
 import {inspectFoundationRuntime,SHINE_DEFENCE_FOUNDATION_RUNTIME_INSPECTOR_VERSION} from './foundation-runtime-inspector-v1.mjs';
 
 const arg=(name)=>{
@@ -31,7 +32,8 @@ if(!env.test(environment))throw new Error('invalid environment');
 if(!sha64.test(artifactSha256))throw new Error('invalid artefact sha256');
 if(!sha40.test(sourceCommit)||!sha40.test(policyCommit))throw new Error('invalid commit sha');
 
-const report=inspectFoundationRuntime({repoRoot});
+const deployedFiles=loadVerifiedRuntimeBundle({repoRoot,artifactSha256,sourceCommit});
+const report=inspectFoundationRuntime({repoRoot,deployedFiles});
 const reportBytes=JSON.stringify(report,null,2)+'\n';
 const reportSha256=createHash('sha256').update(reportBytes).digest('hex');
 const authStatus=Array.isArray(report.controls?.auth)&&report.controls.auth.length===0?'pass':'fail';
