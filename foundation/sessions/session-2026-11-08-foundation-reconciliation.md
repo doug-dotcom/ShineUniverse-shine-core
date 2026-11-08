@@ -23,7 +23,7 @@
 2. Full authenticated cross-app access, capability invocation, AI and Project L integration are unverified. The earlier release checkpoint explicitly recorded these limitations.
 3. User/clinician product acceptance remains unverified.
 4. The historical v90 audit trace has no outcome; its result cannot be reconstructed from a later successful request.
-5. Universe registry still points readiness_release_ref to the Layer-58 release. Do not fabricate release-ledger acceptance to advance this projection.
+5. Universe release-ledger identity and registry pointer were subsequently reconciled to `foundation:layer-225:b135f80d`; projection retest reports aligned. This opens a release identity only; no integration or acceptance events were asserted.
 6. The saved HTML evidence review is a static snapshot from earlier today; this repair did not rewrite it or establish a live dashboard refresh.
 7. Provider reconciliation was verified during this session. An automatic management-plane collector that detects future out-of-band deployments has not been added.
 
