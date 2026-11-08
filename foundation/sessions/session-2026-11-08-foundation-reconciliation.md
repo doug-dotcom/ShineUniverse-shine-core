@@ -32,3 +32,22 @@ The deployed release remains Layer 225. This session does not claim 25 newly com
 ## Latest health update
 
 At approximately 17:01 Brisbane, the automatic collector reported degraded health due to p95 latency 5370.108 ms across four probes (zero 4xx/5xx and zero runtime errors). Earlier healthy results remain historical observations; current health must retain this warning. No threshold was relaxed and no probe result was removed.
+
+## Continuation — 8 November 2026, 17:09 Brisbane
+
+- Added verified bundle resolver and artifact-to-source mapping with canonical 31-file SHA-256 `496b05459eebe272c12e4cc26060f33d509dd2572aa4f80937a10d78d358a210`. Rejects source mismatch, altered bundle digest, invalid paths, duplicates and missing entrypoint.
+- Defence inspector v1.1.0 inspects deployed bundle module imports and gateway entrypoint; supplemental navigator/database posture source checks remain distinct. Existing dependency assurance is pinned-import/source inspection, not an npm vulnerability database scan or full penetration test.
+- Nine provenance regression tests passed in GitHub Actions run `42457408380`. The job completed SUCCESS, checked out the exact source commit and submitted its artifact attestation through GitHub OIDC.
+- Attestation policy commit `00b1d5ed45e772092db7daf82b4f9a46ea8269d4`; report SHA-256 `af017c09dff6ab6daa58fcb9eb2f12453e597e1a71f66b95595d26ac825c4bdb` exactly matched the local bundle inspection. One deployed pinned npm import observed.
+- Defence posture now passes all seven controls. Fresh posture observation `761a49a9-4663-42cb-b354-f478c1cfeae7` replaces the earlier warning as current evidence.
+- Re-attestation workflow now also triggers on deployment manifest/mapping changes and runs bundle regression checks before acquiring its OIDC token. This closes the missing-v93-evidence issue; it does not add a management-plane deployment collector.
+- Live Railway dashboard Foundation section and current Defence panel refreshed. Deployment `a967b278-50c0-41c5-b46f-08602b436b71` observed SUCCESS. Readback confirmed exact deployed code and no staged changes. URL: https://shine-universe-dashboard-production.up.railway.app . Authentication and icons retained. Local handler checks confirmed 503 when unconfigured, 401 without access, 200 for valid test credentials, refreshed content and health route.
+- Earlier static Library HTML remains historical. The live hosted snapshot clearly distinguishes the Foundation refresh time from other scopes. Integration/acceptance remain unverified; prior findings remain expandable history.
+- Live unauthenticated access-evaluation smoke request `303560` returned HTTP 401 `unauthenticated`, with no timeout. This is a negative access boundary test, not a successful authenticated cross-app test.
+- Current readiness remains degraded for runtime latency and one historical open audit trace. At 17:08, v93 had 13 complete audit chains and zero broken current-runtime chains. The historical v90 outcome remains absent.
+- Health log inspection showed five v93 /health invocations between 42 and 310 ms and one at 5414 ms, all HTTP 200 in ap-southeast-2. Probe timings also show slow 5-minute-interval requests and fast warm requests. Cold-start overhead is a hypothesis, not established causation; no warning threshold or historical evidence was altered.
+- Integration inventory contains two active clients and nine active invocation adapters. All nine adapter-health rows have null last_event_at despite available labels. These labels are not fresh execution proof. Existing v93 adapters treat missing/stale health evidence as unknown.
+
+### Remaining verification requirements
+
+Authenticated cross-app success and denial/revocation checks need a valid existing client/user session and reviewed test resources; stored credential hashes cannot be used as bearer credentials. No new identities, credentials or personal grants were created. Product acceptance requires the corresponding real user workflow. The batch is still not represented as 25 newly completed build layers.
