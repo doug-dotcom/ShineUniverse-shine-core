@@ -4,5 +4,11 @@
     "path": "foundation/releases/layer-225-release-gateway-v93.json",
     "fileCount": 31,
     "filesSha256": "496b05459eebe272c12e4cc26060f33d509dd2572aa4f80937a10d78d358a210"
+  },
+  "ae18126784563b871230c5f0b0931160d0f41feda99a2c2df7e61ac2c6cc2152": {
+    "sourceCommit": "2af08b6b767bfa5ea41e9a9596a4e31a452a2cf5",
+    "path": "foundation/releases/audit-outcome-retry-gateway-v94.json",
+    "fileCount": 31,
+    "filesSha256": "bb92361ecd58742f687fd161ed651243c85e02f442638363fc08c24b626a05f6"
   }
 }
