@@ -69,3 +69,9 @@ Authenticated cross-app success and denial/revocation checks need a valid existi
 - Dashboard refreshed to v94 and deployed successfully as 8fd90680-c9be-43bb-b2dc-01141be0d3f6. Access control/content checks passed. Historical snapshots retained; integration/acceptance remain unverified.
 
 Remaining: a valid existing client/user session and reviewed test resources are required for authenticated positive access, cross-account denial and revocation/invocation checks. Hashes in credential stores are not usable bearer credentials. A real user workflow is required for product acceptance. Future provider-version drift collection, intermittent latency diagnosis and the historical audit incident remain open.
+
+## Credential discovery — 8 November 2026, 17:49 Brisbane
+
+The existing VC Foundation live integration credential was issued on 8 October and expired on 7 November 2026 at 22:48 Brisbane (12:48 UTC). Its stored Vault reference was found and matched to its registered hash without exposing the secret. The effective-credential view confirms expired. Live request 303770 to the app status route, with that stored credential passed internally, returned HTTP 403 app-caller-unverified. Expiry enforcement works.
+
+The credential ledger is append-only. No expiry was extended and no trigger was disabled. Prepared an unexecuted atomic replacement proposal in foundation/operations/proposed-vc-service-credential-renewal-20261108.sql: generate a new 256-bit service token, store only its hash in the ledger and its encrypted value in Vault, expire after 30 days, preserve the old expired record, and leave all user grants/scopes unchanged. Activation awaits Doug's decision on the new authentication period; no replacement has been issued. An authenticated user test session remains a separate requirement for personal cross-app access tests.
