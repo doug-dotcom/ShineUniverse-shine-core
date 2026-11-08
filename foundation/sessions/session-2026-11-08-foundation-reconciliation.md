@@ -117,3 +117,17 @@ Live metadata inspection confirms the VC provider, app association and app regis
 The two reader role/policy SQL files are proposals, not live migrations; Auth policy changes require the actual Auth table owner. No runtime login, management credential, personal binding, session, auth setting or token was changed. Protected pools, appropriate current-policy credential custody, companion credential custody, remaining L/memory/recipient/health owner services and server composition remain outstanding. The public memory route remains closed. Latest observed Railway deployment remains e3624f47-9a86-4b5c-ae31-054bc66e1ad0 on source 8592242ca0b92310a053919427f2a2d051a97036; merged source is not claimed as deployed.
 
 Evidence: foundation/evidence/vc-identity-owner-20261108.json. No layer counter increase or full integration/acceptance claim.
+
+## VC credential custody backend — implemented, table installed empty
+
+Shine-Veteran- PR #906 merged at 62bb9f2b2ee4c96db29a82c1133c93a3347c5de6. The new owner implements the existing credential adapter's two callbacks using exact owner/app/purpose/audience/revision queries. It reads AES-256-GCM sealed contexts and requires independently protected key custody; the database reader cannot access Vault. Authentication binds the reference, owner, scope, revision, expiry and key ID. A fresh metadata lookup after key retrieval/decryption withholds results withdrawn during the wait. No HTTP credential response or credential writer was added.
+
+Eleven local unit tests passed. GitHub Actions 42477879159 completed SUCCESS with twelve tests, zero failures and zero skips. The PostgreSQL 17 test ran the actual adapter/provider, including positive synthetic resolution, wrong owner/revision, tampering, resealing, revocation during key retrieval, immutable binding, expiry-extension and terminal-state guards, and client/reader write denial. The initial local cross-owner substitution test was corrected to replace both ciphertext and authentication tag, so it actually tests a foreign authenticated envelope; the complete corrected suite passed.
+
+A rolled-back VC database dry run also passed guard/permission assertions. Applied migration vc_foundation_credential_custody_v1 to akyzwuvfvugzyauaptsk. Post-readback: credential_references has zero rows, RLS enabled, no anon/authenticated schema usage, SELECT-only ciphertext/metadata reader, no reader Vault usage or SELECT, NOLOGIN/NOSUPERUSER/NOBYPASSRLS. Only the postgres administrative creator membership exists with SET/INHERIT false. No synthetic fixtures, keys, credentials, runtime login/membership or personal grants were retained/created.
+
+Health advisors returned no notices. Security advisors retained the same unrelated informational findings and leaked-password-protection warning; no finding for the new custody table.
+
+Server composition remains unconfigured and public memory-read stays closed. A bounded protected pool, separately provisioned key custody, a consented credential enrolment/writer and the remaining L/memory/recipient/health owner services are still needed. The renewed VC app service token is not a per-user companion/recipient credential context. This source/schema increment is not a live authenticated integration or acceptance result and does not increment the layer counter.
+
+Evidence: foundation/evidence/vc-credential-custody-20261108.json.
