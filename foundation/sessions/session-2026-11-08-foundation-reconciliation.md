@@ -93,3 +93,15 @@ Installed the approved v2 replacement in the existing VETERAN_FOUNDATION_APP_TOK
 The deployed server calls createVCFoundationServerMount() without protected owner-service dependencies. Its public memory-read handler deliberately returns 503, reports retrievalPerformed=false/resultReturned=false, and does not parse credentials or invoke read authority. The eleven named owner groups in foundation-owner-services.mjs have not been composed in server.mjs. This corrects the earlier overly narrow conclusion that a user session alone was the remaining blocker: user sign-in cannot supply missing protected service composition.
 
 Machine-readable findings: foundation/evidence/vc-consumer-rollout-and-integration-gaps-20261108.json. Post-deployment checks queued as 304045 (health) and 304046 (closed memory transport). Full user-authorised integration and acceptance remain unverified. No synthetic users or personal grants were created during this continuation.
+
+## Durable VC orchestration owner — implemented and CI verified
+
+Implemented three protected callbacks (current task, checkpoint and retry identity) in Shine-Veteran- PR #904, merged to codex/cadj-live-release-20261026 at 6c94ae0983d0253279b938e02a2ca8b48beafa8d. Queries enforce exact owner/binding, current state, expiry and matching revisions. Checkpoint withdrawal or task cancellation prevents reuse. The provider uses transaction-local SELECT-only role access and returns no memory content.
+
+Applied vc_foundation_orchestration_owner_store_v1 to VC project akyzwuvfvugzyauaptsk. All three private metadata tables have RLS enabled; anon/authenticated have no schema usage; all row counts are zero. Only the existing postgres administrator has an administrative reader-role membership, with SET/INHERIT false after testing. No runtime login, user identity or personal grant was created. Rolled-back SQL acceptance checks passed; fixture data and temporary test permission were not retained.
+
+GitHub Actions run 42476839268 completed SUCCESS: 11 tests passed, zero failed and zero skipped, including the real PostgreSQL 17 provider test. It verified positive owner reads, wrong-owner denial, checkpoint withdrawal, cancellation and pooled transaction-role isolation. Ten unit tests also passed locally.
+
+The source is merged but not yet configured in the live server. Railway's latest observed deployment remains e3624f47-9a86-4b5c-ae31-054bc66e1ad0 at source 8592242ca0b92310a053919427f2a2d051a97036. No new deployment was claimed. A protected bounded pool, remaining nine owner groups and trusted server composition are still required. Public memory-read transport remains closed and user-authorised integration/acceptance remains unverified.
+
+Evidence: foundation/evidence/vc-orchestration-owner-20261108.json. This increment does not represent 25 completed layers.
