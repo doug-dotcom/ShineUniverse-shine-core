@@ -1,0 +1,46 @@
+{
+  "assessment": "2026-11-08",
+  "service": "foundation.gateway",
+  "runtimeVersion": 94,
+  "appId": "shine.veteran-care",
+  "credential": {
+    "label": "VC Foundation live integration v2",
+    "effectiveStatus": "active",
+    "issuedAt": "2026-11-08T07:53:09.794069Z",
+    "expiresAt": "2026-12-08T07:53:09.794069Z",
+    "secretLocation": "Supabase Vault",
+    "secretExposed": false,
+    "originalCredential": "expired; retained"
+  },
+  "checks": [
+    {
+      "test": "VC own service status",
+      "requestId": 303796,
+      "httpStatus": 200,
+      "responseStatus": "ok"
+    },
+    {
+      "test": "VC credential cannot inspect Travel status",
+      "requestId": 303797,
+      "httpStatus": 403,
+      "reasonCode": "app-caller-mismatch"
+    },
+    {
+      "test": "Expired original credential still denied",
+      "requestId": 303798,
+      "httpStatus": 403,
+      "reasonCode": "app-caller-unverified"
+    },
+    {
+      "test": "Valid app credential without user credential cannot evaluate personal access",
+      "requestId": 303799,
+      "httpStatus": 401,
+      "reasonCode": "unauthenticated"
+    }
+  ],
+  "limits": [
+    "Service authentication verified; full user-authorised cross-app integration not yet verified.",
+    "New service credential stored for live tests; not proof that every consuming VC deployment uses the new Vault reference.",
+    "No user grants, identities, scopes or links changed."
+  ]
+}
