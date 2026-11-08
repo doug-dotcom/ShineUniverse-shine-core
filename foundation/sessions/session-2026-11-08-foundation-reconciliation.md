@@ -131,3 +131,15 @@ Health advisors returned no notices. Security advisors retained the same unrelat
 Server composition remains unconfigured and public memory-read stays closed. A bounded protected pool, separately provisioned key custody, a consented credential enrolment/writer and the remaining L/memory/recipient/health owner services are still needed. The renewed VC app service token is not a per-user companion/recipient credential context. This source/schema increment is not a live authenticated integration or acceptance result and does not increment the layer counter.
 
 Evidence: foundation/evidence/vc-credential-custody-20261108.json.
+
+## VC companion-link backend — 9 November 2026 Brisbane
+
+PR #907 merged at 0338c0736b281dfa1cce3344bbf8704213af1f49. Implements the existing companion-link adapter's durable owner lookup. A general Foundation companion link alone does not qualify: an explicit active VC association for the same owner/link is required. The provider independently reads the canonical Foundation client/account/link and revocation state, bounds expiry by the earlier source expiry, then re-reads the VC association to detect withdrawal/revision change during the cross-database lookup.
+
+Ten unit tests passed locally. GitHub Actions 42536314902 completed SUCCESS with eleven tests, zero failures/skips, using two independent PostgreSQL 17 services. Verified wrong-owner denial, canonical-only denial, withdrawal on either side, disabled client/account, expiry, immutable bindings, terminal state, restricted columns/roles and final VC reread. The sequence is not a distributed atomic snapshot; the surrounding invocation still needs current admission/rechecks.
+
+Both database provisioning scripts passed rolled-back dry runs. Applied vc_foundation_companion_link_v1 to VC and foundation_vc_companion_link_reader_v1 to Foundation. VC association table remains empty with RLS enabled and browser schema access denied. Both reader roles are NOLOGIN/NOSUPERUSER/NOBYPASSRLS, have no writes, and have no runtime membership. The only administrative creator memberships have SET/INHERIT false. A restricted-role canonical query with sentinel IDs executed successfully and returned zero rows; temporary test membership was rolled back. No personal link/binding, consent or grant was created or modified. Foundation's reader cannot select private client metadata.
+
+Post-change security advisors retain the same pre-existing findings with no new companion-link issue. Source is merged, not claimed as configured in the live server. L client/user proof verification remains unimplemented; protected pools, consented enrolment, remaining memory/recipient/health owners and trusted composition remain outstanding. Public memory transport remains closed. No layer counter increase or live integration/acceptance claim.
+
+Evidence: foundation/evidence/vc-companion-link-owner-20261109.json.
