@@ -32,6 +32,7 @@ end;
 $renew$;
 commit;
 -- Subsequent verification returns only credential metadata and effective status.
-select app_id,label,effective_status,issued_at,expires_at
-from foundation.effective_app_credentials
-where label='VC Foundation live integration v2';
+select e.app_id,c.label,e.effective_status,e.issued_at,e.expires_at
+from foundation.effective_app_credentials e
+join foundation.app_credentials c using(credential_id)
+where c.label='VC Foundation live integration v2';
