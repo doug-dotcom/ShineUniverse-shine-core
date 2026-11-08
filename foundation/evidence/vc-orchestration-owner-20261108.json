@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "scope": "VC Foundation orchestration owner",
+  "date": "2026-11-08",
+  "source": {
+    "repo": "doug-dotcom/Shine-Veteran-",
+    "pr": 904,
+    "mergeCommit": "6c94ae0983d0253279b938e02a2ca8b48beafa8d"
+  },
+  "database": {
+    "project": "akyzwuvfvugzyauaptsk",
+    "migration": "vc_foundation_orchestration_owner_store_v1",
+    "tables": [
+      "read_tasks",
+      "read_checkpoints",
+      "read_retries"
+    ],
+    "rlsEnabled": true,
+    "anonSchemaAccess": false,
+    "authenticatedSchemaAccess": false,
+    "rowCounts": {
+      "tasks": 0,
+      "checkpoints": 0,
+      "retries": 0
+    },
+    "runtimeLoginCreated": false,
+    "personalGrantsChanged": false,
+    "temporaryTestMembershipRolledBack": true
+  },
+  "verification": {
+    "unitTests": 10,
+    "postgresIntegrationTests": 1,
+    "ciRun": 42476839268,
+    "ciConclusion": "success",
+    "tests": 11,
+    "failed": 0,
+    "skipped": 0,
+    "databaseConstraintTests": "passed in rolled-back transaction"
+  },
+  "runtime": {
+    "providerBootstrapConfigured": false,
+    "publicMemoryReadEnabled": false
+  },
+  "remaining": [
+    "protected runtime pool provisioning",
+    "remaining nine owner groups",
+    "trusted server composition",
+    "authenticated cross-app integration",
+    "product acceptance"
+  ]
+}
