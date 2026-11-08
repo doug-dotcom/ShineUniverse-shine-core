@@ -1,0 +1,41 @@
+{
+  "date": "2026-11-08",
+  "consumer": {
+    "repository": "doug-dotcom/Shine-Veteran-",
+    "branch": "codex/cadj-live-release-20261026",
+    "commit": "8592242ca0b92310a053919427f2a2d051a97036",
+    "railwayProject": "d6e85c16-1f57-489b-9dfd-cc1963f765da",
+    "service": "505db8ca-1226-4987-88f6-ccf31219e2b2",
+    "environment": "88d23731-f8c6-45c6-b55a-d7fedc82a071",
+    "deployment": "e3624f47-9a86-4b5c-ae31-054bc66e1ad0",
+    "deploymentStatus": "SUCCESS",
+    "appUrl": "https://shine-veteran-care-production.up.railway.app"
+  },
+  "credentialRollout": {
+    "variable": "VETERAN_FOUNDATION_APP_TOKEN",
+    "replacementReference": "vc-foundation-app-live-integration-v2",
+    "expiresAt": "2026-12-08T07:53:09.794069Z",
+    "secretDisclosed": false,
+    "sourceRevisionAdvanced": false
+  },
+  "integration": {
+    "state": "unverified",
+    "sourceFinding": "server.mjs calls createVCFoundationServerMount() without protected owner dependencies",
+    "publicMemoryTransport": "deliberately returns 503 without parsing credentials or retrieving memory",
+    "requiredOwnerGroups": [
+      "identity",
+      "credentialCustody",
+      "task",
+      "resume",
+      "lIdentity",
+      "companionLink",
+      "memoryMetadata",
+      "memoryConsent",
+      "memoryRead",
+      "resultRecipient",
+      "capabilityHealth"
+    ],
+    "requiredNextWork": "Compose owner-provided protected service implementations, verify every adapter with synthetic identities and records, then exercise an explicitly designed authenticated transport.",
+    "loginAloneSufficient": false
+  }
+}
