@@ -149,20 +149,26 @@ export function createFoundationHttpHandler({
         const domainRequestId=body&&typeof body==='object'
           ?(body.requestId??body.traceId??null)
           :null;
-        try{
-          await recordOperationAudit({
-            operationAuditId:operationAuditContext.operationAuditId,
-            phase:'outcome',
-            method:'POST',
-            path:url.pathname,
-            environment:'production',
-            httpStatus:status,
-            responseReasonCode,
-            domainRequestId:domainRequestId==null?null:String(domainRequestId),
-            occurredAt:new Date().toISOString()
-          });
-        }catch(error){
-          console.error('gateway operation outcome audit write failed',error);
+        // Replay only the audit write. The domain operation has already completed.
+        // Keep its ID, timestamp and response evidence identical after an ambiguous error.
+        const outcomeEvent={
+          operationAuditId:operationAuditContext.operationAuditId,
+          phase:'outcome',
+          method:'POST',
+          path:url.pathname,
+          environment:'production',
+          httpStatus:status,
+          responseReasonCode,
+          domainRequestId:domainRequestId==null?null:String(domainRequestId),
+          occurredAt:new Date().toISOString()
+        };
+        for(let attempt=0;attempt<2;attempt++){
+          try{
+            await recordOperationAudit({...outcomeEvent});
+            break;
+          }catch(error){
+            if(attempt===1) console.error('gateway operation outcome audit write failed',error);
+          }
         }
       }
       return json(status,body);
