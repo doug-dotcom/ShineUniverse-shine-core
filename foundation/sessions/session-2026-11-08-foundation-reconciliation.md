@@ -28,3 +28,7 @@
 7. Provider reconciliation was verified during this session. An automatic management-plane collector that detects future out-of-band deployments has not been added.
 
 The deployed release remains Layer 225. This session does not claim 25 newly completed build layers or increment the layer counter merely for investigation steps.
+
+## Latest health update
+
+At approximately 17:01 Brisbane, the automatic collector reported degraded health due to p95 latency 5370.108 ms across four probes (zero 4xx/5xx and zero runtime errors). Earlier healthy results remain historical observations; current health must retain this warning. No threshold was relaxed and no probe result was removed.
