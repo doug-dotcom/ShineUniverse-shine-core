@@ -726,7 +726,7 @@ test('required pre-execution audit failure fails privileged route closed',async(
   assert.equal((await res.json()).error,'operation-audit-unavailable');
 });
 
-test('post-execution audit failure does not rewrite a completed domain response',async()=>{
+test('persistent outcome audit failure retries once without rewriting the completed response',async()=>{
   let auditCalls=0;
   const originalError=console.error;
   console.error=()=>{};
@@ -766,7 +766,7 @@ test('post-execution audit failure does not rewrite a completed domain response'
     }));
 
     assert.equal(res.status,200);
-    assert.equal(auditCalls,2);
+    assert.equal(auditCalls,3);
     assert.equal((await res.json()).status,'granted');
   } finally {
     console.error=originalError;
@@ -992,4 +992,44 @@ test('Atlas Feed publish conflict maps to HTTP 409',async()=>{
     })
   }));
   assert.equal(res.status,409);
+});
+
+test('ambiguous outcome write retries identical evidence without repeating the operation',async()=>{
+  let serviceCalls=0;
+  const outcomes=[];
+  const handler=createFoundationHttpHandler({
+    gateway:async()=>({status:'allowed'}),
+    authenticate:async()=>({}),
+    grantConsent:async()=>{serviceCalls++;return {status:'granted',reasonCode:'grant-consent-recorded',requestId:'29222222-2222-4222-8222-222222222222'}},
+    evaluateOperationPolicy:async()=>({operationKey:'grant.consent',policyState:'admit',reasonCode:'dependency-admission-clear'}),
+    operationPolicyRequired:true,
+    operationAuditRequired:true,
+    recordOperationAudit:async event=>{
+      if(event.phase==='outcome'){
+        outcomes.push(structuredClone(event));
+        if(outcomes.length===1)throw new Error('connection lost after commit');
+        return {status:'replayed'};
+      }
+      return {status:'recorded'};
+    }
+  });
+  const response=await handler(new Request(base+'/v1/grants/consent',{method:'POST',headers:{'content-type':'application/json'},body:'{}'}));
+  assert.equal(response.status,200);
+  assert.equal(serviceCalls,1);
+  assert.equal(outcomes.length,2);
+  assert.deepEqual(outcomes[0],outcomes[1]);
+  assert.equal((await response.json()).status,'granted');
+});
+
+test('successful outcome audit is written once',async()=>{
+  let writes=0;
+  const handler=createFoundationHttpHandler({
+    gateway:async()=>({status:'allowed'}),authenticate:async()=>({}),
+    grantConsent:async()=>({status:'granted'}),
+    evaluateOperationPolicy:async()=>({operationKey:'grant.consent',policyState:'admit'}),
+    operationPolicyRequired:true,operationAuditRequired:true,
+    recordOperationAudit:async event=>{if(event.phase==='outcome')writes++;return {status:'recorded'}}
+  });
+  await handler(new Request(base+'/v1/grants/consent',{method:'POST',headers:{'content-type':'application/json'},body:'{}'}));
+  assert.equal(writes,1);
 });
