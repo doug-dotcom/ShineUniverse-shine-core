@@ -1,0 +1,48 @@
+{
+  "component": "current-result-recipient-owner",
+  "dateBrisbane": "2026-11-09",
+  "pr": 917,
+  "merge": "1236dcf1444588dee1bd0e52f137fee9506cb9c2",
+  "ci": {
+    "run": 42624941211,
+    "job": 129186178607,
+    "passed": 16,
+    "failed": 0,
+    "skipped": 0,
+    "coverage": "8 owner tests, 7 existing adapter tests, 1 independent two-database PostgreSQL 17 integration test"
+  },
+  "migrations": [
+    {
+      "project": "akyzwuvfvugzyauaptsk",
+      "name": "vc_result_recipient_owner_v1"
+    },
+    {
+      "project": "sjpxqeyewahraxvidvcc",
+      "name": "foundation_result_recipient_reader_v1"
+    }
+  ],
+  "verified": {
+    "hostedDryRuns": true,
+    "postInstallReaderQueries": true,
+    "ledgerRows": 0,
+    "apiRolesTableSelect": false,
+    "readerWrites": false,
+    "readerLogin": false,
+    "readerSuperuser": false,
+    "readerBypassRls": false,
+    "guardSecurityDefiner": false,
+    "runtimeMembership": false,
+    "advisoryCountsUnchanged": true
+  },
+  "issuedServiceProof": false,
+  "enrolledActor": false,
+  "runtimeWired": false,
+  "liveAcceptanceVerified": false,
+  "remaining": [
+    "Capability-health owner",
+    "Trusted runtime pool/management credential/key composition",
+    "Service proof issuance and explicit recipient authorisation",
+    "Trusted source registration and selected-memory consent",
+    "Real user acceptance"
+  ]
+}
