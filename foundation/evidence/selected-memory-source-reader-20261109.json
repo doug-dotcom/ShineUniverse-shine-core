@@ -1,0 +1,52 @@
+{
+  "component": "protected-selected-memory-source-reader",
+  "dateBrisbane": "2026-11-09",
+  "contentVerification": {
+    "pr": 915,
+    "merge": "b28896493d5127c5bdd377ba2bdf0daadb69a1bb",
+    "ciRun": 42594992527,
+    "passed": 32
+  },
+  "sourceReader": {
+    "pr": 916,
+    "merge": "2494e379d3f13dc15be34425de84ba0f2986c141",
+    "ciRun": 42598432761,
+    "ciJob": 129096688166,
+    "passed": 20,
+    "failed": 0,
+    "skipped": 0,
+    "includesContentVerificationTests": true,
+    "initialFailure": "Synthetic catalogue fixture missing existing metadata columns; corrected before final pass."
+  },
+  "installation": {
+    "project": "raxfwycrnviwxxzykhfq",
+    "migration": "project_l_selected_memory_reader_v1",
+    "verified": true,
+    "role": "vc_selected_memory_reader",
+    "login": false,
+    "superuser": false,
+    "bypassRls": false,
+    "restrictivePolicies": 9,
+    "viewSecurityInvoker": true,
+    "viewSecurityBarrier": true,
+    "anonViewAccess": false,
+    "authenticatedViewAccess": false,
+    "serviceRoleViewAccess": false,
+    "metadataContentAccess": false,
+    "registeredSources": 0,
+    "registeredVersions": 0,
+    "unscopedRows": 0,
+    "unregisteredSelectionRows": 0,
+    "advisoryCountsUnchanged": true
+  },
+  "liveAcceptanceVerified": false,
+  "runtimeWired": false,
+  "personalDataRead": false,
+  "remaining": [
+    "Result recipient owner",
+    "Capability health owner",
+    "Private runtime pool/key/management-credential wiring",
+    "Trusted enrolment, source version registration and explicit consent",
+    "User acceptance"
+  ]
+}
