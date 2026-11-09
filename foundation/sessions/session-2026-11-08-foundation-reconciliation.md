@@ -211,3 +211,14 @@ No users, sessions, tokens, personal mappings, links, consents or grants were cr
 The specific Auth-schema permission blocker is resolved. Protected runtime pools/credential custody, remaining content/recipient/capability-health owners, trusted composition and live user acceptance remain incomplete. Public memory transport stays closed. This is not a live authenticated integration result or layer-counter increase.
 
 Evidence: foundation/evidence/private-auth-session-wrapper-20261109.json.
+
+
+## Selected-memory content and source reader — 9 November 2026 Brisbane
+
+PR #915 CI run 42594992527 passed all 32 tests and was merged as b28896493d5127c5bdd377ba2bdf0daadb69a1bb. This supersedes the previous pending-CI observation. The content verification owner checks exact registered SHA-256 and current metadata, preparation and consent before/after retrieval.
+
+PR #916 implements protected current-version attestation and source byte callbacks with fixed parameterised PostgreSQL queries, fresh read-only transactions and transaction-local selection. Final CI run 42598432761/job 129096688166 passed 20 tests, including real PostgreSQL 17 RLS/ownership tests and the 12 content verification tests (overlapping coverage, not 52 distinct tests). The initial CI failure was a missing-column synthetic catalogue fixture, corrected before merge. Squash merge 2494e379d3f13dc15be34425de84ba0f2986c141.
+
+Applied project_l_selected_memory_reader_v1 in Project L after a successful rolled-back hosted dry run. Dedicated role vc_selected_memory_reader is NOLOGIN/NOSUPERUSER/NOBYPASSRLS; only postgres creator membership remains with inherit/set false. Nine restrictive source policies prevent existing permissive PUBLIC policies widening selection. The view is security_invoker/security_barrier. anon/authenticated/service_role have no SELECT on the new view; metadata reader retains no content SELECT on all nine tables. Missing and sentinel-unregistered selections returned zero content and attestation rows. Temporary validation membership/settings rolled back. All source/version registration tables remain empty; no personal bytes, consent, mappings or runtime credentials were created/read. Security advisory counts unchanged.
+
+Evidence: foundation/evidence/selected-memory-source-reader-20261109.json. This implements the source callbacks but does not activate retrieval. Remaining: recipient and capability-health owners, protected runtime wiring/credentials, trusted enrolment/registration/consent and live user acceptance. Live integration remains unverified.
