@@ -1,0 +1,79 @@
+{
+  "schemaVersion": 1,
+  "workDateBrisbane": "2026-11-09",
+  "component": "memory and preparation metadata owner",
+  "source": {
+    "repository": "doug-dotcom/Shine-Veteran-",
+    "initialPullRequest": 912,
+    "initialMergeCommit": "b3cba8f3781d09048d2a63f9aff16bd7795f30f8",
+    "invokerFixPullRequest": 913,
+    "finalMergeCommit": "5713c5a7c6660f98e8b8e696dff008aaa7311d7a"
+  },
+  "verification": {
+    "localUnitTests": 10,
+    "initialCi": {
+      "run": 42566803385,
+      "result": "success"
+    },
+    "finalCi": {
+      "run": 42567184501,
+      "result": "success",
+      "tests": 11,
+      "failures": 0,
+      "skipped": 0
+    },
+    "databases": "three independent PostgreSQL 17 services",
+    "hostedDryRuns": "all passed and rolled back",
+    "hostedInitialLRoleRead": "failed: existing catalogue security_invoker underlying permission",
+    "hostedCorrectedLAndVcRoleCompileReads": "passed with LIMIT 0; no personal rows read; temporary membership rolled back"
+  },
+  "applied": [
+    {
+      "project": "raxfwycrnviwxxzykhfq",
+      "migrations": [
+        "project_l_memory_metadata_v1",
+        "project_l_memory_metadata_projection_v1"
+      ],
+      "sourceRows": 0,
+      "versionRows": 0
+    },
+    {
+      "project": "akyzwuvfvugzyauaptsk",
+      "migrations": [
+        "vc_preparation_memory_metadata_v1"
+      ],
+      "bindingRows": 0
+    },
+    {
+      "project": "sjpxqeyewahraxvidvcc",
+      "migrations": [
+        "foundation_memory_metadata_reader_v1"
+      ]
+    }
+  ],
+  "protections": {
+    "newTablesRls": true,
+    "readerLogin": false,
+    "readerSuperuser": false,
+    "readerBypassRls": false,
+    "runtimeMembershipCreated": false,
+    "memoryContentSelect": false,
+    "appointmentNotesSelect": false,
+    "projectionSecurityInvoker": true,
+    "projectionSecurityBarrier": true,
+    "sourceRls": "existing RLS retained; new reader policies limited to registered currently owned sources",
+    "newBrowserAccess": false
+  },
+  "personalMappingsCreated": false,
+  "personalContentRead": false,
+  "consentGranted": false,
+  "limits": [
+    "registration/enrolment writer unimplemented",
+    "content hash verification and content reader unimplemented",
+    "recipient and capability-health owners unimplemented",
+    "Auth-schema grant blocker remains",
+    "runtime pools and credentials unconfigured",
+    "public memory transport closed",
+    "metadata availability does not establish current content hash or live acceptance"
+  ]
+}
