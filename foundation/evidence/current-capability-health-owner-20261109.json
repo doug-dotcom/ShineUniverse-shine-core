@@ -1,0 +1,54 @@
+{
+  "component": "current-capability-health-owner",
+  "dateBrisbane": "2026-11-09",
+  "pr": 918,
+  "merge": "e024460c9e63917b62834089b298725c4dc20a69",
+  "ci": {
+    "run": 42625921605,
+    "job": 129189576684,
+    "passed": 17,
+    "failed": 0,
+    "skipped": 0,
+    "coverage": "8 owner tests, 8 existing adapter tests, 1 PostgreSQL 17 integration test"
+  },
+  "migration": {
+    "project": "akyzwuvfvugzyauaptsk",
+    "name": "vc_capability_health_owner_v1"
+  },
+  "verified": {
+    "hostedDryRun": true,
+    "installedReaderQuery": true,
+    "collectorRows": 0,
+    "eventRows": 0,
+    "ledgerRls": true,
+    "readerSelect": true,
+    "readerWrites": false,
+    "readerLogin": false,
+    "readerSuperuser": false,
+    "readerBypassRls": false,
+    "apiTableAccess": false,
+    "guardSecurityDefiner": false,
+    "runtimeMembership": false,
+    "advisoryCountsUnchanged": true
+  },
+  "gateSemantics": {
+    "allEightDependencies": true,
+    "newestAppendBeforeOutcomeFilter": true,
+    "maxAgeMillisecondsExclusive": 300000,
+    "liveModeOnly": true,
+    "exactConfiguredCollectorAndSourceCommit": true,
+    "currentCollectorRevisionRequired": true
+  },
+  "liveProbeCollectorConfigured": false,
+  "capabilityHealthVerified": false,
+  "runtimeWired": false,
+  "liveAcceptanceVerified": false,
+  "remaining": [
+    "Actual read-only dependency probes and protected collector writer",
+    "Independent deployed-source collector registration",
+    "Private runtime pools and protected key/management-credential composition",
+    "Recipient proof and explicit actor authorisation",
+    "Trusted source registration and selected-memory consent",
+    "Real user acceptance"
+  ]
+}
