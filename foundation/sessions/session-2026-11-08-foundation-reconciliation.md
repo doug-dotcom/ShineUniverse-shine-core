@@ -161,3 +161,19 @@ Both new readers remain NOLOGIN/NOSUPERUSER/NOBYPASSRLS with no runtime membersh
 Runtime pools, current-policy credential custody, remaining memory/recipient/health owners and trusted server composition remain outstanding. Public memory transport remains closed. No acceptance event or layer-counter increase is asserted.
 
 Evidence: foundation/evidence/vc-l-identity-owner-20261109.json.
+
+## Selected-memory consent owner — 9 November 2026 Brisbane
+
+PR #911 merged at 3350960df1843c0e9c6b2b558be616b28e7c2e0f. Implements current selected-memory consent and owner permission-revision callbacks. A single SQL snapshot returns the exact app/client/owner/link revision/memory version/preparation/scope/purpose grant metadata with its owner revision. Missing owner ledger remains unknown; no implicit zero/empty authority. Revoked grants remain visible as revoked. Overflow/ambiguity denies completeness.
+
+Consent insert/update advances the owner permission revision atomically. Failed or duplicate writes roll back that advance. Bindings, dates and evidence are immutable; revoked grants cannot reactivate, consent history cannot be deleted and revision counters cannot reset/delete. This is a reader and ledger schema, not a consent enrolment interface.
+
+Ten local unit tests passed. CI 42556818071 completed SUCCESS with eleven tests, zero failures/skips, including the actual adapter/provider against PostgreSQL 17. Concurrent revocation checks showed coherent pre-commit active/revision-1 and post-commit revoked/revision-2 snapshots; failed writes did not advance the counter. Exact scope, history retention, immutable/terminal guards and restricted columns/client/write access passed.
+
+Applied project_l_selected_memory_consent_v1 after a successful rolled-back Project L schema/permission dry run. Both private tables have RLS enabled and remain empty (zero owner revision rows and zero grants). Reader has effective schema USAGE, required metadata SELECT only, no write or private evidence-reference access, NOLOGIN/NOSUPERUSER/NOBYPASSRLS, and no runtime membership. Browser roles have no schema USAGE. A reader-scoped sentinel query executed successfully and returned zero rows; temporary test membership was rolled back. No real owner ledger, consent, grant or personal record was created/changed.
+
+The current L catalogue has text source IDs and content, but the exact UUID/version/owner mapping required by the selected-memory contract is not yet established. VC appointment preparation and draft consent-plan tables were inspected by schema only; no existing OAuth/draft/search record was promoted to per-record permission. Memory descriptor/preparation mapping, content reader, recipient/health services, trusted enrolment/writers and server composition remain outstanding.
+
+The prior Project L Auth permission blocker was rechecked and remains: reader Auth-schema USAGE=false and current connection grant option=false. This independent consent increment does not bypass it. Public memory transport stays closed; no live integration, acceptance or layer-counter increase asserted.
+
+Evidence: foundation/evidence/vc-selected-memory-consent-owner-20261109.json.
