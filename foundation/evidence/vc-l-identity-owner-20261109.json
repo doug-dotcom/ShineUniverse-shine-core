@@ -1,0 +1,80 @@
+{
+  "schemaVersion": 1,
+  "workDateBrisbane": "2026-11-09",
+  "component": "VC companion client and Project L user identity proofs",
+  "source": {
+    "repository": "doug-dotcom/Shine-Veteran-",
+    "proofPullRequest": 908,
+    "proofMergeCommit": "8e34c949b90f3d0b23cd5c841cfc960dd9cebdee",
+    "provisioningFixPullRequest": 910,
+    "provisioningFixMergeCommit": "f70816de6e2de9b7591f20582c25b04914da9353"
+  },
+  "verification": {
+    "localUnitTests": 10,
+    "initialProofCi": {
+      "run": 42553266163,
+      "result": "success",
+      "tests": 11
+    },
+    "finalProofCi": {
+      "run": 42553626420,
+      "result": "success",
+      "tests": 11,
+      "failed": 0,
+      "skipped": 0
+    },
+    "vcProvisioningCi": {
+      "run": 42553626584,
+      "result": "success"
+    },
+    "sdk": "actual pinned Supabase SDK with ephemeral synthetic ES256 keys/JWKS; altered signature rejected",
+    "databases": "two independent PostgreSQL 17 services",
+    "liveInvalidClientProof": {
+      "request": 309657,
+      "http": 403,
+      "reason": "integration-client-unverified",
+      "timedOut": false
+    }
+  },
+  "installed": {
+    "foundation": {
+      "project": "sjpxqeyewahraxvidvcc",
+      "migration": "foundation_vc_l_identity_reader_v1",
+      "schemaUsage": true
+    },
+    "projectL": {
+      "project": "raxfwycrnviwxxzykhfq",
+      "migration": "project_l_vc_session_reader_v1",
+      "migrationApiReportedSuccess": true,
+      "columnGrantsAndPoliciesPresent": true,
+      "effectiveAuthSchemaUsage": false,
+      "installationStatus": "blocked"
+    }
+  },
+  "blocker": {
+    "code": "auth-schema-owner-grant-required",
+    "currentDatabaseRole": "postgres",
+    "authSchemaUsageGrantOption": false,
+    "readerAuthSchemaUsage": false,
+    "ownerOperation": "foundation/operations/project-l-auth-schema-reader-owner-grant-20261109.sql",
+    "ownerOperationExecuted": false
+  },
+  "protections": {
+    "readerLogin": false,
+    "superuser": false,
+    "bypassRls": false,
+    "readerEmail": false,
+    "readerRefreshToken": false,
+    "readerWrites": false,
+    "runtimeMembershipCreated": false,
+    "personalUsersOrCredentialsOrGrantsChanged": false
+  },
+  "limits": [
+    "no live user login verified",
+    "runtime pools and management credential custody unconfigured",
+    "remaining memory/recipient/health owner services incomplete",
+    "server composition unconfigured",
+    "public memory transport closed"
+  ],
+  "advisors": "unchanged pre-existing findings"
+}
