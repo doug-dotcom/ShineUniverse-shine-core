@@ -143,3 +143,21 @@ Both database provisioning scripts passed rolled-back dry runs. Applied vc_found
 Post-change security advisors retain the same pre-existing findings with no new companion-link issue. Source is merged, not claimed as configured in the live server. L client/user proof verification remains unimplemented; protected pools, consented enrolment, remaining memory/recipient/health owners and trusted composition remain outstanding. Public memory transport remains closed. No layer counter increase or live integration/acceptance claim.
 
 Evidence: foundation/evidence/vc-companion-link-owner-20261109.json.
+
+## Companion client and L user proof owner — 9 November 2026 Brisbane
+
+Implemented both remaining L identity callbacks in PR #908, merged at 8e34c949b90f3d0b23cd5c841cfc960dd9cebdee. Companion client proof uses the fixed existing Foundation client-status GET endpoint and only its client token. User proof uses the active registered supabase:shine-l provider, actual pinned SDK getClaims/getUser verification, fixed Project L issuer/audience/session checks, current Auth policy, current Auth session/refresh/account state, canonical verified Shine binding, and a final session reread to catch logout during binding lookup. Metadata supplies no identity.
+
+Ten local unit tests passed. Initial CI 42553266163 completed SUCCESS with eleven tests. The integration test used two independent PostgreSQL 17 services and the actual SDK with synthetic ES256 keys/JWKS; an altered signature was rejected. No synthetic key/token was installed live and no live user login is claimed. Live invalid-client request 309657 returned HTTP 403 integration-client-unverified without timeout.
+
+Provisioning exposed a real hosted permission gap. Foundation reader migration foundation_vc_l_identity_reader_v1 applied and effective schema USAGE is verified. Project L migration project_l_vc_session_reader_v1 reported success and installed column grants/RLS policies, but GRANT USAGE on schema auth did not take effect. A role-scoped session query failed permission denied for schema auth. Current postgres lacks Auth-schema USAGE WITH GRANT OPTION. Reader has no Auth-schema USAGE and remains unusable; migration API success is not readiness.
+
+PR #910 fixes both L and VC Auth reader provisioning scripts to assert effective USAGE immediately after GRANT. It reproduces a limited provisioner with USAGE but no GRANT OPTION and checks transaction rollback, including rollback of the new reader role. Both final workflows passed: L proof 42553626420 (eleven tests, zero failures/skips), VC identity 42553626584. Merged at f70816de6e2de9b7591f20582c25b04914da9353. The updated assertion is source protection; it does not retroactively repair the already-partial live L installation.
+
+Prepared, but did not execute, the narrow schema-owner operation foundation/operations/project-l-auth-schema-reader-owner-grant-20261109.sql. The actual Auth schema owner must grant USAGE to vc_foundation_l_identity_reader, then verify a reader-scoped sentinel query. No broader role membership, ownership changes or RLS bypass were introduced. Existing VC identity reader proposals remain unapplied; they need the same effective schema-access verification.
+
+Both new readers remain NOLOGIN/NOSUPERUSER/NOBYPASSRLS with no runtime membership. Project L reader cannot select email/password/refresh-token values or write sessions. No real users, sessions, tokens, identity bindings, companion links or personal grants were changed. Security advisors retain the same pre-existing findings.
+
+Runtime pools, current-policy credential custody, remaining memory/recipient/health owners and trusted server composition remain outstanding. Public memory transport remains closed. No acceptance event or layer-counter increase is asserted.
+
+Evidence: foundation/evidence/vc-l-identity-owner-20261109.json.
