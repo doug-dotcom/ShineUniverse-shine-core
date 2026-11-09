@@ -191,3 +191,23 @@ Applied Project L migrations project_l_memory_metadata_v1 and project_l_memory_m
 Metadata availability is not proof that source bytes match the registered source_sha256. The future content reader must verify that digest before release. Trusted registration/enrolment writers, actual mappings, content reader, recipient and capability-health owners, protected configuration and server composition remain outstanding. The Project L Auth-schema usage/grant-option blocker was rechecked and remains false/false. Public memory transport stays closed. No personal mappings, consent, grant, integration/acceptance event or layer-counter increase was created.
 
 Evidence: foundation/evidence/vc-memory-metadata-owner-20261109.json.
+
+## Auth-schema permission blocker resolved — 9 November 2026 Brisbane
+
+Read Supabase support response SU-544891 and verified its official hosted Auth-schema guide. Direct Auth-schema grants are unsupported; the earlier recommendation to wait for a Supabase-admin grant was incorrect and is superseded. The prepared owner-grant operation is now marked non-executable/superseded.
+
+PR #914 merged at 9c0d68265bfe96f0e5894a8c05e4d06edfa6fbd2. Both VC and L now use a narrow private vc_foundation.current_session_metadata_v1(session UUID,user UUID) wrapper. It is SECURITY DEFINER owned by the authorised postgres provisioning role, with empty search path, fully qualified Auth objects, auth.uid()/subject/session/issuer/role matching, and only seven required metadata fields. PUBLIC, anon, authenticated and service_role execution is denied. Dedicated reader roles receive private-schema USAGE/EXECUTE only; obsolete direct Auth-table grants and reader-only policies were removed. Auth RLS stays enabled and existing API-user policies are unchanged.
+
+Node lookups assert minimal SDK-verified subject/session context through parameterised transaction-local settings. Those GUCs are not independent JWT verification or public authentication; the protected pool remains a trusted server boundary. Roles and claims are restored on commit/rollback.
+
+Twenty local identity tests passed. Both CI workflows completed SUCCESS with eleven tests each (22 total, zero failures/skips): VC 42589463296; L 42589463297. PostgreSQL coverage includes valid/missing/mismatched owner/session/issuer/role context, API-role and direct-table denial, exact fields/search path, pooled-context isolation, current revocation/logout and actual SDK synthetic signing checks for L.
+
+Applied project_l_private_session_wrapper_v1 to Project L and vc_private_session_wrapper_v1 to VC. Effective-role missing-context and sentinel session checks executed successfully in both live databases inside rolled-back test transactions; no real session was returned or created. For both readers, direct Auth-schema USAGE remains false intentionally, wrapper EXECUTE=true, API-role EXECUTE=false, direct Auth-table/email/token SELECT=false, NOLOGIN/NOSUPERUSER/NOBYPASSRLS. Only creator postgres memberships exist with SET/INHERIT false. This verifies the supported boundary without a schema-owner grant.
+
+Also finished the previously prepared Foundation canonical VC identity reader provisioning (foundation_vc_identity_reader_v1), after a successful dry run. Its schema access is effective and it has no writes, login or RLS bypass.
+
+No users, sessions, tokens, personal mappings, links, consents or grants were created/changed. Security advisors retain the same pre-existing warnings with no exposed wrapper finding. No support reply was sent by the assistant.
+
+The specific Auth-schema permission blocker is resolved. Protected runtime pools/credential custody, remaining content/recipient/capability-health owners, trusted composition and live user acceptance remain incomplete. Public memory transport stays closed. This is not a live authenticated integration result or layer-counter increase.
+
+Evidence: foundation/evidence/private-auth-session-wrapper-20261109.json.
