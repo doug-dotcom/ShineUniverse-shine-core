@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "workDateBrisbane": "2026-11-09",
+  "component": "private Auth session metadata boundary",
+  "status": "schema-permission-blocker-resolved",
+  "source": {
+    "repository": "doug-dotcom/Shine-Veteran-",
+    "pullRequest": 914,
+    "mergeCommit": "9c0d68265bfe96f0e5894a8c05e4d06edfa6fbd2"
+  },
+  "support": {
+    "ticket": "SU-544891",
+    "guidance": "private narrow SECURITY DEFINER function, not direct Auth-schema grant",
+    "officialGuide": "https://supabase.com/kb/troubleshooting/permission-errors-when-granting-custom-roles-access-to-the-auth-schema-9e32e7"
+  },
+  "verification": {
+    "localTests": 20,
+    "ci": [
+      {
+        "run": 42589463296,
+        "tests": 11,
+        "result": "success"
+      },
+      {
+        "run": 42589463297,
+        "tests": 11,
+        "result": "success"
+      }
+    ],
+    "failed": 0,
+    "skipped": 0,
+    "coverage": [
+      "exact context/owner/session/issuer",
+      "API-role denial",
+      "direct Auth-table denial",
+      "pool role/claim isolation",
+      "current revocation/logout",
+      "synthetic SDK signature verification"
+    ],
+    "live": "both dedicated roles executed missing-context/sentinel checks in rolled-back transactions without permission errors; no real sessions returned"
+  },
+  "applied": [
+    {
+      "project": "raxfwycrnviwxxzykhfq",
+      "migration": "project_l_private_session_wrapper_v1",
+      "reader": "vc_foundation_l_identity_reader"
+    },
+    {
+      "project": "akyzwuvfvugzyauaptsk",
+      "migration": "vc_private_session_wrapper_v1",
+      "reader": "vc_foundation_session_reader"
+    },
+    {
+      "project": "sjpxqeyewahraxvidvcc",
+      "migration": "foundation_vc_identity_reader_v1",
+      "scope": "canonical VC identity metadata only"
+    }
+  ],
+  "protections": {
+    "readerAuthSchemaUsage": false,
+    "readerWrapperExecute": true,
+    "publicApiRoleExecute": false,
+    "directAuthTableSelect": false,
+    "emailOrTokenSelect": false,
+    "readerLogin": false,
+    "readerSuperuser": false,
+    "readerBypassRls": false,
+    "functionOwner": "postgres",
+    "functionDefiner": true,
+    "emptySearchPath": true,
+    "authUidAndClaimContextRequired": true,
+    "runtimeMembershipCreated": false
+  },
+  "personalUsersSessionsCredentialsMappingsOrGrantsChanged": false,
+  "limits": [
+    "wrapper context is asserted by trusted SDK-verified server code; GUCs do not verify signatures",
+    "no live positive user workflow verified",
+    "runtime pools and credential custody unconfigured",
+    "content/recipient/health services incomplete",
+    "public memory transport closed"
+  ],
+  "advisors": "same pre-existing security warnings; no new exposed wrapper finding"
+}
