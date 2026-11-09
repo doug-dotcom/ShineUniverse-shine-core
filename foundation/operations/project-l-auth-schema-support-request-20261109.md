@@ -1,3 +1,5 @@
+> Status update, 9 November 2026: Doug submitted this request as SU-544891. Supabase's AI support reply confirmed direct Auth-schema grants are unsupported and recommended a narrow private SECURITY DEFINER wrapper. That wrapper is now implemented, installed and role-verified for VC and Project L in PR #914. The draft below is retained as historical request text; its direct-grant proposal is superseded.
+
 # Supabase support request — prepared, not submitted
 
 Subject: Narrow Auth-schema USAGE grant for metadata-only NOLOGIN reader
