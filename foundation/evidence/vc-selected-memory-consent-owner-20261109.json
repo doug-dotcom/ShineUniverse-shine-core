@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "workDateBrisbane": "2026-11-09",
+  "component": "selected memory consent owner",
+  "source": {
+    "repository": "doug-dotcom/Shine-Veteran-",
+    "pullRequest": 911,
+    "mergeCommit": "3350960df1843c0e9c6b2b558be616b28e7c2e0f"
+  },
+  "implemented": [
+    "exact selected-resource consent lookup",
+    "single-snapshot grant/revision context",
+    "transactional monotonic owner permission revisions",
+    "immutable consent binding and terminal revocation",
+    "missing ledger remains unknown"
+  ],
+  "verification": {
+    "localTests": 10,
+    "ciTests": 11,
+    "ciRun": 42556818071,
+    "result": "success",
+    "failures": 0,
+    "skipped": 0,
+    "concurrentRevocationTest": true,
+    "liveSchemaDryRun": "passed and rolled back",
+    "liveRestrictedSentinelRead": "passed; zero matching rows; temporary membership rolled back"
+  },
+  "database": {
+    "project": "raxfwycrnviwxxzykhfq",
+    "migration": "project_l_selected_memory_consent_v1",
+    "ownerLedgerRows": 0,
+    "grantRows": 0,
+    "rlsEnabled": true,
+    "readerSchemaUsage": true,
+    "anonUsage": false,
+    "authenticatedUsage": false,
+    "readerWrites": false,
+    "readerPrivateConsentEvidenceRead": false,
+    "readerLogin": false,
+    "readerSuperuser": false,
+    "readerBypassRls": false,
+    "runtimeMembershipCreated": false
+  },
+  "personalConsentCreated": false,
+  "personalRecordsChanged": false,
+  "remaining": [
+    "exact canonical memory UUID/version/owner mapping",
+    "preparation metadata binding",
+    "selected content reader",
+    "recipient and capability-health owners",
+    "consented enrolment/writers",
+    "protected runtime pools and credentials",
+    "Auth-schema owner grant for L proof reader",
+    "trusted server composition and live acceptance"
+  ],
+  "runtimeConfigured": false,
+  "publicMemoryTransportEnabled": false
+}
