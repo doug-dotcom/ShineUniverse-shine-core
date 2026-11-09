@@ -1,0 +1,43 @@
+{
+  "component": "protected-runtime-composition",
+  "dateBrisbane": "2026-11-09",
+  "pr": 919,
+  "merge": "6b7c2db153035eb156682c2d6c0971b2087a31f2",
+  "ci": {
+    "run": 42628358502,
+    "job": 129197897045,
+    "passed": 13,
+    "failed": 0,
+    "skipped": 0
+  },
+  "verified": {
+    "allElevenOwnerGroupsCompose": true,
+    "productionFactoryImports": true,
+    "taskResumeConsentHealthRouting": true,
+    "noStartupConnections": true,
+    "noStartupSecretResolution": true,
+    "publicHttpRemains503": true
+  },
+  "railwayInventory": {
+    "project": "d6e85c16-1f57-489b-9dfd-cc1963f765da",
+    "service": "505db8ca-1226-4987-88f6-ccf31219e2b2",
+    "environment": "88d23731-f8c6-45c6-b55a-d7fedc82a071",
+    "namesOnly": true,
+    "appTokenConfigured": true,
+    "ownerPoolInputsConfigured": false,
+    "custodyInputsConfigured": false,
+    "healthCollectorInputsConfigured": false
+  },
+  "serverEntrypointChanged": false,
+  "productionActivated": false,
+  "liveAcceptanceVerified": false,
+  "remaining": [
+    "Provision bounded least-privilege Foundation/VC/L pools and required reader SET memberships",
+    "Protected VC and L management credential readers",
+    "Independent custody decryption-key reader",
+    "Actual readonly probe collector and reviewed deployed-source registration",
+    "Recipient proof and explicit actor authorisation",
+    "Trusted source version registration and selected-memory consent",
+    "Protected server activation and real authenticated acceptance"
+  ]
+}
