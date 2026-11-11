@@ -270,3 +270,10 @@ No token was created and no Railway secret was changed during this attempt. Crea
 ## GitHub connection retry — 11 November 2026 Brisbane
 
 Doug requested another attempt using the GitHub plugin. Authenticated connector identity verified as doug-dotcom (225530237), and Foundation checkpoint read succeeded. This verifies repository connector access only, not the separate browser session needed for Supabase token issuance. Corrected the previous unsupported attribution of the ended secure sign-in request to Doug; he explicitly says he did not cancel it. Exact scoped-token/storage approval remains valid.
+
+
+## Supabase direct connection check — 11 November 2026 Brisbane
+
+At Doug's explicit Supabase plugin request, direct SQL checks succeeded in Foundation, VC and Project L. Foundation identity/recipient reader roles exist; L private current-session wrapper exists. VC recipient authorisations, health collectors/events and credential references remain zero. L selected-memory consents, registered sources and versions remain zero. These are integration registration counts, not total memory/data counts. No data/permissions/credentials were modified by these checks.
+
+The Supabase connector is functional. It does not expose an operation to issue/export the app's scoped Management API token, and connected-tool authority does not become a Railway runtime credential. Browser sign-in/token provisioning remains a distinct unfinished step, along with the other recorded runtime/provisioning prerequisites. No live acceptance established.
