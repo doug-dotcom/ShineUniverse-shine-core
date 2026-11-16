@@ -1,3 +1,5 @@
+> **ROOM SHELVED — 16 November 2026 (Australia/Brisbane).** Doug asked to save and shelve this room. Resume only on his instruction. Start with the shelving checkpoint below; historical evidence is retained and is not a current live-health claim.
+
 # Foundation reconciliation — 8 November 2026
 
 ## Applied and verified
@@ -277,3 +279,48 @@ Doug requested another attempt using the GitHub plugin. Authenticated connector 
 At Doug's explicit Supabase plugin request, direct SQL checks succeeded in Foundation, VC and Project L. Foundation identity/recipient reader roles exist; L private current-session wrapper exists. VC recipient authorisations, health collectors/events and credential references remain zero. L selected-memory consents, registered sources and versions remain zero. These are integration registration counts, not total memory/data counts. No data/permissions/credentials were modified by these checks.
 
 The Supabase connector is functional. It does not expose an operation to issue/export the app's scoped Management API token, and connected-tool authority does not become a Railway runtime credential. Browser sign-in/token provisioning remains a distinct unfinished step, along with the other recorded runtime/provisioning prerequisites. No live acceptance established.
+
+
+
+## Room shelving checkpoint — 16 November 2026 Brisbane
+
+**User instruction:** “I am going to shelf this room please save.” Work in this room is shelved. This saves the handover; it does not undo deployed repairs, revoke existing roles, disable separate automations or claim integration acceptance.
+
+### Completed and preserved
+
+- Foundation v93/v90 source reconciliation and Defence remediation were completed earlier in this session; gateway v94 and its recorded evidence remain documented above. Treat version/deployment observations as historical until checked again.
+- VC owner backends were built across PRs #904–#913: task/resume, current identity/session policy, sealed credential custody, companion link, L proof verification, selected consent and source/preparation metadata. Supporting private database readers/registries and the metadata-only projection were installed as recorded.
+- Auth-schema blocker resolved using Supabase-supported private session wrappers in VC and Project L: PR #914, merge 9c0d68265bfe96f0e5894a8c05e4d06edfa6fbd2; 22 CI tests passed at that checkpoint. Direct Auth-schema grants were superseded. Support ticket SU-544891.
+- Content verification: PR #915, merge b28896493d5127c5bdd377ba2bdf0daadb69a1bb; 32 CI tests passed. Exact registered hash and fresh metadata/preparation/consent checks surround retrieval.
+- Protected source bytes/hash reader: PR #916, merge 2494e379d3f13dc15be34425de84ba0f2986c141; 20 CI tests passed, including overlapping content tests and PostgreSQL isolation. Installed project_l_selected_memory_reader_v1.
+- Current result recipient: PR #917, merge 1236dcf1444588dee1bd0e52f137fee9506cb9c2; 16 CI tests passed. Private recipient ledger/readonly readers installed in VC and Foundation.
+- Capability-health evidence owner: PR #918, merge e024460c9e63917b62834089b298725c4dc20a69; 17 CI tests passed. Private append-only health ledger installed; latest failure cannot fall back to earlier success.
+- Protected composition of all 11 owner groups: PR #919, merge 6b7c2db153035eb156682c2d6c0971b2087a31f2; 13 CI tests passed. Construction performs no DB/secret lookup. Production server entrypoint was not activated.
+- Test counts above describe separate, overlapping suites. Do not add them together as distinct tests or count these as completed live acceptance.
+
+### Last verified state and remaining blockers
+
+Last direct Supabase checks were **11 November**, not a fresh 16 November runtime assessment. Foundation/VC/Project L connections worked; reader roles and L private session wrapper existed. VC recipient authorisations, health collectors/events and credential references were empty. L registered sources/versions and selected-memory consents were empty. These are integration registries, not the total personal-memory store.
+
+Last Railway name-only inventory found the Foundation app token but no configured owner pools, management-credential/key custody or collector inputs. No token was created or Railway secret changed during the recorded browser attempts. The later GitHub connector check succeeded as doug-dotcom; this does not sign the browser into Supabase.
+
+Outstanding:
+1. Scoped Auth-policy Management API credential, protected custody and actual pool/key readers.
+2. Bounded least-privilege Foundation/VC/L PostgreSQL pools and required reader-role SET memberships.
+3. Actual read-only dependency probes, protected collector writer and reviewed deployed-source registration.
+4. Explicit service/actor recipient authorisation and trusted source/version registration and selected-memory consent.
+5. Protected server activation and real authenticated end-to-end acceptance, including withdrawal and cross-account denial. Public memory route remains closed in the recorded source; live readiness/acceptance is unverified.
+
+### Approval and authentication handover
+
+Doug explicitly approved creating **Shine VC Auth-policy reader**, limited to **Project L (raxfwycrnviwxxzykhfq)** and **VC (akyzwuvfvugzyauaptsk)**, **Auth Config Read only**, **seven-day lifetime from creation**, and storing it as a **sealed secret in VC Railway**. Do not request the same approval again if scope/destination/lifetime are unchanged. No token was issued in this room.
+
+The browser session expired before issuance. A secure sign-in request ended with an aborted marker, but its cause was unverified; Doug explicitly said he did **not** cancel it. Do not attribute cancellation to him. A browser authentication handoff was subsequently offered; successful completion was not observed. Do not assume an old tab, sign-in session, screenshot or scratch file survives.
+
+### Resume instructions
+
+Read this checkpoint and foundation/evidence/ records, inspect the current VC production branch codex/cadj-live-release-20261026 and verify current live state before changing anything. Source is preserved in doug-dotcom/Shine-Veteran-; canonical handover is this file in doug-dotcom/ShineUniverse-shine-core. Recover source from GitHub if scratch maintenance removed local files.
+
+Resume token issuance only when Doug requests resumption and authentication can be completed. Recreate and verify the exact approved scope if the review form is gone. Never print tokens, copy secrets into receipts, use broad managed-role grants, fabricate consent/collector health or turn CI success into live acceptance. Keep personal-memory access closed until all current authority and acceptance requirements pass.
+
+No additional build, browser-auth retry, deployment or automation change was performed as part of shelving.
