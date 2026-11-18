@@ -1,0 +1,16 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import {assessOperations} from './audit-revocation-report-v1.mjs';
+const now=Date.parse('2026-11-18T10:00:00Z');
+const base=()=>({contract:'shine-foundation/audit-revocation-operations-v1',observedAt:new Date(now).toISOString(),deployment:{runtime_version:'94',artifact_sha256:'a'.repeat(64)},audit:[{scope:'current',fresh_complete:2,broken:0,stale_open:0,pending:0,issues:[]}],revocations:[{appId:'shine.test',pendingCount:0,freshness:'current'}]});
+test('healthy evidence is not integration acceptance',()=>{const r=assessOperations(base(),{now});assert.equal(r.state,'pass');assert.equal(r.integrationAccepted,false);});
+test('historical missing outcome remains visible without contaminating current release classification',()=>{const s=base();s.audit.push({scope:'historical',fresh_complete:0,broken:0,stale_open:1,pending:0,issues:[{id:'old',kind:'missing-outcome'}]});const r=assessOperations(s,{now});assert.equal(r.state,'degraded');assert.equal(r.currentReleaseAudit,'pass');assert.match(r.actions[0].action,/Never replay/);});
+test('current missing outcome degrades',()=>{const s=base();Object.assign(s.audit[0],{stale_open:1,issues:[{id:'new',kind:'missing-outcome'}]});assert.equal(assessOperations(s,{now}).currentReleaseAudit,'degraded');});
+test('broken chain fails even in historical evidence',()=>{const s=base();s.audit.push({scope:'historical',fresh_complete:0,broken:1,stale_open:0,pending:0,issues:[{id:'old',kind:'broken-chain'}]});assert.equal(assessOperations(s,{now}).state,'fail');});
+test('no current traces is unknown',()=>{const s=base();s.audit=[];assert.equal(assessOperations(s,{now}).state,'unknown');});
+test('pending in-flight trace alone is not a completed proof',()=>{const s=base();Object.assign(s.audit[0],{fresh_complete:0,pending:1});assert.equal(assessOperations(s,{now}).state,'unknown');});
+test('stale, future and malformed dates cannot pass',()=>{for(const date of ['2026-11-17','2027-01-01','bad']){const s=base();s.observedAt=date;assert.equal(assessOperations(s,{now}).state,'unknown');}});
+test('missing artifact cannot claim current-release health',()=>{const s=base();s.deployment.artifact_sha256=null;assert.equal(assessOperations(s,{now}).state,'unknown');});
+test('revocation backlog never auto-acknowledges',()=>{const s=base();s.revocations[0]={appId:'shine.test',pendingCount:2,freshness:'stale'};const r=assessOperations(s,{now});assert.equal(r.state,'degraded');assert.match(r.actions[0].action,/Never advance/);});
+test('missing consumer inventory is unknown',()=>{const s=base();s.revocations=[];assert.equal(assessOperations(s,{now}).state,'unknown');});
+test('invalid counts, duplicate scope and incomplete issue lists fail closed',()=>{for(const change of [s=>s.audit[0].broken=-1,s=>s.audit.push({...s.audit[0]}),s=>s.audit[0].stale_open=1,s=>s.revocations[0].pendingCount=-1]){const s=base();change(s);assert.equal(assessOperations(s,{now}).state,'unknown');}});

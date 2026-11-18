@@ -26,6 +26,7 @@ jobs:
         with:
           node-version: '22'
       - run: node --test foundation/packages/veteran-care-server-read-v1/build-v1.test.mjs
+      - run: node --test foundation/operations/audit-revocation-report-v1.test.mjs
       - run: node foundation/integration-kit/verify-object-registry-v1.mjs
       - run: node --test foundation/integration-kit/verify-app-ownership-boundaries-v1.test.mjs
       - run: node foundation/integration-kit/verify-gateway-operation-registry-v1.mjs
@@ -765,3 +766,33 @@ jobs:
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-attestation-authority-sync-heartbeat-integration-v1.sql
       - name: Run Shine Defence authority sync heartbeat full-estate tests
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/defence-attestation-authority-sync-heartbeat-integration-v1.test.sql
+
+  audit-revocation-operations:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: foundation_operations_test
+        ports: [5432:5432]
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: 5432
+      PGDATABASE: foundation_operations_test
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      FOUNDATION_OPERATIONS_SYNTHETIC: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: sudo apt-get update && sudo apt-get install -y postgresql-client
+      - run: node foundation/operations/verify-audit-revocation-postgres-v1.mjs
