@@ -1,6 +1,3 @@
-Warning: truncated output (original token count: 16826)
-Total output lines: 798
-
 name: Shine Foundation
 run-name: "Foundation + Concierge • ${{ inputs.orchestration_id || github.sha }}"
 on:
@@ -380,7 +377,82 @@ jobs:
       - name: Apply Foundation promoted release owner handoff FK index
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-promoted-release-owner-handoff-index-v1.sql
       - name: Run Foundation promoted release owner handoff tests
-        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundat…1826 tokens truncated…age incident response policy
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-promoted-release-owner-handoff-v1.test.sql
+      - name: Apply Foundation promoted release owner acknowledgement
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-promoted-release-owner-ack-v1.sql
+      - name: Run Foundation promoted release owner acknowledgement tests
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-promoted-release-owner-ack-v1.test.sql
+      - name: Apply Foundation promoted release owner evidence return
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-promoted-release-owner-evidence-v1.sql
+      - name: Run Foundation promoted release owner evidence return tests
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-promoted-release-owner-evidence-v1.test.sql
+      - name: Apply Foundation independent promotion-trust verification
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-promoted-release-independent-verification-v1.sql
+      - name: Run Foundation independent promotion-trust verification tests
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-promoted-release-independent-verification-v1.test.sql
+      - name: Apply Foundation owner verification receipts
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-promoted-release-owner-verification-receipts-v1.sql
+      - name: Run Foundation owner verification receipt tests
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-promoted-release-owner-verification-receipts-v1.test.sql
+      - name: Apply Foundation promotion-trust case audit
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-promoted-release-case-audit-v1.sql
+      - name: Run Foundation promotion-trust case audit tests
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-promoted-release-case-audit-v1.test.sql
+      - name: Apply Foundation promotion-trust case audit observations
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-promoted-release-case-audit-observation-v1.sql
+      - name: Run Foundation promotion-trust case audit observation tests
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-promoted-release-case-audit-observation-v1.test.sql
+      - name: Apply Foundation promotion-trust case audit incident lifecycle
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-promoted-release-case-audit-incident-v1.sql
+      - name: Run Foundation promotion-trust case audit incident lifecycle tests
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-promoted-release-case-audit-incident-v1.test.sql
+      - name: Apply Foundation promotion-trust case audit incident response policy
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-promoted-release-case-audit-incident-response-v1.sql
+      - name: Run Foundation promotion-trust case audit incident response policy tests
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-promoted-release-case-audit-incident-response-v1.test.sql
+      - name: Apply Foundation bounded case-audit safe response executor
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-promoted-release-case-audit-safe-response-executor-v1.sql
+      - name: Converge Foundation Layer 76 execution ledger identifiers
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-promoted-release-case-audit-safe-response-executor-identifiers-v1.sql
+      - name: Converge Foundation Layer 76 function identifiers
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-promoted-release-case-audit-safe-response-function-name-convergence-v2.sql
+      - name: Refresh Foundation Layer 76 stored function identifiers
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-promoted-release-case-audit-safe-response-executor-functions-v1.sql
+      - name: Run Foundation bounded case-audit safe response executor tests
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-promoted-release-case-audit-safe-response-executor-v1.test.sql
+      - name: Apply Foundation safe-response durable evidence verification
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-case-audit-safe-response-verification-v1.sql
+      - name: Run Foundation safe-response durable evidence verification tests
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-case-audit-safe-response-verification-v1.test.sql
+      - name: Apply Foundation safe-response verification coverage audit
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-case-audit-safe-response-verification-coverage-v1.sql
+      - name: Run Foundation safe-response verification coverage audit tests
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-case-audit-safe-response-verification-coverage-v1.test.sql
+      - name: Apply Foundation verification coverage incident lifecycle
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-case-audit-verification-incident-v1.sql
+      - name: Run Foundation verification coverage incident lifecycle tests
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-case-audit-verification-incident-v1.test.sql
+      - name: Apply Foundation verification coverage incident response policy
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-case-audit-verification-incident-response-v1.sql
+      - name: Run Foundation verification coverage incident response policy tests
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-case-audit-verification-incident-response-v1.test.sql
+      - name: Apply Foundation bounded overdue verification executor
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-case-audit-verification-executor-v1.sql
+      - name: Run Foundation bounded overdue verification executor tests
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-case-audit-verification-executor-v1.test.sql
+      - name: Apply Foundation verification execution reconciliation
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-case-audit-verification-exec-reconciliation-v1.sql
+      - name: Run Foundation verification execution reconciliation tests
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-case-audit-verification-exec-reconciliation-v1.test.sql
+      - name: Apply Foundation reconciliation coverage audit
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-case-audit-verification-reconciliation-coverage-v1.sql
+      - name: Run Foundation reconciliation coverage audit tests
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-case-audit-verification-reconciliation-coverage-v1.test.sql
+      - name: Apply Foundation reconciliation coverage incident lifecycle
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-case-audit-verification-reconciliation-incident-v1.sql
+      - name: Run Foundation reconciliation coverage incident lifecycle tests
+        run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-case-audit-verification-reconciliation-incident-v1.test.sql
+      - name: Apply Foundation reconciliation coverage incident response policy
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-case-audit-verification-reconciliation-incident-response-v1.sql
       - name: Run Foundation reconciliation coverage incident response policy tests
         run: psql -v ON_ERROR_STOP=1 -f foundation/postgres/foundation-case-audit-verification-reconciliation-incident-response-v1.test.sql
