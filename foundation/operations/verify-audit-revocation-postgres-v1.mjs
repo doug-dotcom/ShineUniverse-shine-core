@@ -1,0 +1,41 @@
+// Disposable PostgreSQL fixture only. Never accepts production connection URLs.
+import {spawnSync} from 'node:child_process';
+import {readFileSync} from 'node:fs';
+import assert from 'node:assert/strict';
+import {assessOperations} from './audit-revocation-report-v1.mjs';
+assert.equal(process.env.FOUNDATION_OPERATIONS_SYNTHETIC,'1');
+assert.equal(process.env.CI,'true');
+assert.equal(process.env.PGDATABASE,'foundation_operations_test');
+assert(['localhost','127.0.0.1'].includes(process.env.PGHOST));
+const sql=q=>{const r=spawnSync('psql',['-X','-A','-t','-q','-v','ON_ERROR_STOP=1'],{input:q,encoding:'utf8',timeout:30000});assert.equal(r.status,0,r.stderr);return r.stdout.trim();};
+sql(`create schema foundation;
+create table foundation.current_service_deployment_observations(service_id text,environment text,runtime_version text,artifact_sha256 text);
+create table foundation.gateway_operation_audit_events(operation_audit_id uuid,audit_event_id uuid,phase text,environment text,runtime_version text,artifact_sha256 text,occurred_at timestamptz,previous_event_hash text,event_hash text);
+create table foundation.app_registry(app_id text,status text);
+create table foundation.test_revocation_health(app_id text,pending_count bigint,freshness_state text,recommended_action text,stale_action text,oldest_pending_at timestamptz);
+create function foundation.get_app_revocation_health_v1(text) returns setof foundation.test_revocation_health language sql security invoker as $$select * from foundation.test_revocation_health where app_id=$1$$;
+insert into foundation.current_service_deployment_observations values('foundation.gateway','production','94',repeat('a',64));
+insert into foundation.app_registry values('shine.test','active');
+insert into foundation.test_revocation_health values('shine.test',0,'current','none','observe',null);
+insert into foundation.gateway_operation_audit_events values
+('11111111-1111-4111-8111-111111111111',gen_random_uuid(),'policy','production','94',repeat('a',64),now()-interval '10 seconds',null,'hash'),
+('11111111-1111-4111-8111-111111111111',gen_random_uuid(),'outcome','production','94',repeat('a',64),now(),'hash','outcome');`);
+const query=readFileSync(new URL('./audit-revocation-snapshot-v1.sql',import.meta.url),'utf8');
+const snapshot=()=>JSON.parse(sql(query));
+assert.equal(assessOperations(snapshot()).state,'pass');
+sql(`insert into foundation.gateway_operation_audit_events values('22222222-2222-4222-8222-222222222222',gen_random_uuid(),'policy','production','90',repeat('b',64),now()-interval '20 days',null,'old');`);
+let s=snapshot();assert.equal(s.audit.find(x=>x.scope==='historical').stale_open,1);assert.equal(assessOperations(s).currentReleaseAudit,'pass');assert.equal(assessOperations(s).state,'degraded');
+sql(`insert into foundation.gateway_operation_audit_events values('33333333-3333-4333-8333-333333333333',gen_random_uuid(),'policy','production','94',repeat('a',64),now()-interval '10 minutes',null,'open');`);
+assert.equal(assessOperations(snapshot()).currentReleaseAudit,'degraded');
+sql(`insert into foundation.gateway_operation_audit_events values('33333333-3333-4333-8333-333333333333',gen_random_uuid(),'outcome','production','94',repeat('a',64),now(),'wrong','broken');`);
+assert.equal(assessOperations(snapshot()).currentReleaseAudit,'fail');
+sql(`update foundation.gateway_operation_audit_events set previous_event_hash='open' where event_hash='broken';`);
+assert.equal(assessOperations(snapshot()).currentReleaseAudit,'pass');
+sql(`insert into foundation.gateway_operation_audit_events values('44444444-4444-4444-8444-444444444444',gen_random_uuid(),'policy','production','94',repeat('c',64),now()-interval '10 minutes',null,'wrong-artifact');`);
+assert.equal(snapshot().audit.find(x=>x.scope==='historical').stale_open,2);
+sql(`insert into foundation.gateway_operation_audit_events values('55555555-5555-4555-8555-555555555555',gen_random_uuid(),'outcome','production','94',repeat('a',64),now(),null,'orphan');`);
+assert.equal(assessOperations(snapshot()).currentReleaseAudit,'fail');
+sql(`update foundation.test_revocation_health set pending_count=1,freshness_state='stale',oldest_pending_at=now()-interval '1 day';`);
+assert.equal(assessOperations(snapshot()).revocationState,'degraded');
+assert.equal(sql('select count(*) from foundation.gateway_operation_audit_events'), '7');
+console.log('PostgreSQL operations snapshot: 9 scenario assertions passed; reporting made no mutations.');
